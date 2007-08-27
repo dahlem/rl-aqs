@@ -1,0 +1,45 @@
+# Copyright (C) 2007 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+#  
+# This file is free software; as a special exception the author gives
+# unlimited permission to copy and/or distribute it, with or without 
+# modifications, as long as this notice is preserved.
+# 
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+if VALGRIND
+
+# find all common suppression files
+for i in `find $(VALGRIND_SUPPS_DIR) -type f`; do \
+  VALGRIND_SUPPRESSIONS += $i; \
+done
+
+
+valgrind: $(TESTS)
+	@echo "Valgrinding tests ..."
+	for test in $(TESTS); do                                                \
+		$(VALGRIND_PATH) -q                                             \
+		$(foreach supps, $(VALGRIND_SUPPRESSIONS), --suppressions=$(supps)) \
+		$(VALGRIND_OPTIONS)                                             \
+		./$$test 2>&1  | tee memcheck.log;                              \
+	done;
+
+
+valgrind.gen-suppressions: $(TESTS)
+	@echo "Valgrinding tests ..."
+	for test in $(TESTS); do                                                \
+		$(VALGRIND_PATH) -q                                             \
+		$(foreach supps, $(VALGRIND_SUPPRESSIONS), --suppressions=$(supps)) \
+		$(VALGRIND_OPTIONS)                                             \
+		--gen-suppressions=all					        \
+		./$$test 2>&1  | tee suppressions.log;                          \
+	done;
+
+
+else
+valgrind: ;
+valgrind.gen-suppressions: ;
+endif
+
+
+.PHONY: valgrind valgrind.gen-suppressions

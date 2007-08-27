@@ -1,0 +1,16 @@
+;; Object list/
+;; SEMANTICDB Tags save file
+(semanticdb-project-database-file "list/"
+  :tables (list 
+   (semanticdb-table "Makefile.am"
+    :major-mode 'makefile-automake-mode
+    :tags '(("EXTRA_DIST" variable (:default-value ("./includes/List.hh" "./includes/Entry.hh")) nil [484 536]) ("libcommonsort_a_SOURCES" variable (:default-value ("Mergesort.cc" "Mergesort.hh")) nil [536 536]))
+    :file "Makefile.am"
+    :pointmax 536
+    :unmatched-syntax 'nil
+    )
+   )
+  :file "semantic.cache"
+  :semantic-tag-version "2.0pre3"
+  :semanticdb-version "2.0pre3"
+  )

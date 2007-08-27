@@ -1,0 +1,35 @@
+;; Object mk/
+;; SEMANTICDB Tags save file
+(semanticdb-project-database-file "mk/"
+  :tables (list 
+   (semanticdb-table "gcov.am"
+    :major-mode 'makefile-automake-mode
+    :tags '(("COVOUT" variable (:default-value ("$(top_srcdir)/coverage")) nil [677 707]) ("LCOVOUT" variable (:default-value ("$(COVOUT)/lcov-reports")) nil [707 738]) ("GENHTMLOUT" variable (:default-value ("$(LCOVOUT)/html")) nil [738 765]) ("lcov" function (:arguments ("$(TESTS)")) nil [848 2315]) ("lcov" function (:arguments (";")) nil [2322 2331]))
+    :file "gcov.am"
+    :pointmax 2351
+    :unmatched-syntax 'nil
+    )
+   (semanticdb-table "valgrind.am"
+    :major-mode 'makefile-automake-mode
+    :tags '(("VALGRIND_SUPPRESSIONS" variable (:default-value ("$i;" "done")) nil [586 622]) ("valgrind" function (:arguments ("$(TESTS)")) nil [624 1033]) ("valgrind.gen-suppressions" function (:arguments ("$(TESTS)")) nil [1034 1499]) ("valgrind" function (:arguments (";")) nil [1505 1542]) ("valgrind.gen-suppressions" function (:arguments (";")) nil [1517 1551]))
+    :file "valgrind.am"
+    :pointmax 1596
+    :unmatched-syntax 'nil
+    )
+   (semanticdb-table "valgrind-recursive.am"
+    :major-mode 'makefile-automake-mode
+    :tags '(("valgrind" function nil nil [496 596]) ("valgrind.gen-suppressions" function nil nil [571 672]) ("valgrind" function (:arguments (";")) nil [677 714]) ("valgrind.gen-suppressions" function (:arguments (";")) nil [689 723]))
+    :file "valgrind-recursive.am"
+    :pointmax 768
+    )
+   (semanticdb-table "gcov-recursive.am"
+    :major-mode 'makefile-automake-mode
+    :tags '(("lcov" function nil nil [492 560]) ("lcov" function (:arguments (";")) nil [565 574]))
+    :file "gcov-recursive.am"
+    :pointmax 594
+    )
+   )
+  :file "semantic.cache"
+  :semantic-tag-version "2.0pre3"
+  :semanticdb-version "2.0pre3"
+  )

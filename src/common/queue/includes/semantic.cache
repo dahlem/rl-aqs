@@ -1,0 +1,15 @@
+;; Object includes/
+;; SEMANTICDB Tags save file
+(semanticdb-project-database-file "includes/"
+  :tables (list 
+   (semanticdb-table "Fifo.hh"
+    :major-mode 'c++-mode
+    :tags '(("FIFO_HH" variable (:constant-flag t) nil [17 36]) ("Queue.hh" include nil nil [35 54]) ("List.hh" include nil nil [55 73]) ("Fifo" type (:superclasses ("Queue") :members (("public" label nil (reparse-symbol classsubparts) [104 111]) ("Fifo" function (:prototype-flag t :constructor-flag t :type ("Fifo" type "class")) (reparse-symbol classsubparts) [116 123]) ("Fifo" function (:prototype-flag t :destructor-flag t :type "void") (reparse-symbol classsubparts) [128 136]) ("enqueue" function (:prototype-flag t :arguments (("p_entry" variable (:pointer 1 :type ("entry_t" type (:type "class") nil nil)) (reparse-symbol arg-sub-list) [155 178])) :type "void") (reparse-symbol classsubparts) [142 179]) ("dequeue" function (:prototype-flag t :pointer 1 :type ("entry_t" type (:type "class") nil nil)) (reparse-symbol classsubparts) [184 209]) ("getList" function (:prototype-flag t :pointer 1 :type ("node_double_t" type (:type "class") nil nil)) (reparse-symbol classsubparts) [214 239]) ("size" function (:prototype-flag t :constant-flag t :type "long") (reparse-symbol classsubparts) [245 263]) ("private" label nil (reparse-symbol classsubparts) [265 273]) ("init" function (:prototype-flag t :type "void") (reparse-symbol classsubparts) [278 290]) ("m_size" variable (:type "long") (reparse-symbol classsubparts) [296 308]) ("m_head" variable (:pointer 1 :type ("node_double_t" type (:type "class") nil nil)) (reparse-symbol classsubparts) [313 335]) ("m_tail" variable (:pointer 1 :type ("node_double_t" type (:type "class") nil nil)) (reparse-symbol classsubparts) [340 362])) :type "class") nil [77 365]))
+    :file "Fifo.hh"
+    :pointmax 375
+    )
+   )
+  :file "semantic.cache"
+  :semantic-tag-version "2.0pre3"
+  :semanticdb-version "2.0pre3"
+  )

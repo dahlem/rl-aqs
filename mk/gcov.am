@@ -1,0 +1,52 @@
+# Copyright (C) 2007 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+#  
+# This file is free software; as a special exception the author gives
+# unlimited permission to copy and/or distribute it, with or without 
+# modifications, as long as this notice is preserved.
+# 
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+#			test ${top_srcdir} = . || 
+#			lcov -l $(LCOVOUT)/$$test.lcov |                        
+#			grep "`pwd`";                                           
+
+if GCOV
+
+COVOUT=$(top_srcdir)/coverage
+LCOVOUT=$(COVOUT)/lcov-reports
+GENHTMLOUT=$(LCOVOUT)/html
+
+
+# fix bug with lcov 1.5 -- move gcov data files from .libs to the base directory
+lcov: $(TESTS)
+	@for test in $(TESTS); do                                                \
+		lcov --zerocounters --directory $(top_srcdir) --quiet;          \
+		./$$test 2>&1;                                                  \
+		for file in `find $(top_srcdir) -name "*.gcda" | grep ".libs" `;\
+		do mv $$file `echo $$file | sed -e 's/\/\.libs//'`;             \
+		done;                                                           \
+		for file in `find $(top_srcdir) -name "*.gcno" | grep ".libs" `;\
+		do mv $$file `echo $$file | sed -e 's/\/\.libs//'`;             \
+		done;                                                           \
+		lcov --directory $(top_srcdir) --capture --test-name "$$test"   \
+		--output-file $(LCOVOUT)/$$test.lcov --quiet;                   \
+		{                                                               \
+			lcov -l $(LCOVOUT)/$$test.lcov |                        \
+			grep -v "`cd ${top_srcdir} && pwd`";                    \
+			lcov -l $(LCOVOUT)/$$test.lcov | grep "/tests/";        \
+		} |                                                             \
+		cut -d: -f1 |                                                   \
+		xargs lcov -r $(LCOVOUT)/$$test.lcov                            \
+		> $(LCOVOUT)/$$test-info.lcov;                                  \
+	done;                                                                   \
+	genhtml -o $(GENHTMLOUT) $(GCOV_GENHTML_OPTIONS) --num-spaces 2         \
+	$(LCOVOUT)/*-info.lcov
+
+else
+lcov: ;
+
+endif
+
+
+.PHONY: lcov
