@@ -18,7 +18,14 @@ void LadderTest::tearDown()
 
 void LadderTest::testBucketwidthException() throw (QueueException)
 {
-    m_ladder->getBucketwidth(1);
+    m_ladder->getBucketwidth(6);
+}
+
+void LadderTest::testBucketwidth()
+{
+    for (int i = 0; i < 5; ++i) {
+        CPPUNIT_ASSERT(m_ladder->getBucketwidth(i) == 0.0);
+    }
 }
 
 void LadderTest::testNumberEventsInBucketsRungException() throw (QueueException) 
@@ -36,6 +43,10 @@ void LadderTest::testNumberEventsInBucketsBucketException2() throw (QueueExcepti
     m_ladder->getNBucket(2, 51);
 }
 
+void LadderTest::testNumberEventsInBucketsBucketException3() throw (QueueException)
+{
+    m_ladder->getNBucket(0, 51);
+}
 
 void LadderTest::testNumberEventsInBucketsEmpty()
 {
@@ -51,4 +62,43 @@ void LadderTest::testNumberEventsInBucketsEmpty()
             CPPUNIT_ASSERT(m_ladder->getNBucket(i, j) == 0);
         }
     }
+}
+
+void LadderTest::testNRung()
+{
+    CPPUNIT_ASSERT(m_ladder->getNRung() == 5);
+}
+
+void LadderTest::testThres()
+{
+    CPPUNIT_ASSERT(m_ladder->getThres() == 50);
+}
+
+void LadderTest::testRCurException() throw (QueueException)
+{
+    m_ladder->getRCur(6);
+}
+
+void LadderTest::testRCur()
+{
+    for (int i = 0; i < 5; ++i) {
+        CPPUNIT_ASSERT(m_ladder->getRCur(i) == 0.0);
+    }
+}
+
+void LadderTest::testRStartException() throw (QueueException)
+{
+    m_ladder->getRStart(6);
+}
+
+void LadderTest::testRStart()
+{
+    for (int i = 0; i < 5; ++i) {
+        CPPUNIT_ASSERT(m_ladder->getRStart(i) == 0.0);
+    }
+}
+
+void LadderTest::testNBC()
+{
+    CPPUNIT_ASSERT(m_ladder->getNBC() == 0);
 }

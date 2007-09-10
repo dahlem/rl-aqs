@@ -48,7 +48,7 @@ Ladder::~Ladder()
 
 double Ladder::getBucketwidth(int p_rung) throw (QueueException)
 {
-    if ((p_rung > m_NRung) || (m_bucketwidth[p_rung] == NULL)) {
+    if (p_rung > m_NRung) {
         throw QueueException(QueueException::RUNG_OUT_OF_BOUNDS);
     }
 
@@ -57,7 +57,7 @@ double Ladder::getBucketwidth(int p_rung) throw (QueueException)
 
 int Ladder::getNBC() 
 {
-    return NULL;
+    return m_NBC;
 }
 
 long Ladder::getNBucket(int p_rung, int p_bucket) 
@@ -80,22 +80,28 @@ long Ladder::getNBucket(int p_rung, int p_bucket)
 
 int Ladder::getNRung() 
 {
-    return NULL;
+    return m_NRung;
 }
 
 int Ladder::getThres() 
 {
-    return NULL;
+    return THRES;
 }
 
 double Ladder::getRCur(int p_rung) 
 {
-    return NULL;
+    if (p_rung > m_NRung) {
+        throw QueueException(QueueException::RUNG_OUT_OF_BOUNDS);
+    }
+    return m_RCur[p_rung];
 }
 
 double Ladder::getRStart(int p_rung) 
 {
-    return NULL;
+    if (p_rung > m_NRung) {
+        throw QueueException(QueueException::RUNG_OUT_OF_BOUNDS);
+    }
+    return m_RStart[p_rung];
 }
 
 double Ladder::bucketwidth(double p_max, double p_min, long p_n) 

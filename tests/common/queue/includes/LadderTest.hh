@@ -11,10 +11,19 @@ class LadderTest : public CppUnit::TestFixture
 {
     CPPUNIT_TEST_SUITE(LadderTest);
     CPPUNIT_TEST_EXCEPTION(testBucketwidthException, QueueException);
+    CPPUNIT_TEST(testBucketwidth);
     CPPUNIT_TEST_EXCEPTION(testNumberEventsInBucketsRungException, QueueException);
     CPPUNIT_TEST_EXCEPTION(testNumberEventsInBucketsBucketException1, QueueException);
     CPPUNIT_TEST_EXCEPTION(testNumberEventsInBucketsBucketException2, QueueException);
+    CPPUNIT_TEST_EXCEPTION(testNumberEventsInBucketsBucketException3, QueueException);
     CPPUNIT_TEST(testNumberEventsInBucketsEmpty);
+    CPPUNIT_TEST(testNRung);
+    CPPUNIT_TEST(testThres);
+    CPPUNIT_TEST_EXCEPTION(testRCurException, QueueException);
+    CPPUNIT_TEST(testRCur);
+    CPPUNIT_TEST_EXCEPTION(testRStartException, QueueException);
+    CPPUNIT_TEST(testRStart);
+    CPPUNIT_TEST(testNBC);
     CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -22,10 +31,19 @@ public:
     void tearDown();
 
     void testBucketwidthException() throw (QueueException);
+    void testBucketwidth();
     void testNumberEventsInBucketsRungException() throw (QueueException);
     void testNumberEventsInBucketsBucketException1() throw (QueueException);
     void testNumberEventsInBucketsBucketException2() throw (QueueException);
+    void testNumberEventsInBucketsBucketException3() throw (QueueException);
     void testNumberEventsInBucketsEmpty();
+    void testNRung();
+    void testThres();
+    void testRCurException() throw (QueueException);
+    void testRCur();
+    void testRStartException() throw (QueueException);
+    void testRStart();
+    void testNBC();
 
 private:
     Ladder *m_ladder;
