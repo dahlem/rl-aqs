@@ -18,6 +18,8 @@ public:
     enum Errors {
         BAD_RESET,
         RUNG_NOT_FOUND,
+        RUNG_OUT_OF_BOUNDS,
+        BUCKET_OUT_OF_BOUNDS,
         NUM_ERRORS
     };
 

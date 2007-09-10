@@ -21,6 +21,7 @@ QueueSuite_SOURCES =                                        \
 	FifoTest.cc                                         \
 	TopTest.cc                                          \
 	BottomTest.cc                                       \
+	LadderTest.cc                                       \
 	QueueSuite.cc
 
 QueueSuite_CXXFLAGS = $(CPPUNIT_CFLAGS)

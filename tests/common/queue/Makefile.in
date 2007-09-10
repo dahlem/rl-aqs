@@ -71,6 +71,7 @@ CONFIG_CLEAN_FILES =
 am__EXEEXT_1 = QueueSuite$(EXEEXT)
 am_QueueSuite_OBJECTS = QueueSuite-FifoTest.$(OBJEXT) \
 	QueueSuite-TopTest.$(OBJEXT) QueueSuite-BottomTest.$(OBJEXT) \
+	QueueSuite-LadderTest.$(OBJEXT) \
 	QueueSuite-QueueSuite.$(OBJEXT)
 QueueSuite_OBJECTS = $(am_QueueSuite_OBJECTS)
 QueueSuite_LDADD = $(LDADD)
@@ -230,6 +231,7 @@ QueueSuite_SOURCES = \
 	FifoTest.cc                                         \
 	TopTest.cc                                          \
 	BottomTest.cc                                       \
+	LadderTest.cc                                       \
 	QueueSuite.cc
 
 QueueSuite_CXXFLAGS = $(CPPUNIT_CFLAGS)
@@ -296,6 +298,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/QueueSuite-BottomTest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/QueueSuite-FifoTest.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/QueueSuite-LadderTest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/QueueSuite-QueueSuite.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/QueueSuite-TopTest.Po@am__quote@
 
@@ -361,6 +364,20 @@ QueueSuite-BottomTest.obj: BottomTest.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='BottomTest.cc' object='QueueSuite-BottomTest.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(QueueSuite_CXXFLAGS) $(CXXFLAGS) -c -o QueueSuite-BottomTest.obj `if test -f 'BottomTest.cc'; then $(CYGPATH_W) 'BottomTest.cc'; else $(CYGPATH_W) '$(srcdir)/BottomTest.cc'; fi`
+
+QueueSuite-LadderTest.o: LadderTest.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(QueueSuite_CXXFLAGS) $(CXXFLAGS) -MT QueueSuite-LadderTest.o -MD -MP -MF $(DEPDIR)/QueueSuite-LadderTest.Tpo -c -o QueueSuite-LadderTest.o `test -f 'LadderTest.cc' || echo '$(srcdir)/'`LadderTest.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/QueueSuite-LadderTest.Tpo $(DEPDIR)/QueueSuite-LadderTest.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='LadderTest.cc' object='QueueSuite-LadderTest.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(QueueSuite_CXXFLAGS) $(CXXFLAGS) -c -o QueueSuite-LadderTest.o `test -f 'LadderTest.cc' || echo '$(srcdir)/'`LadderTest.cc
+
+QueueSuite-LadderTest.obj: LadderTest.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(QueueSuite_CXXFLAGS) $(CXXFLAGS) -MT QueueSuite-LadderTest.obj -MD -MP -MF $(DEPDIR)/QueueSuite-LadderTest.Tpo -c -o QueueSuite-LadderTest.obj `if test -f 'LadderTest.cc'; then $(CYGPATH_W) 'LadderTest.cc'; else $(CYGPATH_W) '$(srcdir)/LadderTest.cc'; fi`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/QueueSuite-LadderTest.Tpo $(DEPDIR)/QueueSuite-LadderTest.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='LadderTest.cc' object='QueueSuite-LadderTest.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(QueueSuite_CXXFLAGS) $(CXXFLAGS) -c -o QueueSuite-LadderTest.obj `if test -f 'LadderTest.cc'; then $(CYGPATH_W) 'LadderTest.cc'; else $(CYGPATH_W) '$(srcdir)/LadderTest.cc'; fi`
 
 QueueSuite-QueueSuite.o: QueueSuite.cc
 @am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(QueueSuite_CXXFLAGS) $(CXXFLAGS) -MT QueueSuite-QueueSuite.o -MD -MP -MF $(DEPDIR)/QueueSuite-QueueSuite.Tpo -c -o QueueSuite-QueueSuite.o `test -f 'QueueSuite.cc' || echo '$(srcdir)/'`QueueSuite.cc

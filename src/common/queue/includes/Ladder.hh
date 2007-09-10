@@ -22,23 +22,29 @@ public:
     node_double_t *delist();
 
     int getNBC();
-    int getNBucket(int p_bucket, int p_rung);
     int getNRung();
     int getThres();
+    long getNBucket(int p_rung, int p_bucket);
 
-    double getBucketwidth(int p_rung);
+    double getBucketwidth(int p_rung) throw (QueueException);
     double getRCur(int p_rung);
     double getRStart(int p_rung);
-
+    
 private:
-    Fifo **m_rungs;
+    double bucketwidth(double p_max, double p_min, long p_n);
+    double bucketwidth(int p_rung);
+    int bucket(double p_TS, int p_rung);
+
+    
+    static const int THRES = 50;
+
+    Fifo ***m_rungs;
     
     int m_NRung;
     int m_NBC;
-    int m_Thres;
+    int m_BucketsFirstRung;
 
     double *m_bucketwidth;
-    int **m_NBucket;
     double *m_RCur;
     double *m_RStart;
 };
