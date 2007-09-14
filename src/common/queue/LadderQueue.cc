@@ -1,15 +1,9 @@
 #include <cmath>
+#include <cstddef>
 
 #include "LadderQueue.hh"
 //#include "Ladder.hh"
 //#include "Bottom.hh"
-
-
-
-struct rung_t 
-{
-    struct rung_t *next;    
-};
 
 
 
@@ -25,7 +19,7 @@ LadderQueue::LadderQueue()
 
 LadderQueue::~LadderQueue() 
 {
-    free(m_top);
+    delete m_top;
 }
 
 void LadderQueue::enqueue(entry_t *const p_entry)

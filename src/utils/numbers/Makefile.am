@@ -8,4 +8,7 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-SUBDIRS = test-utils utils common
+noinst_LTLIBRARIES = libutils_numbers.la
+libutils_numbers_la_SOURCES = Compare.cc
+
+INCLUDES = -I./includes

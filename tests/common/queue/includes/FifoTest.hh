@@ -15,6 +15,7 @@ class FifoTest : public CppUnit::TestFixture
     CPPUNIT_TEST(testEmpty);
     CPPUNIT_TEST(testList);
     CPPUNIT_TEST(testNewList);
+    CPPUNIT_TEST(testEnlist);
     CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -26,6 +27,7 @@ public:
     void testEmpty();
     void testList();
     void testNewList();
+    void testEnlist();
 
 private:
     Fifo *m_fifo;

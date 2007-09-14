@@ -7,13 +7,7 @@
 
 Bottom::Bottom()
 {
-    m_head = new node_double_t(NULL, NULL, NULL);
-    m_tail = new node_double_t(NULL, NULL, NULL);
-
-    m_head->next = m_tail;
-    m_tail->previous = m_head;
-
-    m_size = 0;
+    init();
 }
 
 Bottom::~Bottom()
@@ -40,6 +34,17 @@ Bottom::~Bottom()
 const long Bottom::size()
 {
     return m_size;
+}
+
+void Bottom::init() 
+{
+    m_head = new node_double_t(NULL, NULL, NULL);
+    m_tail = new node_double_t(NULL, NULL, NULL);
+
+    m_head->next = m_tail;
+    m_tail->previous = m_head;
+
+    m_size = 0;
 }
 
 void Bottom::enqueue(entry_t *const p_entry)
@@ -85,6 +90,17 @@ void Bottom::enlist(node_double_t *p_list, long p_size)
 
         m_size += p_size;
     }
+}
+
+node_double_t *Bottom::delist()
+{
+    node_double_t *list = m_head;
+
+    // re-initialise the fifo data structure
+    init();
+
+    // return the current list
+    return list;
 }
 
 entry_t *const Bottom::dequeue()

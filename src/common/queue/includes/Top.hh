@@ -3,11 +3,12 @@
 
 
 #include "Queue.hh"
+#include "List.hh"
 #include "Fifo.hh"
 #include "QueueException.hh"
 
 
-class Top: public Queue
+class Top: public Queue, List
 {
 public:
     Top();
@@ -15,13 +16,14 @@ public:
 
     void enqueue(entry_t *const p_entry);
     entry_t *const dequeue();
+    node_double_t *delist();
+    void enlist(node_double_t *p_list, long p_size);
 
     double getMaxTS();
     double getMinTS();
     double getTopStart();
     long getNTop();
     void reset() throw (QueueException);
-    node_double_t *delist();
 
 private:
     void setMaxTS(double p_maxTS);

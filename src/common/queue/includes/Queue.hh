@@ -2,8 +2,6 @@
 #define QUEUE_HH
 
 
-#include <tr1/memory>
-
 #include "Entry.hh"
 
 

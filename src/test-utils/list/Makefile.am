@@ -12,3 +12,4 @@ noinst_LTLIBRARIES = libtestutilslist.la
 libtestutilslist_la_SOURCES = ListHelper.cc
 
 INCLUDES = -I./includes -I../../common/list/includes
+LIBADD =  ../../common/list/libcommonlist.la

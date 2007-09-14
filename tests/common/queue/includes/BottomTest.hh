@@ -21,6 +21,7 @@ class BottomTest : public CppUnit::TestFixture
     CPPUNIT_TEST(testEnlistShortStability);
     CPPUNIT_TEST(testEnlistLong);
     CPPUNIT_TEST(testEnlistLongStability);
+    CPPUNIT_TEST(testDelist);
     CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -38,6 +39,7 @@ public:
     void testEnlistShortStability();
     void testEnlistLong();
     void testEnlistLongStability();
+    void testDelist();
 
 private:
     Bottom *m_bottom;

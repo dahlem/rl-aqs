@@ -78,7 +78,7 @@ node_double_t *Top::delist()
     node_double_t *result = NULL;
 
     try {
-        result = m_fifo->getList();
+        result = m_fifo->delist();
         reset();
     } catch (QueueException &qe) {
         // cannot happen here
@@ -87,3 +87,7 @@ node_double_t *Top::delist()
     return result;
 }
 
+void Top::enlist(node_double_t *p_list, long p_size) 
+{
+    m_fifo->enlist(p_list, p_size);
+}

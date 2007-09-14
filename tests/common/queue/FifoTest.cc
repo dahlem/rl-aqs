@@ -92,7 +92,7 @@ void FifoTest::testList()
     
     m_fifo->enqueue(entry1);
     m_fifo->enqueue(entry2);
-    result = m_fifo->getList();
+    result = m_fifo->delist();
 
     CPPUNIT_ASSERT(m_fifo->size() == 0);    
     
@@ -124,7 +124,7 @@ void FifoTest::testNewList()
     
     m_fifo->enqueue(entry1);
     m_fifo->enqueue(entry2);
-    result = m_fifo->getList();
+    result = m_fifo->delist();
 
     CPPUNIT_ASSERT(m_fifo->size() == 0);
 
@@ -148,4 +148,37 @@ void FifoTest::testNewList()
     delete result->next->next;
     delete result->next;
     delete result;
+}
+
+void FifoTest::testEnlist()
+{
+    Fifo *fifo = new Fifo();
+    
+    entry_t *resultOld = NULL;
+    entry_t *resultNew = NULL;
+    entry_t *entry = NULL;
+    
+    for (int i = 0; i < 3; ++i) {
+        entry = new entry_t((double) i, i, 1, 0);
+        fifo->enqueue(entry);
+    }
+
+    long size = fifo->size();
+    node_double_t *list = fifo->delist();
+
+    m_fifo->enlist(list->next, size);
+
+    resultOld = m_fifo->dequeue();
+    resultNew = m_fifo->dequeue();
+
+    while (resultNew != NULL) {
+        CPPUNIT_ASSERT(resultOld->destination < resultNew->destination);
+        delete resultOld;
+        resultOld = resultNew;
+        resultNew = m_fifo->dequeue();
+    }
+
+    delete resultOld;
+    delete resultNew;
+    delete fifo;
 }

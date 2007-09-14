@@ -192,7 +192,7 @@ void BottomTest::testEnlistShort()
     }
 
     int size = fifo->size();
-    node_double_t *list = fifo->getList();
+    node_double_t *list = fifo->delist();
 
     m_bottom->enlist(list->next, size);
     CPPUNIT_ASSERT(m_bottom->size() == 8);
@@ -229,7 +229,7 @@ void BottomTest::testEnlistShortStability()
     }
 
     int size = fifo->size();
-    node_double_t *list = fifo->getList();
+    node_double_t *list = fifo->delist();
 
     m_bottom->enlist(list->next, size);
 
@@ -265,7 +265,7 @@ void BottomTest::testEnlistLong()
     }
 
     int size = fifo->size();
-    node_double_t *list = fifo->getList();
+    node_double_t *list = fifo->delist();
 
     m_bottom->enlist(list->next, size);
     CPPUNIT_ASSERT(m_bottom->size() == 18);
@@ -302,7 +302,7 @@ void BottomTest::testEnlistLongStability()
     }
 
     long size = fifo->size();
-    node_double_t *list = fifo->getList();
+    node_double_t *list = fifo->delist();
 
     m_bottom->enlist(list->next, size);
 
@@ -318,4 +318,35 @@ void BottomTest::testEnlistLongStability()
 
     delete resultNew;
     delete fifo;
+}
+
+void BottomTest::testDelist()
+{
+    entry_t *const entry1 = new entry_t(0.0, 1, 1, 0);
+    entry_t *const entry2 = new entry_t(1.0, 2, 2, 1);
+    node_double_t *result = NULL;
+    node_double_t *current = NULL;
+    
+    m_bottom->enqueue(entry1);
+    m_bottom->enqueue(entry2);
+    result = m_bottom->delist();
+
+    CPPUNIT_ASSERT(m_bottom->size() == 0);    
+    
+    current = result->next;
+    CPPUNIT_ASSERT_EQUAL(entry1->arrival, current->data->arrival);
+
+    current = current->next;
+    CPPUNIT_ASSERT_EQUAL(entry2->arrival, current->data->arrival);
+
+    current = current->next;
+    CPPUNIT_ASSERT(current->data == NULL);
+
+    delete entry1;
+    delete entry2;
+
+    delete result->next->next->next;
+    delete result->next->next;
+    delete result->next;
+    delete result;
 }

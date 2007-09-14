@@ -33,6 +33,7 @@ INCLUDES = \
 
 LDADD = \
 	$(top_srcdir)/src/common/sort/libcommonsort.la \
+	$(top_srcdir)/src/common/list/libcommonlist.la \
 	$(top_srcdir)/src/test-utils/list/libtestutilslist.la
 
 CLEANFILES += *.log

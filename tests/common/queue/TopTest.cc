@@ -22,7 +22,6 @@ void TopTest::testInitial()
     CPPUNIT_ASSERT(m_top->getTopStart() == 0.0);
     CPPUNIT_ASSERT(m_top->getNTop() == 0);
 }
-
 void TopTest::testEnqueueOnce()
 {
     entry_t *const entry = new entry_t(3.1, 1, 1, 0);
@@ -171,4 +170,37 @@ void TopTest::test100EnDe()
 
         delete entry;
     }
+}
+
+void TopTest::testEnlist()
+{
+    Fifo *fifo = new Fifo();
+    
+    entry_t *resultOld = NULL;
+    entry_t *resultNew = NULL;
+    entry_t *entry = NULL;
+    
+    for (int i = 0; i < 3; ++i) {
+        entry = new entry_t((double) i, i, 1, 0);
+        fifo->enqueue(entry);
+    }
+
+    long size = fifo->size();
+    node_double_t *list = fifo->delist();
+
+    m_top->enlist(list->next, size);
+
+    resultOld = m_top->dequeue();
+    resultNew = m_top->dequeue();
+
+    while (resultNew != NULL) {
+        CPPUNIT_ASSERT(resultOld->destination < resultNew->destination);
+        delete resultOld;
+        resultOld = resultNew;
+        resultNew = m_top->dequeue();
+    }
+
+    delete resultOld;
+    delete resultNew;
+    delete fifo;
 }

@@ -5,6 +5,9 @@
 
 Fifo::Fifo() 
 {
+    m_head = new node_double_t(NULL, NULL, NULL);
+    m_tail = new node_double_t(NULL, NULL, NULL);
+
     init();
 }
 
@@ -32,12 +35,8 @@ Fifo::~Fifo()
 
 void Fifo::init() 
 {
-    m_head = new node_double_t(NULL, NULL, NULL);
-    m_tail = new node_double_t(NULL, NULL, NULL);
-
     m_head->next = m_tail;
     m_tail->previous = m_head;
-
     m_size = 0;
 }
 
@@ -77,13 +76,25 @@ entry_t *const Fifo::dequeue()
     return result;
 }
 
-node_double_t *Fifo::getList()
+node_double_t *Fifo::delist()
 {
-    node_double_t *list = m_head;
-
+    node_double_t *head = new node_double_t(NULL, m_head->next, NULL);
+    node_double_t *tail = new node_double_t(NULL, NULL, m_tail->previous);
+    
+    head->next->previous = head;
+    tail->previous->next = tail;
+    
     // re-initialise the fifo data structure
     init();
 
     // return the current list
-    return list;
+    return head;
+}
+
+void Fifo::enlist(node_double_t *p_list, long p_size) 
+{
+    m_tail->previous->next = p_list;
+    m_tail->previous = (p_list + (p_size - 1));
+    
+    m_size += p_size;
 }

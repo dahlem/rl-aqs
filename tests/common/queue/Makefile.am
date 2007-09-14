@@ -30,11 +30,14 @@ QueueSuite_LDFLAGS = $(CPPUNIT_LIBS) -ldl
 INCLUDES =                                                  \
 	-Iincludes                                          \
 	-I$(top_srcdir)/src/common/queue/includes           \
+	-I$(top_srcdir)/src/utils/numbers/includes          \
 	-I$(top_srcdir)/src/common/sort/includes            \
 	-I$(top_srcdir)/src/common/list/includes
 
 LDADD =                                                     \
 	$(top_srcdir)/src/common/queue/libcommonqueue.la    \
+	$(top_srcdir)/src/common/list/libcommonlist.la      \
+	$(top_srcdir)/src/utils/numbers/libutils_numbers.la \
 	$(top_srcdir)/src/common/sort/libcommonsort.la
 
 CLEANFILES += *.log

@@ -33,12 +33,15 @@ AC_SUBST(LIBTOOL_DEPS)
 AC_GCOV
 AC_VALGRIND
 
+
 AC_CONFIG_FILES([
    Makefile
    README
    doc/Makefile
    m4/Makefile
    src/Makefile
+   src/utils/Makefile
+   src/utils/numbers/Makefile
    src/test-utils/Makefile
    src/test-utils/list/Makefile
    src/common/Makefile

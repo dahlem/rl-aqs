@@ -1,7 +1,9 @@
 #ifndef LIST_HH
 #define LIST_HH
 
+
 #include "Entry.hh"
+
 
 
 struct node_single_t 
@@ -33,6 +35,16 @@ struct node_double_t
             previous = p;
         }
     
+};
+
+
+class List
+{
+public:
+    virtual ~List() = 0;
+
+    virtual void enlist(node_double_t *p_list, long p_size) = 0;
+    virtual node_double_t *delist() = 0;
 };
 
 
