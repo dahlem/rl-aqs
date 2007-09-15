@@ -1,10 +1,11 @@
-#ifndef LADDERTEST_H
-#define LADDERTEST_H
+#ifndef LADDERTEST_HH
+#define LADDERTEST_HH
 
 
 #include <cppunit/extensions/HelperMacros.h>
 
 #include "Ladder.hh"
+
 
 
 class LadderTest : public CppUnit::TestFixture
