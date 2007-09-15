@@ -7,6 +7,8 @@ const char* QueueException::m_errorStrings[NUM_ERRORS] =
     "Could not find the rung to complete the enqueue operation."
     "Requested bucket does not exist."
     "Requested rung does not exist."
+    "An epoch has not been started with the Ladder structure."
+    "An epoch cannot be created, if another one is not finished yet."
 };
 
 QueueException::QueueException(int p_code)

@@ -19,9 +19,8 @@ public:
     void enqueue(entry_t *const p_entry) throw (QueueException);
     entry_t *const dequeue();
 
-    void enlist(node_double_t *p_list, long p_size);
     void enlist(node_double_t *p_list, long p_size,
-                double p_maxTS, double p_minTS);
+                double p_maxTS, double p_minTS) throw (QueueException);
     node_double_t *delist();
 
     int getNBC();
@@ -40,6 +39,7 @@ public:
     double getRStart(int p_rung);
 
 private:
+    void enlist(node_double_t *p_list, long p_size);
     double bucketwidth(double p_max, double p_min, long p_n);
     int bucket(double p_TS, int p_rung);
     void resizeFirstRung(int p_size);

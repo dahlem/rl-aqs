@@ -165,18 +165,24 @@ int Ladder::bucket(double p_TS, int p_rung)
 
 void Ladder::enqueue(entry_t *const p_entry) throw (QueueException)
 {
+    // cannot enqueue, if the internal structure has not been initialised
+    // by an epoch
+    if (getNBucket() == 0) {
+        throw QueueException(QueueException::NO_EPOCH_INIT);
+    }
+    
     int nRungs = 0;
 
     // find the rung
-    while ((p_entry->arrival < getRCur(nRungs)) && (nRungs <= getNRung())) {
+    while ((p_entry->arrival < getRCur(nRungs)) && (nRungs <= m_lowestRung)) {
         nRungs++;
     }
 
     // found
-    if (nRungs <= getNRung()) {
-//        int bucket_k = bucket(p_entry->arrival, nRungs);
-
+    if (nRungs <= m_lowestRung) {
         // insert into tail of rung x, bucket k
+        node_double_t *newNode = new node_double_t(p_entry, NULL, NULL);
+        enlist(nRungs, newNode, 1);
     } else {
         throw QueueException(QueueException::RUNG_NOT_FOUND);
     }
@@ -209,7 +215,12 @@ void Ladder::enlist(node_double_t *p_list, long p_size)
 
 void Ladder::enlist(node_double_t *p_list, long p_size,
                     double p_maxTS, double p_minTS)
+    throw (QueueException)
 {
+    if (getNBucket() != 0) {
+        throw QueueException(QueueException::EPOCH_EXISTS);
+    }
+    
     // nothing to do
     if (p_size == 0) {
         return;
@@ -223,7 +234,7 @@ void Ladder::enlist(node_double_t *p_list, long p_size,
     // transfer events
     enlist(p_list, p_size);
 
-    // advance the current dequeue bucket
+    // advance dequeue bucket
     advanceDequeueBucket(1);
 }
 

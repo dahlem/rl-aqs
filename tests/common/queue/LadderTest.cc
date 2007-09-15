@@ -506,3 +506,64 @@ void LadderTest::testSpawnAll()
     delete top;
     delete ladder;
 }
+
+void LadderTest::testEnlistException() throw (QueueException)
+{
+    entry_t *newEntry1 = new entry_t(1.0, 1, 1, 0);
+    entry_t *newEntry2 = new entry_t(2.0, 1, 1, 0);
+    node_double_t *node1 = new node_double_t(newEntry1, NULL, NULL);
+    node_double_t *node2 = new node_double_t(newEntry2, NULL, NULL);
+    
+    m_ladder->enlist(node1, 1, 1.0, 1.0);
+    m_ladder->enlist(node2, 1, 2.0, 2.0);
+}
+
+void LadderTest::testEnqueueException() throw (QueueException)
+{
+    entry_t *newEntry1 = new entry_t(1.0, 1, 1, 0);
+    m_ladder->enqueue(newEntry1);
+}
+
+void LadderTest::testEnqueue()
+{
+    entry_t *newEntry1 = new entry_t(1.0, 1, 1, 0);
+    entry_t *newEntry2 = new entry_t(2.0, 1, 1, 0);
+    node_double_t *node1 = new node_double_t(newEntry1, NULL, NULL);
+    node_double_t *result = NULL;
+    node_double_t *current = NULL;
+    
+    m_ladder->enlist(node1, 1, 1.0, 1.0);
+    m_ladder->enqueue(newEntry2);
+
+    double rcur = m_ladder->getRCur();
+    long events = m_ladder->getNBucket();
+    double bucketwidth = m_ladder->getBucketwidth();
+    long totalEvents = events;
+
+    result = m_ladder->delist();
+    while (result->next->data != NULL) {
+        for (int i = 0; i < events; ++i) {
+            result = result->next;
+            current = result;
+            CPPUNIT_ASSERT(current->data->arrival < rcur);
+            delete current;
+        }
+
+        events = m_ladder->getNBucket();
+        totalEvents += events;
+        rcur = m_ladder->getRCur();
+        bucketwidth = m_ladder->getBucketwidth();
+        result = m_ladder->delist();
+    }
+    CPPUNIT_ASSERT_EQUAL((long) 2, totalEvents);
+}
+
+void LadderTest::testEnqueueNotAllowed() throw (QueueException)
+{
+    entry_t *newEntry1 = new entry_t(1.0, 1, 1, 0);
+    entry_t *newEntry2 = new entry_t(0.5, 1, 1, 0);
+    node_double_t *node1 = new node_double_t(newEntry1, NULL, NULL);
+    
+    m_ladder->enlist(node1, 1, 1.0, 1.0);
+    m_ladder->enqueue(newEntry2);
+}

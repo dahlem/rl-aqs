@@ -30,6 +30,10 @@ class LadderTest : public CppUnit::TestFixture
     CPPUNIT_TEST(testSpawnOnce);
     CPPUNIT_TEST(testSpawnEqualArrivals);
     CPPUNIT_TEST(testSpawnAll);
+    CPPUNIT_TEST_EXCEPTION(testEnlistException, QueueException);
+    CPPUNIT_TEST_EXCEPTION(testEnqueueException, QueueException);
+    CPPUNIT_TEST(testEnqueue);
+    CPPUNIT_TEST_EXCEPTION(testEnqueueNotAllowed, QueueException);
     CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -56,6 +60,10 @@ public:
     void testSpawnOnce();
     void testSpawnEqualArrivals();
     void testSpawnAll();
+    void testEnlistException() throw (QueueException);
+    void testEnqueueException() throw (QueueException);
+    void testEnqueue();
+    void testEnqueueNotAllowed() throw (QueueException);
 
 private:
     Ladder *m_ladder;

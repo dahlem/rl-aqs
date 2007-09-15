@@ -20,6 +20,8 @@ public:
         RUNG_NOT_FOUND,
         RUNG_OUT_OF_BOUNDS,
         BUCKET_OUT_OF_BOUNDS,
+        NO_EPOCH_INIT,
+        EPOCH_EXISTS,
         NUM_ERRORS
     };
 
