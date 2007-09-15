@@ -21193,7 +21193,8 @@ fi
 
 
 
-ac_config_files="$ac_config_files Makefile README doc/Makefile m4/Makefile src/Makefile src/test-utils/Makefile src/test-utils/list/Makefile src/common/Makefile src/common/list/Makefile src/common/sort/Makefile src/common/queue/Makefile tests/Makefile tests/common/Makefile tests/common/sort/Makefile tests/common/queue/Makefile"
+
+ac_config_files="$ac_config_files Makefile README doc/Makefile m4/Makefile src/Makefile src/utils/Makefile src/utils/numbers/Makefile src/test-utils/Makefile src/test-utils/list/Makefile src/common/Makefile src/common/list/Makefile src/common/sort/Makefile src/common/queue/Makefile tests/Makefile tests/common/Makefile tests/common/sort/Makefile tests/common/queue/Makefile"
 
 
 cat >confcache <<\_ACEOF
@@ -21801,6 +21802,8 @@ do
     "doc/Makefile") CONFIG_FILES="$CONFIG_FILES doc/Makefile" ;;
     "m4/Makefile") CONFIG_FILES="$CONFIG_FILES m4/Makefile" ;;
     "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
+    "src/utils/Makefile") CONFIG_FILES="$CONFIG_FILES src/utils/Makefile" ;;
+    "src/utils/numbers/Makefile") CONFIG_FILES="$CONFIG_FILES src/utils/numbers/Makefile" ;;
     "src/test-utils/Makefile") CONFIG_FILES="$CONFIG_FILES src/test-utils/Makefile" ;;
     "src/test-utils/list/Makefile") CONFIG_FILES="$CONFIG_FILES src/test-utils/list/Makefile" ;;
     "src/common/Makefile") CONFIG_FILES="$CONFIG_FILES src/common/Makefile" ;;

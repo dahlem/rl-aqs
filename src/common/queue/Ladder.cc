@@ -23,7 +23,7 @@ void Ladder::init()
     m_NRung = 5;
     m_lowestRung = 0;
     m_NBC = 0;
-    m_BucketsFirstRung = DEFAULT_THRES;
+    m_BucketsFirstRung = m_Thres;
 
     m_events = new int[m_NRung];
     m_currentBucket = new int[m_NRung];
@@ -41,8 +41,8 @@ void Ladder::init()
     m_rungs = new Fifo**[m_NRung];
 
     for (int i = 0; i < m_NRung; ++i) {
-        m_rungs[i] = new Fifo*[DEFAULT_THRES];
-        for (int j = 0; j < DEFAULT_THRES; ++j) {
+        m_rungs[i] = new Fifo*[m_Thres];
+        for (int j = 0; j < m_Thres; ++j) {
             m_rungs[i][j] = new Fifo();
         }
     }
@@ -159,7 +159,7 @@ int Ladder::bucket(double p_TS, int p_rung)
     double diff = (p_TS - getRStart(p_rung));
     double result = diff / getBucketwidth(p_rung);
     int retVal = (int) floor(result);
-    
+
     return retVal;
 }
 
@@ -265,11 +265,9 @@ void Ladder::advanceDequeueBucket(bool p_spawn)
 {
     int elements = 0;
 
-    // skip empty tail buckets of the current rung
-    if (m_events[m_lowestRung] == 0) {
-        if (m_lowestRung > 0) {
-            m_lowestRung--;
-        }
+    // skip empty tail buckets of the current and lower rungs
+    while ((m_lowestRung > 0) && (m_events[m_lowestRung] == 0)) {
+        m_lowestRung--;
     }
 
     // find next non-empty bucket from lowest rung
@@ -280,11 +278,9 @@ void Ladder::advanceDequeueBucket(bool p_spawn)
             if (m_currentBucket[m_lowestRung] == (m_BucketsFirstRung - 1)) {
                 break;
             }
-        } else {
-            if (m_lowestRung < m_NRung) {
-                if (m_currentBucket[m_lowestRung] == (m_Thres - 1)) {
-                    break;
-                }
+        } else if (m_lowestRung < m_NRung) {
+            if (m_currentBucket[m_lowestRung] == m_Thres) {
+                break;
             }
         }
 
@@ -307,22 +303,22 @@ void Ladder::advanceDequeueBucket(bool p_spawn)
 
 bool Ladder::spawn(long p_elements)
 {
-    bool result = false;    
+    bool result = false;
 
     // spawn, iff
     // (1) lowest rung < MAX_RUNGS - 1
-    // (2) m_events[i] > m_rungs[i][j]
-    if ((m_events[m_lowestRung]
-         > m_rungs[m_lowestRung][m_currentBucket[m_lowestRung]]->size())
-        && (m_lowestRung < (MAX_RUNGS - 1))) {
+    if ((m_lowestRung < (MAX_RUNGS - 1))) {
         m_lowestRung++;
 
         // create new rung, iff
         // (1) m_NRung < MAX_RUNGS
+        // (2) m_lowestRung >= m_NRung
         if ((m_lowestRung >= m_NRung) && (m_NRung < MAX_RUNGS)) {
             createRung();
         }
 
+        // these formulas are different from the ones presented in the TOMACS
+        // journal on the Ladder Queue by Tang, et. al.
         m_bucketwidth[m_lowestRung] =
             getBucketwidth(m_lowestRung - 1) / (m_Thres  - 1);
         m_RStart[m_lowestRung] =
@@ -336,7 +332,7 @@ bool Ladder::spawn(long p_elements)
         // copy the elements from the previous bucket to the next rung
         int size = m_rungs[m_lowestRung - 1][m_currentBucket[m_lowestRung - 1]]->size();
         m_events[m_lowestRung - 1] -= size;
-        
+
         enlist(
             m_lowestRung,
             m_rungs[m_lowestRung - 1][m_currentBucket[m_lowestRung - 1]]->delist()->next,
@@ -367,4 +363,54 @@ void Ladder::createRung()
 
     delete[] m_rungs;
     m_rungs = rungs;
+
+    // resize the events data structure
+    int *events = new int[m_NRung];
+    memset(events, 0, sizeof(int) * m_NRung);
+    for (int i = 0; i < m_lowestRung; ++i) {
+        events[i] = m_events[i];
+    }
+
+    delete[] m_events;
+    m_events = events;
+
+    // resize the currentBucket data structure
+    int *currentBucket = new int[m_NRung];
+    memset(currentBucket, 0, sizeof(int) * m_NRung);
+    for (int i = 0; i < m_lowestRung; ++i) {
+        currentBucket[i] = m_currentBucket[i];
+    }
+
+    delete[] m_currentBucket;
+    m_currentBucket = currentBucket;
+
+    // resize the bucketwidth data structure
+    double *bucketwidth = new double[m_NRung];
+    memset(bucketwidth, 0, sizeof(double) * m_NRung);
+    for (int i = 0; i < m_lowestRung; ++i) {
+        bucketwidth[i] = m_bucketwidth[i];
+    }
+
+    delete[] m_bucketwidth;
+    m_bucketwidth = bucketwidth;
+
+    // resize the rcur data structure
+    double *rcur = new double[m_NRung];
+    memset(rcur, 0, sizeof(double) * m_NRung);
+    for (int i = 0; i < m_lowestRung; ++i) {
+        rcur[i] = m_RCur[i];
+    }
+
+    delete[] m_RCur;
+    m_RCur = rcur;
+
+    // resize the rstart data structure
+    double *rstart = new double[m_NRung];
+    memset(rstart, 0, sizeof(double) * m_NRung);
+    for (int i = 0; i < m_lowestRung; ++i) {
+        rstart[i] = m_RStart[i];
+    }
+
+    delete[] m_RStart;
+    m_RStart = rstart;
 }

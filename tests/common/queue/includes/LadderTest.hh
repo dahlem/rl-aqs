@@ -29,6 +29,7 @@ class LadderTest : public CppUnit::TestFixture
     CPPUNIT_TEST(testEnlistLarge75Fractions);
     CPPUNIT_TEST(testSpawnOnce);
     CPPUNIT_TEST(testSpawnEqualArrivals);
+    CPPUNIT_TEST(testSpawnAll);
     CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -54,6 +55,7 @@ public:
     void testEnlistLarge75Fractions();
     void testSpawnOnce();
     void testSpawnEqualArrivals();
+    void testSpawnAll();
 
 private:
     Ladder *m_ladder;
