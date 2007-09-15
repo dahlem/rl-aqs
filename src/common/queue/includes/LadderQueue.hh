@@ -2,22 +2,9 @@
 #define LADDERQUEUE_HH
 
 
-#include "Queue.hh"
 #include "Top.hh"
-
-
-
-struct ladder_t
-{
-    double *bucketwidth;
-    int nBc;
-    int **nBucket;
-    int nRungs;
-    int maxRungs;
-    double *rCur;
-    double *rStart;
-    int thres;
-};
+#include "Ladder.hh"
+#include "Bottom.hh"
 
 
 
@@ -32,7 +19,8 @@ public:
 
 private:
     Top *m_top;
-    ladder_t m_ladder;
+    Ladder *m_ladder;
+    Bottom *m_bottom;
 };
 
 
