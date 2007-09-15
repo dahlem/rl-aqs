@@ -2,9 +2,9 @@
 #define LADDER_HH
 
 
+#include "Fifo.hh"
 #include "List.hh"
 #include "Queue.hh"
-#include "Fifo.hh"
 #include "QueueException.hh"
 
 

@@ -2,9 +2,10 @@
 #define LADDERQUEUE_HH
 
 
-#include "Top.hh"
-#include "Ladder.hh"
 #include "Bottom.hh"
+#include "Ladder.hh"
+#include "QueueException.hh"
+#include "Top.hh"
 
 
 
@@ -14,7 +15,7 @@ public:
     LadderQueue();
     ~LadderQueue();
 
-    void enqueue(entry_t *const p_entry);
+    void enqueue(entry_t *const p_entry) throw (QueueException);
     entry_t *const dequeue();
 
 private:

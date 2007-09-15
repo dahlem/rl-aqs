@@ -40,13 +40,12 @@ void Top::reset() throw (QueueException)
     if (getNTop() > 0) {
         throw QueueException(QueueException::BAD_RESET);
     } else {
-        // do something with m_topStart
         m_maxTS = 0.0;
         m_minTS = DBL_MAX;
     }
 }
 
-void Top::enqueue(entry_t *const p_entry)
+void Top::enqueue(entry_t *const p_entry) throw (QueueException)
 {
     setMaxTS(p_entry->arrival);
     setMinTS(p_entry->arrival);
@@ -56,7 +55,13 @@ void Top::enqueue(entry_t *const p_entry)
 
 entry_t *const Top::dequeue()
 {
-    return m_fifo->dequeue();
+    entry_t *result = m_fifo->dequeue();
+
+    if (result != NULL) {
+        m_topStart = result->arrival;
+    }
+    
+    return result;
 }
 
 void Top::setMaxTS(double p_maxTS) 
@@ -79,6 +84,8 @@ node_double_t *Top::delist()
 
     try {
         result = m_fifo->delist();
+        m_topStart = m_maxTS;
+        
         reset();
     } catch (QueueException &qe) {
         // cannot happen here

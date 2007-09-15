@@ -45,7 +45,7 @@ const long Fifo::size()
     return m_size;
 }
 
-void Fifo::enqueue(entry_t *const p_entry)
+void Fifo::enqueue(entry_t *const p_entry) throw (QueueException)
 {
     node_double_t *node = new node_double_t(p_entry, m_tail, m_tail->previous);
     

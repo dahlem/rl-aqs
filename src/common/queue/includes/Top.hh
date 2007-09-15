@@ -2,9 +2,9 @@
 #define TOP_HH
 
 
-#include "Queue.hh"
-#include "List.hh"
 #include "Fifo.hh"
+#include "List.hh"
+#include "Queue.hh"
 #include "QueueException.hh"
 
 
@@ -14,7 +14,7 @@ public:
     Top();
     ~Top();
 
-    void enqueue(entry_t *const p_entry);
+    void enqueue(entry_t *const p_entry) throw (QueueException);
     entry_t *const dequeue();
     node_double_t *delist();
     void enlist(node_double_t *p_list, long p_size);

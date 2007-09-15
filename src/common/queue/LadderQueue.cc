@@ -1,4 +1,7 @@
 #include <cstddef>
+#include <iostream>
+using std::cout;
+using std::endl;
 
 #include "LadderQueue.hh"
 
@@ -18,7 +21,7 @@ LadderQueue::~LadderQueue()
     delete m_bottom;
 }
 
-void LadderQueue::enqueue(entry_t *const p_entry)
+void LadderQueue::enqueue(entry_t *const p_entry) throw (QueueException)
 {
     if (p_entry->arrival >= m_top->getTopStart()) {
         // insert at the tail of top

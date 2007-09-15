@@ -7,13 +7,15 @@
 
 Bottom::Bottom()
 {
+    m_lastEvent = 0.0;
+
     init();
 }
 
 Bottom::~Bottom()
 {
     node_double_t *current = m_head->next;
-    
+
     while (current) {
         // if tail node
         if (current->data == NULL) break;
@@ -26,7 +28,7 @@ Bottom::~Bottom()
         // delete and the node
         delete deleteNode;
     }
-    
+
     delete m_head;
     delete m_tail;
 }
@@ -36,7 +38,7 @@ const long Bottom::size()
     return m_size;
 }
 
-void Bottom::init() 
+void Bottom::init()
 {
     m_head = new node_double_t(NULL, NULL, NULL);
     m_tail = new node_double_t(NULL, NULL, NULL);
@@ -47,9 +49,13 @@ void Bottom::init()
     m_size = 0;
 }
 
-void Bottom::enqueue(entry_t *const p_entry)
+void Bottom::enqueue(entry_t *const p_entry) throw (QueueException)
 {
     if (p_entry == NULL) return;
+
+    if (p_entry->arrival < m_lastEvent) {
+        throw QueueException(QueueException::PAST_EVENT_NOT_ALLOWED);
+    }
 
     node_double_t *temp = m_tail->previous;
 
@@ -67,7 +73,7 @@ void Bottom::enqueue(entry_t *const p_entry)
 
             return;
         }
-        
+
         temp = temp->previous;
     }
 }
@@ -117,6 +123,8 @@ entry_t *const Bottom::dequeue()
 
     delete temp;
     m_size--;
+
+    m_lastEvent = result->arrival;
 
     return result;
 }

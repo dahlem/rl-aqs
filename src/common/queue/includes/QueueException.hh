@@ -22,6 +22,7 @@ public:
         BUCKET_OUT_OF_BOUNDS,
         NO_EPOCH_INIT,
         EPOCH_EXISTS,
+        PAST_EVENT_NOT_ALLOWED,
         NUM_ERRORS
     };
 
