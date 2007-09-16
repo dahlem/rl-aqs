@@ -163,6 +163,14 @@ int Ladder::bucket(double p_TS, int p_rung)
     return retVal;
 }
 
+void Ladder::pushBack(node_double_t *p_list, long p_size) 
+{
+    enlist(m_lowestRung, p_list, p_size);    
+
+    // advance dequeue bucket
+    advanceDequeueBucket(1);
+}
+
 void Ladder::enqueue(entry_t *const p_entry) throw (QueueException)
 {
     // cannot enqueue, if the internal structure has not been initialised
@@ -308,11 +316,11 @@ void Ladder::advanceDequeueBucket(bool p_spawn)
     }
 
     if (p_spawn && (elements > m_Thres)) {
-        advanceDequeueBucket(spawn(elements));
+        advanceDequeueBucket(spawn(true));
     }
 }
 
-bool Ladder::spawn(long p_elements)
+bool Ladder::spawn(bool p_doEnlist)
 {
     bool result = false;
 
@@ -340,14 +348,16 @@ bool Ladder::spawn(long p_elements)
             - getBucketwidth(m_lowestRung - 1)
             + getBucketwidth(m_lowestRung);
 
-        // copy the elements from the previous bucket to the next rung
-        int size = m_rungs[m_lowestRung - 1][m_currentBucket[m_lowestRung - 1]]->size();
-        m_events[m_lowestRung - 1] -= size;
+        if (p_doEnlist) {
+            // copy the elements from the previous bucket to the next rung
+            int size = m_rungs[m_lowestRung - 1][m_currentBucket[m_lowestRung - 1]]->size();
+            m_events[m_lowestRung - 1] -= size;
 
-        enlist(
-            m_lowestRung,
-            m_rungs[m_lowestRung - 1][m_currentBucket[m_lowestRung - 1]]->delist()->next,
-            size);
+            enlist(
+                m_lowestRung,
+                m_rungs[m_lowestRung - 1][m_currentBucket[m_lowestRung - 1]]->delist()->next,
+                size);
+        }
 
         result = true;
     }

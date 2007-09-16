@@ -35,6 +35,8 @@ class LadderTest : public CppUnit::TestFixture
     CPPUNIT_TEST_EXCEPTION(testEnqueueException, QueueException);
     CPPUNIT_TEST(testEnqueue);
     CPPUNIT_TEST_EXCEPTION(testEnqueueNotAllowed, QueueException);
+    CPPUNIT_TEST(testPushBack);
+    CPPUNIT_TEST(testPushBackSpawn);
     CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -65,6 +67,8 @@ public:
     void testEnqueueException() throw (QueueException);
     void testEnqueue();
     void testEnqueueNotAllowed() throw (QueueException);
+    void testPushBack();
+    void testPushBackSpawn();
 
 private:
     Ladder *m_ladder;

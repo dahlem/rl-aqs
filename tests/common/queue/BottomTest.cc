@@ -350,3 +350,21 @@ void BottomTest::testDelist()
     delete result->next;
     delete result;
 }
+
+void BottomTest::testMaxTS() 
+{
+    CPPUNIT_ASSERT_EQUAL(m_bottom->getMaxTS(), (double) 0.0);
+
+    entry_t *const entry1 = new entry_t(3.1, 1, 1, 0);
+    m_bottom->enqueue(entry1);
+    CPPUNIT_ASSERT_EQUAL(m_bottom->getMaxTS(), (double) 3.1);
+}
+
+void BottomTest::testMinTS() 
+{
+    CPPUNIT_ASSERT_EQUAL(m_bottom->getMinTS(), (double) 0.0);
+
+    entry_t *const entry1 = new entry_t(3.1, 1, 1, 0);
+    m_bottom->enqueue(entry1);
+    CPPUNIT_ASSERT_EQUAL(m_bottom->getMinTS(), (double) 3.1);
+}

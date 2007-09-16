@@ -1,7 +1,4 @@
 #include <cstddef>
-#include <iostream>
-using std::cout;
-using std::endl;
 
 #include "LadderQueue.hh"
 
@@ -35,8 +32,27 @@ void LadderQueue::enqueue(entry_t *const p_entry) throw (QueueException)
         m_bottom->enqueue(p_entry);
 
         if (m_bottom->size() > m_ladder->getThres()) {
-            // spawn a new rung in the ladder and copy the
-            // events from bottom to the ladder rung just created.
+            // check whether ladder is empty
+            // if yes, get max and min TS values from bottom and enlist
+            if (m_ladder->getNBucket() == 0) {
+                double max = m_bottom->getMaxTS();
+                double min = m_bottom->getMinTS();
+                long size = m_bottom->size();
+
+                node_double_t *list = m_bottom->delist();
+                m_ladder->enlist(list->next, size, max, min);
+            } else {
+                // otherwise, spawn a new rung in the ladder and copy the
+                // events from bottom to the ladder rung just created.
+                bool success = m_ladder->spawn(false);
+
+                if (success) {
+                    long size = m_bottom->size();
+                    node_double_t *list = m_bottom->delist();
+                    
+                    m_ladder->pushBack(list, size);
+                }
+            }
         }
     }
 }

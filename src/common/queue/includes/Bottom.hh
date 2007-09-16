@@ -18,6 +18,8 @@ public:
     entry_t *const dequeue();
     void enlist(node_double_t *p_list, long p_size);
     node_double_t * delist();
+    double getMaxTS();
+    double getMinTS();
 
     const long size();
 

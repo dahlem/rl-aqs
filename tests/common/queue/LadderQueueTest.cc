@@ -32,11 +32,26 @@ void LadderQueueTest::testEnqueue10()
 
     for (int i = 0; i < 9; ++i) {
         entry_t *newE = m_ladderqueue->dequeue();
-
-        cout << oldE->arrival << " - " << newE->arrival << endl;
-//        CPPUNIT_ASSERT(oldE->arrival <= newE->arrival);
+        CPPUNIT_ASSERT((double) oldE->arrival <= (double) newE->arrival);
+        delete oldE;
         oldE = newE;
-        delete newE;
+    }
+}
+
+void LadderQueueTest::testEnqueueVeryLarge()
+{
+    for (int i = 2000000; i > 0; --i) {
+        entry_t *entry = new entry_t((double) i, 1, 1, 1);
+        m_ladderqueue->enqueue(entry);
+    }
+
+    entry_t *oldE = m_ladderqueue->dequeue();
+
+    for (int i = 0; i < 1999999; ++i) {
+        entry_t *newE = m_ladderqueue->dequeue();
+        CPPUNIT_ASSERT((double) oldE->arrival <= (double) newE->arrival);
+        delete oldE;
+        oldE = newE;
     }
 }
 
@@ -53,16 +68,12 @@ void LadderQueueTest::testEnqueueDequeue20()
 
     entry_t *oldE = m_ladderqueue->dequeue();
 
-    cout << endl << "1" << endl;
-    
     for (int i = 0; i < 9; ++i) {
         entry_t *newE = m_ladderqueue->dequeue();
 
-        cout << oldE->arrival << " - " << newE->arrival << endl;
-        
-//        CPPUNIT_ASSERT(oldE->arrival <= newE->arrival);
+        CPPUNIT_ASSERT(oldE->arrival <= newE->arrival);
+        delete oldE;
         oldE = newE;
-        delete newE;
     }
 
     for (int i = 1; i < 11; ++i) {
@@ -74,13 +85,10 @@ void LadderQueueTest::testEnqueueDequeue20()
         }
     }
 
-    cout << endl << "2" << endl;
     for (int i = 0; i < 11; ++i) {
         entry_t *newE = m_ladderqueue->dequeue();
-        cout << oldE->arrival << " - " << newE->arrival << endl;
-        
-//        CPPUNIT_ASSERT(oldE->arrival <= newE->arrival);
+        CPPUNIT_ASSERT(oldE->arrival <= newE->arrival);
+        delete oldE;
         oldE = newE;
-        delete newE;
     }
 }

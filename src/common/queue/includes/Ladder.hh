@@ -38,13 +38,16 @@ public:
 
     double getRStart(int p_rung);
 
+    bool spawn(bool p_doEnlist);
+    void pushBack(node_double_t *p_list, long p_size);
+
+
 private:
     void enlist(node_double_t *p_list, long p_size);
     double bucketwidth(double p_max, double p_min, long p_n);
     int bucket(double p_TS, int p_rung);
     void resizeFirstRung(int p_size);
     void advanceDequeueBucket(bool p_spawn);
-    bool spawn(long p_elements);
     void createRung();
     void init();
     void enlist(int p_rung, node_double_t *p_list, long p_size);

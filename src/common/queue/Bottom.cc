@@ -128,3 +128,21 @@ entry_t *const Bottom::dequeue()
 
     return result;
 }
+
+double Bottom::getMaxTS() 
+{
+    if (m_size != 0) {
+        return m_tail->previous->data->arrival;
+    }
+
+    return m_lastEvent;
+}
+
+double Bottom::getMinTS() 
+{
+    if (m_size != 0) {
+        return m_head->next->data->arrival;
+    }
+
+    return m_lastEvent;
+}
