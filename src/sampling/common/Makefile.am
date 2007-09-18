@@ -8,4 +8,9 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-SUBDIRS = design test-utils utils sampling common
+noinst_LTLIBRARIES = libsamplingcommon.la
+
+libsamplingcommon_la_SOURCES = \
+	SamplingException.cc
+
+INCLUDES = -I./includes

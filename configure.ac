@@ -17,11 +17,6 @@ AC_CONFIG_MACRO_DIR([m4])
 
 AM_INIT_AUTOMAKE([dist-bzip2])
 
-
-PKG_CHECK_MODULES(CPPUNIT, cppunit >= 1.12.0)
-AC_SUBST(CPPUNIT_CFLAGS)
-AC_SUBST(CPPUNIT_LIBS)
-
 LF_CONFIGURE_CC
 LF_CONFIGURE_CXX
 LF_HOST_TYPE
@@ -32,6 +27,22 @@ AC_SUBST(LIBTOOL_DEPS)
 
 AC_SUBST([MAINTAINERCLEANFILES],['Makefile.in configure semantic.cache'])
 
+
+# CPPUnit library checks
+PKG_CHECK_MODULES(CPPUNIT, cppunit >= 1.12.0)
+AC_SUBST(CPPUNIT_CFLAGS)
+AC_SUBST(CPPUNIT_LIBS)
+
+# GSL library checks
+AC_CHECK_LIB([m],[cos])
+AC_CHECK_LIB([gslcblas],[cblas_dgemm])
+AC_CHECK_LIB([gsl],[gsl_blas_dgemm])
+
+# Boost library check
+AX_BOOST_BASE([1.33.1])
+
+
+# optional libraries
 AC_GCOV
 AC_VALGRIND
 
@@ -42,6 +53,11 @@ AC_CONFIG_FILES([
    doc/Makefile
    m4/Makefile
    src/Makefile
+   src/design/Makefile
+   src/design/pattern/Makefile
+   src/sampling/Makefile
+   src/sampling/common/Makefile
+   src/sampling/crn/Makefile
    src/utils/Makefile
    src/utils/numbers/Makefile
    src/test-utils/Makefile
@@ -54,6 +70,8 @@ AC_CONFIG_FILES([
    tests/common/Makefile
    tests/common/sort/Makefile
    tests/common/queue/Makefile
+   tests/sampling/Makefile
+   tests/sampling/crn/Makefile
 ])
 
 AC_OUTPUT

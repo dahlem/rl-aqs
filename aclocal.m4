@@ -8017,3 +8017,4 @@ fi[]dnl
 m4_include([m4/ac_gcov.m4])
 m4_include([m4/ac_perl_module_version.m4])
 m4_include([m4/ac_valgrind.m4])
+m4_include([m4/ax_boost_base.m4])

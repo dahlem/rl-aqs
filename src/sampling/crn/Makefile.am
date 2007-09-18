@@ -8,4 +8,15 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-SUBDIRS = design test-utils utils sampling common
+noinst_LTLIBRARIES = libsamplingcrn.la
+
+libsamplingcrn_la_SOURCES = CRN.cc
+
+
+INCLUDES =                                                                \
+	-I$(top_srcdir)/src/sampling/crn/includes                         \
+	-I$(top_srcdir)/src/design/pattern/includes                       \
+	-I$(top_srcdir)/src/sampling/common/includes
+
+LIBADD = ../common/libsamplingcommon.la
+

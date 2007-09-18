@@ -8,4 +8,7 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-SUBDIRS = design test-utils utils sampling common
+SUBDIRS = crn
+
+include $(top_srcdir)/mk/valgrind-recursive.am
+include $(top_srcdir)/mk/gcov-recursive.am
