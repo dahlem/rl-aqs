@@ -8,4 +8,10 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-SUBDIRS = common crn qrn
+noinst_LTLIBRARIES = libsamplingqrn.la
+
+libsamplingqrn_la_SOURCES = QRNSequence.cc
+
+
+INCLUDES =                                                                \
+	-I$(top_srcdir)/src/sampling/qrn/includes

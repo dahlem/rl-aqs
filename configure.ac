@@ -58,6 +58,7 @@ AC_CONFIG_FILES([
    src/sampling/Makefile
    src/sampling/common/Makefile
    src/sampling/crn/Makefile
+   src/sampling/qrn/Makefile
    src/utils/Makefile
    src/utils/numbers/Makefile
    src/test-utils/Makefile
