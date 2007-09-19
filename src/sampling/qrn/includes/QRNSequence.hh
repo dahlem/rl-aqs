@@ -5,6 +5,7 @@
 #include <gsl/gsl_qrng.h>
 
 
+
 class QRNSequence
 {
 public:

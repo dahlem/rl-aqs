@@ -25,4 +25,10 @@ QRNSequence::~QRNSequence()
 void QRNSequence::get(double p_sample[], double p_scaling[])
 {
     gsl_qrng_get(m_qrng, p_sample);
+
+    // do an element-wise vector product to scale the random sample
+    // to the appropriate desired input parameters
+    for (int i = 0; i < m_dim; ++i) {
+        p_sample[i] = p_sample[i] * p_scaling[i];
+    }
 }

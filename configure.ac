@@ -73,6 +73,7 @@ AC_CONFIG_FILES([
    tests/common/queue/Makefile
    tests/sampling/Makefile
    tests/sampling/crn/Makefile
+   tests/sampling/qrn/Makefile
 ])
 
 AC_OUTPUT
