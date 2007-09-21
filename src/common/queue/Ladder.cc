@@ -101,7 +101,7 @@ int Ladder::getNBC()
     return m_NBC;
 }
 
-long Ladder::getNBucket(int p_rung, int p_bucket)
+long Ladder::getNBucket(int p_rung, int p_bucket) throw (QueueException)
 {
     if (p_rung >= m_NRung) {
         throw QueueException(QueueException::RUNG_OUT_OF_BOUNDS);

@@ -59,6 +59,14 @@ void Bottom::init()
     m_size = 0;
 }
 
+/**
+ * Insert an entry into the bottom structure. Since the bottom structure
+ * maintains a sorted list, this enqueue operation uses an insertion algorithm
+ * starting from the back of the queue in order to maintain stability. Otherwise,
+ * the bottom structure would not offer stability characteristics.
+ * 
+ * @see Queue#enqueue(entry_t*) throw (QueueException)
+ */
 void Bottom::enqueue(entry_t *const p_entry) throw (QueueException)
 {
     if (p_entry == NULL) return;
@@ -88,6 +96,13 @@ void Bottom::enqueue(entry_t *const p_entry) throw (QueueException)
     }
 }
 
+/**
+ * Insert a list into the bottom structure. If the size of the list to be
+ * inserted is less than 10 elements, an insertion sort algorithm is employed.
+ * Otherwise, a merge sort algorithm is used.
+ *
+ * @see List#enlist(node_double_t*, long)
+ */
 void Bottom::enlist(node_double_t *p_list, long p_size)
 {
     // insert data items of a small list individually, otherwise use mergesort

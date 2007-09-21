@@ -17,26 +17,51 @@
 #include "QueueException.hh"
 
 
-
+/**
+ * This class implements a first in first out data structure.
+ *
+ * <a href="mailto:Dominik.Dahlem@cs.tcd.ie">Dominik Dahlem</a>
+ */
 class Fifo: public Queue, List
 {
 public:
     Fifo();
     ~Fifo();
 
+    /**
+     * @see Queue#enqueue(entry_t* const) throw (QueueException)
+     */
     void enqueue(entry_t *const p_entry) throw (QueueException);
+
+    /**
+     * @see Queue#dequeue()
+     */
     entry_t *const dequeue();
+
+    /**
+     * @see List#delist()
+     */
     node_double_t *delist();
+
+    /**
+     * @see List#enlist(node_double_t*, long)
+     */
     void enlist(node_double_t *p_list, long p_size);
 
+    /**
+     * @return the size of the fifo
+     */
     const long size();
 
-    node_double_t *m_head;
-    node_double_t *m_tail;
 private:
+    /**
+     * Initialise the fifo.
+     */
     void init();
 
     long m_size;
+    node_double_t *m_head;
+    node_double_t *m_tail;
 };
 
 

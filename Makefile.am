@@ -11,12 +11,18 @@
 SUBDIRS = m4 src doc tests
 EXTRA_DIST = \
 	reconf \
+	README \
 	$(srcdir)/m4/ac_gcov.m4 \
-	$(srcdir)/m4/ac_valgrind.m4
+	$(srcdir)/m4/ac_valgrind.m4 \
+	$(srcdir)/m4/ac_perl_module_version.m4 \
+	$(srcdir)/m4/ax_boost_base.m4 \
+	$(srcdir)/m4/ax_prog_doxygen.m4 \
 	$(srcdir)/mk/gcov.am \
 	$(srcdir)/mk/valgrind.am \
 	$(srcdir)/mk/gcov-recursive.am \
-	$(srcdir)/mk/valgrind-recursive.am
+	$(srcdir)/mk/valgrind-recursive.am \
+	$(srcdir)/mk/doxygen.am
+
 
 DISTCHECK_CONFIGURE_FLAGS = --enable-gcov --enable-valgrind
 
@@ -55,5 +61,8 @@ lcov: ;
 endif
 
 
+include mk/doxygen.am
 
-.PHONY: valgrind valgrind.gen-suppressions lcov lcov-prepare
+
+.PHONY: valgrind valgrind.gen-suppressions lcov lcov-prepare \
+	doxygen-run doxygen-doc $(DX_PS_GOAL) $(DX_PDF_GOAL)

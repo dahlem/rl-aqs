@@ -17,12 +17,25 @@
 
 
 
+/**
+ * This class specifies the contract of a queue.
+ *
+ * @author <a href="mailto:Dominik.Dahlem@cs.tcd.ie>Dominik Dahlem</a>
+ */
 class Queue
 {
 public:
     virtual ~Queue() = 0;
 
+    /**
+     * @param entry_t* the entry structure to be enqueued into a queue.
+     * @throws QueueException throw, if the queue cannot enqueue the entry.
+     */
     virtual void enqueue(entry_t *const p_entry) throw (QueueException) = 0;
+
+    /**
+     * @return returns the next entry in a queue.
+     */
     virtual entry_t *const dequeue() = 0;
 };
 

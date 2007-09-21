@@ -25,8 +25,6 @@ LF_SET_WARNINGS
 AC_PROG_LIBTOOL
 AC_SUBST(LIBTOOL_DEPS)
 
-AC_SUBST([MAINTAINERCLEANFILES],['Makefile.in configure semantic.cache'])
-
 
 # CPPUnit library checks
 PKG_CHECK_MODULES(CPPUNIT, cppunit >= 1.12.0)
@@ -47,9 +45,28 @@ AC_GCOV
 AC_VALGRIND
 
 
+
+# doxygen
+DX_DOXYGEN_FEATURE([ON])
+DX_HTML_FEATURE([ON])
+DX_CHM_FEATURE([OFF])
+DX_CHI_FEATURE([OFF])
+DX_MAN_FEATURE([OFF])
+DX_RTF_FEATURE([OFF])
+DX_XML_FEATURE([OFF])
+DX_PDF_FEATURE([OFF])
+DX_PS_FEATURE([OFF])
+DX_INIT_DOXYGEN([DES], [Doxyfile], [doc/doxygen])
+
+
+AC_SUBST([MOSTLYCLEANFILES],[DX_CLEANFILES])
+AC_SUBST([MAINTAINERCLEANFILES],['Makefile.in configure semantic.cache'])
+
+
+
 AC_CONFIG_FILES([
-   Makefile
    README
+   Makefile
    doc/Makefile
    m4/Makefile
    src/Makefile
@@ -72,12 +89,21 @@ AC_CONFIG_FILES([
    tests/common/sort/Makefile
    tests/common/queue/Makefile
    tests/sampling/Makefile
-   tests/sampling/crn/Makefile
+   tests/sampling/crn/Makefile	
    tests/sampling/qrn/Makefile
 ])
+
 
 AC_OUTPUT
 
 for top_builddir in . .. ../.. $ac_auxdir $ac_auxdir/..; do
   test -f $top_builddir/configure && break
 done
+
+AC_MSG_RESULT([
+
+des $VERSION: Automatic configuration OK.
+
+Type 'make' to compile des.
+
+])

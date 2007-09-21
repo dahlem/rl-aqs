@@ -11,6 +11,9 @@
 #include "QueueException.hh"
 
 
+/**
+ * Specification of the valid error strings.
+ */
 const char* QueueException::m_errorStrings[NUM_ERRORS] =
 {
     "Reset Not Allowed, because the fifo data structure is not empty."

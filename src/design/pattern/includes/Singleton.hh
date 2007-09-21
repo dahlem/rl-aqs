@@ -13,18 +13,41 @@
 
 
 
+/**
+ * This is is a template to declare Scott Meyer's singleton pattern.
+ * Usage: <code>typedef Singleton<AClass> ASingleton;</code>
+ *
+ * @author <a href="mailto:Dominik.Dahlem@cs.tcd.ie">Dominik Dahlem</a>
+ */
 template <class T>
 class Singleton
 {
 public:
+    /**
+     * get the only instance of this class.
+     *
+     * @return an instance of the singleton class
+     */
     static T& getInstance() {
         static T m_instance;
         return m_instance;
     }
 
 private:
+    /**
+     * Private constructor, because we this class is its own resource manager.
+     */
     Singleton();
+
+    /**
+     * Private copy constructor, because we this class is its own resource
+     * manager.
+     */
     Singleton(Singleton const&);
+
+    /**
+     * Private destructor, because we this class is its own resource manager.
+     */
     ~Singleton();
 };
 

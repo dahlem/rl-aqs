@@ -18,6 +18,11 @@ using std::exception;
 
 
 
+/**
+ * This exception specifies errors that may occur within queues.
+ *
+ * @author <a href="mailto:Dominik.Dahlem@cs.tcd.ie">Dominik Dahlem</a>
+ */
 class QueueException: public exception
 {
 public:

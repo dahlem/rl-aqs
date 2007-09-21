@@ -15,7 +15,11 @@
 #include "Entry.hh"
 
 
-
+/**
+ * This structure specifies a single-linked list element.
+ *
+ * @author <a href="mailto:Dominik.Dahlem@cs.tcd.ie">Dominik Dahlem</a>
+ */
 struct node_single_t 
 {
     struct entry_t *data;
@@ -30,6 +34,11 @@ struct node_single_t
     
 };
 
+/**
+ * This structure specifies a double-linked list element.
+ *
+ * @author <a href="mailto:Dominik.Dahlem@cs.tcd.ie">Dominik Dahlem</a>
+ */
 struct node_double_t 
 {
     struct entry_t *data;
@@ -48,6 +57,11 @@ struct node_double_t
 };
 
 
+/**
+ * Specification of the <code>List</code> interface.
+ *
+ * @author <a href="mailto:Dominik.Dahlem@cs.tcd.ie">Dominik Dahlem</a>
+ */
 class List
 {
 public:
