@@ -9,6 +9,9 @@
 // implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 #include "List.hh"
+using des::common::List;
+
+
 
 List::~List() 
 {}

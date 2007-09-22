@@ -15,6 +15,8 @@
 #include <cppunit/extensions/HelperMacros.h>
 
 #include "Top.hh"
+using des::common::Top;
+
 
 
 class TopTest : public CppUnit::TestFixture

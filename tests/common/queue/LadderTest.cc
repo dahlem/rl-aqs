@@ -9,8 +9,19 @@
 // implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 #include "Bottom.hh"
-#include "Top.hh"
+using des::common::Bottom;
+
 #include "Compare.hh"
+using des::utils::Compare;
+
+#include "Entry.hh"
+using des::common::entry_t;
+
+#include "List.hh"
+using des::common::node_double_t;
+
+#include "Top.hh"
+using des::common::Top;
 
 #include "LadderTest.hh"
 

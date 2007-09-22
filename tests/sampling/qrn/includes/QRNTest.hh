@@ -14,8 +14,6 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 
-#include "QRNSequence.hh"
-
 
 
 class QRNTest : public CppUnit::TestFixture

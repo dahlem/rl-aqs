@@ -11,6 +11,7 @@
 #include <cstddef>
 
 #include "QRNSequence.hh"
+using des::sampling::QRNSequence;
 
 
 

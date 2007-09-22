@@ -1,9 +1,9 @@
 // Copyright (C) 2007 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
-//  
+//
 // This file is free software; as a special exception the author gives
-// unlimited permission to copy and/or distribute it, with or without 
+// unlimited permission to copy and/or distribute it, with or without
 // modifications, as long as this notice is preserved.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 // implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
@@ -13,10 +13,14 @@
 
 
 #include <exception>
-
 using std::exception;
 
 
+
+namespace des
+{
+    namespace common
+    {
 
 /**
  * This exception specifies errors that may occur within queues.
@@ -29,7 +33,7 @@ public:
     QueueException(int p_code);
 
     const char* what() const throw();
-    
+
     enum Errors {
         BAD_RESET,
         RUNG_NOT_FOUND,
@@ -45,5 +49,9 @@ private:
     static const char* m_errorStrings[NUM_ERRORS];
     int m_code;
 };
+
+
+    }
+}
 
 #endif

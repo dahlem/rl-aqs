@@ -13,9 +13,14 @@
 
 
 #include "List.hh"
+using des::common::node_double_t;
 
 
-
+namespace des
+{
+    namespace testutils
+    {
+        
 /**
  * This class does not have an internal state, but provides static helper
  * methods for the test cases to link and free up <code>node_double_t</code>s.
@@ -58,5 +63,7 @@ private:
     
 };
 
+    }
+}
 
 #endif

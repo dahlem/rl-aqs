@@ -15,6 +15,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 
 #include "Ladder.hh"
+using des::common::Ladder;
 
 
 

@@ -14,8 +14,8 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 
-#include "CRN.hh"
-
+#include "SamplingException.hh"
+using des::sampling::SamplingException;
 
 
 class CRNTest : public CppUnit::TestFixture

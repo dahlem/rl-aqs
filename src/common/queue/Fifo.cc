@@ -11,6 +11,8 @@
 #include <cstddef>
 
 #include "Fifo.hh"
+using des::common::Fifo;
+
 
 
 Fifo::Fifo() 

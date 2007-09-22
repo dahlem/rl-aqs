@@ -9,6 +9,7 @@
 // implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 #include "QueueException.hh"
+using des::common::QueueException;
 
 
 /**

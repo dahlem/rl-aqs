@@ -15,6 +15,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 
 #include "Mergesort.hh"
+using des::common::Mergesort;
 
 
 

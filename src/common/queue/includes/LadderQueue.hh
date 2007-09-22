@@ -13,11 +13,29 @@
 
 
 #include "Bottom.hh"
+using des::common::Bottom;
+
+#include "Entry.hh"
+using des::common::entry_t;
+
 #include "Ladder.hh"
+using des::common::Ladder;
+
+#include "Queue.hh"
+using des::common::Queue;
+
 #include "QueueException.hh"
+using des::common::QueueException;
+
 #include "Top.hh"
+using des::common::Top;
 
 
+namespace des
+{
+    namespace common
+    {
+        
 
 /**
  * This class is based on the journal publication:
@@ -58,5 +76,7 @@ private:
     Bottom *m_bottom;
 };
 
+    }
+}
 
 #endif

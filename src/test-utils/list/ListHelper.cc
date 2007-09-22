@@ -11,6 +11,8 @@
 #include <cstdlib>
 
 #include "ListHelper.hh"
+using des::testutils::ListHelper;
+
 
 
 node_double_t *const ListHelper::link(

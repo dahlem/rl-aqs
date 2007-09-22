@@ -11,7 +11,10 @@
 #include <cstddef>
 
 #include "Bottom.hh"
+using des::common::Bottom;
+
 #include "Mergesort.hh"
+using des::common::Mergesort;
 
 
 

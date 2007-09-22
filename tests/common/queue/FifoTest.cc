@@ -10,6 +10,14 @@
 
 #include "FifoTest.hh"
 
+#include "Entry.hh"
+using des::common::entry_t;
+
+#include "List.hh"
+using des::common::node_double_t;
+
+
+
 // Registers the fixture into the 'registry'
 CPPUNIT_TEST_SUITE_REGISTRATION(FifoTest);
 

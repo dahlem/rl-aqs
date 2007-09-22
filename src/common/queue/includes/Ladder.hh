@@ -12,11 +12,29 @@
 #define LADDER_HH
 
 
-#include "Fifo.hh"
-#include "List.hh"
-#include "Queue.hh"
-#include "QueueException.hh"
+#include "Entry.hh"
+using des::common::entry_t;
 
+#include "Fifo.hh"
+using des::common::Fifo;
+
+#include "List.hh"
+using des::common::node_double_t;
+using des::common::List;
+
+#include "Queue.hh"
+using des::common::Queue;
+
+#include "QueueException.hh"
+using des::common::QueueException;
+
+
+
+namespace des
+{
+    namespace common
+    {
+        
 
 
 /**
@@ -257,5 +275,7 @@ private:
     double *m_RStart;
 };
 
+    }
+}
 
 #endif

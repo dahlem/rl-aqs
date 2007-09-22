@@ -9,12 +9,19 @@
 // implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 #include <iostream>
-
 using std::cout;
 using std::endl;
 
 #include "BottomTest.hh"
+#include "Entry.hh"
+using des::common::entry_t;
+
 #include "Fifo.hh"
+using des::common::Fifo;
+
+#include "List.hh"
+using des::common::node_double_t;
+
 
 
 

@@ -13,10 +13,18 @@
 
 
 #include "Entry.hh"
+using des::common::entry_t;
+
 #include "QueueException.hh"
+using des::common::QueueException;
 
 
 
+namespace des
+{
+    namespace common
+    {
+        
 /**
  * This class specifies the contract of a queue.
  *
@@ -39,5 +47,7 @@ public:
     virtual entry_t *const dequeue() = 0;
 };
 
+    }
+}
 
 #endif

@@ -13,6 +13,7 @@
 #include <cstring>
 
 #include "Ladder.hh"
+using des::common::Ladder;
 
 
 

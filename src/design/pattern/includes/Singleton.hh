@@ -12,6 +12,11 @@
 #define SINGLETON_HH
 
 
+namespace des
+{
+    namespace design
+    {
+        
 
 /**
  * This is is a template to declare Scott Meyer's singleton pattern.
@@ -52,5 +57,7 @@ private:
 };
 
 
+    }
+}
 
 #endif

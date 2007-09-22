@@ -9,6 +9,8 @@
 // implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 #include "Compare.hh"
+using des::utils::Compare;
+
 
 
 double Compare::diff(double p_a, double p_b)

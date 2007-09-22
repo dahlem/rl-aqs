@@ -11,6 +11,7 @@
 #include <cstddef>
 
 #include "CRN.hh"
+using des::sampling::CRN;
 
 
 

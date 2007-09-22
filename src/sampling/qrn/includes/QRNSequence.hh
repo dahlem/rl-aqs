@@ -16,6 +16,11 @@
 
 
 
+namespace des
+{
+    namespace sampling
+    {
+        
 /**
  * This class provides quasi-random number sequences for space-filling computer
  * simulation designs using the quasi-random number generators provided
@@ -52,5 +57,7 @@ private:
 };
 
 
+    }
+}
 
 #endif

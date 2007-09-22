@@ -8,7 +8,15 @@
 // WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 // implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
+#include "Entry.hh"
+using des::common::entry_t;
+
+#include "List.hh"
+using des::common::node_double_t;
+
 #include "ListHelper.hh"
+using des::testutils::ListHelper;
+
 #include "MergesortTest.hh"
 
 

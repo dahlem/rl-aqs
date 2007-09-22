@@ -10,6 +10,10 @@
 
 #include "CRNTest.hh"
 
+#include "CRN.hh"
+using des::sampling::CRN;
+using des::sampling::CRNSingleton;
+
 
 
 // Registers the fixture into the 'registry'

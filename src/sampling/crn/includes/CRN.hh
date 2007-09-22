@@ -17,9 +17,17 @@
 using std::vector;
 
 #include "SamplingException.hh"
+
 #include "Singleton.hh"
+using des::design::Singleton;
 
 
+
+namespace des
+{
+    namespace sampling
+    {
+        
 /**
  * type definition of a vector of random number generators.
  */
@@ -79,5 +87,7 @@ private:
  */
 typedef Singleton<CRN> CRNSingleton;
 
+    }
+}
 
 #endif

@@ -15,6 +15,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 
 #include "LadderQueue.hh"
+using des::common::LadderQueue;
 
 
 

@@ -15,6 +15,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 
 #include "Bottom.hh"
+using des::common::Bottom;
 
 
 class BottomTest : public CppUnit::TestFixture

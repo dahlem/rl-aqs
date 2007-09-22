@@ -12,10 +12,24 @@
 #define BOTTOM_HH
 
 
-#include "List.hh"
-#include "Queue.hh"
-#include "QueueException.hh"
+#include "Entry.hh"
+using des::common::entry_t;
 
+#include "List.hh"
+using des::common::node_double_t;
+using des::common::List;
+
+#include "Queue.hh"
+using des::common::Queue;
+
+#include "QueueException.hh"
+using des::common::QueueException;
+
+
+namespace des
+{
+    namespace common
+    {
 
 
 /**
@@ -81,5 +95,7 @@ private:
     node_double_t *m_tail;
 };
 
+    }
+}
 
 #endif

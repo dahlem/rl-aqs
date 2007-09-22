@@ -8,7 +8,17 @@
 // WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 // implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
+#include "Entry.hh"
+using des::common::entry_t;
+
+#include "Fifo.hh"
+using des::common::Fifo;
+
+#include "List.hh"
+using des::common::node_double_t;
+
 #include "TopTest.hh"
+
 
 // Registers the fixture into the 'registry'
 CPPUNIT_TEST_SUITE_REGISTRATION(TopTest);

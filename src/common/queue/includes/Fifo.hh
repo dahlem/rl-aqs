@@ -12,10 +12,26 @@
 #define FIFO_HH
 
 
-#include "List.hh"
-#include "Queue.hh"
-#include "QueueException.hh"
+#include "Entry.hh"
+using des::common::entry_t;
 
+#include "List.hh"
+using des::common::List;
+using des::common::node_double_t;
+
+#include "Queue.hh"
+using des::common::Queue;
+
+#include "QueueException.hh"
+using des::common::QueueException;
+
+
+
+namespace des
+{
+    namespace common
+    {
+        
 
 /**
  * This class implements a first in first out data structure.
@@ -64,5 +80,7 @@ private:
     node_double_t *m_tail;
 };
 
+    }
+}
 
 #endif

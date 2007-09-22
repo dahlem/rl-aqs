@@ -11,6 +11,7 @@
 #include <cstddef>
 
 #include "LadderQueue.hh"
+using des::common::LadderQueue;
 
 
 

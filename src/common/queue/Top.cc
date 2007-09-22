@@ -12,6 +12,8 @@
 #include <cfloat>
 
 #include "Top.hh"
+using des::common::Top;
+
 
 
 Top::Top() 

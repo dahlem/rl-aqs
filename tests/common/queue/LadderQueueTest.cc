@@ -13,6 +13,9 @@ using std::cout;
 using std::endl;
 
 
+#include "Entry.hh"
+using des::common::entry_t;
+
 #include "LadderQueueTest.hh"
 
 

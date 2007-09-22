@@ -1,6 +1,13 @@
 #ifndef ENTRY_HH
 #define ENTRY_HH
 
+
+namespace des 
+{
+    namespace common
+    {
+        
+
 /**
  * This structure specifies an (event) entry for the priority queue.
  * An event is specified by the arrival time, the destination, the origin, and
@@ -25,4 +32,8 @@ struct entry_t
     
 };
 
+    }
+}
+
+        
 #endif

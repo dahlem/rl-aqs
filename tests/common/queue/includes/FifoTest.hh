@@ -15,6 +15,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 
 #include "Fifo.hh"
+using des::common::Fifo;
 
 
 class FifoTest : public CppUnit::TestFixture
