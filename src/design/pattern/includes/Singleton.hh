@@ -40,7 +40,7 @@ public:
 
 private:
     /**
-     * Private constructor, because we this class is its own resource manager.
+     * Private constructor, because this class is its own resource manager.
      */
     Singleton();
 

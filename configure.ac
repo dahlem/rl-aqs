@@ -84,6 +84,8 @@ AC_CONFIG_FILES([
    src/common/list/Makefile
    src/common/sort/Makefile
    src/common/queue/Makefile
+   src/statistics/Makefile
+   src/statistics/analysis/Makefile
    tests/Makefile
    tests/common/Makefile
    tests/common/sort/Makefile
@@ -91,6 +93,8 @@ AC_CONFIG_FILES([
    tests/sampling/Makefile
    tests/sampling/crn/Makefile	
    tests/sampling/qrn/Makefile
+   tests/statistics/Makefile
+   tests/statistics/analysis/Makefile
 ])
 
 
