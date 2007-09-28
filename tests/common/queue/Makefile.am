@@ -41,4 +41,4 @@ LDADD =                                                     \
 	$(top_srcdir)/src/utils/numbers/libutils_numbers.la \
 	$(top_srcdir)/src/common/sort/libcommonsort.la
 
-CLEANFILES += *.log
+CLEANFILES += $(TESTS) *.log

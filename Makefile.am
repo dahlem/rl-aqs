@@ -24,7 +24,16 @@ EXTRA_DIST = \
 	$(srcdir)/mk/doxygen.am
 
 
+include mk/doxygen.am
+
+
 DISTCHECK_CONFIGURE_FLAGS = --enable-gcov --enable-valgrind
+
+DISTCLEANFILES = 'Makefile.in configure'
+MAINTAINERCLEANFILES = semantic.cache
+MOSTLYCLEANFILES = ${DX_CLEANFILES}
+
+
 
 clean-local:
 	rm -rf ./coverage/*
@@ -60,8 +69,6 @@ lcov: ;
 
 endif
 
-
-include mk/doxygen.am
 
 
 .PHONY: valgrind valgrind.gen-suppressions lcov lcov-prepare \

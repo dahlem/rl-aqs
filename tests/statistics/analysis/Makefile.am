@@ -32,4 +32,4 @@ INCLUDES = \
 LDADD = \
 	$(top_srcdir)/src/statistics/analysis/libstatisticsanalysis.la
 
-CLEANFILES += *.log
+CLEANFILES += $(TESTS) *.log

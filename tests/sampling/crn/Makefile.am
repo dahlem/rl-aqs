@@ -35,4 +35,4 @@ LDADD =                                                          \
 	$(top_srcdir)/src/sampling/crn/libsamplingcrn.la         \
 	$(top_srcdir)/src/sampling/common/libsamplingcommon.la
 
-CLEANFILES += *.log
+CLEANFILES += $(TESTS) *.log

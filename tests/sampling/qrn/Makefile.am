@@ -32,4 +32,4 @@ INCLUDES =                                                       \
 LDADD =                                                          \
 	$(top_srcdir)/src/sampling/qrn/libsamplingqrn.la
 
-CLEANFILES += *.log
+CLEANFILES += $(TESTS) *.log

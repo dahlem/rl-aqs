@@ -36,8 +36,10 @@ AC_DEFUN([AC_GCOV],
 
                 # check whether GD.pm is available
                 AC_PERL_MODULE_VERSION([GD 2.30], [ac_genhtml_frames=yes], [ac_genhtml_frames=yes])
-                AC_SUBST([CLEANFILES],['$CLEANFILES *.da *.gcda *.lcov'])
-                AC_SUBST([MOSTLYCLEANFILES],['$MOSTLYCLEANFILES *.bb *.bbg *.gcno'])
+
+                AC_SUBST([CLEANFILES],['*.da *.gcda *.lcov'])
+                AC_SUBST([MOSTLYCLEANFILES],['*.bb *.bbg *.gcno'])
+
         fi
 
         if test "x$ac_genhtml_frames" = "xyes"; then

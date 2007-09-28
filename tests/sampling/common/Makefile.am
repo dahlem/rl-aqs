@@ -33,4 +33,4 @@ INCLUDES =                                                       \
 LDADD =                                                          \
 	$(top_srcdir)/src/sampling/common/libsamplingcommon.la
 
-CLEANFILES += *.log
+CLEANFILES += $(TESTS) *.log

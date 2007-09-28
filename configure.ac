@@ -59,10 +59,6 @@ DX_PS_FEATURE([OFF])
 DX_INIT_DOXYGEN([DES], [Doxyfile], [doc/doxygen])
 
 
-AC_SUBST([MOSTLYCLEANFILES],[DX_CLEANFILES])
-AC_SUBST([MAINTAINERCLEANFILES],['Makefile.in configure semantic.cache'])
-
-
 
 AC_CONFIG_FILES([
    README
