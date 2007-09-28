@@ -61,6 +61,7 @@ void SeedsTest::testGetSeeds()
     }
 
     CPPUNIT_ASSERT_THROW(singleton.getSeed(), SamplingException);
+    CPPUNIT_ASSERT_THROW(singleton.getSeed(), SamplingException);
 }
 
 void SeedsTest::testGetSeedsNoNumber() 
