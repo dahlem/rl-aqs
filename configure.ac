@@ -91,6 +91,7 @@ AC_CONFIG_FILES([
    tests/common/sort/Makefile
    tests/common/queue/Makefile
    tests/sampling/Makefile
+   tests/sampling/common/Makefile
    tests/sampling/crn/Makefile	
    tests/sampling/qrn/Makefile
    tests/statistics/Makefile

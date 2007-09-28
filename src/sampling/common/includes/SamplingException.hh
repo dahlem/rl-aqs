@@ -36,6 +36,10 @@ public:
     
     enum Errors {
         UNKNOWN_INDEX,
+        NO_SEEDS,
+        NO_SEEDS_FILE,
+        NOT_INITIALISED,
+        NOT_A_NUMBER,
         NUM_ERRORS
     };
 

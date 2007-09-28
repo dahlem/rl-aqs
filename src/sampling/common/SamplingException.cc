@@ -16,6 +16,10 @@ using des::sampling::SamplingException;
 const char* SamplingException::m_errorStrings[NUM_ERRORS] =
 {
     "The random number generator index does not exist."
+    "There are no sees left."
+    "Cannot open the specified file."
+    "The random seeds have not been initialised yet."
+    "The seed is not a number."
 };
 
 SamplingException::SamplingException(int p_code)

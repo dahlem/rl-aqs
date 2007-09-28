@@ -10,7 +10,10 @@
 
 noinst_LTLIBRARIES = libsamplingcommon.la
 
-libsamplingcommon_la_SOURCES = \
-	SamplingException.cc
+libsamplingcommon_la_SOURCES =                              \
+	SamplingException.cc                                \
+	Seeds.cc
 
-INCLUDES = -I./includes
+INCLUDES =                                                  \
+	-I./includes                                        \
+	-I$(top_srcdir)/src/design/pattern/includes

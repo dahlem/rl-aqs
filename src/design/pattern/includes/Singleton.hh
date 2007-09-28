@@ -45,13 +45,13 @@ private:
     Singleton();
 
     /**
-     * Private copy constructor, because we this class is its own resource
+     * Private copy constructor, because this class is its own resource
      * manager.
      */
     Singleton(Singleton const&);
 
     /**
-     * Private destructor, because we this class is its own resource manager.
+     * Private destructor, because this class is its own resource manager.
      */
     ~Singleton();
 };

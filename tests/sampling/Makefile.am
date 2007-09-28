@@ -8,7 +8,7 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-SUBDIRS = crn qrn
+SUBDIRS = common crn qrn
 
 include $(top_srcdir)/mk/valgrind-recursive.am
 include $(top_srcdir)/mk/gcov-recursive.am
