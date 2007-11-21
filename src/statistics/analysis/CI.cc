@@ -30,7 +30,13 @@ bool CI::isConfidentWithPrecision(
     double t = gsl_cdf_tdist_Pinv(nu, df);
     double mean = gsl_stats_mean(p_data, 1, p_size);
     double sv = gsl_stats_variance_m(p_data, 1, p_size, mean);
-    double ciHalfLength = t * sqrt(sv / p_size);
+    double ciHalfLength = 0.0;
+    
+    if (gsl_isnan(sv)) {
+        return 1;
+    }
+
+    ciHalfLength = t * sqrt(sv / p_size);
 
     if ((ciHalfLength / fabs(mean)) <= relAdjError) {
         return true;
