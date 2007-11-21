@@ -10,4 +10,5 @@
 
 noinst_LTLIBRARIES = libstatisticsanalysis.la
 libstatisticsanalysis_la_SOURCES = CI.cc
-INCLUDES = -I./includes
+AM_CPPFLAGS = -I./includes
+include_HEADERS = includes

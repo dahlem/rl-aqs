@@ -21,5 +21,7 @@ libcommonqueue_la_SOURCES = \
 
 libcommonqueue_la_LDFLAGS = -lm
 
-INCLUDES = -I./includes -I../sort/includes -I../list/includes
+AM_CPPFLAGS = -I./includes -I../sort/includes -I../list/includes
 LIBADD = ../sort/libcommonsort.la ../list/libcommonlist.la
+
+include_HEADERS = includes

@@ -14,6 +14,8 @@ libsamplingcommon_la_SOURCES =                              \
 	SamplingException.cc                                \
 	Seeds.cc
 
-INCLUDES =                                                  \
+AM_CPPFLAGS =                                               \
 	-I./includes                                        \
 	-I$(top_srcdir)/src/design/pattern/includes
+
+include_HEADERS = includes

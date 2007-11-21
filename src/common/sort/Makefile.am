@@ -10,5 +10,7 @@
 
 noinst_LTLIBRARIES = libcommonsort.la
 libcommonsort_la_SOURCES = Mergesort.cc
-INCLUDES = -I./includes -I../list/includes
+AM_CPPFLAGS = -I./includes -I../list/includes
 LIBADD =  ../list/libcommonlist.la
+
+include_HEADERS = includes

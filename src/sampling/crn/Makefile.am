@@ -13,10 +13,11 @@ noinst_LTLIBRARIES = libsamplingcrn.la
 libsamplingcrn_la_SOURCES = CRN.cc
 
 
-INCLUDES =                                                                \
+AM_CPPFLAGS =                                                             \
 	-I$(top_srcdir)/src/sampling/crn/includes                         \
 	-I$(top_srcdir)/src/design/pattern/includes                       \
 	-I$(top_srcdir)/src/sampling/common/includes
 
 LIBADD = ../common/libsamplingcommon.la
 
+include_HEADERS = includes

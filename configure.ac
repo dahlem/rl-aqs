@@ -8,22 +8,42 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-AC_INIT([des],[0.0.1],[Dominik Dahlem Dominik.Dahlem@cs.tcd.ie],[des])
+AC_PREREQ(2.61)
+AC_INIT([Discrete Event Simulation for Service Interaction],
+        [0.5],
+        [Dominik Dahlem Dominik.Dahlem@cs.tcd.ie], 
+        [des])
+
 AC_CONFIG_AUX_DIR(config)
-AC_CONFIG_HEADERS([config.h])
+AC_CONFIG_SRCDIR([config.h.in])
+AC_CONFIG_HEADER([config.h])
 
 # place where extra autoconf macros are kept
 AC_CONFIG_MACRO_DIR([m4])
 
 AM_INIT_AUTOMAKE([dist-bzip2])
 
+
 LF_CONFIGURE_CC
 LF_CONFIGURE_CXX
 LF_HOST_TYPE
 LF_SET_WARNINGS
 
+AC_PROG_CXX
+AC_PROG_CC
+AC_PROG_CPP
 AC_PROG_LIBTOOL
 AC_SUBST(LIBTOOL_DEPS)
+
+
+# Checks for header files.
+# Checks for typedefs, structures, and compiler characteristics.
+AC_HEADER_STDBOOL
+AC_C_CONST
+
+# Checks for library functions.
+AC_HEADER_STDC
+AC_CHECK_FUNCS([floor memset sqrt])
 
 
 # CPPUnit library checks

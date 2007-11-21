@@ -29,8 +29,8 @@ include mk/doxygen.am
 
 DISTCHECK_CONFIGURE_FLAGS = --enable-gcov --enable-valgrind
 
-DISTCLEANFILES = 'Makefile.in configure'
-MAINTAINERCLEANFILES = semantic.cache
+DISTCLEANFILES = configure
+MAINTAINERCLEANFILES = "Makefile.in semantic.cache"
 MOSTLYCLEANFILES = ${DX_CLEANFILES}
 
 

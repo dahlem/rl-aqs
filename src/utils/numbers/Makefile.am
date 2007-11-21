@@ -11,4 +11,5 @@
 noinst_LTLIBRARIES = libutils_numbers.la
 libutils_numbers_la_SOURCES = Compare.cc
 
-INCLUDES = -I./includes
+AM_CPPFLAGS = -I./includes
+include_HEADERS = includes
