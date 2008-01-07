@@ -35,6 +35,7 @@ AC_PROG_CPP
 AC_PROG_LIBTOOL
 AC_SUBST(LIBTOOL_DEPS)
 
+CFLAGS="-W -Wall -pedantic ${CFLAGS}"
 
 # Checks for header files.
 # Checks for typedefs, structures, and compiler characteristics.

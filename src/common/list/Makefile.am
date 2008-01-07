@@ -12,6 +12,7 @@ noinst_LTLIBRARIES = libcommonlist.la
 
 libcommonlist_la_SOURCES = List.cc
 
-AM_CPPFLAGS = -I./includes
+libcommonlist_la_CPPFLAGS = -I./includes
+
 
 include_HEADERS = includes

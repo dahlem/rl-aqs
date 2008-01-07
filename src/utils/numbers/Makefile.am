@@ -9,7 +9,10 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 noinst_LTLIBRARIES = libutils_numbers.la
+
 libutils_numbers_la_SOURCES = Compare.cc
 
-AM_CPPFLAGS = -I./includes
+libutils_numbers_la_CPPFLAGS = -I./includes
+
+
 include_HEADERS = includes

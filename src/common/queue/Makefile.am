@@ -10,18 +10,24 @@
 
 noinst_LTLIBRARIES = libcommonqueue.la
 
-libcommonqueue_la_SOURCES = \
-	Queue.cc \
-	QueueException.cc \
-	Fifo.cc \
-	Top.cc \
-	Bottom.cc \
-	Ladder.cc \
+libcommonqueue_la_SOURCES =                                          \
+	Queue.cc                                                     \
+	QueueException.cc                                            \
+	Fifo.cc                                                      \
+	Top.cc                                                       \
+	Bottom.cc                                                    \
+	Ladder.cc                                                    \
 	LadderQueue.cc
 
 libcommonqueue_la_LDFLAGS = -lm
 
-AM_CPPFLAGS = -I./includes -I../sort/includes -I../list/includes
-LIBADD = ../sort/libcommonsort.la ../list/libcommonlist.la
+libcommonqueue_la_CPPFLAGS =                                         \
+	-I./includes                                                 \
+	-I../sort/includes                                           \
+	-I../list/includes
+
+LIBADD =                                                             \
+	../sort/libcommonsort.la                                     \
+	../list/libcommonlist.la
 
 include_HEADERS = includes

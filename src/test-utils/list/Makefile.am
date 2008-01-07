@@ -9,9 +9,14 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 noinst_LTLIBRARIES = libtestutilslist.la
+
 libtestutilslist_la_SOURCES = ListHelper.cc
 
-AM_CPPFLAGS = -I./includes -I../../common/list/includes
+libtestutilslist_la_CPPFLAGS =                                       \
+	-I./includes                                                 \
+	-I../../common/list/includes
+
 LIBADD =  ../../common/list/libcommonlist.la
+
 
 include_HEADERS = includes

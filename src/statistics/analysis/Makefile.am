@@ -9,6 +9,15 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 noinst_LTLIBRARIES = libstatisticsanalysis.la
+
 libstatisticsanalysis_la_SOURCES = CI.cc
-AM_CPPFLAGS = -I./includes
+
+libstatisticsanalysis_la_CPPFLAGS = -I./includes
+
+LDADD =                                                               \
+	-lgsl                                                         \
+	-lgslcblas                                                    \
+	-lm
+
+
 include_HEADERS = includes

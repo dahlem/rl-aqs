@@ -9,8 +9,14 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 noinst_LTLIBRARIES = libcommonsort.la
+
 libcommonsort_la_SOURCES = Mergesort.cc
-AM_CPPFLAGS = -I./includes -I../list/includes
+
+libcommonsort_la_CPPFLAGS =                                          \
+	-I./includes                                                 \
+	-I../list/includes
+
 LIBADD =  ../list/libcommonlist.la
+
 
 include_HEADERS = includes

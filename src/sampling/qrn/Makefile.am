@@ -13,7 +13,12 @@ noinst_LTLIBRARIES = libsamplingqrn.la
 libsamplingqrn_la_SOURCES = QRNSequence.cc
 
 
-AM_CPPFLAGS =                                                              \
+libsamplingqrn_la_CPPFLAGS =                                          \
 	-I$(top_srcdir)/src/sampling/qrn/includes
+
+LDADD =                                                               \
+	-lgsl                                                         \
+	-lm
+
 
 include_HEADERS = includes
