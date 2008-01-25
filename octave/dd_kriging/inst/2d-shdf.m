@@ -108,7 +108,7 @@ function chain = shdf_krig()
   endfor
   
   # mcmc_mh(s1, x0_beta, x0_theta, x0_sigma, X, y, n)
-  chain = mcmc_mh(50, 2, [1, 1], 2, X, y, 10000);
+  chain = mcmc_mh(50, [1, 1], X, y, 10000);
   
   
 endfunction

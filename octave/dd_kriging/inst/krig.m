@@ -16,9 +16,9 @@
 ## Version: 0.1
 
 
-function l = krig_likelihood(sigma, theta, X, y, beta, f)
-  if (nargin != 6)
-    usage("krig_likelihood(sigma, theta, X, y, beta, f)");
+function [l, beta, sigma_squared] = krig_likelihood(theta, X, y, f)
+  if (nargin != 4)
+    usage("krig_likelihood(theta, X, y, f)");
   endif
 
   if (theta <= 0)
@@ -38,11 +38,12 @@ function l = krig_likelihood(sigma, theta, X, y, beta, f)
   endif
 
   R = scf_gaussianm(X, theta);
+  R_inf = R^-1;
   n = rows(y);
+  beta = (f' * R_inf * f)^-1 * f' * R_inf * y;
   temp = y - f * beta;
+  sigma_squared = 1 / n * temp' * R_inf * temp;
 
-#  l = 1 / (sqrt((2 * pi * sigma^2)^n * det(R))) * e^-((temp' * R^-1 * temp)/(2 * sigma^2));
-  l = - (n/2) * log(2 * pi * sigma^2) - 1/2 * log(det(R)) /
-      - 1/(2 * sigma^2) * (temp' * R^-1 * temp);
+  l = - (n/2) * log(2 * pi * sigma_squared) - 1/2 * log(det(R)) - 1/(2 * sigma_squared) * (temp' * R_inf * temp);
   
 endfunction

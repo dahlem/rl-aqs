@@ -24,58 +24,54 @@
 ## observations (rows) with d dimensions (columns), y is the output
 ## vector at the n observations, and n is the number of iterations for
 ## the monte carlo sampling.
-function chain = mcmc_mh(s1, x0_beta, x0_theta, x0_sigma, X, y, n)
-   if (nargin != 7)
-     usage("mcmc_mh(s1, x0_beta, x0_theta, x0_sigma, X, y, n)");
-   endif
+function chain = mcmc_mh(s1, x0_theta, X, y, n)
+  if (nargin != 5)
+    usage("mcmc_mh(s1, x0_theta, X, y, n)");
+  endif
 
-   if (rows(y) != rows(X))
-     error("The vector y has to have the same dimension as matrix columns.");
-   endif
+  if (rows(y) != rows(X))
+    error("The vector y has to have the same dimension as matrix columns.");
+  endif
 
-   if (columns(x0_theta) != columns(X))
-     error("The vector x0_theta has to have the same dimension as matrix columns.");
-   endif
+  if (columns(x0_theta) != columns(X))
+    error("The vector x0_theta has to have the same dimension as matrix columns.");
+  endif
 
-   f = ones(rows(X), 1);
+  f = ones(rows(X), 1);
 
-   # initialise the x values
-   x.beta = 0.0;
-   x_old.beta = x0_beta;
+  # initialise the x values
+  x.theta = zeros(1, columns(X));
+  x_old.theta = x0_theta;
 
-   x.theta = zeros(1, columns(X));
-   x_old.theta = x0_theta;
+  x.beta = 0.0;
+  x.sigma = 0.0;
 
-   x.sigma = 0.0;
-   x_old.sigma = x0_sigma;
+  x0_sigma = s1^2;
+  pi_old = 1 / x0_sigma;
 
-   pi_old = 1 / x0_sigma^2;
+  # "krig_likelihood(sigma, theta, X, y, beta, f)"
+  [q_old, x_old.beta, x_old.sigma] = krig_likelihood(x0_theta, X, y, f);
 
-   # "krig_likelihood(sigma, theta, X, y, beta, f)"
-   q_old = krig_likelihood(x0_sigma, x0_theta, X, y, x0_beta, f);
+  accepted = 0;
+  s1 = s1^2;
 
-   accepted = 0;
-   s1 = s1^2;
+  C = cov(X);
+  theta_var = diag(C);
+  
+  # initialise the chain
+  chain.beta = [];
+  chain.theta = [];
+  chain.sigma = [];
 
-   C = cov(X);
-   theta_var = diag(C);
-   
-   # initialise the chain
-   chain_beta = [];
-   chain_theta = [];
-   chain_sigma = [];
+  for i = 1:n
+    # step 1: generate x from the proposal distribution
+    x.sigma = normrnd(x_old.sigma, s1);
+    
+    # sigma has to be positive
+    while (x.sigma < 0)
+      x.sigma = normrnd(x_old.sigma, s1);
+    endwhile
 
-   for i = 1:n
-     # step 1: generate x from the proposal distribution
-     x.sigma = normrnd(x_old.sigma, s1);
-      # sigma has to be positive
-      while (x.sigma < 0)
-	x.sigma = normrnd(x_old.sigma, s1);
-      endwhile
-
-    for i = 1:columns(x.beta)
-      x.beta(i) = normrnd(x_old.beta(i), s1);
-    endfor
     for i = 1:columns(x.theta)
       x.theta(i) = normrnd(x_old.theta(i), theta_var(i));
 
@@ -88,7 +84,7 @@ function chain = mcmc_mh(s1, x0_beta, x0_theta, x0_sigma, X, y, n)
     # step 2: calcuate the probability of move
     u = rand();
     pi_new = 1 / x.sigma^2;
-    q_new = krig_likelihood(x.sigma, x.theta, X, y, x.beta, f);
+    [q_new, x.beta, x.sigma] = krig_likelihood(x.theta, X, y, f);
 
     ratio = (pi_new * q_old) / (pi_old * q_new);
 
@@ -102,14 +98,10 @@ function chain = mcmc_mh(s1, x0_beta, x0_theta, x0_sigma, X, y, n)
       x_old.sigma = x.sigma;
 
       # put results into markov chain
-      chain_beta = [chain_beta, x_old.beta];
-      chain_theta = [chain_theta; x_old.theta];
-      chain_sigma = [chain_sigma, x_old.sigma];
-
+      chain.beta = [chain.beta, x_old.beta];
+      chain.theta = [chain.theta; x_old.theta];
+      chain.sigma = [chain.sigma, x_old.sigma];
       chain.accepted = accepted;
-      chain.beta = chain_beta;
-      chain.sigma = chain_sigma;
-      chain.theta = chain_theta;
     endif
   endfor
 
