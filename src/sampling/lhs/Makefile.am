@@ -8,4 +8,18 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-SUBDIRS = common crn qrn lhs
+noinst_LTLIBRARIES = libsamplinglhs.la
+
+libsamplinglhs_la_SOURCES = LHS.cc
+
+
+libsamplinglhs_la_CPPFLAGS =                                          \
+	-I$(top_srcdir)/src/sampling/lhs/includes                     \
+	-I$(top_srcdir)/src/sampling/common/includes
+
+libsamplinglhs_la_LIBADD =                                            \
+	$(top_srcdir)/src/sampling/common/libsamplingcommon.la        \
+	$(GSL_LIBS)
+
+
+include_HEADERS = includes

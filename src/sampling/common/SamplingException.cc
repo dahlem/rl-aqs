@@ -20,6 +20,9 @@ const char* SamplingException::m_errorStrings[NUM_ERRORS] =
     "Cannot open the specified file."
     "The random seeds have not been initialised yet."
     "The seed is not a number."
+    "The vector dimensions do not match."
+    "The sample size specified is too small."
+    "The random number generator is null."
 };
 
 SamplingException::SamplingException(int p_code)

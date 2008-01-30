@@ -11,6 +11,7 @@
 noinst_LTLIBRARIES = libsamplingcommon.la
 
 libsamplingcommon_la_SOURCES =                              \
+	Rng.cc                                              \
 	SamplingException.cc                                \
 	Seeds.cc
 

@@ -40,6 +40,9 @@ public:
         NO_SEEDS_FILE,
         NOT_INITIALISED,
         NOT_A_NUMBER,
+        DIM_DONT_MATCH,
+        SAMPLE_SIZE_TOO_SMALL,
+        GSL_RNG_NULL,
         NUM_ERRORS
     };
 

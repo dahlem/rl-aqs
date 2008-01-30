@@ -14,24 +14,25 @@ include $(top_srcdir)/mk/gcov.am
 
 
 # unit tests
-TESTS = CommonSuite
+TESTS = LHSSuite
 
 check_PROGRAMS = $(TESTS)
 
-CommonSuite_SOURCES =                                            \
-	RngTest.cc                                               \
-	SeedsTest.cc                                             \
-	CommonSuite.cc
+LHSSuite_SOURCES =                                               \
+	LHSTest.cc                                               \
+	LHSSuite.cc
 
-CommonSuite_CXXFLAGS = $(CPPUNIT_CFLAGS)
-CommonSuite_LDFLAGS = $(CPPUNIT_LIBS) -ldl
+LHSSuite_CXXFLAGS = $(CPPUNIT_CFLAGS)
+LHSSuite_LDFLAGS = $(CPPUNIT_LIBS) -ldl $(GSL_LIBS)
 
 INCLUDES =                                                       \
 	-Iincludes                                               \
-	-I$(top_srcdir)/src/sampling/common/includes             \
-	-I$(top_srcdir)/src/design/pattern/includes
+	-I$(top_srcdir)/src/sampling/lhs/includes                \
+	-I$(top_srcdir)/src/sampling/common/includes
 
 LDADD =                                                          \
+	$(top_srcdir)/src/sampling/lhs/libsamplinglhs.la         \
 	$(top_srcdir)/src/sampling/common/libsamplingcommon.la
+
 
 CLEANFILES += $(TESTS) *.log
