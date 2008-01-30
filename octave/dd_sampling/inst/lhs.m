@@ -21,11 +21,18 @@
 ##  min : vector (x_1, x_2, ..., x_k) of the minimum values for each dimension
 ##  max : vector (x_1, x_2, ..., x_k) of the maximum values for each dimension
 function S = lhs(n, min, max)
+  if ((nargin ~= 3) || ~isnumeric(n) || (length(min) != length(max)))
+    error("usage: lhs(n, min, max)");
+    error(", where n is the number of samples");
+    error("min is the vector of minimum values for each dimension");
+    error("max is the vector of maximum values for each dimension.");
+  end
+
   nvar = length(min);
   u = rand(n, nvar);
   S = zeros(n, nvar);
 
-  for j=1: nvar
+  for j=1:nvar
     # generate the random permutation of the integers 1...n
     idx = randperm(n);
 

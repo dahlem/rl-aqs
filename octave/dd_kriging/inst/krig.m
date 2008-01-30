@@ -44,6 +44,13 @@ function [l, beta, sigma_squared] = krig_likelihood(theta, X, y, f)
   temp = y - f * beta;
   sigma_squared = 1 / n * temp' * R_inf * temp;
 
-  l = - (n/2) * log(2 * pi * sigma_squared) - 1/2 * log(det(R)) - 1/(2 * sigma_squared) * (temp' * R_inf * temp);
-  
+#  l = - (n/2) * log(2 * pi * sigma_squared) - 1/2 * log(det(R)) - 1/(2 * sigma_squared) * (temp' * R_inf * temp);
+  l = - 0.5 * (n * log(2 * pi) + log(det(R)) + (temp' * R_inf * temp));
+
+endfunction
+
+
+function y = krig(X, x, R, beta, theta, y, f)
+  r = scf_gaussianu(X, x, theta);
+  y = f' * beta + r' * R^-1 * (y - f * beta);
 endfunction

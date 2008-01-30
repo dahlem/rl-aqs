@@ -35,7 +35,7 @@ function r = scf_gaussian(x, y, theta)
   r = 1.0;
   
   for i = 1:columns(x)
-    r *= e^-((y(i) - x(i))^2 * theta(i));
+    r *= e^-((y(i) - x(i))^2 / theta(i));
   endfor
 endfunction
 
@@ -76,6 +76,6 @@ function r = scf_gaussianu(X, x, theta)
   r = zeros(rows(X), 1);
 
   for i = 1:rows(X)
-    r(i) = scf_gaussianv(x, X(i,:), theta);
+    r(i,:) = scf_gaussian(x, X(i,:), theta);
   endfor
 endfunction
