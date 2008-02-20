@@ -22,10 +22,9 @@ SortSuite_SOURCES = \
 	MergesortTest.cc \
 	SortSuite.cc
 
-SortSuite_CXXFLAGS = $(CPPUNIT_CFLAGS)
 SortSuite_LDFLAGS = $(CPPUNIT_LIBS) -ldl
 
-INCLUDES = \
+SortSuite_CXXFLAGS = $(CPPUNIT_CFLAGS) \
 	-Iincludes \
 	-I$(top_srcdir)/src/test-utils/list/includes \
 	-I$(top_srcdir)/src/common/sort/includes \
@@ -36,4 +35,6 @@ LDADD = \
 	$(top_srcdir)/src/common/list/libcommonlist.la \
 	$(top_srcdir)/src/test-utils/list/libtestutilslist.la
 
+
+include_HEADERS = includes
 CLEANFILES += $(TESTS) *.log

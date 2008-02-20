@@ -120,7 +120,7 @@ void LHSTest::testSample()
         CPPUNIT_ASSERT(isIn1);
         CPPUNIT_ASSERT(isIn2);
     }
-    
+
     gsl_rng_free(rng);
     gsl_vector_free(min);
     gsl_vector_free(max);

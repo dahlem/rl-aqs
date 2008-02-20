@@ -25,10 +25,10 @@ QueueSuite_SOURCES =                                        \
 	LadderQueueTest.cc                                  \
 	QueueSuite.cc
 
-QueueSuite_CXXFLAGS = $(CPPUNIT_CFLAGS)
 QueueSuite_LDFLAGS = $(CPPUNIT_LIBS) -ldl
 
-INCLUDES =                                                  \
+QueueSuite_CXXFLAGS =                                       \
+	$(CPPUNIT_CFLAGS)                                   \
 	-Iincludes                                          \
 	-I$(top_srcdir)/src/common/queue/includes           \
 	-I$(top_srcdir)/src/utils/numbers/includes          \
@@ -41,4 +41,6 @@ LDADD =                                                     \
 	$(top_srcdir)/src/utils/numbers/libutils_numbers.la \
 	$(top_srcdir)/src/common/sort/libcommonsort.la
 
+
+include_HEADERS = includes
 CLEANFILES += $(TESTS) *.log

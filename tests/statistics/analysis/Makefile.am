@@ -22,14 +22,15 @@ StatsAnalysisSuite_SOURCES = \
 	CITest.cc \
 	StatsAnalysisSuite.cc
 
-StatsAnalysisSuite_CXXFLAGS = $(CPPUNIT_CFLAGS)
 StatsAnalysisSuite_LDFLAGS = $(CPPUNIT_LIBS) -ldl
 
-INCLUDES = \
+StatsAnalysisSuite_CXXFLAGS = $(CPPUNIT_CFLAGS) \
 	-Iincludes \
 	-I$(top_srcdir)/src/statistics/analysis/includes 
 
 LDADD = \
 	$(top_srcdir)/src/statistics/analysis/libstatisticsanalysis.la
 
+
+include_HEADERS = includes
 CLEANFILES += $(TESTS) *.log

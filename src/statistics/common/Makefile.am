@@ -1,4 +1,4 @@
-# Copyright (C) 2007 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+# Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 #  
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without 
@@ -8,7 +8,11 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-SUBDIRS = analysis correlation
+noinst_LTLIBRARIES = libstatisticscommon.la
 
-include $(top_srcdir)/mk/valgrind-recursive.am
-include $(top_srcdir)/mk/gcov-recursive.am
+libstatisticscommon_la_SOURCES = StatsException.cc
+
+libstatisticscommon_la_CPPFLAGS = -I./includes
+
+include_HEADERS = includes
+MAINTAINERCLEANFILES = Makefile.in

@@ -22,10 +22,10 @@ CRNSuite_SOURCES =                                               \
 	CRNTest.cc                                               \
 	CRNSuite.cc
 
-CRNSuite_CXXFLAGS = $(CPPUNIT_CFLAGS)
 CRNSuite_LDFLAGS = $(CPPUNIT_LIBS) -ldl
 
-INCLUDES =                                                       \
+CRNSuite_CXXFLAGS =                                              \
+	$(CPPUNIT_CFLAGS)                                        \
 	-Iincludes                                               \
 	-I$(top_srcdir)/src/sampling/crn/includes                \
 	-I$(top_srcdir)/src/design/pattern/includes              \
@@ -35,4 +35,6 @@ LDADD =                                                          \
 	$(top_srcdir)/src/sampling/crn/libsamplingcrn.la         \
 	$(top_srcdir)/src/sampling/common/libsamplingcommon.la
 
+
+include_HEADERS = includes
 CLEANFILES += $(TESTS) *.log

@@ -23,10 +23,9 @@ CommonSuite_SOURCES =                                            \
 	SeedsTest.cc                                             \
 	CommonSuite.cc
 
-CommonSuite_CXXFLAGS = $(CPPUNIT_CFLAGS)
 CommonSuite_LDFLAGS = $(CPPUNIT_LIBS) -ldl
 
-INCLUDES =                                                       \
+CommonSuite_CXXFLAGS = $(CPPUNIT_CFLAGS)                         \
 	-Iincludes                                               \
 	-I$(top_srcdir)/src/sampling/common/includes             \
 	-I$(top_srcdir)/src/design/pattern/includes
@@ -34,4 +33,6 @@ INCLUDES =                                                       \
 LDADD =                                                          \
 	$(top_srcdir)/src/sampling/common/libsamplingcommon.la
 
+
+include_HEADERS = includes
 CLEANFILES += $(TESTS) *.log

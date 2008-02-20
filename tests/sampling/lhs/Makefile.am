@@ -22,10 +22,10 @@ LHSSuite_SOURCES =                                               \
 	LHSTest.cc                                               \
 	LHSSuite.cc
 
-LHSSuite_CXXFLAGS = $(CPPUNIT_CFLAGS)
 LHSSuite_LDFLAGS = $(CPPUNIT_LIBS) -ldl $(GSL_LIBS)
 
-INCLUDES =                                                       \
+LHSSuite_CXXFLAGS =                                              \
+	$(CPPUNIT_CFLAGS)                                        \
 	-Iincludes                                               \
 	-I$(top_srcdir)/src/sampling/lhs/includes                \
 	-I$(top_srcdir)/src/sampling/common/includes
@@ -35,4 +35,5 @@ LDADD =                                                          \
 	$(top_srcdir)/src/sampling/common/libsamplingcommon.la
 
 
+include_HEADERS = includes
 CLEANFILES += $(TESTS) *.log

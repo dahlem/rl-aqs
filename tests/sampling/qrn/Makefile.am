@@ -22,14 +22,16 @@ QRNSuite_SOURCES =                                               \
 	QRNTest.cc                                               \
 	QRNSuite.cc
 
-QRNSuite_CXXFLAGS = $(CPPUNIT_CFLAGS)
 QRNSuite_LDFLAGS = $(CPPUNIT_LIBS) -ldl
 
-INCLUDES =                                                       \
+QRNSuite_CXXFLAGS =                                              \
+	$(CPPUNIT_CFLAGS)                                        \
 	-Iincludes                                               \
 	-I$(top_srcdir)/src/sampling/qrn/includes
 
 LDADD =                                                          \
 	$(top_srcdir)/src/sampling/qrn/libsamplingqrn.la
 
+
+include_HEADERS = includes
 CLEANFILES += $(TESTS) *.log
