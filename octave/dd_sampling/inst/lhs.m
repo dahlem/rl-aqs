@@ -26,7 +26,7 @@ function S = lhs(n, min, max)
     error(", where n is the number of samples");
     error("min is the vector of minimum values for each dimension");
     error("max is the vector of maximum values for each dimension.");
-  end
+  endif
 
   nvar = length(min);
   u = rand(n, nvar);
