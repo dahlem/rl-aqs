@@ -8,8 +8,5 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-SUBDIRS = design test-utils utils sampling common statistics
-
-if BOOST_SUPPORT
-  SUBDIRS += network
-endif
+include_HEADERS = includes
+MAINTAINERCLEANFILES = Makefile.in

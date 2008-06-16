@@ -1,4 +1,4 @@
-# Copyright (C) 2007 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+# Copyright (C) 2007, 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 #  
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without 
@@ -57,8 +57,19 @@ AC_CHECK_LIB([m],[cos])
 AC_CHECK_LIB([gslcblas],[cblas_dgemm])
 AC_CHECK_LIB([gsl],[gsl_blas_dgemm])
 
+
 # Boost library check
-AX_BOOST_BASE([1.33.1])
+AC_ARG_ENABLE(boost, AS_HELP_STRING(
+		     [--enable-boost], 
+		     [enable the Boost library @<:@default=no@:>@]), 
+		     [BOOSTLIB=$enableval], [BOOSTLIB=no])
+
+if test x$BOOSTLIB = xyes; then
+  AX_BOOST_BASE([1.34.1])
+  AM_CONDITIONAL(BOOST_SUPPORT, true)
+else
+  AM_CONDITIONAL(BOOST_SUPPORT, false)
+fi
 
 
 # optional libraries
@@ -106,6 +117,9 @@ AC_CONFIG_FILES([
    src/statistics/analysis/Makefile
    src/statistics/common/Makefile
    src/statistics/correlation/Makefile
+   src/network/Makefile
+   src/network/evolution/Makefile
+   src/network/main/Makefile
    tests/Makefile
    tests/common/Makefile
    tests/common/sort/Makefile
@@ -129,7 +143,7 @@ done
 
 AC_MSG_RESULT([
 
-des $VERSION: Automatic configuration OK.
+$PACKAGE $VERSION: Automatic configuration OK.
 
 Type 'make' to compile des.
 

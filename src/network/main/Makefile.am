@@ -8,8 +8,18 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-SUBDIRS = design test-utils utils sampling common statistics
+bin_PROGRAMS = network_add_vertices
 
-if BOOST_SUPPORT
-  SUBDIRS += network
-endif
+network_add_vertices_SOURCES =                                        \
+	network_add_vertices.cc
+
+network_add_vertices_CPPFLAGS =                                       \
+	-I./includes                                                  \
+	$(BOOST_CPPFLAGS)
+
+
+network_add_vertices_LDADD =                                          \
+	$(BOOST_LDFLAGS)
+
+
+MAINTAINERCLEANFILES = Makefile.in
