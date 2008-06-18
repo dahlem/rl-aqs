@@ -8,5 +8,17 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
+noinst_LTLIBRARIES = libnetevo.la
+
+libnetevo_la_SOURCES =                                                \
+	WEvonet.cc
+
+libnetevo_la_CPPFLAGS =                                               \
+	-I./includes                                                  \
+	$(BOOST_CPPFLAGS)
+
+libnetevo_la_LIBADD =                                                 \
+	$(BOOST_LDFLAGS)
+
 include_HEADERS = includes
 MAINTAINERCLEANFILES = Makefile.in

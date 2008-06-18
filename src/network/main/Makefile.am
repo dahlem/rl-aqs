@@ -8,7 +8,7 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-bin_PROGRAMS = network_add_vertices
+bin_PROGRAMS = network_add_vertices wevonet_main
 
 network_add_vertices_SOURCES =                                        \
 	network_add_vertices.cc
@@ -19,6 +19,19 @@ network_add_vertices_CPPFLAGS =                                       \
 
 
 network_add_vertices_LDADD =                                          \
+	$(BOOST_LDFLAGS)
+
+
+wevonet_main_SOURCES =                                                \
+	wevonet_main.cc
+
+wevonet_main_CPPFLAGS =                                               \
+	-I$(top_srcdir)/src/network/evolution/includes                \
+	$(BOOST_CPPFLAGS)
+
+
+wevonet_main_LDADD =                                                  \
+	../evolution/libnetevo.la                                     \
 	$(BOOST_LDFLAGS)
 
 
