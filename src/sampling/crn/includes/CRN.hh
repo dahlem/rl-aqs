@@ -1,9 +1,9 @@
-// Copyright (C) 2007 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
-//  
+// Copyright (C) 2007, 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+//
 // This file is free software; as a special exception the author gives
-// unlimited permission to copy and/or distribute it, with or without 
+// unlimited permission to copy and/or distribute it, with or without
 // modifications, as long as this notice is preserved.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 // implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
@@ -12,7 +12,11 @@
 #define CRN_HH
 
 
+#include <boost/shared_ptr.hpp>
+using boost::shared_ptr;
+
 #include <gsl/gsl_rng.h>
+
 #include <vector>
 using std::vector;
 
@@ -27,13 +31,8 @@ namespace des
 {
     namespace sampling
     {
-        
-/**
- * type definition of a vector of random number generators.
- */
-typedef vector<gsl_rng*>  ptr_rng;
 
-
+typedef shared_ptr<gsl_rng> tGslRngSP;
 
 /**
  * This class implements a layer to provide common random number generators
@@ -73,10 +72,15 @@ public:
      * @throws SamplingException thrown, if the random number generator cannot
      *                           be returned
      */
-    gsl_rng* get(const unsigned int p_rng) throw (SamplingException);
+    tGslRngSP get(const unsigned int p_rng) throw (SamplingException);
 
 
 private:
+
+    /**
+     * type definition of a vector of random number generators.
+     */
+    typedef vector<tGslRngSP>  ptr_rng;
     ptr_rng m_gslRngs;
 
 };

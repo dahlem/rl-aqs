@@ -1,12 +1,15 @@
 // Copyright (C) 2007-2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
-//  
+//
 // This file is free software; as a special exception the author gives
-// unlimited permission to copy and/or distribute it, with or without 
+// unlimited permission to copy and/or distribute it, with or without
 // modifications, as long as this notice is preserved.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 // implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+#include <boost/shared_ptr.hpp>
+using boost::shared_ptr;
 
 #include "CRNTest.hh"
 
@@ -20,18 +23,18 @@ using des::sampling::CRNSingleton;
 CPPUNIT_TEST_SUITE_REGISTRATION(CRNTest);
 
 
-void CRNTest::testInit() 
+void CRNTest::testInit()
 {
     CRN singleton = CRNSingleton::getInstance();
     int index = singleton.init(0);
-    gsl_rng* rng = singleton.get(index - 1);
-    
-    CPPUNIT_ASSERT(rng != NULL);
+    shared_ptr<gsl_rng> rng = singleton.get(index - 1);
+
+    CPPUNIT_ASSERT(rng.get() != NULL);
 }
 
-void CRNTest::testGetException() 
+void CRNTest::testGetException()
 {
     CRN singleton = CRNSingleton::getInstance();
     int index = singleton.init(0);
-    gsl_rng* rng = singleton.get(index);
+    shared_ptr<gsl_rng> rng = singleton.get(index);
 }
