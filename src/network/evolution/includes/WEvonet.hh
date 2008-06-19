@@ -50,6 +50,7 @@ using boost::graph_property_iter_range;
 enum vertex_service_rate_t { vertex_service_rate = 1111 };
 
 
+// install the vertex service rate property
 namespace boost
 {
     BOOST_INSTALL_PROPERTY(vertex, service_rate);
