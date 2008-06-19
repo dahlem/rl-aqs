@@ -43,9 +43,6 @@ using boost::indirect_cmp;
 #include <boost/pending/integer_range.hpp>
 using boost::integer_range;
 
-#include <boost/range/iterator_range.hpp>
-using boost::iterator_range;
-
 #include <gsl/gsl_rng.h>
 
 #include "WEvonet.hh"
@@ -187,11 +184,7 @@ void WEvonet::assign_edge_weights(Vertex &v)
     Graph::degree_size_type degree = out_degree(v, (*g.get()));
     OutEdgeIterator out_it, out_it_end;
 
-    tie(out_it, out_it_end) = out_edges(v, (*g.get()));
-    iterator_range <OutEdgeIterator> it_r =
-        make_iterator_range(out_it, out_it_end);
-
-    BOOST_FOREACH(Edge e, it_r) {
+    BOOST_FOREACH(Edge e, (out_edges(v, (*g.get())))) {
         edge_weight_props_map[e] = 1.0 / degree;
     }
 }
