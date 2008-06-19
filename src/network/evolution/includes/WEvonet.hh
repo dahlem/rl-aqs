@@ -51,8 +51,6 @@ namespace des
     namespace network
     {
 
-//using boost::vertex_service_rate_t;
-
 typedef property<vertex_service_rate_t, float> VertexServiceRateProperty;
 typedef property<edge_weight_t, float> EdgeWeightProperty;
 
@@ -81,10 +79,10 @@ public:
     void print(const std::string& filename);
 
 private:
-    shared_ptr<Graph> g;
-    VertexServiceRateMap vertex_service_props_map;
-    VertexIndexMap vertex_index_props_map;
-    EdgeWeightMap edge_weight_props_map;
+    void assign_edge_weights(Vertex &v);
+
+    typedef shared_ptr<Graph> tGraphSP;
+    tGraphSP g;
 };
 
 

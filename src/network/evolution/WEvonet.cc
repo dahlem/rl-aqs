@@ -24,12 +24,15 @@
 using boost::num_vertices;
 using boost::vertex;
 
-#include <boost/graph/property_iter_range.hpp>
-using boost::graph_property_iter_range;
-
 #include <boost/graph/graphviz.hpp>
 using boost::write_graphviz;
 using boost::dynamic_properties;
+
+#include <boost/graph/property_iter_range.hpp>
+using boost::graph_property_iter_range;
+
+#include <boost/pending/indirect_cmp.hpp>
+using boost::indirect_cmp;
 
 #include <boost/pending/integer_range.hpp>
 using boost::integer_range;
@@ -37,14 +40,10 @@ using boost::integer_range;
 #include <boost/range/iterator_range.hpp>
 using boost::iterator_range;
 
-#include <boost/pending/indirect_cmp.hpp>
-using boost::indirect_cmp;
-
 #include <gsl/gsl_rng.h>
 
 #include "WEvonet.hh"
 using des::network::WEvonet;
-//using des::network::vertex_service_rate_t;
 using des::network::Graph;
 using des::network::Vertex;
 using des::network::Edge;
@@ -59,12 +58,12 @@ using boost::edge_weight;
 WEvonet::WEvonet(int p_size)
 {
     // create the graph
-    shared_ptr<Graph> g(new Graph(0));
+    g = tGraphSP(new Graph(0));
 
     // get references to the property maps
-    vertex_service_props_map = get(vertex_service_rate, (*g.get()));
-    vertex_index_props_map = get(vertex_index, (*g.get()));
-    edge_weight_props_map = get(edge_weight, (*g.get()));
+    VertexServiceRateMap vertex_service_props_map = get(vertex_service_rate, (*g.get()));
+    VertexIndexMap vertex_index_props_map = get(vertex_index, (*g.get()));
+    EdgeWeightMap edge_weight_props_map = get(edge_weight, (*g.get()));
 
     // create a small graph upon which the evolution is excercised
     Vertex v1 = add_vertex((*g.get()));
@@ -147,18 +146,8 @@ WEvonet::WEvonet(int p_size)
             }
         }
 
-        Graph::degree_size_type degree = out_degree(v, (*g.get()));
-        std::cout << "outdegree : " << degree << std::endl;
-
-        OutEdgeIterator out_it, out_it_end;
-        tie(out_it, out_it_end) = out_edges(v, (*g.get()));
-        iterator_range< OutEdgeIterator > it_r =
-            make_iterator_range(out_it, out_it_end);
-
-        BOOST_FOREACH(Edge e, it_r) {
-            edge_weight_props_map[e] = 1.0 / degree;
-        }
-
+        // calculate and assign the edge weights of the newly created vertex and its out edges
+        assign_edge_weights(v);
     }
 
     gsl_rng_free(r);
@@ -176,6 +165,9 @@ void WEvonet::advance(int p_steps)
 
 void WEvonet::print(const std::string& filename)
 {
+    VertexIndexMap vertex_index_props_map = get(vertex_index, (*g.get()));
+    EdgeWeightMap edge_weight_props_map = get(edge_weight, (*g.get()));
+
     std::ofstream out(filename.c_str(), std::ios::out);
 
     if (out.is_open()) {
@@ -185,5 +177,22 @@ void WEvonet::print(const std::string& filename)
 
         write_graphviz(out, (*g.get()), dp);
         out.close();
+    }
+}
+
+
+void WEvonet::assign_edge_weights(Vertex &v)
+{
+    EdgeWeightMap edge_weight_props_map = get(edge_weight, (*g.get()));
+
+    Graph::degree_size_type degree = out_degree(v, (*g.get()));
+    OutEdgeIterator out_it, out_it_end;
+
+    tie(out_it, out_it_end) = out_edges(v, (*g.get()));
+    iterator_range <OutEdgeIterator> it_r =
+        make_iterator_range(out_it, out_it_end);
+
+    BOOST_FOREACH(Edge e, it_r) {
+        edge_weight_props_map[e] = 1.0 / degree;
     }
 }
