@@ -81,32 +81,45 @@ WEvonet::WEvonet(int p_size)
     Edge e2 = (add_edge(v1, v3, (*g.get()))).first;
     edge_weight_props_map[e2] = 1.0;
 
+    advance(p_size - 3);
+}
+
+
+WEvonet::~WEvonet()
+{}
+
+
+void WEvonet::advance(int p_steps)
+{
+    VServiceIterator service_it, service_it_end;
+    VertexServiceRateMap vertex_service_props_map = get(vertex_service_rate, (*g.get()));
+    VertexIndexMap vertex_index_props_map = get(vertex_index, (*g.get()));
+
+    double accum_service_rate;
     const gsl_rng_type * T;
     gsl_rng * r;
+
     gsl_rng_env_setup();
 
     T = gsl_rng_default;
     r = gsl_rng_alloc (T);
 
-    VServiceIterator service_it, service_it_end;
-    double accum_service_rate;
-
     // at each step do:
     // 1. create vertex
     // 2. attach vertex via m links to existing ones
-    for (int i = 0; i < (p_size - 3); ++i) {
+    for (int i = 0; i < p_steps; ++i) {
         // calculate the accumulated service rate
         tie(service_it, service_it_end) =
             get_property_iter_range((*g.get()), vertex_service_rate);
         accum_service_rate = std::accumulate(service_it, service_it_end, 0.0);
 
         // a vector to hold the discover time property for each vertex
-        std::vector<float> service_rates(num_vertices((*g.get())));
+        std::vector <float> service_rates(num_vertices((*g.get())));
 
         // Use std::sort to order the vertices by their discover time
-        std::vector<graph_traits<Graph>::vertices_size_type>
+        std::vector <graph_traits<Graph>::vertices_size_type>
             service_rate_order(num_vertices((*g.get())));
-        integer_range<int> range(0, num_vertices((*g.get())));
+        integer_range <int> range(0, num_vertices((*g.get())));
 
         // copy the index range into the service_rate_order vector
         std::copy(range.begin(), range.end(), service_rate_order.begin());
@@ -130,15 +143,11 @@ WEvonet::WEvonet(int p_size)
             double temp = 0.0;
             double u = gsl_rng_uniform (r);
             for (int j = 0; j < num_vertices((*g.get())) - 1; ++j) {
-                std::cout << "vspm : " << vertex_service_props_map[vertex(service_rate_order[j], (*g.get()))] << std::endl;
-
                 temp += vertex_service_props_map[vertex(service_rate_order[j], (*g.get()))];
-                std::cout << u << " < " << temp/accum_service_rate << " = " << (u < temp/accum_service_rate) << std::endl;
 
                 if (u < temp/accum_service_rate) {
                     // check if link already exists between new vertex and selected one
                     if (!edge(v, vertex(service_rate_order[j], (*g.get())), (*g.get())).second) {
-                        std::cout << service_rate_order[j] << std::endl;
                         add_edge(v, vertex(service_rate_order[j], (*g.get())), (*g.get()));
                         break;
                     }
@@ -151,15 +160,6 @@ WEvonet::WEvonet(int p_size)
     }
 
     gsl_rng_free(r);
-}
-
-
-WEvonet::~WEvonet()
-{}
-
-
-void WEvonet::advance(int p_steps)
-{
 }
 
 
