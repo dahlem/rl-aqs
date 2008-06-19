@@ -36,9 +36,11 @@ using boost::property_map;
 #include <boost/graph/property_iter_range.hpp>
 using boost::graph_property_iter_range;
 
+#include <gsl/gsl_rng.h>
 
 
 enum vertex_service_rate_t { vertex_service_rate = 1111 };
+
 
 namespace boost
 {
@@ -69,10 +71,14 @@ typedef property_map<Graph, edge_weight_t>::type EdgeWeightMap;
 typedef graph_property_iter_range<Graph, vertex_service_rate_t>::iterator VServiceIterator;
 typedef graph_traits<Graph>::out_edge_iterator OutEdgeIterator;
 
+typedef shared_ptr<Graph> tGraphSP;
+typedef shared_ptr<gsl_rng> tGslRngSP;
+
+
 class WEvonet
 {
 public:
-    WEvonet(int p_size);
+    WEvonet(int p_size, tGslRngSP p_edge_rng, tGslRngSP p_uniform_rng);
     ~WEvonet();
 
     void advance(int p_steps);
@@ -81,7 +87,9 @@ public:
 private:
     void assign_edge_weights(Vertex &v);
 
-    typedef shared_ptr<Graph> tGraphSP;
+    tGslRngSP num_edges_rng;
+    tGslRngSP uniform_rng;
+
     tGraphSP g;
 };
 

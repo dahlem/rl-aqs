@@ -55,10 +55,12 @@ using boost::edge_weight;
 
 
 
-WEvonet::WEvonet(int p_size)
+WEvonet::WEvonet(int p_size, tGslRngSP p_edge_rng, tGslRngSP p_uniform_rng)
 {
     // create the graph
     g = tGraphSP(new Graph(0));
+    num_edges_rng = p_edge_rng;
+    uniform_rng = p_uniform_rng;
 
     // get references to the property maps
     VertexServiceRateMap vertex_service_props_map = get(vertex_service_rate, (*g.get()));
@@ -96,13 +98,6 @@ void WEvonet::advance(int p_steps)
     VertexIndexMap vertex_index_props_map = get(vertex_index, (*g.get()));
 
     double accum_service_rate;
-    const gsl_rng_type * T;
-    gsl_rng * r;
-
-    gsl_rng_env_setup();
-
-    T = gsl_rng_default;
-    r = gsl_rng_alloc (T);
 
     // at each step do:
     // 1. create vertex
@@ -137,11 +132,11 @@ void WEvonet::advance(int p_steps)
         vertex_index_props_map[v] = num_vertices((*g.get())) - 1;
 
         // select vertices to connect to
-        unsigned int edges = gsl_rng_uniform_int(r, 5) + 1;
+        unsigned int edges = gsl_rng_uniform_int(num_edges_rng.get(), 5) + 1;
 
         for (int e = 0; e < edges; ++e) {
             double temp = 0.0;
-            double u = gsl_rng_uniform (r);
+            double u = gsl_rng_uniform(uniform_rng.get());
             for (int j = 0; j < num_vertices((*g.get())) - 1; ++j) {
                 temp += vertex_service_props_map[vertex(service_rate_order[j], (*g.get()))];
 
@@ -158,8 +153,6 @@ void WEvonet::advance(int p_steps)
         // calculate and assign the edge weights of the newly created vertex and its out edges
         assign_edge_weights(v);
     }
-
-    gsl_rng_free(r);
 }
 
 
