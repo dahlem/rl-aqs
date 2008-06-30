@@ -29,6 +29,12 @@
 #include <boost/graph/adjacency_list.hpp>
 using boost::num_vertices;
 using boost::vertex;
+using boost::vertex_index;
+using boost::edge_weight;
+
+#include <boost/graph/breadth_first_search.hpp>
+using boost::default_bfs_visitor;
+using boost::breadth_first_visit;
 
 #include <boost/graph/graphviz.hpp>
 using boost::write_graphviz;
@@ -53,8 +59,54 @@ using des::network::Edge;
 using des::network::VServiceIterator;
 using des::network::OutEdgeIterator;
 
-using boost::vertex_index;
-using boost::edge_weight;
+#include "epidemic_visit.hh"
+
+
+template <class VertexServiceMap, class EdgeWeightMap,
+          class VertexIndexMap, class StrengthDiffMap>
+class epidemic_vertex_service_visitor : public default_bfs_visitor
+{
+public:
+    epidemic_vertex_service_visitor(VertexServiceMap vertex_service_map,
+                                    EdgeWeightMap edge_weight_map,
+                                    VertexIndexMap vertex_index_map,
+                                    StrengthDiffMap vertex_strength_diff_map,
+                                    StrengthDiffMap vertex_strength_diff_apply_map)
+        :  m_vertex_service_map(vertex_service_map),
+           m_edge_weight_map(edge_weight_map),
+           m_vertex_index_map(vertex_index_map),
+           m_vertex_strength_diff_map(vertex_strength_diff_map),
+           m_vertex_strength_diff_apply_map(vertex_strength_diff_apply_map) {}
+
+    template <typename Edge, typename Graph>
+    void examine_edge(Edge e, const Graph & g) const
+        {
+            m_vertex_strength_diff_map[target(e, g)] +=
+                (m_edge_weight_map[e] * m_vertex_strength_diff_apply_map[source(e, g)]);
+        }
+
+    template <typename Vertex, typename Graph>
+    void examine_vertex(Vertex u, const Graph & g) const
+        {
+            if (m_vertex_strength_diff_map[u] == 0.0) {
+                m_vertex_strength_diff_apply_map[u] = m_vertex_service_map[u];
+            } else {
+                m_vertex_strength_diff_apply_map[u] = m_vertex_strength_diff_map[u];
+            }
+        }
+
+    template <typename Vertex, typename Graph>
+    void finish_vertex(Vertex u, const Graph & g) const
+        {
+            m_vertex_strength_diff_apply_map[u] = 0.0;
+        }
+
+    VertexServiceMap m_vertex_service_map;
+    EdgeWeightMap m_edge_weight_map;
+    VertexIndexMap m_vertex_index_map;
+    StrengthDiffMap m_vertex_strength_diff_map;
+    StrengthDiffMap m_vertex_strength_diff_apply_map;
+};
 
 
 
@@ -75,16 +127,16 @@ WEvonet::WEvonet(int p_size, tGslRngSP p_edge_rng, tGslRngSP p_uniform_rng)
     vertex_service_props_map[v1] = 12.5;
     vertex_index_props_map[v1] = 0;
     Vertex v2 = add_vertex((*g.get()));
-    vertex_service_props_map[v2] = 13.5;
+    vertex_service_props_map[v2] = 6.25;
     vertex_index_props_map[v2] = 1;
     Vertex v3 = add_vertex((*g.get()));
-    vertex_service_props_map[v3] = 14.5;
+    vertex_service_props_map[v3] = 6.25;
     vertex_index_props_map[v3] = 2;
 
     Edge e1 = (add_edge(v1, v2, (*g.get()))).first;
-    edge_weight_props_map[e1] = 1.0;
+    edge_weight_props_map[e1] = 0.5;
     Edge e2 = (add_edge(v1, v3, (*g.get()))).first;
-    edge_weight_props_map[e2] = 1.0;
+    edge_weight_props_map[e2] = 0.5;
 
     advance(p_size - 3);
 }
@@ -105,6 +157,8 @@ void WEvonet::advance(int p_steps)
     // at each step do:
     // 1. create vertex
     // 2. attach vertex via m links to existing ones
+    // 3. assign weights to the edges
+    // 4. evaluate the vertex strengths
     for (int i = 0; i < p_steps; ++i) {
         // calculate the accumulated service rate
         tie(service_it, service_it_end) =
@@ -130,6 +184,8 @@ void WEvonet::advance(int p_steps)
                   indirect_cmp <float*, std::greater <float> >(&service_rates[0]));
 
         // create vertex
+        std::cout << "Create new vertex... " << std::endl;
+
         Vertex v = add_vertex((*g.get()));
         vertex_service_props_map[v] = 11.1;
         vertex_index_props_map[v] = num_vertices((*g.get())) - 1;
@@ -155,12 +211,53 @@ void WEvonet::advance(int p_steps)
 
         // calculate and assign the edge weights of the newly created vertex and its out edges
         assign_edge_weights(v);
+
+        // re-calculate the node strengths using depth-first search originating from the new node
+        balance_vertex_strength(v);
     }
+}
+
+
+void WEvonet::balance_vertex_strength(Vertex &v)
+{
+    VertexServiceRateMap vertex_service_props_map = get(vertex_service_rate, (*g.get()));
+    EdgeWeightMap edge_weight_props_map = get(edge_weight, (*g.get()));
+    VertexIndexMap vertex_index_props_map = get(vertex_index, (*g.get()));
+
+    // external property to keep the enduced differences in strengths
+    std::vector<float> strength_diff_vec(num_vertices((*g.get())));
+    std::vector<float> strength_diff_apply_vec(num_vertices((*g.get())));
+
+    typedef boost::iterator_property_map <std::vector <float>::iterator,
+        property_map <Graph, vertex_index_t>::type, float, float&> IterStrDiffMap;
+
+    IterStrDiffMap strength_diff_map(strength_diff_vec.begin(), get(vertex_index, (*g.get())));
+    IterStrDiffMap strength_diff_apply_map(strength_diff_apply_vec.begin(), get(vertex_index, (*g.get())));
+
+    // create the visitor
+    epidemic_vertex_service_visitor <VertexServiceRateMap, EdgeWeightMap,
+        VertexIndexMap, IterStrDiffMap>
+        vis(vertex_service_props_map, edge_weight_props_map, vertex_index_props_map,
+            strength_diff_map, strength_diff_apply_map);
+
+    // 1. determine the enduced differences in vertex strength
+    epidemic_visit((*g.get()),
+                   v,
+                   visitor(vis));
+
+    typedef graph_traits <Graph>::vertex_iterator vertex_iter_t;
+    std::pair <vertex_iter_t, vertex_iter_t> p;
+    for (p = vertices((*g.get())); p.first != p.second; ++p.first) {
+        std::cout << strength_diff_map[*p.first] << std::endl;
+    }
+
+    // 2. apply the enduced differences in vertex strength
 }
 
 
 void WEvonet::print(const std::string& filename)
 {
+    VertexServiceRateMap vertex_service_props_map = get(vertex_service_rate, (*g.get()));
     VertexIndexMap vertex_index_props_map = get(vertex_index, (*g.get()));
     EdgeWeightMap edge_weight_props_map = get(edge_weight, (*g.get()));
 
@@ -170,6 +267,7 @@ void WEvonet::print(const std::string& filename)
         dynamic_properties dp;
         dp.property("node_id", vertex_index_props_map);
         dp.property("label", edge_weight_props_map);
+        dp.property("label", vertex_service_props_map);
 
         write_graphviz(out, (*g.get()), dp);
         out.close();

@@ -35,8 +35,8 @@ int main(int argc, char *argv[])
     // use the WEvonet class
     std::cout << "Using WEvonet..." << std::endl;
 
-    WEvonet net(20, r1, r2);
+    WEvonet net(8, r1, r2);
     net.print("test.dot");
-    
+
     return EXIT_SUCCESS;
 }

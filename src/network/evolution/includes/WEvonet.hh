@@ -181,6 +181,15 @@ private:
      */
     void assign_edge_weights(Vertex &v);
 
+    /** @fn void balance_vertex_strength(Vertex &v)
+     * Balance the vertex strenghts given a starting position. The starting position
+     * usually is the newly added vertex. A depth-first search is performed to adjust
+     * the vertex strengths (here the service rate).
+     *
+     * @param Vertex& The vertex from which to start the adjustment
+     */
+    void balance_vertex_strength(Vertex &v);
+
     /**
      * The random number generator to determine how many edges should be
      * created originating from the newly created vertex.
