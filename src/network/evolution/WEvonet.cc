@@ -19,9 +19,15 @@
  *
  * @author Dominik Dahlem
  */
+#if HAVE_CONFIG_H
+# include <config.h>
+#endif
+
 #include <fstream>
 #include <numeric>
 #include <vector>
+using std::vector;
+
 #include <iostream>
 
 #include <boost/foreach.hpp>
@@ -117,6 +123,27 @@ public:
 };
 
 
+template <class VertexServiceMap, class StrengthDiffMap>
+class apply_enduced_strength_visitor : public default_bfs_visitor
+{
+public:
+    apply_enduced_strength_visitor(VertexServiceMap vertex_service_map,
+                                   StrengthDiffMap vertex_strength_diff_map)
+        :  m_vertex_service_map(vertex_service_map),
+           m_vertex_strength_diff_map(vertex_strength_diff_map) {}
+
+    template <typename Vertex, typename Graph>
+    void discover_vertex(Vertex u, const Graph & g) const
+        {
+            // apply the enduced strength
+            m_vertex_service_map[u] += m_vertex_strength_diff_map[u];
+        }
+
+    VertexServiceMap m_vertex_service_map;
+    StrengthDiffMap m_vertex_strength_diff_map;
+};
+
+
 
 WEvonet::WEvonet(int p_size, tGslRngSP p_edge_rng, tGslRngSP p_uniform_rng)
 {
@@ -192,8 +219,6 @@ void WEvonet::advance(int p_steps)
                   indirect_cmp <float*, std::greater <float> >(&service_rates[0]));
 
         // create vertex
-        std::cout << "Create new vertex... " << std::endl;
-
         Vertex v = add_vertex((*g.get()));
         vertex_service_props_map[v] = 11.1;
         vertex_index_props_map[v] = num_vertices((*g.get())) - 1;
@@ -228,44 +253,63 @@ void WEvonet::advance(int p_steps)
 
 void WEvonet::balance_vertex_strength(Vertex &v)
 {
-    VertexServiceRateMap vertex_service_props_map = get(vertex_service_rate, (*g.get()));
+    VertexServiceRateMap vertex_service_props_map =
+        get(vertex_service_rate, (*g.get()));
     EdgeWeightMap edge_weight_props_map = get(edge_weight, (*g.get()));
     VertexIndexMap vertex_index_props_map = get(vertex_index, (*g.get()));
 
     // external property to keep the enduced differences in strengths
-    std::vector<float> strength_diff_vec(num_vertices((*g.get())));
-    std::vector<float> strength_diff_apply_vec(num_vertices((*g.get())));
+    std::vector <float> strength_diff_vec(num_vertices((*g.get())));
+    std::vector <float> strength_diff_apply_vec(num_vertices((*g.get())));
 
     typedef boost::iterator_property_map <std::vector <float>::iterator,
         property_map <Graph, vertex_index_t>::type, float, float&> IterStrDiffMap;
 
-    IterStrDiffMap strength_diff_map(strength_diff_vec.begin(), get(vertex_index, (*g.get())));
-    IterStrDiffMap strength_diff_apply_map(strength_diff_apply_vec.begin(), get(vertex_index, (*g.get())));
+    IterStrDiffMap strength_diff_map(strength_diff_vec.begin(),
+                                     get(vertex_index, (*g.get())));
+    IterStrDiffMap strength_diff_apply_map(strength_diff_apply_vec.begin(),
+                                           get(vertex_index, (*g.get())));
 
     // create the visitor
     epidemic_vertex_service_visitor <VertexServiceRateMap, EdgeWeightMap,
         VertexIndexMap, IterStrDiffMap>
-        vis(vertex_service_props_map, edge_weight_props_map, vertex_index_props_map,
-            strength_diff_map, strength_diff_apply_map);
+        vis_enduced_strength(vertex_service_props_map, edge_weight_props_map,
+                             vertex_index_props_map, strength_diff_map,
+                             strength_diff_apply_map);
 
     // 1. determine the enduced differences in vertex strength
     epidemic_visit((*g.get()),
                    v,
-                   visitor(vis));
-
-    typedef graph_traits <Graph>::vertex_iterator vertex_iter_t;
-    std::pair <vertex_iter_t, vertex_iter_t> p;
-    for (p = vertices((*g.get())); p.first != p.second; ++p.first) {
-        std::cout << strength_diff_map[*p.first] << std::endl;
-    }
+                   visitor(vis_enduced_strength));
 
     // 2. apply the enduced differences in vertex strength
+    apply_enduced_strength_visitor <VertexServiceRateMap, IterStrDiffMap>
+        vis_apply_enduced_strength(vertex_service_props_map, strength_diff_map);
+
+    vector<boost::default_color_type> color_vec(num_vertices((*g.get())));
+
+    breadth_first_visit((*g.get()),
+                        v,
+                        visitor(vis_apply_enduced_strength).
+                        color_map(make_iterator_property_map(
+                                      color_vec.begin(), get(vertex_index, (*g.get())),
+                                      color_vec[0])));
+
+#ifdef NDEBUG
+    typedef graph_traits <Graph>::vertex_iterator vertex_iter_t;
+    std::pair <vertex_iter_t, vertex_iter_t> p;
+
+    for (p = vertices((*g.get())); p.first != p.second; ++p.first) {
+        std::cout << vertex_service_props_map[*p.first] << std::endl;
+    }
+#endif /* NDEBUG */
 }
 
 
 void WEvonet::print(const std::string& filename)
 {
-    VertexServiceRateMap vertex_service_props_map = get(vertex_service_rate, (*g.get()));
+    VertexServiceRateMap vertex_service_props_map =
+        get(vertex_service_rate, (*g.get()));
     VertexIndexMap vertex_index_props_map = get(vertex_index, (*g.get()));
     EdgeWeightMap edge_weight_props_map = get(edge_weight, (*g.get()));
 

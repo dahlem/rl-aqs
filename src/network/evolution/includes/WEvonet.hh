@@ -183,8 +183,9 @@ private:
 
     /** @fn void balance_vertex_strength(Vertex &v)
      * Balance the vertex strenghts given a starting position. The starting position
-     * usually is the newly added vertex. A depth-first search is performed to adjust
-     * the vertex strengths (here the service rate).
+     * usually is the newly added vertex. A epidemc visit is performed to calculate the
+     * enduced differences in strength of the affected nodes. Then the strengths of the
+     * nodes are adjusted accordingly (here the service rate).
      *
      * @param Vertex& The vertex from which to start the adjustment
      */

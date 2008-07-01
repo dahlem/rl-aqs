@@ -71,6 +71,15 @@ else
   AM_CONDITIONAL(BOOST_SUPPORT, false)
 fi
 
+# Check for debug
+AC_ARG_ENABLE(debug, AS_HELP_STRING(
+		     [--enable-debug], 
+		     [enable debug @<:@default=no@:>@]), 
+		     [DEBUGGING=$enableval], [DEBUGGING=no])
+if test "x$DEBUGGING" = xyes; then
+  AC_DEFINE(NDEBUG, 1, [define debugging, if enabled])
+fi
+
 
 # optional libraries
 AC_GCOV
