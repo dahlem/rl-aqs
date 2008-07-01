@@ -81,23 +81,31 @@ public:
     template <typename Edge, typename Graph>
     void examine_edge(Edge e, const Graph & g) const
         {
-            m_vertex_strength_diff_map[target(e, g)] +=
-                (m_edge_weight_map[e] * m_vertex_strength_diff_apply_map[source(e, g)]);
+            double update = (m_edge_weight_map[e]
+                             * m_vertex_strength_diff_apply_map[source(e, g)]);
+
+            // update the target strength difference
+            m_vertex_strength_diff_map[target(e, g)] += update;
+            // update the target apply strength difference,
+            // it may not have been applied yet
+            m_vertex_strength_diff_apply_map[target(e, g)] += update;
         }
 
     template <typename Vertex, typename Graph>
     void examine_vertex(Vertex u, const Graph & g) const
         {
+            // assign the service rate to the apply strength difference
+            // this only happens for the root node
             if (m_vertex_strength_diff_map[u] == 0.0) {
                 m_vertex_strength_diff_apply_map[u] = m_vertex_service_map[u];
-            } else {
-                m_vertex_strength_diff_apply_map[u] = m_vertex_strength_diff_map[u];
             }
         }
 
     template <typename Vertex, typename Graph>
     void finish_vertex(Vertex u, const Graph & g) const
         {
+            // reset the apply strength difference field of the source vertex
+            // because we applied all differences to its children
             m_vertex_strength_diff_apply_map[u] = 0.0;
         }
 
