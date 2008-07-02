@@ -145,12 +145,16 @@ public:
      * Constructor which evolves a weighted directed network given a particular size.
      *
      * @param int the size of the network
+     * @param int the maximum number of edges
      * @param tGslRngSP the GSL random number to draw the number of edges a new
      *        vertex is linked up to
      * @param tGslRngSP the GSL random number to draw a uniform number to decide
      *        which vertex to link up to.
+     * @param tGslRngSP the GSL random number to draw a uniform number for the vertex
+     *        service rate.
      */
-    WEvonet(int p_size, tGslRngSP p_edge_rng, tGslRngSP p_uniform_rng);
+    WEvonet(int p_size, int p_max_edges,
+            tGslRngSP p_edge_rng, tGslRngSP p_uniform_rng, tGslRngSP p_vertex_service_rng);
 
     /**
      * Destructor
@@ -198,6 +202,12 @@ private:
     tGslRngSP num_edges_rng;
 
     /**
+     * The random number generator to determine the vertex service rate when a new
+     * vertex is created.
+     */
+    tGslRngSP vertex_service_rng;
+
+    /**
      * The random number generator to determine a uniform random number in the range
      * [0, 1) to decide which vertices to link up to.
      */
@@ -207,6 +217,11 @@ private:
      * The BGL graph object
      */
     tGraphSP g;
+
+    /**
+     * The maximum number of allowed edges for a newly created vertex.
+     */
+    int max_edges;
 };
 
 

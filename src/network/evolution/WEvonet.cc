@@ -145,12 +145,16 @@ public:
 
 
 
-WEvonet::WEvonet(int p_size, tGslRngSP p_edge_rng, tGslRngSP p_uniform_rng)
+WEvonet::WEvonet(int p_size, int p_max_edges,
+                 tGslRngSP p_edge_rng, tGslRngSP p_uniform_rng, tGslRngSP p_vertex_service_rng)
 {
     // create the graph
     g = tGraphSP(new Graph(0));
     num_edges_rng = p_edge_rng;
     uniform_rng = p_uniform_rng;
+    vertex_service_rng = p_vertex_service_rng;
+
+    max_edges = p_max_edges;
 
     // get references to the property maps
     VertexServiceRateMap vertex_service_props_map = get(vertex_service_rate, (*g.get()));
@@ -159,13 +163,13 @@ WEvonet::WEvonet(int p_size, tGslRngSP p_edge_rng, tGslRngSP p_uniform_rng)
 
     // create a small graph upon which the evolution is excercised
     Vertex v1 = add_vertex((*g.get()));
-    vertex_service_props_map[v1] = 12.5;
+    vertex_service_props_map[v1] = (gsl_rng_uniform(vertex_service_rng.get()) * 10);
     vertex_index_props_map[v1] = 0;
     Vertex v2 = add_vertex((*g.get()));
-    vertex_service_props_map[v2] = 6.25;
+    vertex_service_props_map[v2] = vertex_service_props_map[v1] * 0.5;
     vertex_index_props_map[v2] = 1;
     Vertex v3 = add_vertex((*g.get()));
-    vertex_service_props_map[v3] = 6.25;
+    vertex_service_props_map[v3] = vertex_service_props_map[v1] * 0.5;
     vertex_index_props_map[v3] = 2;
 
     Edge e1 = (add_edge(v1, v2, (*g.get()))).first;
@@ -220,11 +224,11 @@ void WEvonet::advance(int p_steps)
 
         // create vertex
         Vertex v = add_vertex((*g.get()));
-        vertex_service_props_map[v] = 11.1;
+        vertex_service_props_map[v] = (gsl_rng_uniform(vertex_service_rng.get()) * 10);
         vertex_index_props_map[v] = num_vertices((*g.get())) - 1;
 
         // select vertices to connect to
-        unsigned int edges = gsl_rng_uniform_int(num_edges_rng.get(), 5) + 1;
+        unsigned int edges = gsl_rng_uniform_int(num_edges_rng.get(), max_edges) + 1;
 
         for (int e = 0; e < edges; ++e) {
             double temp = 0.0;

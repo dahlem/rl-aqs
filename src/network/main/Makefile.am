@@ -32,6 +32,7 @@ wevonet_main_CPPFLAGS =                                               \
 
 wevonet_main_LDADD =                                                  \
 	../evolution/libnetevo.la                                     \
+	-lboost_program_options                                       \
 	$(BOOST_LDFLAGS)
 
 
