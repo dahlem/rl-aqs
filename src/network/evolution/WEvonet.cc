@@ -230,10 +230,10 @@ void WEvonet::advance(int p_steps)
         // select vertices to connect to
         unsigned int edges = gsl_rng_uniform_int(num_edges_rng.get(), max_edges) + 1;
 
-        for (int e = 0; e < edges; ++e) {
+        for (unsigned int e = 0; e < edges; ++e) {
             double temp = 0.0;
             double u = gsl_rng_uniform(uniform_rng.get());
-            for (int j = 0; j < num_vertices((*g.get())) - 1; ++j) {
+            for (unsigned int j = 0; j < num_vertices((*g.get())) - 1; ++j) {
                 temp += vertex_service_props_map[vertex(service_rate_order[j], (*g.get()))];
 
                 if (u < temp/accum_service_rate) {

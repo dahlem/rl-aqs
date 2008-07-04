@@ -27,7 +27,7 @@ using boost::shared_ptr;
 
 #include <boost/graph/adjacency_list.hpp>
 using boost::adjacency_list;
-using boost::bidirectionalS;
+using boost::directedS;
 using boost::graph_traits;
 using boost::listS;
 using boost::setS;
@@ -82,7 +82,7 @@ typedef property<edge_weight_t, float> EdgeWeightProperty;
  */
 typedef adjacency_list<setS,
                        listS,
-                       bidirectionalS,
+                       directedS,
                        property<vertex_index_t, uint32_t, VertexServiceRateProperty>,
                        EdgeWeightProperty> Graph;
 

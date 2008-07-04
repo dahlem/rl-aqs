@@ -45,7 +45,7 @@ namespace boost
 
 typedef boost::property<vertex_service_rate_t, float> VertexServiceRateProperty;
 
-int main(int argc, char *argv[])
+int main()
 {
     typedef adjacency_list<setS,    // no parallel edges; most expensive space complexity
         listS,                      // add/remove verteces quickly; constant time complexity
@@ -128,23 +128,23 @@ int main(int argc, char *argv[])
                indirect_cmp < float*, std::greater < float > >(&service_rates[0]));
 
      double temp = 0.0;
-     for (int i = 0; i < num_vertices((*g.get())); ++i) {
+     for (unsigned int i = 0; i < num_vertices((*g.get())); ++i) {
          temp += vertex_service_props_map[vertex(service_rate_order[i], (*g.get()))];
          std::cout << temp/accum << std::endl;
      }
 
      // print order of the service rates
-     for (int i = 0; i < num_vertices((*g.get())); ++i)
+     for (unsigned int i = 0; i < num_vertices((*g.get())); ++i)
         std::cout << service_rate_order[i] << " ";
      std::cout << std::endl;
 
      // print the respective service rates
-     for (int i = 0; i < num_vertices((*g.get())); ++i)
+     for (unsigned int i = 0; i < num_vertices((*g.get())); ++i)
          std::cout << service_rates[service_rate_order[i]] << std::endl;
      std::cout << std::endl;
 
      // get the vertices in decending service rate order
-     for (int i = 0; i < num_vertices((*g.get())); ++i)
+     for (unsigned int i = 0; i < num_vertices((*g.get())); ++i)
          std::cout << vertex_service_props_map[vertex(service_rate_order[i], (*g.get()))] << std::endl;
      std::cout << std::endl;
 
