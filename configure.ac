@@ -42,7 +42,6 @@ CPPFLAGS="-W -Wall -pedantic ${CPPFLAGS}"
 AC_HEADER_STDBOOL
 AC_C_CONST
 AC_TYPE_SIZE_T
-AC_TYPE_UINT32_T
 
 # Checks for library functions.
 AC_HEADER_STDC
