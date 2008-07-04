@@ -41,10 +41,12 @@ CPPFLAGS="-W -Wall -pedantic ${CPPFLAGS}"
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL
 AC_C_CONST
+AC_TYPE_SIZE_T
+AC_TYPE_UINT32_T
 
 # Checks for library functions.
 AC_HEADER_STDC
-AC_CHECK_FUNCS([floor memset sqrt])
+AC_CHECK_FUNCS([floor memset sqrt pow])
 
 
 # CPPUnit library checks
