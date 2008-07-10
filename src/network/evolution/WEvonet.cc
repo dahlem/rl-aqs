@@ -192,6 +192,7 @@ void WEvonet::advance(int p_steps)
     VertexIndexMap vertex_index_props_map = get(vertex_index, (*g.get()));
 
     double accum_service_rate;
+    size_t vertices;
 
     // at each step do:
     // 1. create vertex
@@ -199,18 +200,20 @@ void WEvonet::advance(int p_steps)
     // 3. assign weights to the edges
     // 4. evaluate the vertex strengths
     for (int i = 0; i < p_steps; ++i) {
+        vertices = num_vertices((*g.get()));
+
         // calculate the accumulated service rate
         tie(service_it, service_it_end) =
             get_property_iter_range((*g.get()), vertex_service_rate);
         accum_service_rate = std::accumulate(service_it, service_it_end, 0.0);
 
         // a vector to hold the discover time property for each vertex
-        std::vector <float> service_rates(num_vertices((*g.get())));
+        std::vector <float> service_rates(vertices);
 
         // Use std::sort to order the vertices by their discover time
-        std::vector <graph_traits<Graph>::vertices_size_type>
-            service_rate_order(num_vertices((*g.get())));
-        integer_range <int> range(0, num_vertices((*g.get())));
+        std::vector <graph_traits <Graph>::vertices_size_type>
+            service_rate_order(vertices);
+        integer_range <int> range(0, vertices);
 
         // copy the index range into the service_rate_order vector
         std::copy(range.begin(), range.end(), service_rate_order.begin());
@@ -225,7 +228,7 @@ void WEvonet::advance(int p_steps)
         // create vertex
         Vertex v = add_vertex((*g.get()));
         vertex_service_props_map[v] = (gsl_rng_uniform(vertex_service_rng.get()) * 10);
-        vertex_index_props_map[v] = num_vertices((*g.get())) - 1;
+        vertex_index_props_map[v] = vertices;
 
         // select vertices to connect to
         unsigned int edges = gsl_rng_uniform_int(num_edges_rng.get(), max_edges) + 1;
@@ -233,7 +236,7 @@ void WEvonet::advance(int p_steps)
         for (unsigned int e = 0; e < edges; ++e) {
             double temp = 0.0;
             double u = gsl_rng_uniform(uniform_rng.get());
-            for (unsigned int j = 0; j < num_vertices((*g.get())) - 1; ++j) {
+            for (unsigned int j = 0; j < vertices; ++j) {
                 temp += vertex_service_props_map[vertex(service_rate_order[j], (*g.get()))];
 
                 if (u < temp/accum_service_rate) {
@@ -261,10 +264,11 @@ void WEvonet::balance_vertex_strength(Vertex &v)
         get(vertex_service_rate, (*g.get()));
     EdgeWeightMap edge_weight_props_map = get(edge_weight, (*g.get()));
     VertexIndexMap vertex_index_props_map = get(vertex_index, (*g.get()));
+    size_t vertices = num_vertices((*g.get()));
 
     // external property to keep the enduced differences in strengths
-    std::vector <float> strength_diff_vec(num_vertices((*g.get())));
-    std::vector <float> strength_diff_apply_vec(num_vertices((*g.get())));
+    std::vector <float> strength_diff_vec(vertices);
+    std::vector <float> strength_diff_apply_vec(vertices);
 
     typedef boost::iterator_property_map <std::vector <float>::iterator,
         property_map <Graph, vertex_index_t>::type, float, float&> IterStrDiffMap;
@@ -290,7 +294,7 @@ void WEvonet::balance_vertex_strength(Vertex &v)
     apply_enduced_strength_visitor <VertexServiceRateMap, IterStrDiffMap>
         vis_apply_enduced_strength(vertex_service_props_map, strength_diff_map);
 
-    vector<boost::default_color_type> color_vec(num_vertices((*g.get())));
+    vector<boost::default_color_type> color_vec(vertices);
 
     breadth_first_visit((*g.get()),
                         v,
