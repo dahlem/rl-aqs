@@ -68,6 +68,7 @@ using des::network::OutEdgeIterator;
 #include "epidemic_visit.hh"
 
 
+
 template <class VertexServiceMap, class EdgeWeightMap,
           class VertexIndexMap, class StrengthDiffMap>
 class epidemic_vertex_service_visitor : public default_bfs_visitor
@@ -237,12 +238,14 @@ void WEvonet::advance(int p_steps)
             double temp = 0.0;
             double u = gsl_rng_uniform(uniform_rng.get());
             for (unsigned int j = 0; j < vertices; ++j) {
-                temp += vertex_service_props_map[vertex(service_rate_order[j], (*g.get()))];
+                Vertex z = vertex(service_rate_order[j], (*g.get()));
+
+                temp += vertex_service_props_map[z];
 
                 if (u < temp/accum_service_rate) {
                     // check if link already exists between new vertex and selected one
-                    if (!edge(v, vertex(service_rate_order[j], (*g.get())), (*g.get())).second) {
-                        add_edge(v, vertex(service_rate_order[j], (*g.get())), (*g.get()));
+                    if (!edge(v, z, (*g.get())).second) {
+                        add_edge(v, z, (*g.get()));
                         break;
                     }
                 }
@@ -260,10 +263,10 @@ void WEvonet::advance(int p_steps)
 
 void WEvonet::balance_vertex_strength(Vertex &v)
 {
-    VertexServiceRateMap vertex_service_props_map =
-        get(vertex_service_rate, (*g.get()));
+    VertexServiceRateMap vertex_service_props_map = get(vertex_service_rate, (*g.get()));
     EdgeWeightMap edge_weight_props_map = get(edge_weight, (*g.get()));
     VertexIndexMap vertex_index_props_map = get(vertex_index, (*g.get()));
+
     size_t vertices = num_vertices((*g.get()));
 
     // external property to keep the enduced differences in strengths
@@ -273,10 +276,8 @@ void WEvonet::balance_vertex_strength(Vertex &v)
     typedef boost::iterator_property_map <std::vector <float>::iterator,
         property_map <Graph, vertex_index_t>::type, float, float&> IterStrDiffMap;
 
-    IterStrDiffMap strength_diff_map(strength_diff_vec.begin(),
-                                     get(vertex_index, (*g.get())));
-    IterStrDiffMap strength_diff_apply_map(strength_diff_apply_vec.begin(),
-                                           get(vertex_index, (*g.get())));
+    IterStrDiffMap strength_diff_map(strength_diff_vec.begin(), vertex_index_props_map);
+    IterStrDiffMap strength_diff_apply_map(strength_diff_apply_vec.begin(), vertex_index_props_map);
 
     // create the visitor
     epidemic_vertex_service_visitor <VertexServiceRateMap, EdgeWeightMap,
@@ -300,7 +301,8 @@ void WEvonet::balance_vertex_strength(Vertex &v)
                         v,
                         visitor(vis_apply_enduced_strength).
                         color_map(make_iterator_property_map(
-                                      color_vec.begin(), get(vertex_index, (*g.get())),
+                                      color_vec.begin(),
+                                      vertex_index_props_map,
                                       color_vec[0])));
 
 #ifdef NDEBUG
