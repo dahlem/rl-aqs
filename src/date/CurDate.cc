@@ -18,7 +18,7 @@
  * Implementation of the <code>CurDate</code> class. It uses the boost
  * date_time package internally to retrieve and parse the local date.
  */
-#include <iostream>
+#include <sstream>
 using std::stringstream;
 
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -50,4 +50,3 @@ string CurDate::get() const
 {
     return m_cur_date;
 }
-

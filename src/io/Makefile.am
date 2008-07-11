@@ -15,9 +15,12 @@ libdesio_la_SOURCES =                                                \
 
 libdesio_la_CPPFLAGS =                                               \
 	-I./includes                                                 \
+	-I$(top_srcdir)/src/date/includes                            \
+	-I$(top_srcdir)/src/design/pattern/includes                  \
 	$(BOOST_CPPFLAGS)
 
 libdesio_la_LIBADD =                                                 \
+	$(top_srcdir)/src/date/libdesdate.la                         \
 	$(BOOST_LDFLAGS)
 
 include_HEADERS = includes

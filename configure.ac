@@ -109,6 +109,7 @@ AC_CONFIG_FILES([
    m4/Makefile
    src/Makefile
    src/date/Makefile
+   src/io/Makefile
    src/design/Makefile
    src/design/pattern/Makefile
    src/sampling/Makefile

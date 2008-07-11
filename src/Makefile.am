@@ -11,5 +11,5 @@
 SUBDIRS = design test-utils utils sampling common statistics
 
 if BOOST_SUPPORT
-  SUBDIRS += network date
+  SUBDIRS += network date io
 endif
