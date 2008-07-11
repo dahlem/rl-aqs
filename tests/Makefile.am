@@ -1,4 +1,4 @@
-# Copyright (C) 2007 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+# Copyright (C) 2007, 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 #  
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without 
@@ -9,6 +9,10 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 SUBDIRS = common sampling statistics
+
+if BOOST_SUPPORT
+  SUBDIRS += date
+endif
 
 include $(top_srcdir)/mk/valgrind-recursive.am
 include $(top_srcdir)/mk/gcov-recursive.am

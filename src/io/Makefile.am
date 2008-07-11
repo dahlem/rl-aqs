@@ -8,8 +8,17 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-SUBDIRS = design test-utils utils sampling common statistics
+noinst_LTLIBRARIES = libdesio.la
 
-if BOOST_SUPPORT
-  SUBDIRS += network date
-endif
+libdesio_la_SOURCES =                                                \
+	Results.cc
+
+libdesio_la_CPPFLAGS =                                               \
+	-I./includes                                                 \
+	$(BOOST_CPPFLAGS)
+
+libdesio_la_LIBADD =                                                 \
+	$(BOOST_LDFLAGS)
+
+include_HEADERS = includes
+MAINTAINERCLEANFILES = Makefile.in
