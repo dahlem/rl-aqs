@@ -10,7 +10,7 @@
 
 AC_PREREQ(2.61)
 AC_INIT([Discrete Event Simulation for Service Interaction],
-        [0.8],
+        [0.9],
         [Dominik Dahlem Dominik.Dahlem@cs.tcd.ie], 
         [des])
 
@@ -66,7 +66,7 @@ AC_ARG_ENABLE(boost, AS_HELP_STRING(
 		     [BOOSTLIB=$enableval], [BOOSTLIB=no])
 
 if test x$BOOSTLIB = xyes; then
-  AX_BOOST_BASE([1.34.1])
+  AX_BOOST_BASE([1.35])
   AM_CONDITIONAL(BOOST_SUPPORT, true)
 else
   AM_CONDITIONAL(BOOST_SUPPORT, false)

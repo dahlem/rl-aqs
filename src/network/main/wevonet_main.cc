@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
     std::cout << "Generating Graph..." << std::endl;
 
     WEvonet net(net_size, max_edges, r1, r2, r3);
-    net.print("test.dot");
+    net.print("test.gml", WEvonet::GRAPHML);
 
     return EXIT_SUCCESS;
 }

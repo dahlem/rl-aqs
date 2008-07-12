@@ -42,8 +42,10 @@ using boost::edge_weight;
 using boost::default_bfs_visitor;
 using boost::breadth_first_visit;
 
+#include <boost/graph/graphml.hpp>
 #include <boost/graph/graphviz.hpp>
 using boost::write_graphviz;
+using boost::write_graphml;
 using boost::dynamic_properties;
 
 #include <boost/graph/property_iter_range.hpp>
@@ -316,7 +318,36 @@ void WEvonet::balance_vertex_strength(Vertex &v)
 }
 
 
-void WEvonet::print(const std::string& filename)
+void WEvonet::assign_edge_weights(Vertex &v)
+{
+    EdgeWeightMap edge_weight_props_map = get(edge_weight, (*g.get()));
+
+    Graph::degree_size_type degree = out_degree(v, (*g.get()));
+    OutEdgeIterator out_it, out_it_end;
+
+    BOOST_FOREACH(Edge e, (out_edges(v, (*g.get())))) {
+        edge_weight_props_map[e] = 1.0 / degree;
+    }
+}
+
+
+void WEvonet::print(const std::string& filename, const GraphTypes graphType)
+{
+    switch (graphType) {
+      case GRAPHVIZ:
+          print_dot(filename);
+          break;
+      case GRAPHML:
+          print_graphml(filename);
+          break;
+      default:
+          print_dot(filename);
+          break;
+    }
+}
+
+
+void WEvonet::print_dot(const std::string& filename)
 {
     VertexServiceRateMap vertex_service_props_map =
         get(vertex_service_rate, (*g.get()));
@@ -337,14 +368,23 @@ void WEvonet::print(const std::string& filename)
 }
 
 
-void WEvonet::assign_edge_weights(Vertex &v)
+void WEvonet::print_graphml(const std::string& filename)
 {
+    VertexServiceRateMap vertex_service_props_map =
+        get(vertex_service_rate, (*g.get()));
+    VertexIndexMap vertex_index_props_map = get(vertex_index, (*g.get()));
     EdgeWeightMap edge_weight_props_map = get(edge_weight, (*g.get()));
 
-    Graph::degree_size_type degree = out_degree(v, (*g.get()));
-    OutEdgeIterator out_it, out_it_end;
+    std::ofstream out(filename.c_str(), std::ios::out);
 
-    BOOST_FOREACH(Edge e, (out_edges(v, (*g.get())))) {
-        edge_weight_props_map[e] = 1.0 / degree;
+    if (out.is_open()) {
+        dynamic_properties dp;
+        dp.property("node_id", vertex_index_props_map);
+        dp.property("label", edge_weight_props_map);
+        dp.property("label", vertex_service_props_map);
+
+        write_graphml(out, (*g.get()), dp, true);
+
+        out.close();
     }
 }

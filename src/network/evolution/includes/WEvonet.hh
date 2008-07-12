@@ -141,6 +141,12 @@ typedef shared_ptr<gsl_rng> tGslRngSP;
 class WEvonet
 {
 public:
+    /** @enum GraphTypes
+     * This enum declares the supported output graph formats. Currently supported
+     * are the dot format (graphviz) and the graphml format.
+     */
+    enum GraphTypes { GRAPHVIZ, GRAPHML };
+
     /**
      * Constructor which evolves a weighted directed network given a particular size.
      *
@@ -168,12 +174,14 @@ public:
      */
     void advance(int p_steps);
 
-    /** @fn void print(const std::string& filename)
-     * Print the graph using the graphviz interface of BGL into a file
+    /** @fn void print(const std::string& filename, GraphTypes graphType)
+     * Print the graph using either of the supported graph formats. The default format
+     * is graphviz.
      *
      * @param const std::string& the filename to be printed into
+     * @param const GraphTypes the graph type selected for the output
      */
-    void print(const std::string& filename);
+    void print(const std::string& filename, const GraphTypes graphType);
 
 private:
 
@@ -194,6 +202,20 @@ private:
      * @param Vertex& The vertex from which to start the adjustment
      */
     void balance_vertex_strength(Vertex &v);
+
+    /** @fn void print_dot(const std::string& filename)
+     * Print the graph using the graphviz interface of BGL into a file
+     *
+     * @param const std::string& the filename to be printed into
+     */
+    void print_dot(const std::string& filename);
+
+    /** @fn void print_graphml(const std::string& filename)
+     * Print the graph into a graphml format
+     *
+     * @param const std::string& the filename to be printed into
+     */
+    void print_graphml(const std::string& filename);
 
     /**
      * The random number generator to determine how many edges should be
