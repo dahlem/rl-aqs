@@ -71,17 +71,17 @@ using des::network::OutEdgeIterator;
 
 
 
-template <class VertexServiceMap, class EdgeWeightMap,
+template <class VertexArrivalMap, class EdgeWeightMap,
           class VertexIndexMap, class StrengthDiffMap>
-class epidemic_vertex_service_visitor : public default_bfs_visitor
+class epidemic_vertex_arrival_visitor : public default_bfs_visitor
 {
 public:
-    epidemic_vertex_service_visitor(VertexServiceMap vertex_service_map,
+    epidemic_vertex_arrival_visitor(VertexArrivalMap vertex_arrival_map,
                                     EdgeWeightMap edge_weight_map,
                                     VertexIndexMap vertex_index_map,
                                     StrengthDiffMap vertex_strength_diff_map,
                                     StrengthDiffMap vertex_strength_diff_apply_map)
-        :  m_vertex_service_map(vertex_service_map),
+        :  m_vertex_arrival_map(vertex_arrival_map),
            m_edge_weight_map(edge_weight_map),
            m_vertex_index_map(vertex_index_map),
            m_vertex_strength_diff_map(vertex_strength_diff_map),
@@ -106,7 +106,7 @@ public:
             // assign the service rate to the apply strength difference
             // this only happens for the root node
             if (m_vertex_strength_diff_map[u] == 0.0) {
-                m_vertex_strength_diff_apply_map[u] = m_vertex_service_map[u];
+                m_vertex_strength_diff_apply_map[u] = m_vertex_arrival_map[u];
             }
         }
 
@@ -118,7 +118,7 @@ public:
             m_vertex_strength_diff_apply_map[u] = 0.0;
         }
 
-    VertexServiceMap m_vertex_service_map;
+    VertexArrivalMap m_vertex_arrival_map;
     EdgeWeightMap m_edge_weight_map;
     VertexIndexMap m_vertex_index_map;
     StrengthDiffMap m_vertex_strength_diff_map;
@@ -149,30 +149,34 @@ public:
 
 
 WEvonet::WEvonet(int p_size, int p_max_edges,
-                 tGslRngSP p_edge_rng, tGslRngSP p_uniform_rng, tGslRngSP p_vertex_service_rng)
+                 tGslRngSP p_edge_rng, tGslRngSP p_uniform_rng, tGslRngSP p_vertex_arrival_rng)
 {
     // create the graph
     g = tGraphSP(new Graph(0));
     num_edges_rng = p_edge_rng;
     uniform_rng = p_uniform_rng;
-    vertex_service_rng = p_vertex_service_rng;
+    vertex_arrival_rng = p_vertex_arrival_rng;
 
     max_edges = p_max_edges;
 
     // get references to the property maps
+    VertexArrivalRateMap vertex_arrival_props_map = get(vertex_arrival_rate, (*g.get()));
     VertexServiceRateMap vertex_service_props_map = get(vertex_service_rate, (*g.get()));
     VertexIndexMap vertex_index_props_map = get(vertex_index, (*g.get()));
     EdgeWeightMap edge_weight_props_map = get(edge_weight, (*g.get()));
 
     // create a small graph upon which the evolution is excercised
     Vertex v1 = add_vertex((*g.get()));
-    vertex_service_props_map[v1] = (gsl_rng_uniform(vertex_service_rng.get()) * 10);
+    vertex_arrival_props_map[v1] = (gsl_rng_uniform(vertex_arrival_rng.get()) * 10);
+    vertex_service_props_map[v1] = vertex_arrival_props_map[v1];
     vertex_index_props_map[v1] = 0;
     Vertex v2 = add_vertex((*g.get()));
-    vertex_service_props_map[v2] = vertex_service_props_map[v1] * 0.5;
+    vertex_arrival_props_map[v2] = vertex_arrival_props_map[v1] * 0.5;
+    vertex_service_props_map[v2] = vertex_arrival_props_map[v2];
     vertex_index_props_map[v2] = 1;
     Vertex v3 = add_vertex((*g.get()));
-    vertex_service_props_map[v3] = vertex_service_props_map[v1] * 0.5;
+    vertex_arrival_props_map[v3] = vertex_arrival_props_map[v1] * 0.5;
+    vertex_service_props_map[v3] = vertex_arrival_props_map[v3];
     vertex_index_props_map[v3] = 2;
 
     Edge e1 = (add_edge(v1, v2, (*g.get()))).first;
@@ -190,11 +194,12 @@ WEvonet::~WEvonet()
 
 void WEvonet::advance(int p_steps)
 {
-    VServiceIterator service_it, service_it_end;
+    VArrivalIterator arrival_it, arrival_it_end;
+    VertexArrivalRateMap vertex_arrival_props_map = get(vertex_arrival_rate, (*g.get()));
     VertexServiceRateMap vertex_service_props_map = get(vertex_service_rate, (*g.get()));
     VertexIndexMap vertex_index_props_map = get(vertex_index, (*g.get()));
 
-    double accum_service_rate;
+    double accum_arrival_rate;
     size_t vertices;
 
     // at each step do:
@@ -205,32 +210,33 @@ void WEvonet::advance(int p_steps)
     for (int i = 0; i < p_steps; ++i) {
         vertices = num_vertices((*g.get()));
 
-        // calculate the accumulated service rate
-        tie(service_it, service_it_end) =
-            get_property_iter_range((*g.get()), vertex_service_rate);
-        accum_service_rate = std::accumulate(service_it, service_it_end, 0.0);
+        // calculate the accumulated arrival rate
+        tie(arrival_it, arrival_it_end) =
+            get_property_iter_range((*g.get()), vertex_arrival_rate);
+        accum_arrival_rate = std::accumulate(arrival_it, arrival_it_end, 0.0);
 
         // a vector to hold the discover time property for each vertex
-        std::vector <float> service_rates(vertices);
+        std::vector <float> arrival_rates(vertices);
 
         // Use std::sort to order the vertices by their discover time
         std::vector <graph_traits <Graph>::vertices_size_type>
-            service_rate_order(vertices);
+            arrival_rate_order(vertices);
         integer_range <int> range(0, vertices);
 
-        // copy the index range into the service_rate_order vector
-        std::copy(range.begin(), range.end(), service_rate_order.begin());
+        // copy the index range into the arrival_rate_order vector
+        std::copy(range.begin(), range.end(), arrival_rate_order.begin());
 
-        // copy the service rates into a vector
-        std::copy(service_it, service_it_end, service_rates.begin());
+        // copy the arrival rates into a vector
+        std::copy(arrival_it, arrival_it_end, arrival_rates.begin());
 
-        // sort the service_rate_order according to the service_rates in ascending order
-        std::sort(service_rate_order.begin(), service_rate_order.end(),
-                  indirect_cmp <float*, std::greater <float> >(&service_rates[0]));
+        // sort the arrival_rate_order according to the arrival_rates in ascending order
+        std::sort(arrival_rate_order.begin(), arrival_rate_order.end(),
+                  indirect_cmp <float*, std::greater <float> >(&arrival_rates[0]));
 
         // create vertex
         Vertex v = add_vertex((*g.get()));
-        vertex_service_props_map[v] = (gsl_rng_uniform(vertex_service_rng.get()) * 10);
+        vertex_arrival_props_map[v] = (gsl_rng_uniform(vertex_arrival_rng.get()) * 10);
+        vertex_service_props_map[v] = vertex_arrival_props_map[v];
         vertex_index_props_map[v] = vertices;
 
         // select vertices to connect to
@@ -240,11 +246,11 @@ void WEvonet::advance(int p_steps)
             double temp = 0.0;
             double u = gsl_rng_uniform(uniform_rng.get());
             for (unsigned int j = 0; j < vertices; ++j) {
-                Vertex z = vertex(service_rate_order[j], (*g.get()));
+                Vertex z = vertex(arrival_rate_order[j], (*g.get()));
 
-                temp += vertex_service_props_map[z];
+                temp += vertex_arrival_props_map[z];
 
-                if (u < temp/accum_service_rate) {
+                if (u < temp/accum_arrival_rate) {
                     // check if link already exists between new vertex and selected one
                     if (!edge(v, z, (*g.get())).second) {
                         add_edge(v, z, (*g.get()));
@@ -265,6 +271,7 @@ void WEvonet::advance(int p_steps)
 
 void WEvonet::balance_vertex_strength(Vertex &v)
 {
+    VertexArrivalRateMap vertex_arrival_props_map = get(vertex_arrival_rate, (*g.get()));
     VertexServiceRateMap vertex_service_props_map = get(vertex_service_rate, (*g.get()));
     EdgeWeightMap edge_weight_props_map = get(edge_weight, (*g.get()));
     VertexIndexMap vertex_index_props_map = get(vertex_index, (*g.get()));
@@ -282,9 +289,9 @@ void WEvonet::balance_vertex_strength(Vertex &v)
     IterStrDiffMap strength_diff_apply_map(strength_diff_apply_vec.begin(), vertex_index_props_map);
 
     // create the visitor
-    epidemic_vertex_service_visitor <VertexServiceRateMap, EdgeWeightMap,
+    epidemic_vertex_arrival_visitor <VertexArrivalRateMap, EdgeWeightMap,
         VertexIndexMap, IterStrDiffMap>
-        vis_enduced_strength(vertex_service_props_map, edge_weight_props_map,
+        vis_enduced_strength(vertex_arrival_props_map, edge_weight_props_map,
                              vertex_index_props_map, strength_diff_map,
                              strength_diff_apply_map);
 
@@ -312,7 +319,7 @@ void WEvonet::balance_vertex_strength(Vertex &v)
     std::pair <vertex_iter_t, vertex_iter_t> p;
 
     for (p = vertices((*g.get())); p.first != p.second; ++p.first) {
-        std::cout << vertex_service_props_map[*p.first] << std::endl;
+        std::cout << vertex_arrival_props_map[*p.first] << std::endl;
     }
 #endif /* NDEBUG */
 }
@@ -351,6 +358,8 @@ void WEvonet::print_dot(const std::string& filename)
 {
     VertexServiceRateMap vertex_service_props_map =
         get(vertex_service_rate, (*g.get()));
+    VertexArrivalRateMap vertex_arrival_props_map =
+        get(vertex_arrival_rate, (*g.get()));
     VertexIndexMap vertex_index_props_map = get(vertex_index, (*g.get()));
     EdgeWeightMap edge_weight_props_map = get(edge_weight, (*g.get()));
 
@@ -358,9 +367,10 @@ void WEvonet::print_dot(const std::string& filename)
 
     if (out.is_open()) {
         dynamic_properties dp;
-        dp.property("node_id", vertex_index_props_map);
-        dp.property("label", edge_weight_props_map);
-        dp.property("label", vertex_service_props_map);
+        dp.property("id", vertex_index_props_map);
+        dp.property("weight", edge_weight_props_map);
+        dp.property("service_rate", vertex_service_props_map);
+        dp.property("arrival_rate", vertex_arrival_props_map);
 
         write_graphviz(out, (*g.get()), dp);
         out.close();
@@ -372,6 +382,8 @@ void WEvonet::print_graphml(const std::string& filename)
 {
     VertexServiceRateMap vertex_service_props_map =
         get(vertex_service_rate, (*g.get()));
+    VertexArrivalRateMap vertex_arrival_props_map =
+        get(vertex_arrival_rate, (*g.get()));
     VertexIndexMap vertex_index_props_map = get(vertex_index, (*g.get()));
     EdgeWeightMap edge_weight_props_map = get(edge_weight, (*g.get()));
 
@@ -379,9 +391,10 @@ void WEvonet::print_graphml(const std::string& filename)
 
     if (out.is_open()) {
         dynamic_properties dp;
-        dp.property("node_id", vertex_index_props_map);
-        dp.property("label", edge_weight_props_map);
-        dp.property("label", vertex_service_props_map);
+        dp.property("id", vertex_index_props_map);
+        dp.property("weight", edge_weight_props_map);
+        dp.property("service_rate", vertex_service_props_map);
+        dp.property("arrival_rate", vertex_arrival_props_map);
 
         write_graphml(out, (*g.get()), dp, true);
 

@@ -50,27 +50,43 @@ using boost::graph_property_iter_range;
 enum vertex_service_rate_t { vertex_service_rate = 1111 };
 
 
+/** @enum vertex_arrival_rate_t
+ * This enum extends the vertex properties by a arrival_rate attribute.
+ */
+enum vertex_arrival_rate_t { vertex_arrival_rate = 1112 };
+
+
 // install the vertex service rate property
 namespace boost
 {
     BOOST_INSTALL_PROPERTY(vertex, service_rate);
+    BOOST_INSTALL_PROPERTY(vertex, arrival_rate);
 }
 
 
-namespace des
-{
-    namespace network
-    {
+namespace des { namespace network {
+
 
 /** @typedef VertexServiceRateProperty
  * Specifies the property for the vertex service rate
  */
-typedef property<vertex_service_rate_t, float> VertexServiceRateProperty;
+typedef property <vertex_service_rate_t, float> VertexServiceRateProperty;
+
+/** @typedef VertexArrivalRateProperty
+ * Specifies the property for the vertex arrival rate
+ */
+typedef property <vertex_arrival_rate_t, float, VertexServiceRateProperty> VertexArrivalRateProperty;
+
+/** @typedef VertexProperties
+ * This type definition assembles all the properties for the vertices of the graph
+ */
+typedef property <vertex_index_t, uint32_t, VertexArrivalRateProperty> VertexProperties;
 
 /** @typedef EdgeWeightProperty
  * Specifies the property for the edge weight
  */
-typedef property<edge_weight_t, float> EdgeWeightProperty;
+typedef property <edge_weight_t, float> EdgeWeightProperty;
+
 
 /** @typedef Graph
  * Specifies the Graph as an adjacency list. The edges are represented in a
@@ -78,58 +94,67 @@ typedef property<edge_weight_t, float> EdgeWeightProperty;
  * STL containers, this is the most expensive in terms of space complexity. The Vertices
  * are stored in a STL list to allow quick addition and removal with constant time
  * complexity.
- * @todo ddahlem: verify whether bidirectionality is required.
  */
 typedef adjacency_list<setS,
                        listS,
                        directedS,
-                       property<vertex_index_t, uint32_t, VertexServiceRateProperty>,
+                       VertexProperties,
                        EdgeWeightProperty> Graph;
 
 /** @typedef Vertex
  * Specifies the vertex descriptor of a graph
  */
-typedef graph_traits<Graph>::vertex_descriptor Vertex;
+typedef graph_traits <Graph>::vertex_descriptor Vertex;
 
 /** @typedef Edge
  * Specifies the edge descriptor of a graph
  */
-typedef graph_traits<Graph>::edge_descriptor Edge;
+typedef graph_traits <Graph>::edge_descriptor Edge;
 
 /** @typedef VertexServiceRateMap
  * Specifies the map that stores the vertex service rate property
  */
-typedef property_map<Graph, vertex_service_rate_t>::type VertexServiceRateMap;
+typedef property_map <Graph, vertex_service_rate_t>::type VertexServiceRateMap;
+
+/** @typedef VertexArrivalRateMap
+ * Specifies the map that stores the vertex arrival rate property
+ */
+typedef property_map <Graph, vertex_arrival_rate_t>::type VertexArrivalRateMap;
 
 /** @typedef VertexIndexMap
  * Specifies the map that stores the vertex indeces
  */
-typedef property_map<Graph, vertex_index_t>::type VertexIndexMap;
+typedef property_map <Graph, vertex_index_t>::type VertexIndexMap;
 
 /** @typedef EdgeWeightMap
  * Specifies the edge weight property
  */
-typedef property_map<Graph, edge_weight_t>::type EdgeWeightMap;
+typedef property_map <Graph, edge_weight_t>::type EdgeWeightMap;
 
 /** @typedef VServiceIterator
  * Specifies the iterator for the vertex service rates
  */
-typedef graph_property_iter_range<Graph, vertex_service_rate_t>::iterator VServiceIterator;
+typedef graph_property_iter_range <Graph, vertex_service_rate_t>::iterator VServiceIterator;
+
+/** @typedef VArrivalIterator
+ * Specifies the iterator for the vertex arrival rates
+ */
+typedef graph_property_iter_range <Graph, vertex_arrival_rate_t>::iterator VArrivalIterator;
 
 /** @typedef OutEdgeIterator
  * Specifies the iterator for the out degree edges
  */
-typedef graph_traits<Graph>::out_edge_iterator OutEdgeIterator;
+typedef graph_traits <Graph>::out_edge_iterator OutEdgeIterator;
 
 /** @typedef tGraphSP
  * Specifies shared pointer to the Graph object
  */
-typedef shared_ptr<Graph> tGraphSP;
+typedef shared_ptr <Graph> tGraphSP;
 
 /** @typedef tGslRngSP
  * Specifies shared pointer to the GSL random number generator objects
  */
-typedef shared_ptr<gsl_rng> tGslRngSP;
+typedef shared_ptr <gsl_rng> tGslRngSP;
 
 
 
@@ -157,10 +182,10 @@ public:
      * @param tGslRngSP the GSL random number to draw a uniform number to decide
      *        which vertex to link up to.
      * @param tGslRngSP the GSL random number to draw a uniform number for the vertex
-     *        service rate.
+     *        arrival rate.
      */
     WEvonet(int p_size, int p_max_edges,
-            tGslRngSP p_edge_rng, tGslRngSP p_uniform_rng, tGslRngSP p_vertex_service_rng);
+            tGslRngSP p_edge_rng, tGslRngSP p_uniform_rng, tGslRngSP p_vertex_arrival_rng);
 
     /**
      * Destructor
@@ -224,10 +249,10 @@ private:
     tGslRngSP num_edges_rng;
 
     /**
-     * The random number generator to determine the vertex service rate when a new
+     * The random number generator to determine the vertex arrival rate when a new
      * vertex is created.
      */
-    tGslRngSP vertex_service_rng;
+    tGslRngSP vertex_arrival_rng;
 
     /**
      * The random number generator to determine a uniform random number in the range
