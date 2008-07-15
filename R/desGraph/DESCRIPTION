@@ -1,0 +1,11 @@
+Package: desGraph
+Version: 0.1
+Date: 2008-07-15
+Title: Analysis of DES graphs
+Author: Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+Maintainer: Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+Depends: R (>= 2.6), igraph, gplots
+Description: Analyse graphs from the DES simulation environment.
+License: GPL-2
+URL: http://www.r-project.org
+     
