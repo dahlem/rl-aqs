@@ -194,12 +194,12 @@ WEvonet::~WEvonet()
 
 void WEvonet::advance(int p_steps)
 {
-    VArrivalIterator arrival_it, arrival_it_end;
+    VServiceIterator service_it, service_it_end;
     VertexArrivalRateMap vertex_arrival_props_map = get(vertex_arrival_rate, (*g.get()));
     VertexServiceRateMap vertex_service_props_map = get(vertex_service_rate, (*g.get()));
     VertexIndexMap vertex_index_props_map = get(vertex_index, (*g.get()));
 
-    double accum_arrival_rate;
+    double accum_service_rate;
     size_t vertices;
 
     // at each step do:
@@ -210,28 +210,28 @@ void WEvonet::advance(int p_steps)
     for (int i = 0; i < p_steps; ++i) {
         vertices = num_vertices((*g.get()));
 
-        // calculate the accumulated arrival rate
-        tie(arrival_it, arrival_it_end) =
-            get_property_iter_range((*g.get()), vertex_arrival_rate);
-        accum_arrival_rate = std::accumulate(arrival_it, arrival_it_end, 0.0);
+        // calculate the accumulated service rate
+        tie(service_it, service_it_end) =
+            get_property_iter_range((*g.get()), vertex_service_rate);
+        accum_service_rate = std::accumulate(service_it, service_it_end, 0.0);
 
         // a vector to hold the discover time property for each vertex
-        std::vector <float> arrival_rates(vertices);
+        std::vector <float> service_rates(vertices);
 
-        // Use std::sort to order the vertices by their discover time
+        // Use std::sort to order the vertices by their service rate
         std::vector <graph_traits <Graph>::vertices_size_type>
-            arrival_rate_order(vertices);
+            service_rate_order(vertices);
         integer_range <int> range(0, vertices);
 
-        // copy the index range into the arrival_rate_order vector
-        std::copy(range.begin(), range.end(), arrival_rate_order.begin());
+        // copy the index range into the service_rate_order vector
+        std::copy(range.begin(), range.end(), service_rate_order.begin());
 
-        // copy the arrival rates into a vector
-        std::copy(arrival_it, arrival_it_end, arrival_rates.begin());
+        // copy the service rates into a vector
+        std::copy(service_it, service_it_end, service_rates.begin());
 
-        // sort the arrival_rate_order according to the arrival_rates in ascending order
-        std::sort(arrival_rate_order.begin(), arrival_rate_order.end(),
-                  indirect_cmp <float*, std::greater <float> >(&arrival_rates[0]));
+        // sort the service_rate_order according to the service_rates in ascending order
+        std::sort(service_rate_order.begin(), service_rate_order.end(),
+                  indirect_cmp <float*, std::greater <float> >(&service_rates[0]));
 
         // create vertex
         Vertex v = add_vertex((*g.get()));
@@ -246,11 +246,11 @@ void WEvonet::advance(int p_steps)
             double temp = 0.0;
             double u = gsl_rng_uniform(uniform_rng.get());
             for (unsigned int j = 0; j < vertices; ++j) {
-                Vertex z = vertex(arrival_rate_order[j], (*g.get()));
+                Vertex z = vertex(service_rate_order[j], (*g.get()));
 
-                temp += vertex_arrival_props_map[z];
+                temp += vertex_service_props_map[z];
 
-                if (u < temp/accum_arrival_rate) {
+                if (u < temp/accum_service_rate) {
                     // check if link already exists between new vertex and selected one
                     if (!edge(v, z, (*g.get())).second) {
                         add_edge(v, z, (*g.get()));
