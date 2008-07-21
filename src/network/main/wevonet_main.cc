@@ -14,6 +14,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #include <iostream>
+#include <string>
 
 #include <boost/shared_ptr.hpp>
 using boost::shared_ptr;
@@ -35,6 +36,7 @@ int main(int argc, char *argv[])
     int max_edges;
     const gsl_rng_type * T;
     shared_ptr <gsl_rng> r1, r2, r3;
+    std::string filename;
 
     // Declare the supported options.
     po::options_description desc("Configuration");
@@ -42,6 +44,7 @@ int main(int argc, char *argv[])
         ("help", "produce help message")
         ("size", po::value<int>(), "set the size of the network")
         ("max_edges", po::value<int>(), "set the maximum number of edges to connect a new vertex")
+        ("filename", po::value<std::string>(), "set the filename for the graph output")
         ;
 
     po::variables_map vm;
@@ -71,6 +74,15 @@ int main(int argc, char *argv[])
         max_edges = 3;
     }
 
+    if (vm.count("filename")) {
+        std::cout << "Set the filename to "
+                  << vm["filename"].as<std::string>() << "." << std::endl;
+        filename = vm["filename"].as<std::string>();
+    } else {
+        std::cout << "Default filename is test.gml." << std::endl;
+        filename = "test.gml";
+    }
+
     gsl_rng_env_setup();
 
     T = gsl_rng_default;
@@ -82,7 +94,7 @@ int main(int argc, char *argv[])
     std::cout << "Generating Graph..." << std::endl;
 
     WEvonet net(net_size, max_edges, r1, r2, r3);
-    net.print("test.gml", WEvonet::GRAPHML);
+    net.print(filename, WEvonet::GRAPHML);
 
     return EXIT_SUCCESS;
 }
