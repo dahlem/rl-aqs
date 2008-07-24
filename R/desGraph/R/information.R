@@ -11,7 +11,7 @@
 ## Author: Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 ## Maintainer: Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 ## Keywords: graph, analysis, degree, information-theory
-## Created: 15.07.2008
+## Created: 24.07.2008
 
 des.graph.info <- function(graph) {
   return(mean(des.graph.node.info(graph)))
