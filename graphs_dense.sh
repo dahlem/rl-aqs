@@ -12,7 +12,7 @@ do
 done
 
 # max edges
-filename=${OUT_DIR}/1000_max.gml
+filename=${OUT_DIR}/100_max.gml
 ./src/network/main/wevonet_main --size 100 $d --filename $filename
 
 exit 0
