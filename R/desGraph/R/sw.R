@@ -23,7 +23,8 @@ des.graph.sw <- function(graph) {
   return(data.frame(average.path,
                     diameter,
                     order,
-                    cluster.coefficient))
+                    cluster.coefficient,
+                    edge.density))
 }
 
 
