@@ -240,7 +240,18 @@ void WEvonet::advance(int p_steps)
         vertex_index_props_map[v] = vertices;
 
         // select vertices to connect to
-        unsigned int edges = gsl_rng_uniform_int(num_edges_rng.get(), max_edges) + 1;
+        unsigned int edges = 0;
+
+        // if MAX_EDGES is selected than the edges are deterministic
+        // otherwise they are stochastic bounded on the maximum number of available
+        // vertices
+        if (max_edges == WEvonet::MAX_EDGES) {
+            edges = vertices;
+        } else if (max_edges > vertices) {
+            edges = gsl_rng_uniform_int(num_edges_rng.get(), vertices) + 1;
+        } else {
+            edges = gsl_rng_uniform_int(num_edges_rng.get(), max_edges) + 1;
+        }
 
         for (unsigned int e = 0; e < edges; ++e) {
             double temp = 0.0;

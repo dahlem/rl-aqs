@@ -22,6 +22,8 @@
 #ifndef __WEVONET_HH__
 #define __WEVONET_HH__
 
+#include <limits>
+
 #include <boost/shared_ptr.hpp>
 using boost::shared_ptr;
 
@@ -166,6 +168,8 @@ typedef shared_ptr <gsl_rng> tGslRngSP;
 class WEvonet
 {
 public:
+    static const int MAX_EDGES = INT_MAX;
+
     /** @enum GraphTypes
      * This enum declares the supported output graph formats. Currently supported
      * are the dot format (graphviz) and the graphml format.

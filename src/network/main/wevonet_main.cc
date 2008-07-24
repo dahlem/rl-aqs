@@ -70,8 +70,8 @@ int main(int argc, char *argv[])
                   << vm["max_edges"].as<int>() << "." << std::endl;
         max_edges = vm["max_edges"].as<int>();
     } else {
-        std::cout << "Default maximum number of edges is 3." << std::endl;
-        max_edges = 3;
+        std::cout << "Default maximum number of edges is to MAX_edges." << std::endl;
+        max_edges = WEvonet::MAX_EDGES;
     }
 
     if (vm.count("filename")) {
