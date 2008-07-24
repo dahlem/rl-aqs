@@ -21,12 +21,11 @@ des.graph.info <- function(graph) {
 des.graph.node.info <- function(graph, vertex=V(graph)) {
   outdegree <- degree(graph, v=vertex, mode="out", loops=FALSE)
   outdegree <- outdegree[outdegree != 0]
-  weight <- 1/outdegree
   
-  return(des.graph.max.info(outdegree, weight))
+  return(des.graph.max.info(outdegree))
 }
 
 
 des.graph.max.info <- function(outdegree, weight) {
-  return((outdegree - 1) * weight * 2)
+  return(2 - 2/outdegree)
 }
