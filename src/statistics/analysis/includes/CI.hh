@@ -1,4 +1,4 @@
-// Copyright (C) 2007 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2007, 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This file is free software; as a special exception the author gives
 // unlimited permission to copy and/or distribute it, with or without
@@ -8,6 +8,10 @@
 // WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 // implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
+/** @file CI.hh
+ * Header file with the declaration of confidence intervals with a specified
+ * precision.
+ */
 #ifndef CI_HH
 #define CI_HH
 
