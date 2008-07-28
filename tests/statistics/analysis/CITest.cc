@@ -41,3 +41,16 @@ void CITest::testConf()
     CPPUNIT_ASSERT_EQUAL(4, replications - 1);
     CPPUNIT_ASSERT_EQUAL((double) 17.025, mean);
 }
+
+
+void CITest::testRecursiveConf()
+{
+    double data[5] = {15.2, 18.1, 16.5, 18.3, 16.6};
+    double means[5] = {15.2, 16.65, 16.6, 17.025, 16.94};
+    double ssd[4] = {0, 4.205, 4.22, 6.3875};
+
+
+    CPPUNIT_ASSERT(!CI::isConfidentWithPrecision(means[1], ssd[1], data[2], 3, 0.1, 0.1));
+    CPPUNIT_ASSERT(!CI::isConfidentWithPrecision(means[2], ssd[2], data[3], 4, 0.1, 0.1));
+    CPPUNIT_ASSERT(CI::isConfidentWithPrecision(means[3], ssd[3], data[4], 5, 0.1, 0.1));
+}

@@ -10,7 +10,7 @@
 
 /** @file Stats.hh
  * Header file with the declaration of standard statistics functions.
- */ 
+ */
 #ifndef __STATS_HH__
 #define __STATS_HH__
 
@@ -33,7 +33,7 @@ public:
     /** @fn double mean(int p_n, double p_xbar, double p_x)
      * Calculate the sample mean in a one-pass recursive manner using
      * Welford's algorithm.
-     * 
+     *
      * @param int the running number of data points
      * @param double the running sample mean
      * @param double the new data point
@@ -44,7 +44,7 @@ public:
     /** @fn double ssd(int p_n, double p_xbar, double p_sd, double p_x)
      * Calculate the running sum of squared deviations. In order to calculate
      * the sample variance divide the SSD by the number of data points, i.e.,
-     * \$ \sigma^2 = ssd / p_n \$. And consequently the sample standard deviation
+     * \f$ \sigma^2 = ssd / p_n \f$. And consequently the sample standard deviation
      * is the square root of the variance.
      *
      * @param int the running number of data points

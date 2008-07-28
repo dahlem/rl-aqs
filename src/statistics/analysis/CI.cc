@@ -20,6 +20,9 @@
 #include "CI.hh"
 using des::statistics::CI;
 
+#include "Stats.hh"
+using des::statistics::Stats;
+
 
 
 bool CI::isConfidentWithPrecision(
@@ -28,24 +31,45 @@ bool CI::isConfidentWithPrecision(
     double p_alpha,
     double p_error)
 {
+    double mean = gsl_stats_mean(p_data, 1, p_size);
+    double sv = gsl_stats_variance_m(p_data, 1, p_size, mean);
+
+    return CI::isConfidentWithPrecision(mean, sv, p_size, p_alpha, p_error);
+}
+
+
+bool CI::isConfidentWithPrecision(
+    const double p_xbar, const double p_sd, const double p_x,
+    const int p_size,
+    double p_alpha,
+    double p_error)
+{
+    double mean = Stats::mean(p_size, p_xbar, p_x);
+    double sv = Stats::ssd(p_size, p_xbar, p_sd, p_x) / (p_size - 1);
+
+    return CI::isConfidentWithPrecision(mean, sv, p_size, p_alpha, p_error);
+}
+
+
+bool CI::isConfidentWithPrecision(
+    const double p_mean, const double p_sv,
+    const int p_size, double p_alpha, double p_error)
+{
     double df = p_size - 1;
     double nu = 1 - (p_alpha / 2);
     double relAdjError = p_error / (1 + p_error);
     double t = gsl_cdf_tdist_Pinv(nu, df);
-    double mean = gsl_stats_mean(p_data, 1, p_size);
-    double sv = gsl_stats_variance_m(p_data, 1, p_size, mean);
     double ciHalfLength = 0.0;
 
-    if (gsl_isnan(sv)) {
+    if (gsl_isnan(p_sv)) {
         return 1;
     }
 
-    ciHalfLength = t * sqrt(sv / p_size);
+    ciHalfLength = t * sqrt(p_sv / p_size);
 
-    if ((ciHalfLength / fabs(mean)) <= relAdjError) {
+    if ((ciHalfLength / fabs(p_mean)) <= relAdjError) {
         return true;
     } else {
         return false;
     }
 }
-
