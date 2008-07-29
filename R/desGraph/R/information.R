@@ -13,19 +13,44 @@
 ## Keywords: graph, analysis, degree, information-theory
 ## Created: 24.07.2008
 
-des.graph.info <- function(graph) {
-  return(mean(des.graph.node.info(graph)))
+des.graph.max.info <- function(graph) {
+  return(mean(des.graph.node.max.info(graph)))
 }
 
 
-des.graph.node.info <- function(graph, vertex=V(graph)) {
+des.graph.node.max.info <- function(graph, vertex=V(graph)) {
   outdegree <- degree(graph, v=vertex, mode="out", loops=FALSE)
-  outdegree <- outdegree[outdegree != 0]
+  info <- des.graph.max.info.fn(outdegree)
+
+  # replace -Inf with zeros
+  info[info == -Inf] <- 0
   
-  return(des.graph.max.info(outdegree))
+  return(info)
 }
 
 
-des.graph.max.info <- function(outdegree, weight) {
+des.graph.max.info.fn <- function(outdegree) {
   return(2 - 2/outdegree)
+}
+
+
+des.graph.info <- function(graph) {
+  # for each vertex calculate the available information using
+  # the weights of all out-edges
+  
+  return(mean(sapply(V(graph), des.graph.node.info, graph=graph)))
+}
+
+
+des.graph.node.info <- function(vertex, graph) {
+  weights <- E(graph)[from(vertex)]$weight
+  outdegree <- 1/length(weights)
+  
+  return(des.graph.info.fn(outdegree, weights))
+}
+
+
+des.graph.info.fn <- function(outdegree, weights) {
+  diff <- outdegree - weights
+  return(sum(abs(diff)))
 }
