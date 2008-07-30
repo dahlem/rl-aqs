@@ -41,3 +41,52 @@ des.graph.degree <- function(graph, filename, ps=TRUE, from=NULL,
       dev.off();
   }
 }
+
+
+## from "Assortative Mixing in Networks" and "Mixing patterns in networks"
+## by Newman
+des.graph.degree.assortivity <- function(graph) {
+  M <- 1/length(E(graph))
+  j <- 0
+  k <- 0
+  jk <- 0
+  jSquared <- 0
+  kSquared <- 0
+
+  for (e in E(graph)) {
+    inV <- V(graph)[to(e)]
+    outV <- V(graph)[from(e)]
+
+    ji <- (degree(graph, inV, mode="in", loops=FALSE) - 1)
+    ki <- (degree(graph, outV, mode="out", loops=FALSE) - 1)
+
+    j <- j + ji
+    k <- k + ki
+
+    jk <- jk + ji * ki
+
+    jSquared <- jSquared + ji^2
+    kSquared <- kSquared + ki^2
+  }
+
+  r <- (jk - M * j * k) / (sqrt((jSquared - M * j^2) * (kSquared - M * k^2)))
+
+  return (r)
+}
+
+
+## from "Assortative Mixing in Networks" and "Mixing patterns in networks"
+## by Newman
+des.graph.degree.assortivity.sigma <- function(graph) {
+  r <- des.graph.degree.assortivity(graph)
+  sigma <- 0
+
+  for (e in E(graph)) {
+    g <- delete.edges(graph, e)
+    ri <- des.graph.degree.assortivity(g)
+
+    sigma <- sigma + (ri - r)^2
+  }
+
+  return (sigma)
+}
