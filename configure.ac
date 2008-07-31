@@ -48,11 +48,6 @@ AC_HEADER_STDC
 AC_CHECK_FUNCS([floor memset sqrt pow])
 
 
-# CPPUnit library checks
-PKG_CHECK_MODULES(CPPUNIT, cppunit >= 1.12.0)
-AC_SUBST(CPPUNIT_CFLAGS)
-AC_SUBST(CPPUNIT_LIBS)
-
 # GSL library checks
 AC_CHECK_LIB([m],[cos])
 AC_CHECK_LIB([gslcblas],[cblas_dgemm])
@@ -81,6 +76,40 @@ if test "x$DEBUGGING" = xyes; then
   AC_DEFINE(NDEBUG, 1, [define debugging, if enabled])
 fi
 
+# cppunit library check
+AC_ARG_ENABLE(test, AS_HELP_STRING(
+		     [--enable-test], 
+		     [enable the tests @<:@default=no@:>@]), 
+		     [TESTLIB=$enableval], [TESTLIB=no])
+
+if test x$TESTLIB = xyes; then
+  # CPPUnit library checks
+  PKG_CHECK_MODULES(CPPUNIT, cppunit >= 1.12.0)
+  AC_SUBST(CPPUNIT_CFLAGS)
+  AC_SUBST(CPPUNIT_LIBS)
+  AM_CONDITIONAL(CPPUNIT_SUPPORT, true)
+else
+  AM_CONDITIONAL(CPPUNIT_SUPPORT, false)
+fi
+
+
+# Check for MPI
+AC_ARG_ENABLE(mpi, AS_HELP_STRING(
+		   [--enable-mpi], 
+		   [enable MPI @<:@default=no@:>@]), 
+		   [USE_MPI=$enableval], [USE_MPI=no])
+if test "x$USE_MPI" = xyes; then
+   HAVE_MPI=TRUE
+   SNOW=", snow"
+   AC_SUBST(HAVE_MPI)
+   AC_SUBST(SNOW)
+else
+   HAVE_MPI=FALSE
+   SNOW=""
+   AC_SUBST(HAVE_MPI)
+   AC_SUBST(SNOW)
+fi
+
 
 # optional libraries
 AC_GCOV
@@ -107,6 +136,11 @@ AC_CONFIG_FILES([
    Makefile
    doc/Makefile
    m4/Makefile
+   R/Makefile
+   R/desGraph/Makefile
+   R/desGraph/DESCRIPTION
+   R/analysis/Makefile
+   R/analysis/assortativity-analysis.R
    src/Makefile
    src/date/Makefile
    src/io/Makefile

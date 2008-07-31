@@ -1,4 +1,4 @@
-# Copyright (C) 2007 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+# Copyright (C) 2007, 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 #  
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without 
@@ -10,10 +10,17 @@
 ACLOCAL_AMFLAGS = -I m4 -I /usr/share/aclocal
 
 
-SUBDIRS = m4 src doc tests
+SUBDIRS = m4 R src doc
+
+if CPPUNIT_SUPPORT
+  SUBDIRS += tests
+endif
+
 EXTRA_DIST = \
-	reconf \
 	README \
+	$(srcdir)/graphs/ \
+	$(srcdir)/graphs_dense.sh \
+	$(srcdir)/graphs.sh \
 	$(srcdir)/m4/ac_gcov.m4 \
 	$(srcdir)/m4/ac_valgrind.m4 \
 	$(srcdir)/m4/ac_perl_module_version.m4 \

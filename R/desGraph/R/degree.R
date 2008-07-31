@@ -90,3 +90,13 @@ des.graph.degree.assortivity.sigma <- function(graph) {
 
   return (sigma)
 }
+
+
+## from "Assortative Mixing in Networks" and "Mixing patterns in networks"
+## by Newman
+des.graph.degree.assortivity.sigma.i <- function(edge, graph, assortativity) {
+  g <- delete.edges(graph, edge)
+  ri <- des.graph.degree.assortivity(g)
+
+  return ((ri - assortativity)^2)
+}
