@@ -18,7 +18,7 @@ endif
 
 EXTRA_DIST = \
 	README \
-	$(srcdir)/graphs/ \
+	$(srcdir)/graphs \
 	$(srcdir)/graphs_dense.sh \
 	$(srcdir)/graphs.sh \
 	$(srcdir)/m4/ac_gcov.m4 \
@@ -26,6 +26,7 @@ EXTRA_DIST = \
 	$(srcdir)/m4/ac_perl_module_version.m4 \
 	$(srcdir)/m4/ax_boost_base.m4 \
 	$(srcdir)/m4/ax_prog_doxygen.m4 \
+	$(srcdir)/m4/acx_mpi.m4 \
 	$(srcdir)/mk/gcov.am \
 	$(srcdir)/mk/valgrind.am \
 	$(srcdir)/mk/gcov-recursive.am \
