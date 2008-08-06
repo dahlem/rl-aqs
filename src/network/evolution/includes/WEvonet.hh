@@ -82,7 +82,7 @@ typedef property <vertex_arrival_rate_t, float, VertexServiceRateProperty> Verte
 /** @typedef VertexProperties
  * This type definition assembles all the properties for the vertices of the graph
  */
-typedef property <vertex_index_t, uint32_t, VertexArrivalRateProperty> VertexProperties;
+typedef property <vertex_index_t, int, VertexArrivalRateProperty> VertexProperties;
 
 /** @typedef EdgeWeightProperty
  * Specifies the property for the edge weight

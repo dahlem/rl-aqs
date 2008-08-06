@@ -10,7 +10,7 @@
 
 AC_PREREQ(2.61)
 AC_INIT([Discrete Event Simulation for Service Interaction],
-        [0.9],
+        [1.0],
         [Dominik Dahlem Dominik.Dahlem@cs.tcd.ie], 
         [des])
 
@@ -166,6 +166,9 @@ AC_CONFIG_FILES([
    src/network/Makefile
    src/network/evolution/Makefile
    src/network/main/Makefile
+   src/core/Makefile
+   src/core/event/Makefile
+   src/core/main/Makefile
    tests/Makefile
    tests/common/Makefile
    tests/common/sort/Makefile
