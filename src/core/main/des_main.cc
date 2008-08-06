@@ -20,14 +20,13 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include <boost/program_options/options_description.hpp>
-#include <boost/program_options/parsers.hpp>
-#include <boost/program_options/value_semantic.hpp>
-#include <boost/program_options/variables_map.hpp>
-namespace po = boost::program_options;
-
 #include <boost/graph/graphml.hpp>
 #include <boost/graph/graphviz.hpp>
+
+#include "CL.hh"
+using des::core::desArgs_t;
+using des::core::tDesArgsSP;
+using des::core::CL;
 
 #include "WEvonet.hh"
 using des::network::EdgeWeightMap;
@@ -39,52 +38,19 @@ using des::network::VertexServiceRateMap;
 
 
 
-const std::string STOPTIME = "stop_time";
-const std::string GRAPH = "graph";
-const std::string HELP = "help";
-
-
-
 int main(int argc, char *argv[])
 {
-    long stop_time;
-    std::string filename;
+    tDesArgsSP desArgs(new desArgs_t);
+    CL cl;
 
-    // Declare the supported options.
-    // NOTE: [ddahlem] use a separte cc file for the command-line parsing logic.
-    po::options_description desc("General Configuration");
-    desc.add_options()
-        (HELP.c_str(), "produce help message")
-        (STOPTIME.c_str(), po::value<long>(), "set the stop time of the event simulator.")
-        (GRAPH.c_str(), po::value<std::string>(), "set the graph for the event simulator.")
-        ;
-
-    po::variables_map vm;
-    po::store(po::parse_command_line(argc, argv, desc), vm);
-    po::notify(vm);
-
-    if (vm.count(HELP)) {
-        std::cout << desc << std::endl;
+    if (cl.parse(argc, argv, desArgs)) {
         return EXIT_SUCCESS;
-    }
-
-    if (vm.count(STOPTIME.c_str())) {
-        stop_time = vm[STOPTIME.c_str()].as<long>();
-        std::cout << "Stopping time set to " << stop_time << "." << std::endl;
-    } else {
-        stop_time = 100;
-        std::cout << "Default stopping time is " << stop_time << "." << std::endl;
-    }
-
-    if (vm.count(GRAPH.c_str())) {
-        filename = vm[GRAPH.c_str()].as<std::string>();
-        std::cout << "Read graph from filename " << filename << "." << std::endl;
     }
 
     // generate/read graph
     Graph graph;
 
-    std::ifstream in(filename.c_str(), std::ifstream::in);
+    std::ifstream in((desArgs->graph_filename).c_str(), std::ifstream::in);
 
     if (in.is_open()) {
         boost::dynamic_properties dp;
