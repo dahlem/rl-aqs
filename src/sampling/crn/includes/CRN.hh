@@ -8,17 +8,23 @@
 // WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 // implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
+/** @file CRN.hh
+ * Declaration of the common random number interface.
+ */
 #ifndef CRN_HH
 #define CRN_HH
 
+#ifndef __STDC_CONSTANT_MACROS
+# define __STDC_CONSTANT_MACROS
+#endif /* __STDC_CONSTANT_MACROS */
 
+#include <string>
+#include <vector>
+
+#include <boost/cstdint.hpp>
 #include <boost/shared_ptr.hpp>
-using boost::shared_ptr;
 
 #include <gsl/gsl_rng.h>
-
-#include <vector>
-using std::vector;
 
 #include "SamplingException.hh"
 
@@ -32,7 +38,11 @@ namespace des
     namespace sampling
     {
 
-typedef shared_ptr<gsl_rng> tGslRngSP;
+/** @typedef tGslRngSP
+ * Typedef of the shared pointer to a GSL random number generator.
+ */
+typedef boost::shared_ptr<gsl_rng> tGslRngSP;
+
 
 /**
  * This class implements a layer to provide common random number generators
@@ -56,37 +66,45 @@ public:
     CRN();
     ~CRN();
 
-    /**
+    /** @fn init(unsigned long int p_seed)
      * Initialise a new GSL random number generator.
      *
-     * @param usigned long int the random number seed
+     * @param boost::intmax_t the random number seed
      * @return the index to the newly allocated GSL random number generator
      */
-    const signed int init(unsigned long int p_seed);
+    const boost::int32_t init(const boost::intmax_t p_seed);
 
-    /**
+    /** @fn get(const unsigned int p_rng) throw (SamplingException)
      * Retrieve the random number generator associated with a given index.
      *
-     * @param unsigned int the index of the random number generator
+     * @param const boost::uint32_t the index of the random number generator
      * @return the GSL random number generator
      * @throws SamplingException thrown, if the random number generator cannot
      *                           be returned
      */
-    tGslRngSP get(const unsigned int p_rng) throw (SamplingException);
+    tGslRngSP get(const boost::uint32_t p_rng) throw (SamplingException);
+
+    /** @fn log(std::string eventType)
+     * Log the seed and its purpose of use.
+     *
+     * @param const boost::intmax_t the seed of the random number generator
+     * @param std::string the event type
+     */
+    void log(const boost::intmax_t p_seed, std::string eventType);
 
 
 private:
 
-    /**
+    /** @typedef ptr_rng
      * type definition of a vector of random number generators.
      */
-    typedef vector<tGslRngSP>  ptr_rng;
+    typedef std::vector<tGslRngSP>  ptr_rng;
     ptr_rng m_gslRngs;
 
 };
 
 
-/**
+/** @typedef CRNSingleton
  * Define a singleton type of the <code>CRN</code> class.
  */
 typedef Singleton<CRN> CRNSingleton;

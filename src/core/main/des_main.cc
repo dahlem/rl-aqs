@@ -13,68 +13,99 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+#ifndef __STDC_CONSTANT_MACROS
+# define __STDC_CONSTANT_MACROS
+#endif /* __STDC_CONSTANT_MACROS */
+
 #include <fstream>
 #include <iostream>
 #include <string>
 
+#include <boost/cstdint.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/shared_ptr.hpp>
 
 #include <boost/graph/graphml.hpp>
 #include <boost/graph/graphviz.hpp>
 
+#include <gsl/gsl_randist.h>
+
 #include "CL.hh"
-using des::core::desArgs_t;
-using des::core::tDesArgsSP;
-using des::core::CL;
+namespace dcore = des::core;
+
+#include "CRN.hh"
+#include "Seeds.hh"
+namespace dsample = des::sampling;
 
 #include "WEvonet.hh"
-using des::network::EdgeWeightMap;
-using des::network::Graph;
-using des::network::Vertex;
-using des::network::VertexArrivalRateMap;
-using des::network::VertexIndexMap;
-using des::network::VertexServiceRateMap;
+namespace dnet = des::network;
 
 
 
 int main(int argc, char *argv[])
 {
-    tDesArgsSP desArgs(new desArgs_t);
-    CL cl;
+    dcore::tDesArgsSP desArgs(new dcore::desArgs_t);
+    dcore::CL cl;
+    boost::uint32_t cur_arrival;
+
 
     if (cl.parse(argc, argv, desArgs)) {
         return EXIT_SUCCESS;
     }
 
-    // generate/read graph
-    Graph graph;
+    dnet::Graph graph;
 
-    std::ifstream in((desArgs->graph_filename).c_str(), std::ifstream::in);
+    if (desArgs->graph_filename != "") {
+        // read the graph
+        std::ifstream in((desArgs->graph_filename).c_str(), std::ifstream::in);
 
-    if (in.is_open()) {
-        boost::dynamic_properties dp;
-        dp.property("id", get(boost::vertex_index, graph));
-        dp.property("weight", get(boost::edge_weight, graph));
-        dp.property("service_rate", get(vertex_service_rate, graph));
-        dp.property("arrival_rate", get(vertex_arrival_rate, graph));
+        if (in.is_open()) {
+            boost::dynamic_properties dp;
+            dp.property("id", get(boost::vertex_index, graph));
+            dp.property("weight", get(boost::edge_weight, graph));
+            dp.property("service_rate", get(vertex_service_rate, graph));
+            dp.property("arrival_rate", get(vertex_arrival_rate, graph));
 
-        boost::read_graphml(in, graph, dp);
+            boost::read_graphml(in, graph, dp);
 
-        in.close();
+            in.close();
+        } else {
+            std::cerr << "Error: Cannot open graph file " << desArgs->graph_filename
+                      << "!" << std::endl;
+        }
+    } else {
+        // generate the graph
+        std::cout << "Generate the graph " << std::endl;
     }
 
-    Vertex z = vertex(0, graph);
-    VertexArrivalRateMap vertex_arrival_props_map;
-    VertexIndexMap vertex_index_props_map;
-    VertexServiceRateMap vertex_service_props_map;
+    // initialise the random number seeds
+    dsample::Seeds seeds = dsample::SeedsSingleton::getInstance();
 
-    std::cout << boost::num_vertices(graph) << std::endl;
-    std::cout << vertex_service_props_map[z] << std::endl;
-    std::cout << vertex_arrival_props_map[z] << std::endl;
-    std::cout << vertex_index_props_map[z] << std::endl;
+    if (desArgs->seeds_filename != "") {
+        // read the seeds
+        seeds.init(desArgs->seeds_filename.c_str());
+    } else {
+        // generate the graph
+        std::cout << "Use random number to generate seeds." << std::endl;
+    }
+
+    // initialise the common random number container
+    dsample::CRN crn = dsample::CRNSingleton::getInstance();
+    boost::uint32_t seed = seeds.getSeed();
+    int index = crn.init(seed);
+    dsample::tGslRngSP rng = crn.get(index - 1);
+    crn.log(seed, "arrival events");
+
+    cur_arrival = 0;
 
     // for as long as there is no stopping event
+    while (cur_arrival < desArgs->stop_time) {
+        // generate arrival events
+        cur_arrival += gsl_ran_poisson(rng.get(), 4);
+
+        std::cout << cur_arrival << std::endl;
+    }
+
     // generate events over this graph
     // process events
 

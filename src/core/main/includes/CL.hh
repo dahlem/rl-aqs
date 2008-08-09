@@ -23,10 +23,14 @@
 #ifndef __CL_HH__
 #define __CL_HH__
 
+#ifndef __STDC_CONSTANT_MACROS
+# define __STDC_CONSTANT_MACROS
+#endif /* __STDC_CONSTANT_MACROS */
+
 #include <string>
 
+#include <boost/cstdint.hpp>
 #include <boost/shared_ptr.hpp>
-using boost::shared_ptr;
 
 #include <boost/program_options/options_description.hpp>
 namespace po = boost::program_options;
@@ -40,27 +44,29 @@ namespace des { namespace core {
  */
 const std::string STOPTIME = "stop_time";
 const std::string GRAPH = "graph";
+const std::string SEEDS = "seeds";
 const std::string HELP = "help";
 
 
 /** @typedef tOptDescSP
  * Specifies shared pointer to the boost options description
  */
-typedef shared_ptr <po::options_description> tOptDescSP;
+typedef boost::shared_ptr <po::options_description> tOptDescSP;
 
 
 /** @struct
  * structure specifying the command line variables.
  */
 struct desArgs_t {
-    long stop_time;               /* stopping time of the DES */
-    std::string graph_filename;   /* filename for the graph */
+    boost::uint32_t stop_time;      /* stopping time of the DES */
+    std::string graph_filename;     /* filename for the graph */
+    std::string seeds_filename;     /* filename for the seeds */
 };
 
 /** @typedef tDesArgsSP
  * Specifies shared pointer to the command line options
  */
-typedef shared_ptr <desArgs_t> tDesArgsSP;
+typedef boost::shared_ptr <desArgs_t> tDesArgsSP;
 
 
 

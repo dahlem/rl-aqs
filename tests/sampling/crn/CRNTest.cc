@@ -32,9 +32,41 @@ void CRNTest::testInit()
     CPPUNIT_ASSERT(rng.get() != NULL);
 }
 
+
 void CRNTest::testGetException()
 {
     CRN singleton = CRNSingleton::getInstance();
     int index = singleton.init(0);
     shared_ptr<gsl_rng> rng = singleton.get(index);
 }
+
+
+void CRNTest::testStreamEqual()
+{
+    CRN singleton = CRNSingleton::getInstance();
+    int index1 = singleton.init(0);
+    int index2 = singleton.init(0);
+    shared_ptr<gsl_rng> rng1 = singleton.get(index1 - 1);
+    shared_ptr<gsl_rng> rng2 = singleton.get(index2 - 1);
+
+    for (int i = 0; i < 10; ++i) {
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(gsl_rng_uniform(rng1.get()),
+                                     gsl_rng_uniform(rng2.get()),
+                                     0.00001);
+    }
+}
+
+
+void CRNTest::testStreamDifferent()
+{
+    CRN singleton = CRNSingleton::getInstance();
+    int index1 = singleton.init(999);
+    int index2 = singleton.init(0);
+    shared_ptr<gsl_rng> rng1 = singleton.get(index1 - 1);
+    shared_ptr<gsl_rng> rng2 = singleton.get(index2 - 1);
+
+    for (int i = 0; i < 10; ++i) {
+        CPPUNIT_ASSERT(gsl_rng_uniform(rng1.get()) != gsl_rng_uniform(rng2.get()));
+    }
+}
+

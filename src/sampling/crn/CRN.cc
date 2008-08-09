@@ -8,7 +8,12 @@
 // WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 // implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-#include <cstddef>
+/** @file CRN.cc
+ * Implementation of the common random number interface @ref{CRN.hh}
+ */
+#include <iostream>
+
+#include <gsl/gsl_rng.h>
 
 #include "CRN.hh"
 using des::sampling::CRN;
@@ -20,24 +25,36 @@ CRN::CRN()
     gsl_rng_env_setup();
 }
 
+
 CRN::~CRN()
 {
 }
 
-const signed int CRN::init(unsigned long int p_seed)
+
+const boost::int32_t CRN::init(const boost::intmax_t p_seed)
 {
     const gsl_rng_type *rng_type = gsl_rng_default;
 
-    m_gslRngs.push_back(tGslRngSP(gsl_rng_alloc(rng_type), gsl_rng_free));
+    tGslRngSP rng = tGslRngSP(gsl_rng_alloc(rng_type), gsl_rng_free);
+    gsl_rng_set(rng.get(), p_seed);
+
+    m_gslRngs.push_back(rng);
 
     return m_gslRngs.size();
 }
 
-tGslRngSP CRN::get(const unsigned int p_rng) throw (SamplingException)
+
+tGslRngSP CRN::get(const boost::uint32_t p_rng) throw (SamplingException)
 {
-    if ((p_rng >= 0) && (p_rng < m_gslRngs.size())) {
+    if (p_rng < m_gslRngs.size()) {
         return m_gslRngs[p_rng];
     } else {
         throw SamplingException(SamplingException::UNKNOWN_INDEX);
     }
+}
+
+
+void CRN::log(const boost::intmax_t p_seed, std::string eventType)
+{
+    std::cout << "Use seed " << p_seed << " for the " << eventType << "." << std::endl;
 }
