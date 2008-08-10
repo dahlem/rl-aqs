@@ -94,7 +94,7 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
             std::cout << "Read seeds from filename "
                       << desArgs->seeds_filename << "." << std::endl;
         } else {
-            std::cerr << "Error: Seeds file " << desArgs->graph_filename
+            std::cerr << "Error: Seeds file " << desArgs->seeds_filename
                       << " does not exist!" << std::endl;
 
             return EXIT_FAILURE;

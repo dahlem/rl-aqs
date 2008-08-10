@@ -13,11 +13,17 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+#ifndef __STDC_CONSTANT_MACROS
+# define __STDC_CONSTANT_MACROS
+#endif /* __STDC_CONSTANT_MACROS */
+
 #include <iostream>
 #include <string>
 
 #include <boost/shared_ptr.hpp>
-using boost::shared_ptr;
+
+#include <boost/filesystem.hpp>
+namespace fs = boost::filesystem;
 
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/parsers.hpp>
@@ -25,8 +31,19 @@ using boost::shared_ptr;
 #include <boost/program_options/variables_map.hpp>
 namespace po = boost::program_options;
 
+#include "CRN.hh"
+#include "Seeds.hh"
+namespace dsample = des::sampling;
+
 #include "WEvonet.hh"
 using des::network::WEvonet;
+
+
+const std::string HELP = "help";
+const std::string SEEDS = "seeds";
+const std::string SIZE = "size";
+const std::string MAX_EDGES = "max_edges";
+const std::string FILENAME = "filename";
 
 
 
@@ -34,61 +51,118 @@ int main(int argc, char *argv[])
 {
     int net_size;
     int max_edges;
-    const gsl_rng_type * T;
-    shared_ptr <gsl_rng> r1, r2, r3;
+    dsample::tGslRngSP r1, r2, r3;
     std::string filename;
+    std::string seeds_file;
 
     // Declare the supported options.
     po::options_description desc("Configuration");
     desc.add_options()
-        ("help", "produce help message")
-        ("size", po::value<int>(), "set the size of the network")
-        ("max_edges", po::value<int>(), "set the maximum number of edges to connect a new vertex")
-        ("filename", po::value<std::string>(), "set the filename for the graph output")
+        (HELP.c_str(), "produce help message")
+        (SIZE.c_str(), po::value<int>(), "set the size of the network")
+        (MAX_EDGES.c_str(), po::value<int>(), "set the maximum number of edges to connect a new vertex")
+        (FILENAME.c_str(), po::value<std::string>(), "set the filename for the graph output")
+        (SEEDS.c_str(), po::value <std::string>(), "set the seeds for the event simulator.")
         ;
 
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);
     po::notify(vm);
 
-    if (vm.count("help")) {
+    if (vm.count(HELP.c_str())) {
         std::cout << desc << std::endl;
         return EXIT_SUCCESS;
     }
 
-    if (vm.count("size")) {
+    if (vm.count(SIZE.c_str())) {
         std::cout << "Size of network set to "
-                  << vm["size"].as<int>() << "." << std::endl;
-        net_size = vm["size"].as<int>();
+                  << vm[SIZE.c_str()].as<int>() << "." << std::endl;
+        net_size = vm[SIZE.c_str()].as<int>();
     } else {
         std::cout << "Default network size is 10." << std::endl;
         net_size = 10;
     }
 
-    if (vm.count("max_edges")) {
+    if (vm.count(MAX_EDGES.c_str())) {
         std::cout << "Maximum number of edges is set to "
-                  << vm["max_edges"].as<int>() << "." << std::endl;
-        max_edges = vm["max_edges"].as<int>();
+                  << vm[MAX_EDGES.c_str()].as<int>() << "." << std::endl;
+        max_edges = vm[MAX_EDGES.c_str()].as<int>();
     } else {
         std::cout << "Default maximum number of edges is to MAX_edges." << std::endl;
         max_edges = WEvonet::MAX_EDGES;
     }
 
-    if (vm.count("filename")) {
+    if (vm.count(FILENAME.c_str())) {
         std::cout << "Set the filename to "
-                  << vm["filename"].as<std::string>() << "." << std::endl;
-        filename = vm["filename"].as<std::string>();
+                  << vm[FILENAME.c_str()].as<std::string>() << "." << std::endl;
+        filename = vm[FILENAME.c_str()].as<std::string>();
     } else {
         std::cout << "Default filename is test.gml." << std::endl;
         filename = "test.gml";
     }
 
-    gsl_rng_env_setup();
+    if (vm.count(SEEDS.c_str())) {
+        seeds_file = vm[SEEDS.c_str()].as <std::string>();
+        if (fs::exists(seeds_file)) {
+            std::cout << "Read seeds from filename "
+                      << seeds_file << "." << std::endl;
+        } else {
+            std::cerr << "Error: Seeds file " << seeds_file
+                      << " does not exist!" << std::endl;
 
-    T = gsl_rng_default;
-    r1 = shared_ptr <gsl_rng>(gsl_rng_alloc(T), gsl_rng_free);
-    r2 = shared_ptr <gsl_rng>(gsl_rng_alloc(T), gsl_rng_free);
-    r3 = shared_ptr <gsl_rng>(gsl_rng_alloc(T), gsl_rng_free);
+            return EXIT_FAILURE;
+        }
+    }
+
+    // initialise the common random number container
+    // initialise the random number seeds and the common random number container
+    dsample::Seeds seeds = dsample::SeedsSingleton::getInstance();
+    dsample::CRN crn = dsample::CRNSingleton::getInstance();
+    boost::int32_t arrival_rng_index;
+    boost::int32_t seeds_rng_index;
+    boost::int32_t uniform_rng_index;
+    boost::int32_t num_edges_rng_index;
+    boost::uint32_t seed = 0;
+
+    if (seeds_file != "") {
+        // read the seeds
+        seeds.init(seeds_file.c_str());
+
+        // init the crn for the arrival events
+        seed = seeds.getSeed();
+        arrival_rng_index = crn.init(seed);
+        crn.log(seed, "vertex arrival rate");
+        seed = seeds.getSeed();
+        uniform_rng_index = crn.init(seed);
+        crn.log(seed, "uniform");
+        seed = seeds.getSeed();
+        num_edges_rng_index = crn.init(seed);
+        crn.log(seed, "number of edges");
+    } else {
+        // generate the seeds
+        std::cout << "Use random number to generate seeds." << std::endl;
+
+        // 1. init the random number generator for the seeds
+        seeds_rng_index = crn.init(gsl_rng_default_seed);
+        crn.log(gsl_rng_default_seed, "seeds");
+
+        dsample::tGslRngSP seeds_rng = crn.get(seeds_rng_index - 1);
+
+        // 2. init the crn for the arrival events
+        seed = gsl_rng_uniform_int(seeds_rng.get(), gsl_rng_max(seeds_rng.get()));
+        arrival_rng_index = crn.init(seed);
+        crn.log(seed, "arrival events");
+        seed = gsl_rng_uniform_int(seeds_rng.get(), gsl_rng_max(seeds_rng.get()));
+        uniform_rng_index = crn.init(seed);
+        crn.log(seed, "uniform");
+        seed = gsl_rng_uniform_int(seeds_rng.get(), gsl_rng_max(seeds_rng.get()));
+        num_edges_rng_index = crn.init(seed);
+        crn.log(seed, "number of edges");
+    }
+
+    r1 = crn.get(num_edges_rng_index - 1);
+    r2 = crn.get(uniform_rng_index - 1);
+    r3 = crn.get(arrival_rng_index - 1);
 
     // use the WEvonet class
     std::cout << "Generating Graph..." << std::endl;

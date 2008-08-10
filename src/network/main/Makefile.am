@@ -27,12 +27,18 @@ wevonet_main_SOURCES =                                                \
 
 wevonet_main_CPPFLAGS =                                               \
 	-I$(top_srcdir)/src/network/evolution/includes                \
+	-I$(top_srcdir)/src/sampling/crn/includes                     \
+	-I$(top_srcdir)/src/design/pattern/includes                   \
+	-I$(top_srcdir)/src/sampling/common/includes                  \
 	$(BOOST_CPPFLAGS)
 
 
 wevonet_main_LDADD =                                                  \
-	../evolution/libnetevo.la                                     \
+	$(top_srcdir)/src/network/evolution/libnetevo.la              \
+	$(top_srcdir)/src/sampling/crn/libsamplingcrn.la              \
+	$(top_srcdir)/src/sampling/common/libsamplingcommon.la        \
 	-lboost_program_options                                       \
+	-lboost_filesystem                                            \
 	$(BOOST_LDFLAGS)
 
 
