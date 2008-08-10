@@ -1,12 +1,22 @@
-// Copyright (C) 2007-2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
-//  
-// This file is free software; as a special exception the author gives
-// unlimited permission to copy and/or distribute it, with or without 
-// modifications, as long as this notice is preserved.
-// 
-// This program is distributed in the hope that it will be useful, but
-// WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
-// implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// Copyright (C) 2007,2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+
+/** @file Ladder.cc
+ * Implementation of the ladder structure @ref{Ladder.hh} of the Ladder Queue.
+ */
 
 #include <cmath>
 #include <cstddef>
@@ -174,9 +184,9 @@ int Ladder::bucket(double p_TS, int p_rung)
     return retVal;
 }
 
-void Ladder::pushBack(node_double_t *p_list, long p_size) 
+void Ladder::pushBack(node_double_t *p_list, long p_size)
 {
-    enlist(m_lowestRung, p_list, p_size);    
+    enlist(m_lowestRung, p_list, p_size);
 
     // advance dequeue bucket
     advanceDequeueBucket(1);
@@ -189,7 +199,7 @@ void Ladder::enqueue(entry_t *const p_entry) throw (QueueException)
     if (getNBucket() == 0) {
         throw QueueException(QueueException::NO_EPOCH_INIT);
     }
-    
+
     int nRungs = 0;
 
     // find the rung
@@ -239,7 +249,7 @@ void Ladder::enlist(node_double_t *p_list, long p_size,
     if (getNBucket() != 0) {
         throw QueueException(QueueException::EPOCH_EXISTS);
     }
-    
+
     // nothing to do
     if (p_size == 0) {
         return;

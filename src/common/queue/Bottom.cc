@@ -1,12 +1,22 @@
-// Copyright (C) 2007-2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
-//  
-// This file is free software; as a special exception the author gives
-// unlimited permission to copy and/or distribute it, with or without 
-// modifications, as long as this notice is preserved.
-// 
-// This program is distributed in the hope that it will be useful, but
-// WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
-// implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// Copyright (C) 2007,2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+
+/** @file Bottom.cc
+ * Implementation of the bottom structure @ref{Bottom.hh} of the Ladder Queue.
+ */
 
 #include <cstddef>
 
@@ -67,7 +77,7 @@ void Bottom::init()
  * maintains a sorted list, this enqueue operation uses an insertion algorithm
  * starting from the back of the queue in order to maintain stability. Otherwise,
  * the bottom structure would not offer stability characteristics.
- * 
+ *
  * @see Queue#enqueue(entry_t*) throw (QueueException)
  */
 void Bottom::enqueue(entry_t *const p_entry) throw (QueueException)
@@ -157,7 +167,7 @@ entry_t *const Bottom::dequeue()
     return result;
 }
 
-double Bottom::getMaxTS() 
+double Bottom::getMaxTS()
 {
     if (m_size != 0) {
         return m_tail->previous->data->arrival;
@@ -166,7 +176,7 @@ double Bottom::getMaxTS()
     return m_lastEvent;
 }
 
-double Bottom::getMinTS() 
+double Bottom::getMinTS()
 {
     if (m_size != 0) {
         return m_head->next->data->arrival;

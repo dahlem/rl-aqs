@@ -1,12 +1,22 @@
-// Copyright (C) 2007-2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
-//  
-// This file is free software; as a special exception the author gives
-// unlimited permission to copy and/or distribute it, with or without 
-// modifications, as long as this notice is preserved.
-// 
-// This program is distributed in the hope that it will be useful, but
-// WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
-// implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// Copyright (C) 2007,2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+
+/** @file LadderQueue.cc
+ * Implementation of the Ladder Queue @ref{LadderQueue.hh}.
+ */
 
 #include <cstddef>
 
@@ -15,14 +25,14 @@ using des::common::LadderQueue;
 
 
 
-LadderQueue::LadderQueue() 
+LadderQueue::LadderQueue()
 {
     m_top = new Top();
     m_ladder = new Ladder();
     m_bottom = new Bottom();
 }
 
-LadderQueue::~LadderQueue() 
+LadderQueue::~LadderQueue()
 {
     delete m_top;
     delete m_ladder;
@@ -60,7 +70,7 @@ void LadderQueue::enqueue(entry_t *const p_entry) throw (QueueException)
                 if (success) {
                     long size = m_bottom->size();
                     node_double_t *list = m_bottom->delist();
-                    
+
                     m_ladder->pushBack(list, size);
                 }
             }
@@ -76,7 +86,7 @@ entry_t *const LadderQueue::dequeue()
     } else {
         // otherwise the ladder will transfer events to the bottom
         int size = m_ladder->getNBucket();
-        
+
         if (size > 0) {
             // the ladder contains events to be transferred to bottom
             m_bottom->enlist(m_ladder->delist()->next, size);

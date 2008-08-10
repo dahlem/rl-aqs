@@ -17,10 +17,14 @@ des_main_SOURCES =                                                    \
 des_main_CPPFLAGS =                                                   \
 	$(BOOST_CPPFLAGS)                                             \
 	-I./includes                                                  \
+	-I$(top_srcdir)/src/core/event/includes                       \
 	-I$(top_srcdir)/src/network/evolution/includes                \
 	-I$(top_srcdir)/src/sampling/crn/includes                     \
 	-I$(top_srcdir)/src/design/pattern/includes                   \
-	-I$(top_srcdir)/src/sampling/common/includes
+	-I$(top_srcdir)/src/sampling/common/includes                  \
+	-I$(top_srcdir)/src/common/queue/includes                     \
+	-I$(top_srcdir)/src/common/sort/includes                      \
+	-I$(top_srcdir)/src/common/list/includes
 
 
 des_main_LDADD =                                                      \
@@ -31,7 +35,10 @@ des_main_LDADD =                                                      \
 	-lgsl                                                         \
 	-lm                                                           \
 	$(top_srcdir)/src/sampling/crn/libsamplingcrn.la              \
-	$(top_srcdir)/src/sampling/common/libsamplingcommon.la
+	$(top_srcdir)/src/sampling/common/libsamplingcommon.la        \
+	$(top_srcdir)/src/common/queue/libcommonqueue.la              \
+	$(top_srcdir)/src/common/list/libcommonlist.la                \
+	$(top_srcdir)/src/common/sort/libcommonsort.la
 
 
 include_HEADERS = includes

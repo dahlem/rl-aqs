@@ -1,12 +1,22 @@
-// Copyright (C) 2007 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
-//  
-// This file is free software; as a special exception the author gives
-// unlimited permission to copy and/or distribute it, with or without 
-// modifications, as long as this notice is preserved.
-// 
-// This program is distributed in the hope that it will be useful, but
-// WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
-// implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// Copyright (C) 2007,2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+
+/** @file Ladder.hh
+ * Declaration of the ladder structure of the Ladder Queue.
+ */
 
 #ifndef LADDER_HH
 #define LADDER_HH
@@ -34,7 +44,7 @@ namespace des
 {
     namespace common
     {
-        
+
 
 
 /**
@@ -132,7 +142,7 @@ public:
      * @return the minimum arrival timestamp of a given rung for enqueuing events
      */
     double getRCur(int p_rung);
-    
+
     /**
      * @return the minimum arrival timestamp of a given rung for enqueuing events
      *         on the currently active rung
@@ -148,9 +158,9 @@ public:
     /**
      * The rung structure is updated according to the following equations. Those
      * do not follow the ones presented in the TOMACS journal.
-     * \f$ \forall i \ge 2 \f$, 
-     * \f$ bucketwidth[i] = bucketwidth[i-1] / (THRES-1) \f$, 
-     * \f$ Rstart[i] = Rcur[i-1] - bucketwidth[i-1] \f$, 
+     * \f$ \forall i \ge 2 \f$,
+     * \f$ bucketwidth[i] = bucketwidth[i-1] / (THRES-1) \f$,
+     * \f$ Rstart[i] = Rcur[i-1] - bucketwidth[i-1] \f$,
      * \f$ Rcur[i] = Rcur[i-1] - bucketwidth[i-1] + bucketwidth[i] \f$;
      *
      * @param bool specifies whether the spawn process entails copying events
@@ -185,7 +195,7 @@ private:
      * \f[
      *   bucketwidth = 1.0
      * \f], if \f$ max==min \f$.
-     * 
+     *
      * @param double the maximum arrival timestamp
      * @param double the minimum arrival timestamp
      * @param long the number of events
@@ -200,7 +210,7 @@ private:
      * \f[
      *   bucket = \lfloor (ts - Rstart[rung]) / bucketwidth[rung] \rfloor
      * \f]
-     * 
+     *
      * @param double the timestamp of an event to be inserted in a rung
      * @param int the rung where the event is to be inserted to
      * @return the index of the bucket in the given rung where the event with
@@ -237,10 +247,10 @@ private:
      * Initialise the ladder structure.
      */
     void init();
-    
+
     /**
      * Insert a list into a specified rung.
-     * 
+     *
      * @param the rung
      * @param the list
      * @param the size of the list

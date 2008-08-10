@@ -1,12 +1,22 @@
-// Copyright (C) 2007-2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
-//  
-// This file is free software; as a special exception the author gives
-// unlimited permission to copy and/or distribute it, with or without 
-// modifications, as long as this notice is preserved.
-// 
-// This program is distributed in the hope that it will be useful, but
-// WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
-// implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// Copyright (C) 2007,2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+
+/** @file Top.hh
+ * Implementation of the top structure @ref{Top.hh} of the Ladder Queue.
+ */
 
 #include <cstddef>
 #include <cfloat>
@@ -16,7 +26,7 @@ using des::common::Top;
 
 
 
-Top::Top() 
+Top::Top()
     : m_maxTS(0.0), m_minTS(DBL_MAX), m_topStart(0.0)
 {
     m_fifo = new Fifo();
@@ -61,7 +71,7 @@ void Top::enqueue(entry_t *const p_entry) throw (QueueException)
 {
     setMaxTS(p_entry->arrival);
     setMinTS(p_entry->arrival);
-    
+
     m_fifo->enqueue(p_entry);
 }
 
@@ -72,11 +82,11 @@ entry_t *const Top::dequeue()
     if (result != NULL) {
         m_topStart = result->arrival;
     }
-    
+
     return result;
 }
 
-void Top::setMaxTS(double p_maxTS) 
+void Top::setMaxTS(double p_maxTS)
 {
     if (p_maxTS > m_maxTS) {
         m_maxTS = p_maxTS;
@@ -97,7 +107,7 @@ node_double_t *Top::delist()
     try {
         result = m_fifo->delist();
         m_topStart = m_maxTS;
-        
+
         reset();
     } catch (QueueException &qe) {
         // cannot happen here
@@ -106,7 +116,7 @@ node_double_t *Top::delist()
     return result;
 }
 
-void Top::enlist(node_double_t *p_list, long p_size) 
+void Top::enlist(node_double_t *p_list, long p_size)
 {
     m_fifo->enlist(p_list, p_size);
 }
