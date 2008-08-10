@@ -6,3 +6,8 @@
 src/network/main/network_add_vertices
 tests/statistics/correlation/StatsCorrelationSuite
 /README
+/gprof
+/.RData
+/.Rhistory
+/*.png
+/des*tar*
