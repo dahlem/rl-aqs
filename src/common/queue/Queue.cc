@@ -18,6 +18,10 @@
  * Implementation of the Queue @ref{Queue.hh}
  */
 
+#if HAVE_CONFIG_H
+# include <config.h>
+#endif
+
 #include "Queue.hh"
 using des::common::Queue;
 
@@ -25,3 +29,9 @@ using des::common::Queue;
 
 Queue::~Queue()
 {}
+
+
+#ifdef HAVE_LADDERSTATS
+void Queue::record() {}
+#endif /* HAVE_LADDERSTATS */
+

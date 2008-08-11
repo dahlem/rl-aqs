@@ -17,6 +17,21 @@
 /** @file Bottom.cc
  * Implementation of the bottom structure @ref{Bottom.hh} of the Ladder Queue.
  */
+#if HAVE_CONFIG_H
+# include <config.h>
+#endif
+
+#ifdef HAVE_LADDERSTATS
+# include <iostream>
+# include <ostream>
+# include <string>
+
+# include <boost/iostreams/stream.hpp>
+namespace bio = boost::iostreams;
+
+# include <boost/shared_ptr.hpp>
+#endif /* HAVE_LADDERSTATS */
+
 
 #include <cstddef>
 
@@ -33,6 +48,20 @@ Bottom::Bottom()
     m_lastEvent = 0.0;
 
     init();
+
+#ifdef HAVE_LADDERSTATS
+    events_in = 0;
+    events_out = 0;
+
+    std::string bottomfile = "./bottom-stats.txt";
+
+    // create a buffer
+    buf = tStrBufSP(new str_buf(bottomfile.c_str()));
+
+    // create a output stream
+    os = tOstreamSP(new std::ostream(buf.get()));
+    (*os.get()) << "EventsIn,EventsOut,NumEvents"  << std::endl;
+#endif /* HAVE_LADDERSTATS */
 }
 
 Bottom::~Bottom()
@@ -55,6 +84,19 @@ Bottom::~Bottom()
     delete m_head;
     delete m_tail;
 }
+
+
+#ifdef HAVE_LADDERSTATS
+void Bottom::record()
+{
+    (*os.get()) << events_in << "," << events_out << "," << size() << std::endl;
+
+    // reset the stat fields
+    events_in = 0;
+    events_out = 0;
+}
+#endif /* HAVE_LADDERSTATS */
+
 
 const long Bottom::size()
 {
@@ -107,6 +149,10 @@ void Bottom::enqueue(entry_t *const p_entry) throw (QueueException)
 
         temp = temp->previous;
     }
+
+#ifdef HAVE_LADDERSTATS
+    events_in++;
+#endif /* HAVE_LADDERSTATS */
 }
 
 /**
@@ -133,6 +179,10 @@ void Bottom::enlist(node_double_t *p_list, long p_size)
         m_head->next = t;
 
         m_size += p_size;
+
+#ifdef HAVE_LADDERSTATS
+        events_in += p_size;
+#endif /* HAVE_LADDERSTATS */
     }
 }
 
@@ -163,6 +213,10 @@ entry_t *const Bottom::dequeue()
     m_size--;
 
     m_lastEvent = result->arrival;
+
+#ifdef HAVE_LADDERSTATS
+    events_out++;
+#endif /* HAVE_LADDERSTATS */
 
     return result;
 }

@@ -17,10 +17,12 @@
 /** @file LadderQueue.hh
  * Declaration of the Ladder Queue.
  */
-
 #ifndef LADDERQUEUE_HH
 #define LADDERQUEUE_HH
 
+#if HAVE_CONFIG_H
+# include <config.h>
+#endif
 
 #include "Bottom.hh"
 using des::common::Bottom;
@@ -69,6 +71,11 @@ class LadderQueue: public Queue
 public:
     LadderQueue();
     ~LadderQueue();
+
+
+#ifdef HAVE_LADDERSTATS
+    void record();
+#endif /* HAVE_LADDERSTATS */
 
     /**
      * @see Queue#enqueue(entry_t* const) throw (QueueException)

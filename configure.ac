@@ -111,6 +111,17 @@ else
 fi
 
 
+# Check for ladder stats
+# can be enabled to record statistics for the ladder queue
+AC_ARG_ENABLE(ladder-stats, AS_HELP_STRING(
+		   [--enable-ladder-stats], 
+		   [enable Ladder Queue statistics @<:@default=no@:>@]), 
+		   [USE_LADDERSTATS=$enableval], [USE_LADDERSTATS=no])
+if test "x$USE_LADDERSTATS" = xyes; then
+   AC_DEFINE(HAVE_LADDERSTATS, 1, [Define to 1 if ladder queue statistics are requested.])]
+fi
+
+
 # optional libraries
 AC_GCOV
 AC_VALGRIND

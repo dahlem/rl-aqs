@@ -17,6 +17,21 @@
 /** @file Ladder.cc
  * Implementation of the ladder structure @ref{Ladder.hh} of the Ladder Queue.
  */
+#if HAVE_CONFIG_H
+# include <config.h>
+#endif
+
+#ifdef HAVE_LADDERSTATS
+# include <iostream>
+# include <ostream>
+# include <string>
+
+# include <boost/iostreams/stream.hpp>
+namespace bio = boost::iostreams;
+
+# include <boost/shared_ptr.hpp>
+#endif /* HAVE_LADDERSTATS */
+
 
 #include <cmath>
 #include <cstddef>
@@ -67,6 +82,20 @@ void Ladder::init()
             m_rungs[i][j] = new Fifo();
         }
     }
+
+#ifdef HAVE_LADDERSTATS
+    events_in = 0;
+    events_out = 0;
+
+    std::string ladderfile = "./ladder-stats.txt";
+
+    // create a buffer
+    buf = tStrBufSP(new str_buf(ladderfile.c_str()));
+
+    // create a output stream
+    os = tOstreamSP(new std::ostream(buf.get()));
+    (*os.get()) << "EventsIn,EventsOut,NumEvents,NumRungs"  << std::endl;
+#endif /* HAVE_LADDERSTATS */
 }
 
 Ladder::~Ladder()
@@ -92,6 +121,18 @@ Ladder::~Ladder()
     delete[] m_events;
     delete[] m_currentBucket;
 }
+
+#ifdef HAVE_LADDERSTATS
+void Ladder::record()
+{
+    (*os.get()) << events_in << "," << events_out << "," << getNBC() << getNRung() << std::endl;
+
+    // reset the stat fields
+    events_in = 0;
+    events_out = 0;
+}
+#endif /* HAVE_LADDERSTATS */
+
 
 double Ladder::getBucketwidth(int p_rung) throw (QueueException)
 {
@@ -229,6 +270,10 @@ void Ladder::enlist(int p_rung, node_double_t *p_list, long p_size)
         m_rungs[p_rung][bucket(p_list->data->arrival, p_rung)]->enlist(p_list, 1);
         m_events[p_rung]++;
         p_list = p_list->next;
+
+#ifdef HAVE_LADDERSTATS
+        events_in++;
+#endif /* HAVE_LADDERSTATS */
     }
 }
 
@@ -269,6 +314,10 @@ void Ladder::enlist(node_double_t *p_list, long p_size,
 
 node_double_t *Ladder::delist()
 {
+#ifdef HAVE_LADDERSTATS
+    events_out += m_rungs[m_lowestRung][m_currentBucket[m_lowestRung]]->size();
+#endif /* HAVE_LADDERSTATS */
+
     // keep track of the events in each rung
     m_events[m_lowestRung] -= m_rungs[m_lowestRung][m_currentBucket[m_lowestRung]]->size();
 

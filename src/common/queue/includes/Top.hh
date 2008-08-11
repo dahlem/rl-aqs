@@ -17,10 +17,12 @@
 /** @file Top.hh
  * Declaration of the top structure of the Ladder Queue.
  */
-
 #ifndef TOP_HH
 #define TOP_HH
 
+#if HAVE_CONFIG_H
+# include <config.h>
+#endif
 
 #include "Entry.hh"
 using des::common::entry_t;
@@ -60,6 +62,10 @@ class Top: public Queue, List
 public:
     Top();
     ~Top();
+
+#ifdef HAVE_LADDERSTATS
+    void record();
+#endif /* HAVE_LADDERSTATS */
 
     /**
      * @see Queue#enqueue(entry_t* const) throw (QueueException)

@@ -17,10 +17,12 @@
 /** @file Ladder.hh
  * Declaration of the ladder structure of the Ladder Queue.
  */
-
 #ifndef LADDER_HH
 #define LADDER_HH
 
+#if HAVE_CONFIG_H
+# include <config.h>
+#endif
 
 #include "Entry.hh"
 using des::common::entry_t;
@@ -60,6 +62,10 @@ public:
     Ladder();
     Ladder(int p_thres);
     ~Ladder();
+
+#ifdef HAVE_LADDERSTATS
+    void record();
+#endif /* HAVE_LADDERSTATS */
 
     /**
      * @see Queue#enqueue(entry_t* const) throw (QueueException)

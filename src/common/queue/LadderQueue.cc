@@ -17,6 +17,9 @@
 /** @file LadderQueue.cc
  * Implementation of the Ladder Queue @ref{LadderQueue.hh}.
  */
+#if HAVE_CONFIG_H
+# include <config.h>
+#endif
 
 #include <cstddef>
 
@@ -38,6 +41,17 @@ LadderQueue::~LadderQueue()
     delete m_ladder;
     delete m_bottom;
 }
+
+
+#ifdef HAVE_LADDERSTATS
+void LadderQueue::record()
+{
+    m_top->record();
+    m_ladder->record();
+    m_bottom->record();
+}
+#endif /* HAVE_LADDERSTATS */
+
 
 void LadderQueue::enqueue(entry_t *const p_entry) throw (QueueException)
 {
