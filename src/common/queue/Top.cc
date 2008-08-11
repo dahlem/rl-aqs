@@ -17,7 +17,6 @@
 /** @file Top.hh
  * Implementation of the top structure @ref{Top.hh} of the Ladder Queue.
  */
-
 #if HAVE_CONFIG_H
 # include <config.h>
 #endif
