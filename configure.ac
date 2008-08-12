@@ -121,6 +121,16 @@ if test "x$USE_LADDERSTATS" = xyes; then
    AC_DEFINE(HAVE_LADDERSTATS, 1, [Define to 1 if ladder queue statistics are requested.])]
 fi
 
+# Check for ladder timing
+# can be enabled to record statistics for the ladder queue
+AC_ARG_ENABLE(ladder-timing, AS_HELP_STRING(
+		   [--enable-ladder-timing], 
+		   [enable Ladder Queue timing @<:@default=no@:>@]), 
+		   [USE_LADDERTIMING=$enableval], [USE_LADDERTIMING=no])
+if test "x$USE_LADDERTIMING" = xyes; then
+   AC_DEFINE(HAVE_LADDERTIMING, 1, [Define to 1 if ladder queue timings are requested.])]
+fi
+
 
 # optional libraries
 AC_GCOV

@@ -21,6 +21,9 @@
 /* Define to 1 if ladder queue statistics are requested. */
 #undef HAVE_LADDERSTATS
 
+/* Define to 1 if ladder queue timings are requested. */
+#undef HAVE_LADDERTIMING
+
 /* Define to 1 if you have the `gcov' library (-lgcov). */
 #undef HAVE_LIBGCOV
 

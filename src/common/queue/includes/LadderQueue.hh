@@ -24,6 +24,16 @@
 # include <config.h>
 #endif
 
+#ifdef HAVE_LADDERTIMING
+# include <ostream>
+
+# include <boost/iostreams/stream.hpp>
+# include <boost/iostreams/device/file.hpp>
+namespace bio = boost::iostreams;
+
+# include <boost/shared_ptr.hpp>
+#endif /* HAVE_LADDERTIMING */
+
 #include "Bottom.hh"
 using des::common::Bottom;
 
@@ -47,6 +57,28 @@ namespace des
 {
     namespace common
     {
+
+
+#ifdef HAVE_LADDERTIMING
+
+/** @typedef str_buf
+ * Specifies a shared pointer to the boost iostream stream_buffer
+ * in file sink mode.
+ */
+typedef bio::stream_buffer <bio::file_sink> str_buf;
+
+/** @typedef tOstreamSP
+ * Specifies shared pointer to the std::ostream
+ */
+typedef boost::shared_ptr <std::ostream> tOstreamSP;
+
+
+/** @typedef tStrBufSP
+ * Specifies a shared pointer to the boost::iostreams::stream_buffer
+ */
+typedef boost::shared_ptr <str_buf> tStrBufSP;
+
+#endif /* HAVE_LADDERTIMING */
 
 
 /**
@@ -91,6 +123,15 @@ private:
     Top *m_top;
     Ladder *m_ladder;
     Bottom *m_bottom;
+
+#ifdef HAVE_LADDERTIMING
+    tOstreamSP osEn;
+    tStrBufSP bufEn;
+    tOstreamSP osDe;
+    tStrBufSP bufDe;
+
+#endif /* HAVE_LADDERSTATS */
+
 };
 
     }
