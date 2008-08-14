@@ -18,7 +18,6 @@
 # define __STDC_CONSTANT_MACROS
 #endif /* __STDC_CONSTANT_MACROS */
 
-#include <cmath>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -35,6 +34,7 @@
 
 #include "CL.hh"
 #include "events.hh"
+#include "EventGenerator.hh"
 namespace dcore = des::core;
 
 #include "CRN.hh"
@@ -49,18 +49,12 @@ namespace dcommon = des::common;
 namespace dnet = des::network;
 
 
-double poiss(double lambda, double u)
-{
-    return (1/lambda * log(u));
-}
-
 
 
 int main(int argc, char *argv[])
 {
     dcore::tDesArgsSP desArgs(new dcore::desArgs_t);
     dcore::CL cl;
-    double cur_arrival;
     boost::shared_ptr <dcommon::LadderQueue> queue;
 
 
@@ -136,39 +130,22 @@ int main(int argc, char *argv[])
 
     queue = boost::shared_ptr<dcommon::LadderQueue>(new dcommon::LadderQueue);
 
-    cur_arrival = 0;
+    boost::int32_t destination;
+    double arrival_rate;
 
     // generate events over this graph
     for (p = boost::vertices(graph); p.first != p.second; ++p.first) {
-        boost::int32_t destination = vertex_index_props_map[*p.first];
-        double arrival_rate = vertex_arrival_props_map[*p.first];
+        destination = vertex_index_props_map[*p.first];
+        arrival_rate = vertex_arrival_props_map[*p.first];
 
-        // for as long as there is no stopping event
-        while (cur_arrival < desArgs->stop_time) {
-            // generate arrival events
-            double new_arrival_event =
-                poiss(arrival_rate, gsl_rng_uniform(arrival_rng.get()));
-
-            if ((cur_arrival - new_arrival_event) <= (double) desArgs->stop_time) {
-                cur_arrival -= new_arrival_event;
-                dcommon::entry_t *entry = new dcommon::entry_t(
-                    cur_arrival,
-                    destination,
-                    dcore::EXTERNAL_EVENT,
-                    dcore::ARRIVAL_EVENT);
-                queue->enqueue(entry);
-            } else {
-                break;
-            }
-        }
-
-        cur_arrival = 0;
+        dcore::EventGenerator::generate(
+            queue, arrival_rng, destination, arrival_rate, desArgs->stop_time);
     }
 
     // process events
     dcommon::entry_t *entry;
     while ((entry = queue->dequeue()) != NULL) {
-        std::cout << entry->arrival << " : " << entry->destination << std::endl;
+        std::cout << entry->arrival << " : " << entry->destination << " : " << entry->type << std::endl;
         delete entry;
     }
 

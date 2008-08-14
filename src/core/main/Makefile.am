@@ -38,6 +38,7 @@ des_main_LDADD =                                                      \
 	$(top_srcdir)/src/sampling/common/libsamplingcommon.la        \
 	$(top_srcdir)/src/common/queue/libcommonqueue.la              \
 	$(top_srcdir)/src/common/list/libcommonlist.la                \
+	$(top_srcdir)/src/core/event/libcoreevent.la                  \
 	$(top_srcdir)/src/common/sort/libcommonsort.la
 
 

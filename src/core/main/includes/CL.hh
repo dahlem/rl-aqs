@@ -43,6 +43,7 @@ namespace des { namespace core {
  * const variables specifying the allowed options.
  */
 const std::string STOPTIME = "stop_time";
+const std::string GENERATIONS = "generations";
 const std::string GRAPH = "graph";
 const std::string SEEDS = "seeds";
 const std::string HELP = "help";
@@ -59,6 +60,7 @@ typedef boost::shared_ptr <po::options_description> tOptDescSP;
  */
 struct desArgs_t {
     boost::uint32_t stop_time;      /* stopping time of the DES */
+    boost::int32_t generations;     /* number of generations for the event simulation */
     std::string graph_filename;     /* filename for the graph */
     std::string seeds_filename;     /* filename for the seeds */
 };

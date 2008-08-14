@@ -49,6 +49,7 @@ CL::CL()
     opt_desc->add_options()
         (HELP.c_str(), "produce help message")
         (STOPTIME.c_str(), po::value <boost::uint32_t>(), "set the stop time of the event simulator.")
+        (GENERATIONS.c_str(), po::value <boost::int32_t>(), "set the number of generations for the event simulator (default -1).")
         (GRAPH.c_str(), po::value <std::string>(), "set the graph for the event simulator.")
         (SEEDS.c_str(), po::value <std::string>(), "set the seeds for the event simulator.")
         ;
@@ -73,6 +74,14 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
     } else {
         desArgs->stop_time = 100;
         std::cout << "Default stopping time is " << desArgs->stop_time << "." << std::endl;
+    }
+
+    if (vm.count(GENERATIONS.c_str())) {
+        desArgs->generations = vm[GENERATIONS.c_str()].as <boost::uint32_t>();
+        std::cout << "Number of generations set to " << desArgs->generations << "." << std::endl;
+    } else {
+        desArgs->generations = -1;
+        std::cout << "No generations." << std::endl;
     }
 
     if (vm.count(GRAPH.c_str())) {

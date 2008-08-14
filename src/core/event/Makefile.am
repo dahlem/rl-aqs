@@ -10,14 +10,24 @@
 
 noinst_LTLIBRARIES = libcoreevent.la
 
-libcoreevent_la_SOURCES =
+libcoreevent_la_SOURCES =                                             \
+	EventGenerator.cc
 
 libcoreevent_la_CPPFLAGS =                                            \
+	$(BOOST_CPPFLAGS)                                             \
 	-I./includes                                                  \
-	$(BOOST_CPPFLAGS)
+	-I$(top_srcdir)/src/design/pattern/includes                   \
+	-I$(top_srcdir)/src/sampling/crn/includes                     \
+	-I$(top_srcdir)/src/sampling/common/includes                  \
+	-I$(top_srcdir)/src/common/queue/includes                     \
+	-I$(top_srcdir)/src/common/list/includes
 
 libcoreevent_la_LIBADD =                                              \
-	$(BOOST_LDFLAGS)
+	$(BOOST_LDFLAGS)                                              \
+	-lgsl                                                         \
+	-lm                                                           \
+	$(top_srcdir)/src/sampling/common/libsamplingcommon.la        \
+	$(top_srcdir)/src/common/queue/libcommonqueue.la
 
 include_HEADERS = includes
 MAINTAINERCLEANFILES = Makefile.in
