@@ -1,4 +1,4 @@
-// Copyright (C) 2007 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2007, 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This file is free software; as a special exception the author gives
 // unlimited permission to copy and/or distribute it, with or without
@@ -11,12 +11,13 @@
 #ifndef OBSERVER_HH
 #define OBSERVER_HH
 
+#include <boost/shared_ptr.hpp>
+
 
 namespace des
 {
     namespace design
     {
-
 
 /**
  * This is is a template to declare the observer of the GOF's observer pattern.
@@ -49,7 +50,7 @@ public:
      *
      * @param T* the subject that notified the concrete observer.
      */
-    virtual void update(T *subject) = 0;
+    virtual void update(boost::shared_ptr<T> subject) = 0;
 };
 
 

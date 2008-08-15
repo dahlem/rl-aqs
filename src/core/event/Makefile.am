@@ -11,7 +11,9 @@
 noinst_LTLIBRARIES = libcoreevent.la
 
 libcoreevent_la_SOURCES =                                             \
-	EventGenerator.cc
+	EventGenerator.cc                                             \
+	Event.cc                                                      \
+	ArrivalEvent.cc
 
 libcoreevent_la_CPPFLAGS =                                            \
 	$(BOOST_CPPFLAGS)                                             \

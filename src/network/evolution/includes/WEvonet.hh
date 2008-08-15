@@ -72,22 +72,22 @@ namespace des { namespace network {
 /** @typedef VertexServiceRateProperty
  * Specifies the property for the vertex service rate
  */
-typedef property <vertex_service_rate_t, float> VertexServiceRateProperty;
+typedef boost::property <vertex_service_rate_t, float> VertexServiceRateProperty;
 
 /** @typedef VertexArrivalRateProperty
  * Specifies the property for the vertex arrival rate
  */
-typedef property <vertex_arrival_rate_t, float, VertexServiceRateProperty> VertexArrivalRateProperty;
+typedef boost::property <vertex_arrival_rate_t, float, VertexServiceRateProperty> VertexArrivalRateProperty;
 
 /** @typedef VertexProperties
  * This type definition assembles all the properties for the vertices of the graph
  */
-typedef property <vertex_index_t, int, VertexArrivalRateProperty> VertexProperties;
+typedef boost::property <boost::vertex_index_t, int, VertexArrivalRateProperty> VertexProperties;
 
 /** @typedef EdgeWeightProperty
  * Specifies the property for the edge weight
  */
-typedef property <edge_weight_t, float> EdgeWeightProperty;
+typedef boost::property <boost::edge_weight_t, float> EdgeWeightProperty;
 
 
 /** @typedef Graph
@@ -97,66 +97,66 @@ typedef property <edge_weight_t, float> EdgeWeightProperty;
  * are stored in a STL list to allow quick addition and removal with constant time
  * complexity.
  */
-typedef adjacency_list<setS,
-                       listS,
-                       directedS,
-                       VertexProperties,
-                       EdgeWeightProperty> Graph;
+typedef boost::adjacency_list<boost::setS,
+                              boost::listS,
+                              boost::directedS,
+                              VertexProperties,
+                              EdgeWeightProperty> Graph;
 
 /** @typedef Vertex
  * Specifies the vertex descriptor of a graph
  */
-typedef graph_traits <Graph>::vertex_descriptor Vertex;
+typedef boost::graph_traits <Graph>::vertex_descriptor Vertex;
 
 /** @typedef Edge
  * Specifies the edge descriptor of a graph
  */
-typedef graph_traits <Graph>::edge_descriptor Edge;
+typedef boost::graph_traits <Graph>::edge_descriptor Edge;
 
 /** @typedef VertexServiceRateMap
  * Specifies the map that stores the vertex service rate property
  */
-typedef property_map <Graph, vertex_service_rate_t>::type VertexServiceRateMap;
+typedef boost::property_map <Graph, vertex_service_rate_t>::type VertexServiceRateMap;
 
 /** @typedef VertexArrivalRateMap
  * Specifies the map that stores the vertex arrival rate property
  */
-typedef property_map <Graph, vertex_arrival_rate_t>::type VertexArrivalRateMap;
+typedef boost::property_map <Graph, vertex_arrival_rate_t>::type VertexArrivalRateMap;
 
 /** @typedef VertexIndexMap
  * Specifies the map that stores the vertex indeces
  */
-typedef property_map <Graph, vertex_index_t>::type VertexIndexMap;
+typedef boost::property_map <Graph, boost::vertex_index_t>::type VertexIndexMap;
 
 /** @typedef EdgeWeightMap
  * Specifies the edge weight property
  */
-typedef property_map <Graph, edge_weight_t>::type EdgeWeightMap;
+typedef boost::property_map <Graph, boost::edge_weight_t>::type EdgeWeightMap;
 
 /** @typedef VServiceIterator
  * Specifies the iterator for the vertex service rates
  */
-typedef graph_property_iter_range <Graph, vertex_service_rate_t>::iterator VServiceIterator;
+typedef boost::graph_property_iter_range <Graph, vertex_service_rate_t>::iterator VServiceIterator;
 
 /** @typedef VArrivalIterator
  * Specifies the iterator for the vertex arrival rates
  */
-typedef graph_property_iter_range <Graph, vertex_arrival_rate_t>::iterator VArrivalIterator;
+typedef boost::graph_property_iter_range <Graph, vertex_arrival_rate_t>::iterator VArrivalIterator;
 
 /** @typedef OutEdgeIterator
  * Specifies the iterator for the out degree edges
  */
-typedef graph_traits <Graph>::out_edge_iterator OutEdgeIterator;
+typedef boost::graph_traits <Graph>::out_edge_iterator OutEdgeIterator;
 
 /** @typedef tGraphSP
  * Specifies shared pointer to the Graph object
  */
-typedef shared_ptr <Graph> tGraphSP;
+typedef boost::shared_ptr <Graph> tGraphSP;
 
 /** @typedef tGslRngSP
  * Specifies shared pointer to the GSL random number generator objects
  */
-typedef shared_ptr <gsl_rng> tGslRngSP;
+typedef boost::shared_ptr <gsl_rng> tGslRngSP;
 
 
 
