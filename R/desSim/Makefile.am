@@ -8,9 +8,9 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-SUBDIRS = desGraph desSim analysis
-
 EXTRA_DIST = \
-	assortativity.pbs \
-	graphs.dat
-
+	man \
+	R \
+	DESCRIPTION.in \
+	COPYING \
+	README

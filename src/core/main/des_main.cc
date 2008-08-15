@@ -20,6 +20,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <iomanip>
 #include <string>
 #include <utility>
 
@@ -155,7 +156,7 @@ int main(int argc, char *argv[])
     // process events
     dcommon::entry_t *entry;
     while ((entry = queue->dequeue()) != NULL) {
-        std::cout << entry->arrival << "," << entry->destination << "," << entry->type << std::endl;
+        std::cout << std::setprecision(14) << entry->arrival << "," << entry->destination << "," << entry->type << std::endl;
         delete entry;
     }
 

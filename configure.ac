@@ -160,6 +160,8 @@ AC_CONFIG_FILES([
    R/Makefile
    R/desGraph/Makefile
    R/desGraph/DESCRIPTION
+   R/desSim/Makefile
+   R/desSim/DESCRIPTION
    R/analysis/Makefile
    R/analysis/assortativity-analysis.R
    src/Makefile

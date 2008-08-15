@@ -1,0 +1,11 @@
+Package: desSim
+Version: @VERSION@
+Date: 2008-08-15
+Title: Analysis of DES simulations
+Author: Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+Maintainer: Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+Depends: R (>= 2.6), ggplot2, stats, @SNOW@
+Description: Analyse the DES simulation output.
+License: GPL-2
+URL: http://www.r-project.org
+     
