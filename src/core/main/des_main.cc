@@ -130,6 +130,16 @@ int main(int argc, char *argv[])
 
     queue = boost::shared_ptr<dcommon::LadderQueue>(new dcommon::LadderQueue);
 
+    double stopTime;
+
+    // find out whether we only generate the events in phases
+    if (desArgs->generations < 0) {
+        stopTime = desArgs->stop_time;
+    } else {
+        // calculate the phases
+        stopTime = desArgs->stop_time / desArgs->generations;
+    }
+
     boost::int32_t destination;
     double arrival_rate;
 
@@ -139,13 +149,13 @@ int main(int argc, char *argv[])
         arrival_rate = vertex_arrival_props_map[*p.first];
 
         dcore::EventGenerator::generate(
-            queue, arrival_rng, destination, arrival_rate, desArgs->stop_time);
+            queue, arrival_rng, destination, arrival_rate, stopTime);
     }
 
     // process events
     dcommon::entry_t *entry;
     while ((entry = queue->dequeue()) != NULL) {
-        std::cout << entry->arrival << " : " << entry->destination << " : " << entry->type << std::endl;
+        std::cout << entry->arrival << "," << entry->destination << "," << entry->type << std::endl;
         delete entry;
     }
 

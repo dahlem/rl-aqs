@@ -77,7 +77,7 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
     }
 
     if (vm.count(GENERATIONS.c_str())) {
-        desArgs->generations = vm[GENERATIONS.c_str()].as <boost::uint32_t>();
+        desArgs->generations = vm[GENERATIONS.c_str()].as <boost::int32_t>();
         std::cout << "Number of generations set to " << desArgs->generations << "." << std::endl;
     } else {
         desArgs->generations = -1;
