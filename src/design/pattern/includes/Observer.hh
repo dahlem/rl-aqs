@@ -50,7 +50,7 @@ public:
      *
      * @param T* the subject that notified the concrete observer.
      */
-    virtual void update(boost::shared_ptr<T> subject) = 0;
+    virtual void update(T *subject) = 0;
 };
 
 

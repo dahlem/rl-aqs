@@ -58,28 +58,28 @@ dnet::WEvonet::WEvonet(int p_size, int p_max_edges,
     max_edges = p_max_edges;
 
     // get references to the property maps
-    dnet::VertexArrivalRateMap vertex_arrival_props_map = get(vertex_arrival_rate, (*g.get()));
-    dnet::VertexServiceRateMap vertex_service_props_map = get(vertex_service_rate, (*g.get()));
-    dnet::VertexIndexMap vertex_index_props_map = get(boost::vertex_index, (*g.get()));
-    dnet::EdgeWeightMap edge_weight_props_map = get(boost::edge_weight, (*g.get()));
+    dnet::VertexArrivalRateMap vertex_arrival_props_map = get(vertex_arrival_rate, *g);
+    dnet::VertexServiceRateMap vertex_service_props_map = get(vertex_service_rate, *g);
+    dnet::VertexIndexMap vertex_index_props_map = get(boost::vertex_index, *g);
+    dnet::EdgeWeightMap edge_weight_props_map = get(boost::edge_weight, *g);
 
     // create a small graph upon which the evolution is excercised
-    dnet::Vertex v1 = add_vertex((*g.get()));
+    dnet::Vertex v1 = add_vertex(*g);
     vertex_arrival_props_map[v1] = (gsl_rng_uniform(vertex_arrival_rng.get()) * 10);
     vertex_service_props_map[v1] = vertex_arrival_props_map[v1];
     vertex_index_props_map[v1] = 0;
-    dnet::Vertex v2 = add_vertex((*g.get()));
+    dnet::Vertex v2 = add_vertex(*g);
     vertex_arrival_props_map[v2] = vertex_arrival_props_map[v1] * 0.5;
     vertex_service_props_map[v2] = vertex_arrival_props_map[v2];
     vertex_index_props_map[v2] = 1;
-    dnet::Vertex v3 = add_vertex((*g.get()));
+    dnet::Vertex v3 = add_vertex(*g);
     vertex_arrival_props_map[v3] = vertex_arrival_props_map[v1] * 0.5;
     vertex_service_props_map[v3] = vertex_arrival_props_map[v3];
     vertex_index_props_map[v3] = 2;
 
-    dnet::Edge e1 = (add_edge(v1, v2, (*g.get()))).first;
+    dnet::Edge e1 = (add_edge(v1, v2, *g)).first;
     edge_weight_props_map[e1] = 0.5;
-    dnet::Edge e2 = (add_edge(v1, v3, (*g.get()))).first;
+    dnet::Edge e2 = (add_edge(v1, v3, *g)).first;
     edge_weight_props_map[e2] = 0.5;
 
     advance(p_size - 3);
@@ -93,9 +93,9 @@ dnet::WEvonet::~WEvonet()
 void dnet::WEvonet::advance(int p_steps)
 {
     dnet::VServiceIterator service_it, service_it_end;
-    dnet::VertexArrivalRateMap vertex_arrival_props_map = get(vertex_arrival_rate, (*g.get()));
-    dnet::VertexServiceRateMap vertex_service_props_map = get(vertex_service_rate, (*g.get()));
-    dnet::VertexIndexMap vertex_index_props_map = get(boost::vertex_index, (*g.get()));
+    dnet::VertexArrivalRateMap vertex_arrival_props_map = get(vertex_arrival_rate, *g);
+    dnet::VertexServiceRateMap vertex_service_props_map = get(vertex_service_rate, *g);
+    dnet::VertexIndexMap vertex_index_props_map = get(boost::vertex_index, *g);
 
     double accum_service_rate;
     size_t vertices;
@@ -106,11 +106,11 @@ void dnet::WEvonet::advance(int p_steps)
     // 3. assign weights to the edges
     // 4. evaluate the vertex strengths
     for (int i = 0; i < p_steps; ++i) {
-        vertices = boost::num_vertices((*g.get()));
+        vertices = boost::num_vertices(*g);
 
         // calculate the accumulated service rate
         tie(service_it, service_it_end) =
-            get_property_iter_range((*g.get()), vertex_service_rate);
+            get_property_iter_range(*g, vertex_service_rate);
         accum_service_rate = std::accumulate(service_it, service_it_end, 0.0);
 
         // a vector to hold the discover time property for each vertex
@@ -132,7 +132,7 @@ void dnet::WEvonet::advance(int p_steps)
                   boost::indirect_cmp <float*, std::greater <float> >(&service_rates[0]));
 
         // create vertex
-        dnet::Vertex v = boost::add_vertex((*g.get()));
+        dnet::Vertex v = boost::add_vertex(*g);
         vertex_arrival_props_map[v] = (gsl_rng_uniform(vertex_arrival_rng.get()) * 10);
         vertex_service_props_map[v] = vertex_arrival_props_map[v];
         vertex_index_props_map[v] = vertices;
@@ -155,14 +155,14 @@ void dnet::WEvonet::advance(int p_steps)
             double temp = 0.0;
             double u = gsl_rng_uniform(uniform_rng.get());
             for (unsigned int j = 0; j < vertices; ++j) {
-                dnet::Vertex z = boost::vertex(service_rate_order[j], (*g.get()));
+                dnet::Vertex z = boost::vertex(service_rate_order[j], *g);
 
                 temp += vertex_service_props_map[z];
 
                 if (u < temp/accum_service_rate) {
                     // check if link already exists between new vertex and selected one
-                    if (!edge(v, z, (*g.get())).second) {
-                        add_edge(v, z, (*g.get()));
+                    if (!edge(v, z, *g).second) {
+                        add_edge(v, z, *g);
                         break;
                     }
                 }
@@ -180,12 +180,12 @@ void dnet::WEvonet::advance(int p_steps)
 
 void dnet::WEvonet::balance_vertex_strength(Vertex &v)
 {
-    dnet::VertexArrivalRateMap vertex_arrival_props_map = get(vertex_arrival_rate, (*g.get()));
-    dnet::VertexServiceRateMap vertex_service_props_map = get(vertex_service_rate, (*g.get()));
-    dnet::EdgeWeightMap edge_weight_props_map = get(boost::edge_weight, (*g.get()));
-    dnet::VertexIndexMap vertex_index_props_map = get(boost::vertex_index, (*g.get()));
+    dnet::VertexArrivalRateMap vertex_arrival_props_map = get(vertex_arrival_rate, *g);
+    dnet::VertexServiceRateMap vertex_service_props_map = get(vertex_service_rate, *g);
+    dnet::EdgeWeightMap edge_weight_props_map = get(boost::edge_weight, *g);
+    dnet::VertexIndexMap vertex_index_props_map = get(boost::vertex_index, *g);
 
-    size_t vertices = boost::num_vertices((*g.get()));
+    size_t vertices = boost::num_vertices(*g);
 
     // external property to keep the enduced differences in strengths
     std::vector <float> strength_diff_vec(vertices);
@@ -205,7 +205,7 @@ void dnet::WEvonet::balance_vertex_strength(Vertex &v)
                              strength_diff_apply_map);
 
     // 1. determine the enduced differences in vertex strength
-    boost::epidemic_visit((*g.get()),
+    boost::epidemic_visit(*g,
                           v,
                           visitor(vis_enduced_strength));
 
@@ -215,7 +215,7 @@ void dnet::WEvonet::balance_vertex_strength(Vertex &v)
 
     std::vector<boost::default_color_type> color_vec(vertices);
 
-    boost::breadth_first_visit((*g.get()),
+    boost::breadth_first_visit(*g,
                         v,
                         visitor(vis_apply_enduced_strength).
                         color_map(make_iterator_property_map(
@@ -227,7 +227,7 @@ void dnet::WEvonet::balance_vertex_strength(Vertex &v)
     typedef graph_traits <dnet::Graph>::vertex_iterator vertex_iter_t;
     std::pair <vertex_iter_t, vertex_iter_t> p;
 
-    for (p = vertices((*g.get())); p.first != p.second; ++p.first) {
+    for (p = vertices(*g); p.first != p.second; ++p.first) {
         std::cout << vertex_arrival_props_map[*p.first] << std::endl;
     }
 #endif /* NDEBUG */
@@ -236,12 +236,12 @@ void dnet::WEvonet::balance_vertex_strength(Vertex &v)
 
 void dnet::WEvonet::assign_edge_weights(Vertex &v)
 {
-    dnet::EdgeWeightMap edge_weight_props_map = get(boost::edge_weight, (*g.get()));
+    dnet::EdgeWeightMap edge_weight_props_map = get(boost::edge_weight, *g);
 
-    dnet::Graph::degree_size_type degree = boost::out_degree(v, (*g.get()));
+    dnet::Graph::degree_size_type degree = boost::out_degree(v, *g);
     dnet::OutEdgeIterator out_it, out_it_end;
 
-    BOOST_FOREACH(dnet::Edge e, (boost::out_edges(v, (*g.get())))) {
+    BOOST_FOREACH(dnet::Edge e, (boost::out_edges(v, *g))) {
         edge_weight_props_map[e] = 1.0 / degree;
     }
 }
@@ -266,11 +266,11 @@ void dnet::WEvonet::print(const std::string& filename, const GraphTypes graphTyp
 void dnet::WEvonet::print_dot(const std::string& filename)
 {
     dnet::VertexServiceRateMap vertex_service_props_map =
-        get(vertex_service_rate, (*g.get()));
+        get(vertex_service_rate, *g);
     dnet::VertexArrivalRateMap vertex_arrival_props_map =
-        get(vertex_arrival_rate, (*g.get()));
-    dnet::VertexIndexMap vertex_index_props_map = get(boost::vertex_index, (*g.get()));
-    dnet::EdgeWeightMap edge_weight_props_map = get(boost::edge_weight, (*g.get()));
+        get(vertex_arrival_rate, *g);
+    dnet::VertexIndexMap vertex_index_props_map = get(boost::vertex_index, *g);
+    dnet::EdgeWeightMap edge_weight_props_map = get(boost::edge_weight, *g);
 
     std::ofstream out(filename.c_str(), std::ios::out);
 
@@ -281,7 +281,7 @@ void dnet::WEvonet::print_dot(const std::string& filename)
         dp.property("service_rate", vertex_service_props_map);
         dp.property("arrival_rate", vertex_arrival_props_map);
 
-        boost::write_graphviz(out, (*g.get()), dp);
+        boost::write_graphviz(out, *g, dp);
         out.close();
     }
 }
@@ -290,11 +290,11 @@ void dnet::WEvonet::print_dot(const std::string& filename)
 void dnet::WEvonet::print_graphml(const std::string& filename)
 {
     dnet::VertexServiceRateMap vertex_service_props_map =
-        get(vertex_service_rate, (*g.get()));
+        get(vertex_service_rate, *g);
     dnet::VertexArrivalRateMap vertex_arrival_props_map =
-        get(vertex_arrival_rate, (*g.get()));
-    dnet::VertexIndexMap vertex_index_props_map = get(boost::vertex_index, (*g.get()));
-    dnet::EdgeWeightMap edge_weight_props_map = get(boost::edge_weight, (*g.get()));
+        get(vertex_arrival_rate, *g);
+    dnet::VertexIndexMap vertex_index_props_map = get(boost::vertex_index, *g);
+    dnet::EdgeWeightMap edge_weight_props_map = get(boost::edge_weight, *g);
 
     std::ofstream out(filename.c_str(), std::ios::out);
 
@@ -305,7 +305,7 @@ void dnet::WEvonet::print_graphml(const std::string& filename)
         dp.property("service_rate", vertex_service_props_map);
         dp.property("arrival_rate", vertex_arrival_props_map);
 
-        boost::write_graphml(out, (*g.get()), dp, true);
+        boost::write_graphml(out, *g, dp, true);
 
         out.close();
     }

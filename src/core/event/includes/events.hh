@@ -29,11 +29,16 @@
 
 namespace des {namespace core {
 
-
+/**
+ * Declaration of the event types
+ */
 const boost::int32_t ARRIVAL_EVENT      = 0;
 const boost::int32_t LAST_ARRIVAL_EVENT = 1;
 
-const boost::int32_t EXTERNAL_EVENT = -1;
+/**
+ * Declaration of the event source
+ */
+const boost::int32_t EXTERNAL_EVENT     = 10;
 
 
     }

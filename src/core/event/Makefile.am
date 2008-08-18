@@ -12,8 +12,10 @@ noinst_LTLIBRARIES = libcoreevent.la
 
 libcoreevent_la_SOURCES =                                             \
 	EventGenerator.cc                                             \
+	EventProcessor.cc                                             \
 	Event.cc                                                      \
-	ArrivalEvent.cc
+	ArrivalEvent.cc                                               \
+	ArrivalHandler.cc
 
 libcoreevent_la_CPPFLAGS =                                            \
 	$(BOOST_CPPFLAGS)                                             \
@@ -22,6 +24,7 @@ libcoreevent_la_CPPFLAGS =                                            \
 	-I$(top_srcdir)/src/sampling/crn/includes                     \
 	-I$(top_srcdir)/src/sampling/common/includes                  \
 	-I$(top_srcdir)/src/common/queue/includes                     \
+	-I$(top_srcdir)/src/network/evolution/includes                \
 	-I$(top_srcdir)/src/common/list/includes
 
 libcoreevent_la_LIBADD =                                              \
@@ -29,6 +32,7 @@ libcoreevent_la_LIBADD =                                              \
 	-lgsl                                                         \
 	-lm                                                           \
 	$(top_srcdir)/src/sampling/common/libsamplingcommon.la        \
+	$(top_srcdir)/src/network/evolution/libnetevo.la              \
 	$(top_srcdir)/src/common/queue/libcommonqueue.la
 
 include_HEADERS = includes

@@ -14,45 +14,34 @@
 // along with this program	  ; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-/** @file ArrivalEvent.hh
- * This header file specifies the arrival event subject.
+/** @file ArrivalHandler.cc
+ * Implementation of a basic arrival handler.
  */
+#include <iostream>
+#include <iomanip>
 
-#ifndef __ARRIVALEVENT_HH__
-#define __ARRIVALEVENT_HH__
+#include "ArrivalEvent.hh"
+#include "ArrivalHandler.hh"
+namespace dcore = des::core;
 
 #include "Entry.hh"
 namespace dcommon = des::common;
 
-#include "Event.hh"
-namespace dcore = des::core;
 
-#include "Subject.hh"
-namespace design = des::design;
+dcore::ArrivalHandler::ArrivalHandler()
+{}
 
 
+dcore::ArrivalHandler::~ArrivalHandler()
+{}
 
-namespace des
+
+void dcore::ArrivalHandler::update(dcore::ArrivalEvent *subject)
 {
-    namespace core
-    {
-
-/** @class ArrivalEvent
- * The class @code{ArrivalEvent} signals an arrival event in the DES.
- */
-class ArrivalEvent : public dcore::Event, public design::Subject<ArrivalEvent>
-{
-public:
-    ArrivalEvent();
-    ~ArrivalEvent();
-
-    void arrival(dcommon::entry_t *event);
-};
-
-typedef boost::shared_ptr <ArrivalEvent> tArrivalEventSP;
-
-    }
+    dcommon::entry_t *entry;
+    entry = subject->getEvent();
+    
+    std::cout << std::setprecision(14) << entry->arrival << ","
+              << entry->destination << "," << entry->type
+              << std::endl;
 }
-
-
-#endif /* __ARRIVALEVENT_HH__ */

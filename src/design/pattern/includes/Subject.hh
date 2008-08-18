@@ -58,7 +58,7 @@ public:
      */
     void attach(boost::shared_ptr <design::Observer <T> > observer)
         {
-            m_observers.push_back(&observer);
+            m_observers.push_back(observer);
         }
 
     /**
@@ -69,13 +69,14 @@ public:
             typename std::vector <boost::shared_ptr <Observer<T> > >::iterator it;
 
             for (it = m_observers.begin(); it != m_observers.end(); it++) {
-                (*it)->update(boost::shared_ptr <T> (static_cast <T *>(this)));
+                (*it)->update(static_cast <T *>(this));
             }
         }
 
 private:
     std::vector <boost::shared_ptr <design::Observer <T> > > m_observers;
 };
+
 
     }
 }

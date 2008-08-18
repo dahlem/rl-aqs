@@ -14,20 +14,18 @@
 // along with this program	  ; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-/** @file ArrivalEvent.hh
- * This header file specifies the arrival event subject.
+/** @file ArrivalHandler.hh
+ * This header file specifies the arrival handler subject.
  */
 
-#ifndef __ARRIVALEVENT_HH__
-#define __ARRIVALEVENT_HH__
+#ifndef __ARRIVALHANDLER_HH__
+#define __ARRIVALHANDLER_HH__
 
-#include "Entry.hh"
-namespace dcommon = des::common;
 
-#include "Event.hh"
+#include "ArrivalEvent.hh"
 namespace dcore = des::core;
 
-#include "Subject.hh"
+#include "Observer.hh"
 namespace design = des::design;
 
 
@@ -37,22 +35,23 @@ namespace des
     namespace core
     {
 
-/** @class ArrivalEvent
- * The class @code{ArrivalEvent} signals an arrival event in the DES.
+/** @class ArrivalHandler
+ * The class @code{ArrivalHandler} handles arrival events in the DES.
  */
-class ArrivalEvent : public dcore::Event, public design::Subject<ArrivalEvent>
+class ArrivalHandler : public design::Observer<dcore::ArrivalEvent>
 {
 public:
-    ArrivalEvent();
-    ~ArrivalEvent();
+    ArrivalHandler();
+    ~ArrivalHandler();
 
-    void arrival(dcommon::entry_t *event);
+    void update(dcore::ArrivalEvent *subject);
 };
 
-typedef boost::shared_ptr <ArrivalEvent> tArrivalEventSP;
+
+typedef boost::shared_ptr <ArrivalHandler> tArrivalHandlerSP;
 
     }
 }
 
 
-#endif /* __ARRIVALEVENT_HH__ */
+#endif /* __ARRIVALHANDLER_HH__ */

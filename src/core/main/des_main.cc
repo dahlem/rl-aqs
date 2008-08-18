@@ -33,9 +33,12 @@
 
 #include <gsl/gsl_randist.h>
 
+#include "ArrivalEvent.hh"
+#include "ArrivalHandler.hh"
 #include "CL.hh"
 #include "events.hh"
 #include "EventGenerator.hh"
+#include "EventProcessor.hh"
 namespace dcore = des::core;
 
 #include "CRN.hh"
@@ -63,7 +66,7 @@ int main(int argc, char *argv[])
         return EXIT_SUCCESS;
     }
 
-    dnet::Graph graph;
+    dnet::tGraphSP graph(new dnet::Graph);
 
     if (desArgs->graph_filename != "") {
         // read the graph
@@ -71,12 +74,12 @@ int main(int argc, char *argv[])
 
         if (in.is_open()) {
             boost::dynamic_properties dp;
-            dp.property("id", get(boost::vertex_index, graph));
-            dp.property("weight", get(boost::edge_weight, graph));
-            dp.property("service_rate", get(vertex_service_rate, graph));
-            dp.property("arrival_rate", get(vertex_arrival_rate, graph));
+            dp.property("id", get(boost::vertex_index, *graph));
+            dp.property("weight", get(boost::edge_weight, *graph));
+            dp.property("service_rate", get(vertex_service_rate, *graph));
+            dp.property("arrival_rate", get(vertex_arrival_rate, *graph));
 
-            boost::read_graphml(in, graph, dp);
+            boost::read_graphml(in, (*graph.get()), dp);
 
             in.close();
         } else {
@@ -121,9 +124,9 @@ int main(int argc, char *argv[])
     dsample::tGslRngSP arrival_rng = crn.get(arrival_rng_index - 1);
 
     dnet::VertexIndexMap vertex_index_props_map =
-        get(boost::vertex_index, graph);
+        get(boost::vertex_index, *graph);
     dnet::VertexArrivalRateMap vertex_arrival_props_map =
-        get(vertex_arrival_rate, graph);
+        get(vertex_arrival_rate, *graph);
 
     // generate events for each vertex in the graph
     typedef boost::graph_traits <dnet::Graph>::vertex_iterator vertex_iter_t;
@@ -145,7 +148,7 @@ int main(int argc, char *argv[])
     double arrival_rate;
 
     // generate events over this graph
-    for (p = boost::vertices(graph); p.first != p.second; ++p.first) {
+    for (p = boost::vertices(*graph); p.first != p.second; ++p.first) {
         destination = vertex_index_props_map[*p.first];
         arrival_rate = vertex_arrival_props_map[*p.first];
 
@@ -153,12 +156,19 @@ int main(int argc, char *argv[])
             queue, arrival_rng, destination, arrival_rate, stopTime);
     }
 
-    // process events
-    dcommon::entry_t *entry;
-    while ((entry = queue->dequeue()) != NULL) {
-        std::cout << std::setprecision(14) << entry->arrival << "," << entry->destination << "," << entry->type << std::endl;
-        delete entry;
-    }
+    // instantiate the events & handlers
+    dcore::tArrivalEventSP arrivalEvent(new dcore::ArrivalEvent);
+    dcore::tArrivalHandlerSP arrivalHandler(new dcore::ArrivalHandler);
+
+    // attach the handlers to the events
+    arrivalEvent->attach(arrivalHandler);
+
+    // instantiate the event processor and set the events
+    dcore::tEventProcessorSP processor(
+        new dcore::EventProcessor(queue, graph, arrivalEvent));
+
+    // process the events
+    processor->process();
 
     return EXIT_SUCCESS;
 }
