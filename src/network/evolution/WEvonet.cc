@@ -60,6 +60,8 @@ dnet::WEvonet::WEvonet(int p_size, int p_max_edges,
     // get references to the property maps
     dnet::VertexArrivalRateMap vertex_arrival_props_map = get(vertex_arrival_rate, *g);
     dnet::VertexServiceRateMap vertex_service_props_map = get(vertex_service_rate, *g);
+    dnet::VertexBusyMap vertex_busy_map = get(vertex_busy, *g);
+    dnet::VertexTimeServiceEndsMap vertex_time_service_ends_map = get(vertex_time_service_ends, *g);
     dnet::VertexIndexMap vertex_index_props_map = get(boost::vertex_index, *g);
     dnet::EdgeWeightMap edge_weight_props_map = get(boost::edge_weight, *g);
 
@@ -68,14 +70,20 @@ dnet::WEvonet::WEvonet(int p_size, int p_max_edges,
     vertex_arrival_props_map[v1] = (gsl_rng_uniform(vertex_arrival_rng.get()) * 10);
     vertex_service_props_map[v1] = vertex_arrival_props_map[v1];
     vertex_index_props_map[v1] = 0;
+    vertex_busy_map[v1] = false;
+    vertex_time_service_ends_map[v1] = 0.0;
     dnet::Vertex v2 = add_vertex(*g);
     vertex_arrival_props_map[v2] = vertex_arrival_props_map[v1] * 0.5;
     vertex_service_props_map[v2] = vertex_arrival_props_map[v2];
     vertex_index_props_map[v2] = 1;
+    vertex_busy_map[v2] = false;
+    vertex_time_service_ends_map[v2] = 0.0;
     dnet::Vertex v3 = add_vertex(*g);
     vertex_arrival_props_map[v3] = vertex_arrival_props_map[v1] * 0.5;
     vertex_service_props_map[v3] = vertex_arrival_props_map[v3];
     vertex_index_props_map[v3] = 2;
+    vertex_busy_map[v3] = false;
+    vertex_time_service_ends_map[v3] = 0.0;
 
     dnet::Edge e1 = (add_edge(v1, v2, *g)).first;
     edge_weight_props_map[e1] = 0.5;
@@ -96,6 +104,8 @@ void dnet::WEvonet::advance(int p_steps)
     dnet::VertexArrivalRateMap vertex_arrival_props_map = get(vertex_arrival_rate, *g);
     dnet::VertexServiceRateMap vertex_service_props_map = get(vertex_service_rate, *g);
     dnet::VertexIndexMap vertex_index_props_map = get(boost::vertex_index, *g);
+    dnet::VertexBusyMap vertex_busy_map = get(vertex_busy, *g);
+    dnet::VertexTimeServiceEndsMap vertex_time_service_ends_map = get(vertex_time_service_ends, *g);
 
     double accum_service_rate;
     size_t vertices;
@@ -136,6 +146,8 @@ void dnet::WEvonet::advance(int p_steps)
         vertex_arrival_props_map[v] = (gsl_rng_uniform(vertex_arrival_rng.get()) * 10);
         vertex_service_props_map[v] = vertex_arrival_props_map[v];
         vertex_index_props_map[v] = vertices;
+        vertex_busy_map[v] = false;
+        vertex_time_service_ends_map[v] = 0.0;
 
         // select vertices to connect to
         unsigned int edges = 0;
@@ -271,6 +283,9 @@ void dnet::WEvonet::print_dot(const std::string& filename)
         get(vertex_arrival_rate, *g);
     dnet::VertexIndexMap vertex_index_props_map = get(boost::vertex_index, *g);
     dnet::EdgeWeightMap edge_weight_props_map = get(boost::edge_weight, *g);
+    dnet::VertexBusyMap vertex_busy_map = get(vertex_busy, *g);
+    dnet::VertexTimeServiceEndsMap vertex_time_service_ends_map =
+        get(vertex_time_service_ends, *g);
 
     std::ofstream out(filename.c_str(), std::ios::out);
 
@@ -280,6 +295,8 @@ void dnet::WEvonet::print_dot(const std::string& filename)
         dp.property("weight", edge_weight_props_map);
         dp.property("service_rate", vertex_service_props_map);
         dp.property("arrival_rate", vertex_arrival_props_map);
+        dp.property("busy", vertex_busy_map);
+        dp.property("time_service_ends", vertex_time_service_ends_map);
 
         boost::write_graphviz(out, *g, dp);
         out.close();
@@ -295,6 +312,9 @@ void dnet::WEvonet::print_graphml(const std::string& filename)
         get(vertex_arrival_rate, *g);
     dnet::VertexIndexMap vertex_index_props_map = get(boost::vertex_index, *g);
     dnet::EdgeWeightMap edge_weight_props_map = get(boost::edge_weight, *g);
+    dnet::VertexBusyMap vertex_busy_map = get(vertex_busy, *g);
+    dnet::VertexTimeServiceEndsMap vertex_time_service_ends_map =
+        get(vertex_time_service_ends, *g);
 
     std::ofstream out(filename.c_str(), std::ios::out);
 
@@ -304,6 +324,8 @@ void dnet::WEvonet::print_graphml(const std::string& filename)
         dp.property("weight", edge_weight_props_map);
         dp.property("service_rate", vertex_service_props_map);
         dp.property("arrival_rate", vertex_arrival_props_map);
+        dp.property("busy", vertex_busy_map);
+        dp.property("time_service_ends", vertex_time_service_ends_map);
 
         boost::write_graphml(out, *g, dp, true);
 

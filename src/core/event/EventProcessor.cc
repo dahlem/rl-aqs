@@ -42,6 +42,7 @@ void dcore::EventProcessor::process()
 {
     dcommon::entry_t *entry;
     while ((entry = m_queue->dequeue()) != NULL) {
+        // log the event here
         switch (entry->type) {
           case ARRIVAL_EVENT:
               if (m_arrivalEvent != NULL) {

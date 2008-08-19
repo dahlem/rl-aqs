@@ -78,6 +78,8 @@ int main(int argc, char *argv[])
             dp.property("weight", get(boost::edge_weight, *graph));
             dp.property("service_rate", get(vertex_service_rate, *graph));
             dp.property("arrival_rate", get(vertex_arrival_rate, *graph));
+            dp.property("busy", get(vertex_busy, *graph));
+            dp.property("time_service_ends", get(vertex_time_service_ends, *graph));
 
             boost::read_graphml(in, (*graph.get()), dp);
 
