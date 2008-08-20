@@ -1,9 +1,9 @@
 // Copyright (C) 2007-2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
-//  
+//
 // This file is free software; as a special exception the author gives
-// unlimited permission to copy and/or distribute it, with or without 
+// unlimited permission to copy and/or distribute it, with or without
 // modifications, as long as this notice is preserved.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 // implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
@@ -139,7 +139,7 @@ void LadderTest::testEnlistSmall()
     entry_t *entry = NULL;
 
     for (int i = 0; i < 3; ++i) {
-        entry = new entry_t((double) i, i, 1, 0);
+        entry = new entry_t((double) i, 0.0, i, 1, 0);
         top->enqueue(entry);
     }
 
@@ -193,7 +193,7 @@ void LadderTest::testEnlistLarge75()
     entry_t *entry = NULL;
 
     for (int i = 0; i < 75; ++i) {
-        entry = new entry_t((double) i, i, 1, 0);
+        entry = new entry_t((double) i, 0.0, i, 1, 0);
         top->enqueue(entry);
     }
 
@@ -240,15 +240,15 @@ void LadderTest::testEnlistLarge75Fractions()
     entry_t *entry = NULL;
 
     for (int i = 0; i < 10; ++i) {
-        entry = new entry_t((double) i, i, 1, 0);
+        entry = new entry_t((double) i, 0.0, i, 1, 0);
         top->enqueue(entry);
     }
     for (int i = 0; i < 25; ++i) {
-        entry = new entry_t((double) (10.0 + ((double) i + 1) / (25.0 + 1.0)), i, 1, 0);
+        entry = new entry_t((double) (10.0 + ((double) i + 1) / (25.0 + 1.0)), 0.0, i, 1, 0);
         top->enqueue(entry);
     }
     for (int i = 0; i < 40; ++i) {
-        entry = new entry_t((double) i + 11.0, i, 1, 0);
+        entry = new entry_t((double) i + 11.0, 0.0, i, 1, 0);
         top->enqueue(entry);
     }
 
@@ -344,17 +344,17 @@ void LadderTest::testSpawnOnce()
 
     for (int i = 0; i < 1; ++i) {
         actualEvents++;
-        entry = new entry_t((double) i, i, 1, 0);
+        entry = new entry_t((double) i, 0.0, i, 1, 0);
         top->enqueue(entry);
     }
     for (int i = 0; i < 51; ++i) {
         actualEvents++;
-        entry = new entry_t((1.0 + ((double) i + 1.0) / (51.0)), i, 1, 0);
+        entry = new entry_t((1.0 + ((double) i + 1.0) / (51.0)), 0.0, i, 1, 0);
         top->enqueue(entry);
     }
     for (int i = 0; i < 1; ++i) {
         actualEvents++;
-        entry = new entry_t((double) i + 200.0, i, 1, 0);
+        entry = new entry_t((double) i + 200.0, 0.0, i, 1, 0);
         top->enqueue(entry);
     }
 
@@ -407,17 +407,17 @@ void LadderTest::testSpawnEqualArrivals()
 
     for (int i = 0; i < 1; ++i) {
         actualEvents++;
-        entry = new entry_t((double) i, i, 1, 0);
+        entry = new entry_t((double) i, 0.0, i, 1, 0);
         top->enqueue(entry);
     }
     for (int i = 0; i < 51; ++i) {
         actualEvents++;
-        entry = new entry_t(1.0, i, 1, 0);
+        entry = new entry_t(1.0, 0.0, i, 1, 0);
         top->enqueue(entry);
     }
     for (int i = 0; i < 1; ++i) {
         actualEvents++;
-        entry = new entry_t(2.0, i, 1, 0);
+        entry = new entry_t(2.0, 0.0, i, 1, 0);
         top->enqueue(entry);
     }
 
@@ -472,17 +472,17 @@ void LadderTest::testSpawnAll()
 
     for (int i = 0; i < 100; ++i) {
         expectedEvents++;
-        entry = new entry_t(1.0 + (double) i * epsilon, i, 1, 0);
+        entry = new entry_t(1.0 + (double) i * epsilon, 0.0, i, 1, 0);
         top->enqueue(entry);
     }
     for (int i = 100; i < 200; ++i) {
         expectedEvents++;
-        entry = new entry_t(2.0 + (double) i * epsilon , i, 1, 0);
+        entry = new entry_t(2.0 + (double) i * epsilon , 0.0, i, 1, 0);
         top->enqueue(entry);
     }
     for (int i = 1; i < 3; ++i) {
         expectedEvents++;
-        entry = new entry_t(100.0 * (double) i , i, 1, 0);
+        entry = new entry_t(100.0 * (double) i , 0.0, i, 1, 0);
         top->enqueue(entry);
     }
 
@@ -528,29 +528,29 @@ void LadderTest::testSpawnAll()
 
 void LadderTest::testEnlistException() throw (QueueException)
 {
-    entry_t *newEntry1 = new entry_t(1.0, 1, 1, 0);
-    entry_t *newEntry2 = new entry_t(2.0, 1, 1, 0);
+    entry_t *newEntry1 = new entry_t(1.0, 0.0, 1, 1, 0);
+    entry_t *newEntry2 = new entry_t(2.0, 0.0, 1, 1, 0);
     node_double_t *node1 = new node_double_t(newEntry1, NULL, NULL);
     node_double_t *node2 = new node_double_t(newEntry2, NULL, NULL);
-    
+
     m_ladder->enlist(node1, 1, 1.0, 1.0);
     m_ladder->enlist(node2, 1, 2.0, 2.0);
 }
 
 void LadderTest::testEnqueueException() throw (QueueException)
 {
-    entry_t *newEntry1 = new entry_t(1.0, 1, 1, 0);
+    entry_t *newEntry1 = new entry_t(1.0, 0.0, 1, 1, 0);
     m_ladder->enqueue(newEntry1);
 }
 
 void LadderTest::testEnqueue()
 {
-    entry_t *newEntry1 = new entry_t(1.0, 1, 1, 0);
-    entry_t *newEntry2 = new entry_t(2.0, 1, 1, 0);
+    entry_t *newEntry1 = new entry_t(1.0, 0.0, 1, 1, 0);
+    entry_t *newEntry2 = new entry_t(2.0, 0.0, 1, 1, 0);
     node_double_t *node1 = new node_double_t(newEntry1, NULL, NULL);
     node_double_t *result = NULL;
     node_double_t *current = NULL;
-    
+
     m_ladder->enlist(node1, 1, 1.0, 1.0);
     m_ladder->enqueue(newEntry2);
 
@@ -579,26 +579,26 @@ void LadderTest::testEnqueue()
 
 void LadderTest::testEnqueueNotAllowed() throw (QueueException)
 {
-    entry_t *newEntry1 = new entry_t(1.0, 1, 1, 0);
-    entry_t *newEntry2 = new entry_t(0.5, 1, 1, 0);
+    entry_t *newEntry1 = new entry_t(1.0, 0.0, 1, 1, 0);
+    entry_t *newEntry2 = new entry_t(0.5, 0.0, 1, 1, 0);
     node_double_t *node1 = new node_double_t(newEntry1, NULL, NULL);
-    
+
     m_ladder->enlist(node1, 1, 1.0, 1.0);
     m_ladder->enqueue(newEntry2);
 }
 
-void LadderTest::testPushBack() 
+void LadderTest::testPushBack()
 {
     Bottom *bottom = new Bottom();
 
     for (int i = 0; i < 51; ++i) {
-        entry_t *newEntry = new entry_t((double) i, 1, 1, 0);
+        entry_t *newEntry = new entry_t((double) i, 0.0, 1, 1, 0);
         bottom->enqueue(newEntry);
     }
 
     CPPUNIT_ASSERT(bottom->size() > m_ladder->getThres());
     CPPUNIT_ASSERT(m_ladder->getNBucket() == 0);
-    
+
     double max = bottom->getMaxTS();
     double min = bottom->getMinTS();
     long size = bottom->size();
@@ -634,14 +634,14 @@ void LadderTest::testPushBack()
     delete bottom;
 }
 
-void LadderTest::testPushBackSpawn() 
+void LadderTest::testPushBackSpawn()
 {
     Top *top = new Top();
     Bottom *bottom = new Bottom();
     entry_t *entry = NULL;
 
     for (int i = 0; i < 10; ++i) {
-        entry = new entry_t((double) i, i, 1, 0);
+        entry = new entry_t((double) i, 0.0, i, 1, 0);
         top->enqueue(entry);
     }
 
@@ -651,22 +651,22 @@ void LadderTest::testPushBackSpawn()
     node_double_t *list = top->delist();
 
     // start the first epoch
-    m_ladder->enlist(list->next, size, max, min);    
-    
+    m_ladder->enlist(list->next, size, max, min);
+
     for (int i = 0; i < 51; ++i) {
-        entry_t *newEntry = new entry_t((double) i * 0.9/75, 1, 1, 0);
+        entry_t *newEntry = new entry_t((double) i * 0.9/75, 0.0, 1, 1, 0);
         bottom->enqueue(newEntry);
     }
 
     CPPUNIT_ASSERT(bottom->size() > m_ladder->getThres());
     CPPUNIT_ASSERT(m_ladder->getNBucket() != 0);
-    
+
     bool success = m_ladder->spawn(false);
 
     CPPUNIT_ASSERT(success);
     size = bottom->size();
     list = bottom->delist();
-    
+
     m_ladder->pushBack(list->next, size);
 
     double rcur = m_ladder->getRCur();

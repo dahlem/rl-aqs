@@ -1,9 +1,9 @@
-// Copyright (C) 2007 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
-//  
+// Copyright (C) 2007, 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+//
 // This file is free software; as a special exception the author gives
-// unlimited permission to copy and/or distribute it, with or without 
+// unlimited permission to copy and/or distribute it, with or without
 // modifications, as long as this notice is preserved.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 // implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
@@ -32,11 +32,10 @@ namespace des
  *
  * @author <a href="mailto:Dominik.Dahlem@cs.tcd.ie">Dominik Dahlem</a>
  */
-class Seeds
+class Seeds : public Singleton <Seeds>
 {
 public:
     Seeds();
-    Seeds(const Seeds&);
     ~Seeds();
 
     /**
@@ -59,16 +58,13 @@ public:
     const unsigned long getSeed() throw (SamplingException);
 
 private:
-    ifstream is;
-    
-};
-        
+    Seeds(const Seeds&);
 
-/**
- * Define a singleton type of the <code>Seeds</code> class.
- */
-typedef Singleton<Seeds> SeedsSingleton;
-        
+    ifstream is;
+
+};
+
+
     }
 }
 

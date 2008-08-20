@@ -17,6 +17,8 @@
 /** @file EventProcessor.hh
  * Implementation of the event processor interface.
  */
+#include <iostream>
+#include <iomanip>
 
 #include "events.hh"
 #include "EventProcessor.hh"
@@ -28,8 +30,10 @@ namespace dcommon = des::common;
 
 dcore::EventProcessor::EventProcessor(tQueueSP p_queue,
                                       dnet::tGraphSP p_graph,
-                                      dcore::tArrivalEventSP p_arrivalEvent)
-    : m_queue(p_queue), m_graph(p_graph), m_arrivalEvent(p_arrivalEvent)
+                                      dcore::tArrivalEventSP p_arrivalEvent,
+                                      dcore::tDepartureEventSP p_departureEvent)
+    : m_queue(p_queue), m_graph(p_graph), m_arrivalEvent(p_arrivalEvent),
+      m_departureEvent(p_departureEvent)
 {
 }
 
@@ -41,17 +45,30 @@ dcore::EventProcessor::~EventProcessor()
 void dcore::EventProcessor::process()
 {
     dcommon::entry_t *entry;
+
     while ((entry = m_queue->dequeue()) != NULL) {
         // log the event here
+        std::cout << std::setprecision(14) << entry->arrival << ","
+                  << entry->destination << "," << entry->type
+                  << std::endl;
+
         switch (entry->type) {
+          case LAST_ARRIVAL_EVENT:
+              // generate new events
           case ARRIVAL_EVENT:
               if (m_arrivalEvent != NULL) {
                   m_arrivalEvent->arrival(entry);
               } else {
                   // throw exception
               }
-          case LAST_ARRIVAL_EVENT:
-              // generate new events
+              break;
+          case DEPARTURE_EVENT:
+              if (m_departureEvent != NULL) {
+                  m_departureEvent->departure(entry);
+              } else {
+                  // throw exception
+              }
+              break;
           default:
               break;
         }

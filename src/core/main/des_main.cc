@@ -35,6 +35,8 @@
 
 #include "ArrivalEvent.hh"
 #include "ArrivalHandler.hh"
+#include "DepartureEvent.hh"
+#include "DepartureHandler.hh"
 #include "CL.hh"
 #include "events.hh"
 #include "EventGenerator.hh"
@@ -80,6 +82,7 @@ int main(int argc, char *argv[])
             dp.property("arrival_rate", get(vertex_arrival_rate, *graph));
             dp.property("busy", get(vertex_busy, *graph));
             dp.property("time_service_ends", get(vertex_time_service_ends, *graph));
+            dp.property("number_in_queue", get(vertex_number_in_queue, *graph));
 
             boost::read_graphml(in, (*graph.get()), dp);
 
@@ -93,37 +96,45 @@ int main(int argc, char *argv[])
         std::cout << "Generate the graph " << std::endl;
     }
 
-    // initialise the random number seeds and the common random number container
-    dsample::Seeds seeds = dsample::SeedsSingleton::getInstance();
-    dsample::CRN crn = dsample::CRNSingleton::getInstance();
     boost::int32_t arrival_rng_index;
+    boost::int32_t service_rng_index;
     boost::int32_t seeds_rng_index;
     boost::uint32_t seed = 0;
 
     if (desArgs->seeds_filename != "") {
         // read the seeds
-        seeds.init(desArgs->seeds_filename.c_str());
+        dsample::Seeds::getInstance().init(desArgs->seeds_filename.c_str());
 
         // init the crn for the arrival events
-        seed = seeds.getSeed();
-        arrival_rng_index = crn.init(seed);
-        crn.log(seed, "arrival events");
+        seed = dsample::Seeds::getInstance().getSeed();
+        arrival_rng_index = dsample::CRN::getInstance().init(seed);
+        dsample::CRN::getInstance().log(seed, "arrival events");
+
+        // init the crn for the service events
+        seed = dsample::Seeds::getInstance().getSeed();
+        service_rng_index = dsample::CRN::getInstance().init(seed);
+        dsample::CRN::getInstance().log(seed, "service events");
     } else {
         // generate the seeds
         std::cout << "Use random number to generate seeds." << std::endl;
 
         // 1. init the random number generator for the seeds
-        seeds_rng_index = crn.init(gsl_rng_default_seed);
-        crn.log(gsl_rng_default_seed, "seeds");
+        seeds_rng_index = dsample::CRN::getInstance().init(gsl_rng_default_seed);
+        dsample::CRN::getInstance().log(gsl_rng_default_seed, "seeds");
 
         // 2. init the crn for the arrival events
-        dsample::tGslRngSP seeds_rng = crn.get(seeds_rng_index - 1);
+        dsample::tGslRngSP seeds_rng = dsample::CRN::getInstance().get(seeds_rng_index - 1);
         seed = gsl_rng_uniform_int(seeds_rng.get(), gsl_rng_max(seeds_rng.get()));
-        arrival_rng_index = crn.init(seed);
-        crn.log(seed, "arrival events");
+        arrival_rng_index = dsample::CRN::getInstance().init(seed);
+        dsample::CRN::getInstance().log(seed, "arrival events");
+
+        // 3. init the crn for the service events
+        seed = gsl_rng_uniform_int(seeds_rng.get(), gsl_rng_max(seeds_rng.get()));
+        service_rng_index = dsample::CRN::getInstance().init(seed);
+        dsample::CRN::getInstance().log(seed, "service events");
     }
 
-    dsample::tGslRngSP arrival_rng = crn.get(arrival_rng_index - 1);
+    dsample::tGslRngSP arrival_rng = dsample::CRN::getInstance().get(arrival_rng_index - 1);
 
     dnet::VertexIndexMap vertex_index_props_map =
         get(boost::vertex_index, *graph);
@@ -160,14 +171,19 @@ int main(int argc, char *argv[])
 
     // instantiate the events & handlers
     dcore::tArrivalEventSP arrivalEvent(new dcore::ArrivalEvent);
-    dcore::tArrivalHandlerSP arrivalHandler(new dcore::ArrivalHandler);
+    dcore::tDepartureEventSP departureEvent(new dcore::DepartureEvent);
+    dcore::tArrivalHandlerSP arrivalHandler(
+        new dcore::ArrivalHandler(graph, queue, service_rng_index));
+    dcore::tDepartureHandlerSP departureHandler(
+        new dcore::DepartureHandler(graph, queue));
 
     // attach the handlers to the events
     arrivalEvent->attach(arrivalHandler);
+    departureEvent->attach(departureHandler);
 
     // instantiate the event processor and set the events
     dcore::tEventProcessorSP processor(
-        new dcore::EventProcessor(queue, graph, arrivalEvent));
+        new dcore::EventProcessor(queue, graph, arrivalEvent, departureEvent));
 
     // process the events
     processor->process();

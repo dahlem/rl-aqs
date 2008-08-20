@@ -14,22 +14,17 @@
 // along with this program	  ; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-/** @file ArrivalHandler.hh
- * This header file specifies the arrival handler subject.
+/** @file DepartureHandler.hh
+ * This header file specifies the departure handler subject.
  */
 
-#ifndef __ARRIVALHANDLER_HH__
-#define __ARRIVALHANDLER_HH__
+#ifndef __DEPARTUREHANDLER_HH__
+#define __DEPARTUREHANDLER_HH__
 
-#ifndef __STDC_CONSTANT_MACROS
-# define __STDC_CONSTANT_MACROS
-#endif /* __STDC_CONSTANT_MACROS */
-
-#include <boost/cstdint.hpp>
 #include <boost/shared_ptr.hpp>
 
 
-#include "ArrivalEvent.hh"
+#include "DepartureEvent.hh"
 namespace dcore = des::core;
 
 #include "Observer.hh"
@@ -56,33 +51,31 @@ namespace des
 typedef boost::shared_ptr <dcommon::LadderQueue> tQueueSP;
 
 
-/** @class ArrivalHandler
- * The class @code{ArrivalHandler} handles arrival events in the DES.
+/** @class DepartureHandler
+ * The class @code{DepartureHandler} handles departure events in the DES.
  */
-class ArrivalHandler : public design::Observer<dcore::ArrivalEvent>
+class DepartureHandler : public design::Observer<dcore::DepartureEvent>
 {
 public:
-    ArrivalHandler(dnet::tGraphSP p_graph, tQueueSP p_queue, uint32_t p_service_idx);
-    ~ArrivalHandler();
+    DepartureHandler(dnet::tGraphSP p_graph, tQueueSP p_queue);
+    ~DepartureHandler();
 
-    void update(dcore::ArrivalEvent *subject);
+    void update(dcore::DepartureEvent *subject);
 
 private:
     dnet::tGraphSP m_graph;
     tQueueSP m_queue;
-    uint32_t m_service_idx;
-    dsample::tGslRngSP m_service_rng;
 };
 
 
-/** @typedef tArrivalHandlerSP
- * a type definition of the shared pointer of the arrival handler
+/** @typedef tDepartureHandlerSP
+ * a type definition of the shared pointer of the departure handler
  */
-typedef boost::shared_ptr <ArrivalHandler> tArrivalHandlerSP;
+typedef boost::shared_ptr <DepartureHandler> tDepartureHandlerSP;
 
 
     }
 }
 
 
-#endif /* __ARRIVALHANDLER_HH__ */
+#endif /* __DEPARTUREHANDLER_HH__ */

@@ -15,7 +15,9 @@ libcoreevent_la_SOURCES =                                             \
 	EventProcessor.cc                                             \
 	Event.cc                                                      \
 	ArrivalEvent.cc                                               \
-	ArrivalHandler.cc
+	ArrivalHandler.cc                                             \
+	DepartureEvent.cc                                             \
+	DepartureHandler.cc
 
 libcoreevent_la_CPPFLAGS =                                            \
 	$(BOOST_CPPFLAGS)                                             \

@@ -29,6 +29,7 @@ namespace dcommon = des::common;
 namespace dnet = des::network;
 
 #include "ArrivalEvent.hh"
+#include "DepartureEvent.hh"
 namespace dcore = des::core;
 
 
@@ -51,7 +52,8 @@ class EventProcessor
 {
 public:
     EventProcessor(tQueueSP p_queue, dnet::tGraphSP p_graph,
-                   dcore::tArrivalEventSP p_arrivalEvent);
+                   dcore::tArrivalEventSP p_arrivalEvent,
+                   dcore::tDepartureEventSP p_departureEvent);
     ~EventProcessor();
 
     void process();
@@ -60,6 +62,7 @@ private:
     tQueueSP m_queue;
     dnet::tGraphSP m_graph;
     dcore::tArrivalEventSP m_arrivalEvent;
+    dcore::tDepartureEventSP m_departureEvent;
 
 };
 

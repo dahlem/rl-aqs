@@ -114,10 +114,6 @@ int main(int argc, char *argv[])
         }
     }
 
-    // initialise the common random number container
-    // initialise the random number seeds and the common random number container
-    dsample::Seeds seeds = dsample::SeedsSingleton::getInstance();
-    dsample::CRN crn = dsample::CRNSingleton::getInstance();
     boost::int32_t arrival_rng_index;
     boost::int32_t seeds_rng_index;
     boost::int32_t uniform_rng_index;
@@ -126,43 +122,43 @@ int main(int argc, char *argv[])
 
     if (seeds_file != "") {
         // read the seeds
-        seeds.init(seeds_file.c_str());
+        dsample::Seeds::getInstance().init(seeds_file.c_str());
 
         // init the crn for the arrival events
-        seed = seeds.getSeed();
-        arrival_rng_index = crn.init(seed);
-        crn.log(seed, "vertex arrival rate");
-        seed = seeds.getSeed();
-        uniform_rng_index = crn.init(seed);
-        crn.log(seed, "uniform");
-        seed = seeds.getSeed();
-        num_edges_rng_index = crn.init(seed);
-        crn.log(seed, "number of edges");
+        seed = dsample::Seeds::getInstance().getSeed();
+        arrival_rng_index = dsample::CRN::getInstance().init(seed);
+        dsample::CRN::getInstance().log(seed, "vertex arrival rate");
+        seed = dsample::Seeds::getInstance().getSeed();
+        uniform_rng_index = dsample::CRN::getInstance().init(seed);
+        dsample::CRN::getInstance().log(seed, "uniform");
+        seed = dsample::Seeds::getInstance().getSeed();
+        num_edges_rng_index = dsample::CRN::getInstance().init(seed);
+        dsample::CRN::getInstance().log(seed, "number of edges");
     } else {
         // generate the seeds
         std::cout << "Use random number to generate seeds." << std::endl;
 
         // 1. init the random number generator for the seeds
-        seeds_rng_index = crn.init(gsl_rng_default_seed);
-        crn.log(gsl_rng_default_seed, "seeds");
+        seeds_rng_index = dsample::CRN::getInstance().init(gsl_rng_default_seed);
+        dsample::CRN::getInstance().log(gsl_rng_default_seed, "seeds");
 
-        dsample::tGslRngSP seeds_rng = crn.get(seeds_rng_index - 1);
+        dsample::tGslRngSP seeds_rng = dsample::CRN::getInstance().get(seeds_rng_index - 1);
 
         // 2. init the crn for the arrival events
         seed = gsl_rng_uniform_int(seeds_rng.get(), gsl_rng_max(seeds_rng.get()));
-        arrival_rng_index = crn.init(seed);
-        crn.log(seed, "arrival events");
+        arrival_rng_index = dsample::CRN::getInstance().init(seed);
+        dsample::CRN::getInstance().log(seed, "arrival events");
         seed = gsl_rng_uniform_int(seeds_rng.get(), gsl_rng_max(seeds_rng.get()));
-        uniform_rng_index = crn.init(seed);
-        crn.log(seed, "uniform");
+        uniform_rng_index = dsample::CRN::getInstance().init(seed);
+        dsample::CRN::getInstance().log(seed, "uniform");
         seed = gsl_rng_uniform_int(seeds_rng.get(), gsl_rng_max(seeds_rng.get()));
-        num_edges_rng_index = crn.init(seed);
-        crn.log(seed, "number of edges");
+        num_edges_rng_index = dsample::CRN::getInstance().init(seed);
+        dsample::CRN::getInstance().log(seed, "number of edges");
     }
 
-    r1 = crn.get(num_edges_rng_index - 1);
-    r2 = crn.get(uniform_rng_index - 1);
-    r3 = crn.get(arrival_rng_index - 1);
+    r1 = dsample::CRN::getInstance().get(num_edges_rng_index - 1);
+    r2 = dsample::CRN::getInstance().get(uniform_rng_index - 1);
+    r3 = dsample::CRN::getInstance().get(arrival_rng_index - 1);
 
     // use the WEvonet class
     std::cout << "Generating Graph..." << std::endl;

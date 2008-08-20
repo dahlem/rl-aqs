@@ -1,9 +1,9 @@
-// Copyright (C) 2007 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
-//  
+// Copyright (C) 2007, 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+//
 // This file is free software; as a special exception the author gives
-// unlimited permission to copy and/or distribute it, with or without 
+// unlimited permission to copy and/or distribute it, with or without
 // modifications, as long as this notice is preserved.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 // implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
@@ -16,7 +16,7 @@ namespace des
 {
     namespace design
     {
-        
+
 
 /**
  * This is is a template to declare Scott Meyer's singleton pattern.
@@ -33,31 +33,34 @@ public:
      *
      * @return an instance of the singleton class
      */
-    static T& getInstance() {
+    inline static T& getInstance() {
         static T m_instance;
         return m_instance;
     }
 
-private:
+protected:
     /**
      * Private constructor, because this class is its own resource manager.
      */
-    Singleton();
-
-    /**
-     * Private copy constructor, because this class is its own resource
-     * manager.
-     */
-    Singleton(Singleton const&);
+    Singleton()
+        {}
 
     /**
      * Private destructor, because this class is its own resource manager.
      */
-    ~Singleton();
-};
+    virtual ~Singleton()
+        {}
 
+private:
+    Singleton(Singleton const&); // Shouldn't be used
+    Singleton& operator=(Singleton const&); // Shouldnât be used};
+
+
+};
 
     }
 }
+
+
 
 #endif

@@ -1,9 +1,9 @@
 // Copyright (C) 2007-2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
-//  
+//
 // This file is free software; as a special exception the author gives
-// unlimited permission to copy and/or distribute it, with or without 
+// unlimited permission to copy and/or distribute it, with or without
 // modifications, as long as this notice is preserved.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 // implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
@@ -34,12 +34,12 @@ void FifoTest::tearDown()
 
 void FifoTest::testEnqueue()
 {
-    entry_t *const entry = new entry_t(0.0, 1, 1, 0);
+    entry_t *const entry = new entry_t(0.0, 0.0, 1, 1, 0);
     entry_t *result = NULL;
-    
+
     m_fifo->enqueue(entry);
     result = m_fifo->dequeue();
-    
+
     CPPUNIT_ASSERT_EQUAL(entry->arrival, result->arrival);
     CPPUNIT_ASSERT_EQUAL(entry->destination, result->destination);
     CPPUNIT_ASSERT_EQUAL(entry->origin, result->origin);
@@ -50,16 +50,16 @@ void FifoTest::testEnqueue()
 
 void FifoTest::testOrder()
 {
-    entry_t *const entry1 = new entry_t(0.0, 1, 1, 0);
-    entry_t *const entry2 = new entry_t(1.0, 2, 2, 1);
+    entry_t *const entry1 = new entry_t(0.0, 0.0, 1, 1, 0);
+    entry_t *const entry2 = new entry_t(1.0, 0.0, 2, 2, 1);
     entry_t *result = NULL;
-    
+
     CPPUNIT_ASSERT(m_fifo->size() == 0);
 
     m_fifo->enqueue(entry1);
 
     CPPUNIT_ASSERT(m_fifo->size() == 1);
-    
+
     m_fifo->enqueue(entry2);
 
     CPPUNIT_ASSERT(m_fifo->size() == 2);
@@ -68,17 +68,17 @@ void FifoTest::testOrder()
     result = m_fifo->dequeue();
 
     CPPUNIT_ASSERT(m_fifo->size() == 1);
-    
+
     CPPUNIT_ASSERT_EQUAL(entry1->arrival, result->arrival);
     CPPUNIT_ASSERT_EQUAL(entry1->destination, result->destination);
     CPPUNIT_ASSERT_EQUAL(entry1->origin, result->origin);
     CPPUNIT_ASSERT_EQUAL(entry1->type, result->type);
-    
+
     // second dequeue
     result = m_fifo->dequeue();
 
     CPPUNIT_ASSERT(m_fifo->size() == 0);
-    
+
     CPPUNIT_ASSERT_EQUAL(entry2->arrival, result->arrival);
     CPPUNIT_ASSERT_EQUAL(entry2->destination, result->destination);
     CPPUNIT_ASSERT_EQUAL(entry2->origin, result->origin);
@@ -97,23 +97,23 @@ void FifoTest::testEmpty()
     // empty dequeue
     result = m_fifo->dequeue();
 
-    CPPUNIT_ASSERT(m_fifo->size() == 0);    
+    CPPUNIT_ASSERT(m_fifo->size() == 0);
     CPPUNIT_ASSERT(result == NULL);
 }
 
 void FifoTest::testList()
 {
-    entry_t *const entry1 = new entry_t(0.0, 1, 1, 0);
-    entry_t *const entry2 = new entry_t(1.0, 2, 2, 1);
+    entry_t *const entry1 = new entry_t(0.0, 0.0, 1, 1, 0);
+    entry_t *const entry2 = new entry_t(1.0, 0.0, 2, 2, 1);
     node_double_t *result = NULL;
     node_double_t *current = NULL;
-    
+
     m_fifo->enqueue(entry1);
     m_fifo->enqueue(entry2);
     result = m_fifo->delist();
 
-    CPPUNIT_ASSERT(m_fifo->size() == 0);    
-    
+    CPPUNIT_ASSERT(m_fifo->size() == 0);
+
     current = result->next;
     CPPUNIT_ASSERT_EQUAL(entry1->arrival, current->data->arrival);
 
@@ -134,12 +134,12 @@ void FifoTest::testList()
 
 void FifoTest::testNewList()
 {
-    entry_t *const entry1 = new entry_t(0.0, 1, 1, 0);
-    entry_t *const entry2 = new entry_t(1.0, 2, 2, 1);
-    entry_t *const entry3 = new entry_t(1.0, 2, 2, 1);
+    entry_t *const entry1 = new entry_t(0.0, 0.0, 1, 1, 0);
+    entry_t *const entry2 = new entry_t(1.0, 0.0, 2, 2, 1);
+    entry_t *const entry3 = new entry_t(1.0, 0.0, 2, 2, 1);
     entry_t *entry = NULL;
     node_double_t *result = NULL;
-    
+
     m_fifo->enqueue(entry1);
     m_fifo->enqueue(entry2);
     result = m_fifo->delist();
@@ -147,11 +147,11 @@ void FifoTest::testNewList()
     CPPUNIT_ASSERT(m_fifo->size() == 0);
 
     m_fifo->enqueue(entry3);
-    
+
     CPPUNIT_ASSERT(m_fifo->size() == 1);
 
     entry = m_fifo->dequeue();
-    
+
     CPPUNIT_ASSERT_EQUAL(entry3->arrival, entry->arrival);
     CPPUNIT_ASSERT_EQUAL(entry3->destination, entry->destination);
     CPPUNIT_ASSERT_EQUAL(entry3->origin, entry->origin);
@@ -171,13 +171,13 @@ void FifoTest::testNewList()
 void FifoTest::testEnlist()
 {
     Fifo *fifo = new Fifo();
-    
+
     entry_t *resultOld = NULL;
     entry_t *resultNew = NULL;
     entry_t *entry = NULL;
-    
+
     for (int i = 0; i < 3; ++i) {
-        entry = new entry_t((double) i, i, 1, 0);
+        entry = new entry_t((double) i, 0.0, i, 1, 0);
         fifo->enqueue(entry);
     }
 

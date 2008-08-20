@@ -60,11 +60,9 @@ typedef boost::shared_ptr<gsl_rng> tGslRngSP;
  *
  * @author <a href="mailto:Dominik.Dahlem@cs.tcd.ie">Dominik Dahlem</a>
  */
-class CRN
+class CRN : public Singleton <CRN>
 {
 public:
-    CRN();
-    ~CRN();
 
     /** @fn init(unsigned long int p_seed)
      * Initialise a new GSL random number generator.
@@ -93,6 +91,9 @@ public:
     void log(const boost::intmax_t p_seed, std::string eventType);
 
 
+    CRN();
+    ~CRN();
+
 private:
 
     /** @typedef ptr_rng
@@ -103,11 +104,6 @@ private:
 
 };
 
-
-/** @typedef CRNSingleton
- * Define a singleton type of the <code>CRN</code> class.
- */
-typedef Singleton<CRN> CRNSingleton;
 
     }
 }

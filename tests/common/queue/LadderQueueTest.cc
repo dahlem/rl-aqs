@@ -1,9 +1,9 @@
 // Copyright (C) 2007-2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
-//  
+//
 // This file is free software; as a special exception the author gives
-// unlimited permission to copy and/or distribute it, with or without 
+// unlimited permission to copy and/or distribute it, with or without
 // modifications, as long as this notice is preserved.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 // implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
@@ -37,7 +37,7 @@ void LadderQueueTest::tearDown()
 void LadderQueueTest::testEnqueue10()
 {
     for (int i = 10; i > 0; --i) {
-        entry_t *entry = new entry_t((double) i, 1, 1, 1);
+        entry_t *entry = new entry_t((double) i, 0.0, 1, 1, 1);
         m_ladderqueue->enqueue(entry);
     }
 
@@ -54,7 +54,7 @@ void LadderQueueTest::testEnqueue10()
 void LadderQueueTest::testEnqueueVeryLarge()
 {
     for (int i = 2000000; i > 0; --i) {
-        entry_t *entry = new entry_t((double) i, 1, 1, 1);
+        entry_t *entry = new entry_t((double) i, 0.0, 1, 1, 1);
         m_ladderqueue->enqueue(entry);
     }
 
@@ -71,11 +71,11 @@ void LadderQueueTest::testEnqueueVeryLarge()
 void LadderQueueTest::testEnqueueDequeue20()
 {
     for (int i = 10; i > 0; --i) {
-        entry_t *entry = new entry_t((double) i, 1, 1, 1);
+        entry_t *entry = new entry_t((double) i, 0.0, 1, 1, 1);
         m_ladderqueue->enqueue(entry);
     }
     for (int i = 10; i > 0; --i) {
-        entry_t *entry = new entry_t(100.0 + (double) i, 1, 1, 1);
+        entry_t *entry = new entry_t(100.0 + (double) i, 0.0, 1, 1, 1);
         m_ladderqueue->enqueue(entry);
     }
 
@@ -91,10 +91,10 @@ void LadderQueueTest::testEnqueueDequeue20()
 
     for (int i = 1; i < 11; ++i) {
         try {
-            entry_t *entry = new entry_t((double) i, 1, 1, 1);
+            entry_t *entry = new entry_t((double) i, 0.0, 1, 1, 1);
             m_ladderqueue->enqueue(entry);
         } catch (QueueException qe) {
-            // we expect those here 
+            // we expect those here
         }
     }
 

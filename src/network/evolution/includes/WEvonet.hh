@@ -64,10 +64,16 @@ enum vertex_arrival_rate_t { vertex_arrival_rate = 1112 };
 enum vertex_busy_t { vertex_busy = 1113 };
 
 
-/** @enum vertex_busy_t
+/** @enum vertex_time_service_ends_t
  * This enum extends the vertex properties by a time service ends attribute.
  */
 enum vertex_time_service_ends_t { vertex_time_service_ends = 1114 };
+
+
+/** @enum vertex_number_in_queue_t
+ * This enum extends the vertex properties by a time service ends attribute.
+ */
+enum vertex_number_in_queue_t { vertex_number_in_queue = 1115 };
 
 
 // install the vertex service rate property
@@ -77,6 +83,7 @@ namespace boost
     BOOST_INSTALL_PROPERTY(vertex, arrival_rate);
     BOOST_INSTALL_PROPERTY(vertex, busy);
     BOOST_INSTALL_PROPERTY(vertex, time_service_ends);
+    BOOST_INSTALL_PROPERTY(vertex, number_in_queue);
 }
 
 
@@ -93,10 +100,15 @@ typedef boost::property <vertex_service_rate_t, float> VertexServiceRateProperty
  */
 typedef boost::property <vertex_arrival_rate_t, float, VertexServiceRateProperty> VertexArrivalRateProperty;
 
+/** @typedef VertexArrivalRateProperty
+ * Specifies the property for the vertex arrival rate
+ */
+typedef boost::property <vertex_number_in_queue_t, int, VertexArrivalRateProperty> VertexNumberInQueueProperty;
+
 /** @typedef VertexBusyProperty
  * Specifies the property for the vertex busy flag
  */
-typedef boost::property <vertex_busy_t, bool, VertexArrivalRateProperty> VertexBusyProperty;
+typedef boost::property <vertex_busy_t, bool, VertexNumberInQueueProperty> VertexBusyProperty;
 
 /** @typedef VertexTimeServiceEndsProperty
  * Specifies the property for the time service ends attribute of a vertex
@@ -136,6 +148,11 @@ typedef boost::graph_traits <Graph>::vertex_descriptor Vertex;
  * Specifies the edge descriptor of a graph
  */
 typedef boost::graph_traits <Graph>::edge_descriptor Edge;
+
+/** @typedef VertexServiceRateMap
+ * Specifies the map that stores the vertex service rate property
+ */
+typedef boost::property_map <Graph, vertex_number_in_queue_t>::type VertexNumberInQueueMap;
 
 /** @typedef VertexServiceRateMap
  * Specifies the map that stores the vertex service rate property

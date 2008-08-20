@@ -16,26 +16,27 @@
 #include <gsl/gsl_rng.h>
 
 #include "CRN.hh"
-using des::sampling::CRN;
-using des::sampling::tGslRngSP;
+namespace dsample = des::sampling;
 
 
-CRN::CRN()
+dsample::CRN::CRN()
 {
+    std::cout << "set up rng" << std::endl;
+
     gsl_rng_env_setup();
 }
 
 
-CRN::~CRN()
+dsample::CRN::~CRN()
 {
 }
 
 
-const boost::int32_t CRN::init(const boost::intmax_t p_seed)
+const boost::int32_t dsample::CRN::init(const boost::intmax_t p_seed)
 {
     const gsl_rng_type *rng_type = gsl_rng_default;
 
-    tGslRngSP rng = tGslRngSP(gsl_rng_alloc(rng_type), gsl_rng_free);
+    dsample::tGslRngSP rng = tGslRngSP(gsl_rng_alloc(rng_type), gsl_rng_free);
     gsl_rng_set(rng.get(), p_seed);
 
     m_gslRngs.push_back(rng);
@@ -44,7 +45,7 @@ const boost::int32_t CRN::init(const boost::intmax_t p_seed)
 }
 
 
-tGslRngSP CRN::get(const boost::uint32_t p_rng) throw (SamplingException)
+dsample::tGslRngSP dsample::CRN::get(const boost::uint32_t p_rng) throw (SamplingException)
 {
     if (p_rng < m_gslRngs.size()) {
         return m_gslRngs[p_rng];
@@ -54,7 +55,7 @@ tGslRngSP CRN::get(const boost::uint32_t p_rng) throw (SamplingException)
 }
 
 
-void CRN::log(const boost::intmax_t p_seed, std::string eventType)
+void dsample::CRN::log(const boost::intmax_t p_seed, std::string eventType)
 {
     std::cout << "Use seed " << p_seed << " for the " << eventType << "." << std::endl;
 }
