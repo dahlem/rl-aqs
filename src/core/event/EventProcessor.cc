@@ -74,6 +74,8 @@ void dcore::EventProcessor::process()
         }
 
         // delete the entry after handling it
-        delete entry;
+        if (entry != NULL) {
+            delete entry;
+        }
     }
 }

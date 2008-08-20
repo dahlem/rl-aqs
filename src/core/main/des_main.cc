@@ -98,6 +98,7 @@ int main(int argc, char *argv[])
 
     boost::int32_t arrival_rng_index;
     boost::int32_t service_rng_index;
+    boost::int32_t depart_uniform_rng_index;
     boost::int32_t seeds_rng_index;
     boost::uint32_t seed = 0;
 
@@ -114,6 +115,11 @@ int main(int argc, char *argv[])
         seed = dsample::Seeds::getInstance().getSeed();
         service_rng_index = dsample::CRN::getInstance().init(seed);
         dsample::CRN::getInstance().log(seed, "service events");
+
+        // init the crn for the departure uniform rv
+        seed = dsample::Seeds::getInstance().getSeed();
+        depart_uniform_rng_index = dsample::CRN::getInstance().init(seed);
+        dsample::CRN::getInstance().log(seed, "departure uniform");
     } else {
         // generate the seeds
         std::cout << "Use random number to generate seeds." << std::endl;
@@ -132,6 +138,11 @@ int main(int argc, char *argv[])
         seed = gsl_rng_uniform_int(seeds_rng.get(), gsl_rng_max(seeds_rng.get()));
         service_rng_index = dsample::CRN::getInstance().init(seed);
         dsample::CRN::getInstance().log(seed, "service events");
+
+        // 4. init the crn for the departure uniform rv
+        seed = gsl_rng_uniform_int(seeds_rng.get(), gsl_rng_max(seeds_rng.get()));
+        depart_uniform_rng_index = dsample::CRN::getInstance().init(seed);
+        dsample::CRN::getInstance().log(seed, "departure uniform");
     }
 
     dsample::tGslRngSP arrival_rng = dsample::CRN::getInstance().get(arrival_rng_index - 1);
@@ -175,7 +186,7 @@ int main(int argc, char *argv[])
     dcore::tArrivalHandlerSP arrivalHandler(
         new dcore::ArrivalHandler(graph, queue, service_rng_index));
     dcore::tDepartureHandlerSP departureHandler(
-        new dcore::DepartureHandler(graph, queue));
+        new dcore::DepartureHandler(graph, queue, depart_uniform_rng_index));
 
     // attach the handlers to the events
     arrivalEvent->attach(arrivalHandler);

@@ -62,15 +62,15 @@ typedef boost::shared_ptr <dcommon::LadderQueue> tQueueSP;
 class ArrivalHandler : public design::Observer<dcore::ArrivalEvent>
 {
 public:
-    ArrivalHandler(dnet::tGraphSP p_graph, tQueueSP p_queue, uint32_t p_service_idx);
+    ArrivalHandler(dnet::tGraphSP p_graph, tQueueSP p_queue, boost::uint32_t p_service_idx);
     ~ArrivalHandler();
 
     void update(dcore::ArrivalEvent *subject);
 
 private:
-    dnet::tGraphSP m_graph;
     tQueueSP m_queue;
-    uint32_t m_service_idx;
+    dnet::tGraphSP m_graph;
+    boost::uint32_t m_service_idx;
     dsample::tGslRngSP m_service_rng;
     dnet::VertexBusyMap vertex_busy_map;
     dnet::VertexTimeServiceEndsMap vertex_time_service_ends_map;

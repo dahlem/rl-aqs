@@ -37,7 +37,7 @@ namespace dsample = des::sampling;
 
 
 dcore::ArrivalHandler::ArrivalHandler(
-    dnet::tGraphSP p_graph, tQueueSP p_queue, uint32_t p_service_idx)
+    dnet::tGraphSP p_graph, tQueueSP p_queue, boost::uint32_t p_service_idx)
     : m_graph(p_graph), m_queue(p_queue), m_service_idx(p_service_idx)
 {
     m_service_rng = dsample::CRN::getInstance().get(m_service_idx - 1);
@@ -70,31 +70,22 @@ void dcore::ArrivalHandler::update(dcore::ArrivalEvent *subject)
     if (vertex_busy_map[vertex]) {
         // the new arrival time is that of the time-service-ends
         departure = vertex_time_service_ends_map[vertex] + service_time;
-
-        dcommon::entry_t *new_entry = new dcommon::entry_t(
-            departure,
-            entry->destination,
-            entry->destination,
-            dcore::DEPARTURE_EVENT);
-
-        m_queue->enqueue(new_entry);
-        vertex_time_service_ends_map[vertex] = departure;
         vertex_number_in_queue_map[vertex]++;
     } else {
         // enqueue a departure event into the queue with a stochastic service time
         departure = entry->arrival + service_time;
 
-        dcommon::entry_t *new_entry = new dcommon::entry_t(
-            departure,
-            entry->destination,
-            entry->destination,
-            dcore::DEPARTURE_EVENT);
-
-        m_queue->enqueue(new_entry);
-
         // set the busy flag to true
         vertex_busy_map[vertex] = true;
-        vertex_time_service_ends_map[vertex] = departure;
         vertex_number_in_queue_map[vertex] = 1;
     }
+
+    dcommon::entry_t *new_entry = new dcommon::entry_t(
+        departure,
+        entry->destination,
+        entry->destination,
+        dcore::DEPARTURE_EVENT);
+
+    m_queue->enqueue(new_entry);
+    vertex_time_service_ends_map[vertex] = departure;
 }
