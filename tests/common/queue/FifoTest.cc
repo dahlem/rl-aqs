@@ -34,7 +34,7 @@ void FifoTest::tearDown()
 
 void FifoTest::testEnqueue()
 {
-    entry_t *const entry = new entry_t(0.0, 0.0, 1, 1, 0);
+    entry_t *const entry = new entry_t(0.0, 1, 1, 0);
     entry_t *result = NULL;
 
     m_fifo->enqueue(entry);
@@ -50,8 +50,8 @@ void FifoTest::testEnqueue()
 
 void FifoTest::testOrder()
 {
-    entry_t *const entry1 = new entry_t(0.0, 0.0, 1, 1, 0);
-    entry_t *const entry2 = new entry_t(1.0, 0.0, 2, 2, 1);
+    entry_t *const entry1 = new entry_t(0.0, 1, 1, 0);
+    entry_t *const entry2 = new entry_t(1.0, 2, 2, 1);
     entry_t *result = NULL;
 
     CPPUNIT_ASSERT(m_fifo->size() == 0);
@@ -103,8 +103,8 @@ void FifoTest::testEmpty()
 
 void FifoTest::testList()
 {
-    entry_t *const entry1 = new entry_t(0.0, 0.0, 1, 1, 0);
-    entry_t *const entry2 = new entry_t(1.0, 0.0, 2, 2, 1);
+    entry_t *const entry1 = new entry_t(0.0, 1, 1, 0);
+    entry_t *const entry2 = new entry_t(1.0, 2, 2, 1);
     node_double_t *result = NULL;
     node_double_t *current = NULL;
 
@@ -134,9 +134,9 @@ void FifoTest::testList()
 
 void FifoTest::testNewList()
 {
-    entry_t *const entry1 = new entry_t(0.0, 0.0, 1, 1, 0);
-    entry_t *const entry2 = new entry_t(1.0, 0.0, 2, 2, 1);
-    entry_t *const entry3 = new entry_t(1.0, 0.0, 2, 2, 1);
+    entry_t *const entry1 = new entry_t(0.0, 1, 1, 0);
+    entry_t *const entry2 = new entry_t(1.0, 2, 2, 1);
+    entry_t *const entry3 = new entry_t(1.0, 2, 2, 1);
     entry_t *entry = NULL;
     node_double_t *result = NULL;
 
@@ -177,7 +177,7 @@ void FifoTest::testEnlist()
     entry_t *entry = NULL;
 
     for (int i = 0; i < 3; ++i) {
-        entry = new entry_t((double) i, 0.0, i, 1, 0);
+        entry = new entry_t((double) i, i, 1, 0);
         fifo->enqueue(entry);
     }
 

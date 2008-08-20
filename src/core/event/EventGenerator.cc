@@ -59,7 +59,6 @@ void dcore::EventGenerator::generate(
             // enqueue the last arrival event
             dcommon::entry_t *entry = new dcommon::entry_t(
                 cur_arrival,
-                0,
                 destination,
                 dcore::EXTERNAL_EVENT,
                 dcore::ARRIVAL_EVENT);
@@ -69,7 +68,6 @@ void dcore::EventGenerator::generate(
             // enqueue the last arrival event
             dcommon::entry_t *entry = new dcommon::entry_t(
                 cur_arrival,
-                0,
                 destination,
                 dcore::EXTERNAL_EVENT,
                 dcore::LAST_ARRIVAL_EVENT);

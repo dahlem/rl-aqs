@@ -44,7 +44,7 @@ void TopTest::testInitial()
 }
 void TopTest::testEnqueueOnce()
 {
-    entry_t *const entry = new entry_t(3.1, 0.0, 1, 1, 0);
+    entry_t *const entry = new entry_t(3.1, 1, 1, 0);
 
     CPPUNIT_ASSERT(m_top->getNTop() == 0);
     m_top->enqueue(entry);
@@ -58,8 +58,8 @@ void TopTest::testEnqueueOnce()
 
 void TopTest::testEnqueueTwice()
 {
-    entry_t *const entry1 = new entry_t(0.5, 0.0, 1, 1, 0);
-    entry_t *const entry2 = new entry_t(1.0, 0.0, 2, 2, 1);
+    entry_t *const entry1 = new entry_t(0.5, 1, 1, 0);
+    entry_t *const entry2 = new entry_t(1.0, 2, 2, 1);
     entry_t *result = NULL;
 
     CPPUNIT_ASSERT(m_top->getNTop() == 0);
@@ -92,7 +92,7 @@ void TopTest::testEnqueueTwice()
 
 void TopTest::testResetOk()
 {
-    entry_t *const entry1 = new entry_t(0.5, 0.0, 1, 1, 0);
+    entry_t *const entry1 = new entry_t(0.5, 1, 1, 0);
 
     m_top->reset();
 
@@ -106,7 +106,7 @@ void TopTest::testResetOk()
 
 void TopTest::testResetThrows()
 {
-    entry_t *const entry1 = new entry_t(0.5, 0.0, 1, 1, 0);
+    entry_t *const entry1 = new entry_t(0.5, 1, 1, 0);
 
     m_top->enqueue(entry1);
 
@@ -121,9 +121,9 @@ void TopTest::testResetThrows()
 
 void TopTest::testList()
 {
-    entry_t *const entry1 = new entry_t(0.0, 0.0, 1, 1, 0);
-    entry_t *const entry2 = new entry_t(1.0, 0.0, 2, 2, 1);
-    entry_t *const entry3 = new entry_t(1.0, 0.0, 2, 2, 1);
+    entry_t *const entry1 = new entry_t(0.0, 1, 1, 0);
+    entry_t *const entry2 = new entry_t(1.0, 2, 2, 1);
+    entry_t *const entry3 = new entry_t(1.0, 2, 2, 1);
     entry_t *entry = NULL;
     node_double_t *result = NULL;
 
@@ -158,7 +158,7 @@ void TopTest::testList()
 void TopTest::test100()
 {
     for (int i = 0; i < 100; ++i) {
-        struct entry_t *const entry = new entry_t((double) i, 0.0, 1, 1, 0);
+        struct entry_t *const entry = new entry_t((double) i, 1, 1, 0);
         m_top->enqueue(entry);
     }
 
@@ -179,7 +179,7 @@ void TopTest::test100EnDe()
     entry_t *result = NULL;
 
     for (int i = 0; i < 100; ++i) {
-        entry = new entry_t((double) i, 0.0, 1, 1, 0);
+        entry = new entry_t((double) i, 1, 1, 0);
 
         m_top->enqueue(entry);
         CPPUNIT_ASSERT(m_top->getNTop() == 1);
@@ -201,7 +201,7 @@ void TopTest::testEnlist()
     entry_t *entry = NULL;
 
     for (int i = 0; i < 3; ++i) {
-        entry = new entry_t((double) i, 0.0, i, 1, 0);
+        entry = new entry_t((double) i, i, 1, 0);
         fifo->enqueue(entry);
     }
 

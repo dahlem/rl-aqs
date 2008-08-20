@@ -41,6 +41,10 @@ dcore::ArrivalHandler::ArrivalHandler(
     : m_graph(p_graph), m_queue(p_queue), m_service_idx(p_service_idx)
 {
     m_service_rng = dsample::CRN::getInstance().get(m_service_idx - 1);
+    vertex_busy_map = get(vertex_busy, *m_graph);
+    vertex_service_map = get(vertex_service_rate, *m_graph);
+    vertex_number_in_queue_map = get(vertex_number_in_queue, *m_graph);
+    vertex_time_service_ends_map = get(vertex_time_service_ends, *m_graph);
 }
 
 
@@ -50,51 +54,42 @@ dcore::ArrivalHandler::~ArrivalHandler()
 
 void dcore::ArrivalHandler::update(dcore::ArrivalEvent *subject)
 {
-    dnet::VertexBusyMap vertex_busy_map = get(vertex_busy, *m_graph);
-    dnet::VertexTimeServiceEndsMap vertex_time_service_ends_map =
-        get(vertex_time_service_ends, *m_graph);
-    dnet::VertexServiceRateMap vertex_service_map =
-        get(vertex_service_rate, *m_graph);
-    dnet::VertexNumberInQueueMap vertex_number_in_queue_map =
-        get(vertex_number_in_queue, *m_graph);
-
     dcommon::entry_t *entry;
-    entry = subject->getEvent();
+    double service_time;
+    double departure;
+    dnet::Vertex vertex;
 
-    dnet::Vertex vertex = boost::vertex(entry->destination, *m_graph);
+    entry = subject->getEvent();
+    vertex = boost::vertex(entry->destination, *m_graph);
+
+    service_time = gsl_ran_exponential(m_service_rng.get(),
+                                       vertex_service_map[vertex]);
+
     // if the server is busy then re-schedule
     // otherwise schedule the departure
     if (vertex_busy_map[vertex]) {
         // the new arrival time is that of the time-service-ends
-        // note: do we need to know the service time here?
-        // it seems yes, because we need to update the time-service-ends
-        double service_time =
-            gsl_ran_exponential(m_service_rng.get(), vertex_service_map[vertex]);
-        double departure = vertex_time_service_ends_map[vertex] + service_time;
-//        std::cout << entry->destination << ") Arrival : " << entry->arrival << " time service begins : " << vertex_time_service_ends_map[vertex]
-//                  << " service time : " << service_time << " time service ends: " << departure << std::endl;
+        departure = vertex_time_service_ends_map[vertex] + service_time;
 
         dcommon::entry_t *new_entry = new dcommon::entry_t(
             departure,
-            service_time,
             entry->destination,
             entry->destination,
             dcore::DEPARTURE_EVENT);
+
         m_queue->enqueue(new_entry);
         vertex_time_service_ends_map[vertex] = departure;
         vertex_number_in_queue_map[vertex]++;
     } else {
         // enqueue a departure event into the queue with a stochastic service time
-        double service_time =
-            gsl_ran_exponential(m_service_rng.get(), vertex_service_map[vertex]);
-        double departure = entry->arrival + service_time;
+        departure = entry->arrival + service_time;
 
         dcommon::entry_t *new_entry = new dcommon::entry_t(
             departure,
-            service_time,
             entry->destination,
             entry->destination,
             dcore::DEPARTURE_EVENT);
+
         m_queue->enqueue(new_entry);
 
         // set the busy flag to true

@@ -72,6 +72,11 @@ private:
     tQueueSP m_queue;
     uint32_t m_service_idx;
     dsample::tGslRngSP m_service_rng;
+    dnet::VertexBusyMap vertex_busy_map;
+    dnet::VertexTimeServiceEndsMap vertex_time_service_ends_map;
+    dnet::VertexServiceRateMap vertex_service_map;
+    dnet::VertexNumberInQueueMap vertex_number_in_queue_map;
+
 };
 
 

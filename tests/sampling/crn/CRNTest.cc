@@ -15,7 +15,6 @@ using boost::shared_ptr;
 
 #include "CRN.hh"
 using des::sampling::CRN;
-using des::sampling::CRNSingleton;
 
 
 
@@ -25,9 +24,8 @@ CPPUNIT_TEST_SUITE_REGISTRATION(CRNTest);
 
 void CRNTest::testInit()
 {
-    CRN singleton = CRNSingleton::getInstance();
-    int index = singleton.init(0);
-    shared_ptr<gsl_rng> rng = singleton.get(index - 1);
+    int index = CRN::getInstance().init(0);
+    shared_ptr<gsl_rng> rng = CRN::getInstance().get(index - 1);
 
     CPPUNIT_ASSERT(rng.get() != NULL);
 }
@@ -35,19 +33,17 @@ void CRNTest::testInit()
 
 void CRNTest::testGetException()
 {
-    CRN singleton = CRNSingleton::getInstance();
-    int index = singleton.init(0);
-    shared_ptr<gsl_rng> rng = singleton.get(index);
+    int index = CRN::getInstance().init(0);
+    shared_ptr<gsl_rng> rng = CRN::getInstance().get(index);
 }
 
 
 void CRNTest::testStreamEqual()
 {
-    CRN singleton = CRNSingleton::getInstance();
-    int index1 = singleton.init(0);
-    int index2 = singleton.init(0);
-    shared_ptr<gsl_rng> rng1 = singleton.get(index1 - 1);
-    shared_ptr<gsl_rng> rng2 = singleton.get(index2 - 1);
+    int index1 = CRN::getInstance().init(0);
+    int index2 = CRN::getInstance().init(0);
+    shared_ptr<gsl_rng> rng1 = CRN::getInstance().get(index1 - 1);
+    shared_ptr<gsl_rng> rng2 = CRN::getInstance().get(index2 - 1);
 
     for (int i = 0; i < 10; ++i) {
         CPPUNIT_ASSERT_DOUBLES_EQUAL(gsl_rng_uniform(rng1.get()),
@@ -59,14 +55,12 @@ void CRNTest::testStreamEqual()
 
 void CRNTest::testStreamDifferent()
 {
-    CRN singleton = CRNSingleton::getInstance();
-    int index1 = singleton.init(999);
-    int index2 = singleton.init(0);
-    shared_ptr<gsl_rng> rng1 = singleton.get(index1 - 1);
-    shared_ptr<gsl_rng> rng2 = singleton.get(index2 - 1);
+    int index1 = CRN::getInstance().init(999);
+    int index2 = CRN::getInstance().init(0);
+    shared_ptr<gsl_rng> rng1 = CRN::getInstance().get(index1 - 1);
+    shared_ptr<gsl_rng> rng2 = CRN::getInstance().get(index2 - 1);
 
     for (int i = 0; i < 10; ++i) {
         CPPUNIT_ASSERT(gsl_rng_uniform(rng1.get()) != gsl_rng_uniform(rng2.get()));
     }
 }
-

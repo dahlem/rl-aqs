@@ -37,15 +37,13 @@ namespace des
 struct entry_t
 {
     double arrival;
-    double service;
     int destination;
     int origin;
     int type;
 
-    entry_t(double a, double s, int d, int o, int t)
+    entry_t(double a, int d, int o, int t)
         {
             arrival = a;
-            service = s;
             destination = d;
             origin = o;
             type = t;

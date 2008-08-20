@@ -52,7 +52,7 @@ void BottomTest::testEnqueueNull()
 void BottomTest::testEnqueue()
 {
     for (int i = 1; i < 6; ++i) {
-        entry_t *const entry = new entry_t((double) i, 0, 1, 1, 0);
+        entry_t *const entry = new entry_t((double) i, 1, 1, 0);
         m_bottom->enqueue(entry);
     }
 
@@ -61,7 +61,7 @@ void BottomTest::testEnqueue()
 
 void BottomTest::testEnqueueOnce()
 {
-    entry_t *const entry = new entry_t(0.0, 0, 1, 1, 0);
+    entry_t *const entry = new entry_t(0.0, 1, 1, 0);
     entry_t *result = NULL;
 
     m_bottom->enqueue(entry);
@@ -77,8 +77,8 @@ void BottomTest::testEnqueueOnce()
 
 void BottomTest::testEnqueueTwiceOrdered()
 {
-    entry_t *const entry1 = new entry_t(0.0, 0, 1, 1, 0);
-    entry_t *const entry2 = new entry_t(1.0, 0, 1, 1, 0);
+    entry_t *const entry1 = new entry_t(0.0, 1, 1, 0);
+    entry_t *const entry2 = new entry_t(1.0, 1, 1, 0);
     entry_t *result = NULL;
 
     m_bottom->enqueue(entry1);
@@ -111,11 +111,11 @@ void BottomTest::testEnqueueAtTail()
     entry_t *resultNew = NULL;
 
     for (int i = 6; i < 1; --i) {
-        entry_t *const entry = new entry_t((double) i, 0, 1, 1, 0);
+        entry_t *const entry = new entry_t((double) i, 1, 1, 0);
         m_bottom->enqueue(entry);
     }
 
-    entry_t *const entry = new entry_t(7, 0, 1, 1, 0);
+    entry_t *const entry = new entry_t(7, 1, 1, 0);
     m_bottom->enqueue(entry);
 
     resultOld = m_bottom->dequeue();
@@ -139,11 +139,11 @@ void BottomTest::testEnqueueAtHead()
     entry_t *resultNew = NULL;
 
     for (int i = 1; i < 6; ++i) {
-        entry_t *const entry = new entry_t((double) i, 0, 1, 1, 0);
+        entry_t *const entry = new entry_t((double) i, 1, 1, 0);
         m_bottom->enqueue(entry);
     }
 
-    entry_t *const entry = new entry_t(0, 0, 1, 1, 0);
+    entry_t *const entry = new entry_t(0, 1, 1, 0);
     m_bottom->enqueue(entry);
 
     resultOld = m_bottom->dequeue();
@@ -166,15 +166,15 @@ void BottomTest::testStability()
     entry_t *resultNew = NULL;
 
     for (int i = 0; i < 3; ++i) {
-        entry_t *const entry = new entry_t((double) i, 0, i, 1, 0);
+        entry_t *const entry = new entry_t((double) i, i, 1, 0);
         m_bottom->enqueue(entry);
     }
     for (int i = 0; i < 10; ++i) {
-        entry_t *const entry = new entry_t(4.0, 0, i + 3, 1, 0);
+        entry_t *const entry = new entry_t(4.0, i + 3, 1, 0);
         m_bottom->enqueue(entry);
     }
     for (int i = 0; i < 3; ++i) {
-        entry_t *const entry = new entry_t((double) i + 5.0, 0, i + 13, 1, 0);
+        entry_t *const entry = new entry_t((double) i + 5.0, i + 13, 1, 0);
         m_bottom->enqueue(entry);
     }
 
@@ -199,12 +199,12 @@ void BottomTest::testEnlistShort()
     entry_t *resultNew = NULL;
 
     for (int i = 6; i < 9; ++i) {
-        entry_t *const entry = new entry_t((double) i, 0, 1, 1, 0);
+        entry_t *const entry = new entry_t((double) i, 1, 1, 0);
         m_bottom->enqueue(entry);
     }
     CPPUNIT_ASSERT(m_bottom->size() == 3);
     for (int i = 5; i > 0; --i) {
-        entry_t *const entry = new entry_t((double) i, 0, i, 1, 0);
+        entry_t *const entry = new entry_t((double) i, i, 1, 0);
         fifo->enqueue(entry);
     }
 
@@ -237,11 +237,11 @@ void BottomTest::testEnlistShortStability()
     entry_t *resultNew = NULL;
 
     for (int i = 0; i < 5; ++i) {
-        entry_t *const entry = new entry_t((double) i, 0, i, 1, 0);
+        entry_t *const entry = new entry_t((double) i, i, 1, 0);
         m_bottom->enqueue(entry);
     }
     for (int i = 0; i < 5; ++i) {
-        entry_t *const entry = new entry_t(5, 0, i + 5, 1, 0);
+        entry_t *const entry = new entry_t(5, i + 5, 1, 0);
         fifo->enqueue(entry);
     }
 
@@ -272,12 +272,12 @@ void BottomTest::testEnlistLong()
     entry_t *resultNew = NULL;
 
     for (int i = 16; i < 19; ++i) {
-        entry_t *const entry = new entry_t((double) i, 0, 1, 1, 0);
+        entry_t *const entry = new entry_t((double) i, 1, 1, 0);
         m_bottom->enqueue(entry);
     }
     CPPUNIT_ASSERT(m_bottom->size() == 3);
     for (int i = 15; i > 0; --i) {
-        entry_t *const entry = new entry_t((double) i, 0, i, 1, 0);
+        entry_t *const entry = new entry_t((double) i, i, 1, 0);
         fifo->enqueue(entry);
     }
 
@@ -310,11 +310,11 @@ void BottomTest::testEnlistLongStability()
     entry_t *entry = NULL;
 
     for (int i = 0; i < 3; ++i) {
-        entry = new entry_t((double) i, 0, i, 1, 0);
+        entry = new entry_t((double) i, i, 1, 0);
         m_bottom->enqueue(entry);
     }
     for (int i = 0; i < 15; ++i) {
-        entry = new entry_t(3.0, 0, i + 3, 1, 0);
+        entry = new entry_t(3.0, i + 3, 1, 0);
         fifo->enqueue(entry);
     }
 
@@ -339,8 +339,8 @@ void BottomTest::testEnlistLongStability()
 
 void BottomTest::testDelist()
 {
-    entry_t *const entry1 = new entry_t(0.0, 0, 1, 1, 0);
-    entry_t *const entry2 = new entry_t(1.0, 0, 2, 2, 1);
+    entry_t *const entry1 = new entry_t(0.0, 1, 1, 0);
+    entry_t *const entry2 = new entry_t(1.0, 2, 2, 1);
     node_double_t *result = NULL;
     node_double_t *current = NULL;
 
@@ -372,7 +372,7 @@ void BottomTest::testMaxTS()
 {
     CPPUNIT_ASSERT_EQUAL(m_bottom->getMaxTS(), (double) 0.0);
 
-    entry_t *const entry1 = new entry_t(3.1, 0, 1, 1, 0);
+    entry_t *const entry1 = new entry_t(3.1, 1, 1, 0);
     m_bottom->enqueue(entry1);
     CPPUNIT_ASSERT_EQUAL(m_bottom->getMaxTS(), (double) 3.1);
 }
@@ -381,7 +381,7 @@ void BottomTest::testMinTS()
 {
     CPPUNIT_ASSERT_EQUAL(m_bottom->getMinTS(), (double) 0.0);
 
-    entry_t *const entry1 = new entry_t(3.1, 0, 1, 1, 0);
+    entry_t *const entry1 = new entry_t(3.1, 1, 1, 0);
     m_bottom->enqueue(entry1);
     CPPUNIT_ASSERT_EQUAL(m_bottom->getMinTS(), (double) 3.1);
 }

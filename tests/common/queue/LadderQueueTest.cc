@@ -37,7 +37,7 @@ void LadderQueueTest::tearDown()
 void LadderQueueTest::testEnqueue10()
 {
     for (int i = 10; i > 0; --i) {
-        entry_t *entry = new entry_t((double) i, 0.0, 1, 1, 1);
+        entry_t *entry = new entry_t((double) i, 1, 1, 1);
         m_ladderqueue->enqueue(entry);
     }
 
@@ -54,7 +54,7 @@ void LadderQueueTest::testEnqueue10()
 void LadderQueueTest::testEnqueueVeryLarge()
 {
     for (int i = 2000000; i > 0; --i) {
-        entry_t *entry = new entry_t((double) i, 0.0, 1, 1, 1);
+        entry_t *entry = new entry_t((double) i, 1, 1, 1);
         m_ladderqueue->enqueue(entry);
     }
 
@@ -71,11 +71,11 @@ void LadderQueueTest::testEnqueueVeryLarge()
 void LadderQueueTest::testEnqueueDequeue20()
 {
     for (int i = 10; i > 0; --i) {
-        entry_t *entry = new entry_t((double) i, 0.0, 1, 1, 1);
+        entry_t *entry = new entry_t((double) i, 1, 1, 1);
         m_ladderqueue->enqueue(entry);
     }
     for (int i = 10; i > 0; --i) {
-        entry_t *entry = new entry_t(100.0 + (double) i, 0.0, 1, 1, 1);
+        entry_t *entry = new entry_t(100.0 + (double) i, 1, 1, 1);
         m_ladderqueue->enqueue(entry);
     }
 
@@ -91,7 +91,7 @@ void LadderQueueTest::testEnqueueDequeue20()
 
     for (int i = 1; i < 11; ++i) {
         try {
-            entry_t *entry = new entry_t((double) i, 0.0, 1, 1, 1);
+            entry_t *entry = new entry_t((double) i, 1, 1, 1);
             m_ladderqueue->enqueue(entry);
         } catch (QueueException qe) {
             // we expect those here

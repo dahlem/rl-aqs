@@ -65,6 +65,9 @@ public:
 private:
     dnet::tGraphSP m_graph;
     tQueueSP m_queue;
+    dnet::VertexBusyMap vertex_busy_map;
+    dnet::VertexNumberInQueueMap vertex_number_in_queue_map;
+    
 };
 
 

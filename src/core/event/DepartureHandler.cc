@@ -40,6 +40,8 @@ dcore::DepartureHandler::DepartureHandler(
     dnet::tGraphSP p_graph, tQueueSP p_queue)
     : m_graph(p_graph), m_queue(p_queue)
 {
+    vertex_busy_map = get(vertex_busy, *m_graph);
+    vertex_number_in_queue_map = get(vertex_number_in_queue, *m_graph);
 }
 
 
@@ -49,10 +51,6 @@ dcore::DepartureHandler::~DepartureHandler()
 
 void dcore::DepartureHandler::update(dcore::DepartureEvent *subject)
 {
-    dnet::VertexBusyMap vertex_busy_map = get(vertex_busy, *m_graph);
-    dnet::VertexNumberInQueueMap vertex_number_in_queue_map =
-        get(vertex_number_in_queue, *m_graph);
-
     dcommon::entry_t *entry;
     entry = subject->getEvent();
 
