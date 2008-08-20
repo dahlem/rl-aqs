@@ -17,28 +17,19 @@
 /** @file Ladder.hh
  * Declaration of the ladder structure of the Ladder Queue.
  */
-#ifndef LADDER_HH
-#define LADDER_HH
+#ifndef __LADDER_HH__
+#define __LADDER_HH__
 
 #if HAVE_CONFIG_H
 # include <config.h>
 #endif
 
 #include "Entry.hh"
-using des::common::entry_t;
-
 #include "Fifo.hh"
-using des::common::Fifo;
-
 #include "List.hh"
-using des::common::node_double_t;
-using des::common::List;
-
 #include "Queue.hh"
-using des::common::Queue;
-
 #include "QueueException.hh"
-using des::common::QueueException;
+namespace dcommon = des::common;
 
 
 
@@ -56,7 +47,7 @@ namespace des
  *
  * @author <a href="mailto:Dominik.Dahlem@cs.tcd.ie">Dominik Dahlem</a>
  */
-class Ladder: public Queue, List
+class Ladder: public dcommon::Queue, dcommon::List
 {
 public:
     Ladder();
@@ -68,14 +59,14 @@ public:
 #endif /* HAVE_LADDERSTATS */
 
     /**
-     * @see Queue#enqueue(entry_t* const) throw (QueueException)
+     * @see Queue#enqueue(dcommon::tEntrySP) throw (QueueException)
      */
-    void enqueue(entry_t *const p_entry) throw (QueueException);
+    void enqueue(dcommon::tEntrySP p_entry) throw (dcommon::QueueException);
 
     /**
      * @see Queue#dequeue()
      */
-    entry_t *const dequeue();
+    dcommon::tEntrySP dequeue();
 
     /**
      * Insert a list into the ladder structure and intialise the following
@@ -96,13 +87,13 @@ public:
      * @double the minimum arrival timestamp of the list to be inserted
      * @see List#enlist(node_double_t*, long)
      */
-    void enlist(node_double_t *p_list, long p_size,
-                double p_maxTS, double p_minTS) throw (QueueException);
+    void enlist(dcommon::node_double_t *p_list, long p_size,
+                double p_maxTS, double p_minTS) throw (dcommon::QueueException);
 
     /**
      * @see List#delist()
      */
-    node_double_t *delist();
+    dcommon::node_double_t *delist();
 
     /**
      * @return the number of events in the ladder structure
@@ -124,7 +115,7 @@ public:
      * @param int the bucket
      * @return the number of events in a given bucket in a given rung
      */
-    long getNBucket(int p_rung, int p_bucket) throw (QueueException);
+    long getNBucket(int p_rung, int p_bucket) throw (dcommon::QueueException);
 
     /**
      * @return the number of events in the current dequeue bucket
@@ -136,7 +127,7 @@ public:
      * @return the bucketwidth of a given rung
      * @throws QueueException thrown, if the given rung has not been initialised
      */
-    double getBucketwidth(int p_rung) throw (QueueException);
+    double getBucketwidth(int p_rung) throw (dcommon::QueueException);
 
     /**
      * @return the bucketwidth of the currently active dequeue rung
@@ -182,14 +173,14 @@ public:
      * @param node_double_t* the list to be inserted
      * @param long the size of the list to be inserted
      */
-    void pushBack(node_double_t *p_list, long p_size);
+    void pushBack(dcommon::node_double_t *p_list, long p_size);
 
 
 private:
     /**
      * @see List#enlist(node_double_t*, long)
      */
-    void enlist(node_double_t *p_list, long p_size);
+    void enlist(dcommon::node_double_t *p_list, long p_size);
 
     /**
      * This method adapts the one presented in the TOMACS journal in order to
@@ -262,7 +253,7 @@ private:
      * @param the size of the list
      * @see List#enlist(node_double_t*, long)
      */
-    void enlist(int p_rung, node_double_t *p_list, long p_size);
+    void enlist(int p_rung, dcommon::node_double_t *p_list, long p_size);
 
 
     /**
@@ -275,7 +266,7 @@ private:
      */
     static const int MAX_RUNGS = 8;
 
-    Fifo ***m_rungs;
+    dcommon::Fifo ***m_rungs;
     int m_BucketsFirstRung;
 
     int m_NRung;

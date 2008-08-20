@@ -21,6 +21,8 @@
 #ifndef __ARRIVALEVENT_HH__
 #define __ARRIVALEVENT_HH__
 
+#include <boost/shared_ptr.hpp>
+
 #include "Entry.hh"
 namespace dcommon = des::common;
 
@@ -46,7 +48,7 @@ public:
     ArrivalEvent();
     ~ArrivalEvent();
 
-    void arrival(dcommon::entry_t *event);
+    void arrival(dcommon::tEntrySP event);
 };
 
 typedef boost::shared_ptr <ArrivalEvent> tArrivalEventSP;

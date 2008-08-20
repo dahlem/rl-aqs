@@ -17,8 +17,10 @@
 /** @file Entry.hh
  * Specification of an entry for the priority queue.
  */
-#ifndef ENTRY_HH
-#define ENTRY_HH
+#ifndef __ENTRY_HH__
+#define __ENTRY_HH__
+
+#include <boost/shared_ptr.hpp>
 
 
 namespace des
@@ -50,6 +52,13 @@ struct entry_t
         }
 
 };
+
+
+/** @typedef tEntrySP
+ * a type definition of a shared pointer of an entry
+ */
+typedef boost::shared_ptr <entry_t> tEntrySP;
+
 
     }
 }

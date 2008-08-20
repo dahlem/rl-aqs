@@ -23,15 +23,15 @@
 #endif
 
 #include "Queue.hh"
-using des::common::Queue;
+namespace dcommon = des::common;
 
 
 
-Queue::~Queue()
+dcommon::Queue::~Queue()
 {}
 
 
 #ifdef HAVE_LADDERSTATS
-void Queue::record() {}
+void dcommon::Queue::record() {}
 #endif /* HAVE_LADDERSTATS */
 

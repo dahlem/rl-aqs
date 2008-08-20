@@ -1,34 +1,37 @@
 // Copyright (C) 2007-2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
-//  
+//
 // This file is free software; as a special exception the author gives
-// unlimited permission to copy and/or distribute it, with or without 
+// unlimited permission to copy and/or distribute it, with or without
 // modifications, as long as this notice is preserved.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 // implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 #include <cstddef>
 
+#include <boost/shared_ptr.hpp>
+
+#include "Entry.hh"
 #include "Mergesort.hh"
-using des::common::Mergesort;
+namespace dcommon = des::common;
 
 
 
-Mergesort::Mergesort() 
+dcommon::Mergesort::Mergesort()
 {}
 
-Mergesort::~Mergesort() 
+dcommon::Mergesort::~Mergesort()
 {}
 
-node_double_t* Mergesort::sort(
-    node_double_t* p_list)
+dcommon::node_double_t* dcommon::Mergesort::sort(
+    dcommon::node_double_t* p_list)
 {
     if (p_list == NULL || p_list->next == NULL || p_list->next->data == NULL)
         return p_list;
 
-    node_double_t *left = p_list;
-    node_double_t *right = p_list->next;
+    dcommon::node_double_t *left = p_list;
+    dcommon::node_double_t *right = p_list->next;
 
     while ((right != NULL)
            && (right->next != NULL)
@@ -44,13 +47,14 @@ node_double_t* Mergesort::sort(
     return merge(sort(left), sort(right));
 }
 
-node_double_t* Mergesort::merge(
-        node_double_t* p_left,
-        node_double_t* p_right)
+dcommon::node_double_t* dcommon::Mergesort::merge(
+    dcommon::node_double_t* p_left,
+    dcommon::node_double_t* p_right)
 {
-    node_double_t dummy(NULL, NULL, NULL);
-    node_double_t *head = &dummy;
-    node_double_t *temp = head;
+    dcommon::entry_t *entry = NULL;
+    dcommon::node_double_t dummy(dcommon::tEntrySP(entry), NULL, NULL);
+    dcommon::node_double_t *head = &dummy;
+    dcommon::node_double_t *temp = head;
 
     while ((p_left != NULL) && (p_right != NULL)) {
         if ((p_left->data == NULL) && (p_right->data == NULL)) break;
@@ -80,7 +84,6 @@ node_double_t* Mergesort::merge(
 
     temp->next = (p_left == NULL) ? p_right : p_left;
     temp->next->previous = temp;
-    
+
     return head->next;
 }
-

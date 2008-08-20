@@ -46,7 +46,7 @@ public:
     DepartureEvent();
     ~DepartureEvent();
 
-    void departure(dcommon::entry_t *event);
+    void departure(dcommon::tEntrySP event);
 };
 
 typedef boost::shared_ptr <DepartureEvent> tDepartureEventSP;

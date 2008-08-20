@@ -17,6 +17,7 @@
 /** @file Event.cc
  * Implementation of the abstract event class.
  */
+#include <cstdlib>
 
 #include "Event.hh"
 namespace dcore = des::core;
@@ -25,10 +26,12 @@ namespace dcore = des::core;
 namespace dcommon = des::common;
 
 
-dcore::Event::~Event() {}
+dcore::Event::~Event()
+{
+}
 
 
-dcommon::entry_t *dcore::Event::getEvent()
+dcommon::tEntrySP dcore::Event::getEvent()
 {
     return m_event;
 }

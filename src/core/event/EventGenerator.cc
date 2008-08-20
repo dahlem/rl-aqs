@@ -57,20 +57,20 @@ void dcore::EventGenerator::generate(
 
         if ((cur_arrival - new_arrival) <= stop_time) {
             // enqueue the last arrival event
-            dcommon::entry_t *entry = new dcommon::entry_t(
+            dcommon::tEntrySP entry = dcommon::tEntrySP(new dcommon::entry_t(
                 cur_arrival,
                 destination,
                 dcore::EXTERNAL_EVENT,
-                dcore::ARRIVAL_EVENT);
+                dcore::ARRIVAL_EVENT));
             queue->enqueue(entry);
             cur_arrival -= new_arrival;
         } else {
             // enqueue the last arrival event
-            dcommon::entry_t *entry = new dcommon::entry_t(
+            dcommon::tEntrySP entry = dcommon::tEntrySP(new dcommon::entry_t(
                 cur_arrival,
                 destination,
                 dcore::EXTERNAL_EVENT,
-                dcore::LAST_ARRIVAL_EVENT);
+                dcore::LAST_ARRIVAL_EVENT));
             queue->enqueue(entry);
             break;
         }

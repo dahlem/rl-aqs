@@ -37,14 +37,14 @@ namespace bio = boost::iostreams;
 #include <cfloat>
 
 #include "Top.hh"
-using des::common::Top;
+namespace dcommon = des::common;
 
 
 
-Top::Top()
+dcommon::Top::Top()
     : m_maxTS(0.0), m_minTS(DBL_MAX), m_topStart(0.0)
 {
-    m_fifo = new Fifo();
+    m_fifo = new dcommon::Fifo();
 
 #ifdef HAVE_LADDERSTATS
     events_in = 0;
@@ -62,14 +62,14 @@ Top::Top()
 }
 
 
-Top::~Top()
+dcommon::Top::~Top()
 {
     delete m_fifo;
 }
 
 
 #ifdef HAVE_LADDERSTATS
-void Top::record()
+void dcommon::Top::record()
 {
     (*os.get()) << events_in << "," << events_out << "," << getNTop() << std::endl;
 
@@ -80,34 +80,34 @@ void Top::record()
 #endif /* HAVE_LADDERSTATS */
 
 
-double Top::getMaxTS()
+double dcommon::Top::getMaxTS()
 {
     return m_maxTS;
 }
 
 
-double Top::getMinTS()
+double dcommon::Top::getMinTS()
 {
     return m_minTS;
 }
 
 
-double Top::getTopStart()
+double dcommon::Top::getTopStart()
 {
     return m_topStart;
 }
 
 
-long Top::getNTop()
+long dcommon::Top::getNTop()
 {
     return m_fifo->size();
 }
 
 
-void Top::reset() throw (QueueException)
+void dcommon::Top::reset() throw (dcommon::QueueException)
 {
     if (getNTop() > 0) {
-        throw QueueException(QueueException::BAD_RESET);
+        throw dcommon::QueueException(dcommon::QueueException::BAD_RESET);
     } else {
         m_maxTS = 0.0;
         m_minTS = DBL_MAX;
@@ -115,7 +115,7 @@ void Top::reset() throw (QueueException)
 }
 
 
-void Top::enqueue(entry_t *const p_entry) throw (QueueException)
+void dcommon::Top::enqueue(dcommon::tEntrySP p_entry) throw (dcommon::QueueException)
 {
 #ifdef HAVE_LADDERSTATS
     events_in++;
@@ -128,9 +128,9 @@ void Top::enqueue(entry_t *const p_entry) throw (QueueException)
 }
 
 
-entry_t *const Top::dequeue()
+dcommon::tEntrySP dcommon::Top::dequeue()
 {
-    entry_t *result = m_fifo->dequeue();
+    dcommon::tEntrySP result = m_fifo->dequeue();
 
     if (result != NULL) {
 #ifdef HAVE_LADDERSTATS
@@ -144,7 +144,7 @@ entry_t *const Top::dequeue()
 }
 
 
-void Top::setMaxTS(double p_maxTS)
+void dcommon::Top::setMaxTS(double p_maxTS)
 {
     if (p_maxTS > m_maxTS) {
         m_maxTS = p_maxTS;
@@ -152,7 +152,7 @@ void Top::setMaxTS(double p_maxTS)
 }
 
 
-void Top::setMinTS(double p_minTS)
+void dcommon::Top::setMinTS(double p_minTS)
 {
     if (p_minTS < m_minTS) {
         m_minTS = p_minTS;
@@ -160,16 +160,16 @@ void Top::setMinTS(double p_minTS)
 }
 
 
-node_double_t *Top::delist()
+dcommon::node_double_t *dcommon::Top::delist()
 {
-    node_double_t *result = NULL;
+    dcommon::node_double_t *result = NULL;
 
     try {
         result = m_fifo->delist();
         m_topStart = m_maxTS;
 
         reset();
-    } catch (QueueException &qe) {
+    } catch (dcommon::QueueException &qe) {
         // cannot happen here
     }
 
@@ -177,7 +177,7 @@ node_double_t *Top::delist()
 }
 
 
-void Top::enlist(node_double_t *p_list, long p_size)
+void dcommon::Top::enlist(dcommon::node_double_t *p_list, long p_size)
 {
     m_fifo->enlist(p_list, p_size);
 }

@@ -44,9 +44,10 @@ dcore::EventProcessor::~EventProcessor()
 
 void dcore::EventProcessor::process()
 {
-    dcommon::entry_t *entry;
+    dcommon::tEntrySP entry;
 
     while ((entry = m_queue->dequeue()) != NULL) {
+
         // log the event here
         std::cout << std::setprecision(14) << entry->arrival << ","
                   << entry->destination << "," << entry->type
@@ -71,11 +72,6 @@ void dcore::EventProcessor::process()
               break;
           default:
               break;
-        }
-
-        // delete the entry after handling it
-        if (entry != NULL) {
-            delete entry;
         }
     }
 }

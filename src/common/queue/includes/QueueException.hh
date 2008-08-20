@@ -23,7 +23,6 @@
 
 
 #include <exception>
-using std::exception;
 
 
 
@@ -37,7 +36,7 @@ namespace des
  *
  * @author <a href="mailto:Dominik.Dahlem@cs.tcd.ie">Dominik Dahlem</a>
  */
-class QueueException: public exception
+class QueueException: public std::exception
 {
 public:
     QueueException(int p_code);

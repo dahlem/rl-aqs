@@ -35,22 +35,13 @@ namespace bio = boost::iostreams;
 #endif /* HAVE_LADDERTIMING */
 
 #include "Bottom.hh"
-using des::common::Bottom;
-
 #include "Entry.hh"
-using des::common::entry_t;
-
 #include "Ladder.hh"
-using des::common::Ladder;
-
 #include "Queue.hh"
-using des::common::Queue;
-
 #include "QueueException.hh"
-using des::common::QueueException;
-
 #include "Top.hh"
-using des::common::Top;
+namespace dcommon = des::common;
+
 
 
 namespace des
@@ -98,7 +89,7 @@ typedef boost::shared_ptr <str_buf> tStrBufSP;
  *
  * @author <a href="mailto:Dominik.Dahlem@cs.tcd.ie">Dominik Dahlem</a>
  */
-class LadderQueue: public Queue
+class LadderQueue: public dcommon::Queue
 {
 public:
     LadderQueue();
@@ -110,19 +101,19 @@ public:
 #endif /* HAVE_LADDERSTATS */
 
     /**
-     * @see Queue#enqueue(entry_t* const) throw (QueueException)
+     * @see Queue#enqueue(dcommon::tEntrySP) throw (QueueException)
      */
-    void enqueue(entry_t *const p_entry) throw (QueueException);
+    void enqueue(dcommon::tEntrySP p_entry) throw (dcommon::QueueException);
 
     /**
      * @see Queue#dequeue()
      */
-    entry_t *const dequeue();
+    dcommon::tEntrySP dequeue();
 
 private:
-    Top *m_top;
-    Ladder *m_ladder;
-    Bottom *m_bottom;
+    dcommon::Top *m_top;
+    dcommon::Ladder *m_ladder;
+    dcommon::Bottom *m_bottom;
 
 #ifdef HAVE_LADDERTIMING
     tOstreamSP osEn;

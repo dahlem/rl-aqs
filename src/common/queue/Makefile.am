@@ -1,4 +1,4 @@
-# Copyright (C) 2007 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+# Copyright (C) 2007, 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 #  
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without 
@@ -10,24 +10,25 @@
 
 noinst_LTLIBRARIES = libcommonqueue.la
 
-libcommonqueue_la_SOURCES =                                          \
-	Queue.cc                                                     \
-	QueueException.cc                                            \
-	Fifo.cc                                                      \
-	Top.cc                                                       \
-	Bottom.cc                                                    \
-	Ladder.cc                                                    \
+libcommonqueue_la_SOURCES =                                           \
+	Queue.cc                                                      \
+	QueueException.cc                                             \
+	Fifo.cc                                                       \
+	Top.cc                                                        \
+	Bottom.cc                                                     \
+	Ladder.cc                                                     \
 	LadderQueue.cc
 
-libcommonqueue_la_LDFLAGS = -lm
-
-libcommonqueue_la_CPPFLAGS =                                         \
-	-I./includes                                                 \
-	-I../sort/includes                                           \
+libcommonqueue_la_CPPFLAGS =                                          \
+	$(BOOST_CPPFLAGS)                                             \
+	-I./includes                                                  \
+	-I../sort/includes                                            \
 	-I../list/includes
 
-LIBADD =                                                             \
-	../sort/libcommonsort.la                                     \
+libcommonqueue_la_LIBADD =                                            \
+	$(BOOST_LDFLAGS)                                              \
+	-lm                                                           \
+	../sort/libcommonsort.la                                      \
 	../list/libcommonlist.la
 
 include_HEADERS = includes

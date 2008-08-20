@@ -18,6 +18,7 @@
  * Implementation of a basic departure handler.
  */
 #include <iostream>
+#include <cstdlib>
 #include <vector>
 
 #include <gsl/gsl_randist.h>
@@ -61,7 +62,7 @@ dcore::DepartureHandler::~DepartureHandler()
 void dcore::DepartureHandler::update(dcore::DepartureEvent *subject)
 {
     dnet::OutEdgeIterator out_edge_it, out_edge_it_end;
-    dcommon::entry_t *entry;
+    dcommon::tEntrySP entry;
     entry = subject->getEvent();
 
     dnet::Vertex vertex = boost::vertex(entry->destination, *m_graph);
@@ -118,11 +119,11 @@ void dcore::DepartureHandler::update(dcore::DepartureEvent *subject)
                     std::cout << "v: " << destination << ", arrival: " << entry->arrival
                               << ", e: " << sorted_edge_weights[e] << ", edge weight: "
                               << edge_weights[e] << std::endl;
-                    dcommon::entry_t *new_entry = new dcommon::entry_t(
+                    dcommon::tEntrySP new_entry = dcommon::tEntrySP(new dcommon::entry_t(
                         entry->arrival,
                         destination,
                         dcore::INTERNAL_EVENT,
-                        dcore::ARRIVAL_EVENT);
+                        dcore::ARRIVAL_EVENT));
 
                     m_queue->enqueue(new_entry);
                     break;

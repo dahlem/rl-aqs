@@ -18,22 +18,15 @@
  * Declaration of the FIFO list/queue
  */
 
-#ifndef FIFO_HH
-#define FIFO_HH
+#ifndef __FIFO_HH__
+#define __FIFO_HH__
 
 
 #include "Entry.hh"
-using des::common::entry_t;
-
 #include "List.hh"
-using des::common::List;
-using des::common::node_double_t;
-
 #include "Queue.hh"
-using des::common::Queue;
-
 #include "QueueException.hh"
-using des::common::QueueException;
+namespace dcommon = des::common;
 
 
 
@@ -48,7 +41,7 @@ namespace des
  *
  * <a href="mailto:Dominik.Dahlem@cs.tcd.ie">Dominik Dahlem</a>
  */
-class Fifo: public Queue, List
+class Fifo: public dcommon::Queue, dcommon::List
 {
 public:
     Fifo();
@@ -57,22 +50,22 @@ public:
     /**
      * @see Queue#enqueue(entry_t* const) throw (QueueException)
      */
-    void enqueue(entry_t *const p_entry) throw (QueueException);
+    void enqueue(dcommon::tEntrySP p_entry) throw (dcommon::QueueException);
 
     /**
      * @see Queue#dequeue()
      */
-    entry_t *const dequeue();
+    dcommon::tEntrySP dequeue();
 
     /**
      * @see List#delist()
      */
-    node_double_t *delist();
+    dcommon::node_double_t *delist();
 
     /**
      * @see List#enlist(node_double_t*, long)
      */
-    void enlist(node_double_t *p_list, long p_size);
+    void enlist(dcommon::node_double_t *p_list, long p_size);
 
     /**
      * @return the size of the fifo
@@ -86,8 +79,8 @@ private:
     void init();
 
     long m_size;
-    node_double_t *m_head;
-    node_double_t *m_tail;
+    dcommon::node_double_t *m_head;
+    dcommon::node_double_t *m_tail;
 };
 
     }

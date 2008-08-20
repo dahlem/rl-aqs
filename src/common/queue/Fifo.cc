@@ -21,28 +21,29 @@
 #include <cstddef>
 
 #include "Fifo.hh"
-using des::common::Fifo;
+namespace dcommon = des::common;
 
 
 
-Fifo::Fifo()
+dcommon::Fifo::Fifo()
 {
-    m_head = new node_double_t(NULL, NULL, NULL);
-    m_tail = new node_double_t(NULL, NULL, NULL);
+    dcommon::entry_t *entry = NULL;
+    m_head = new dcommon::node_double_t(dcommon::tEntrySP(entry), NULL, NULL);
+    m_tail = new dcommon::node_double_t(dcommon::tEntrySP(entry), NULL, NULL);
 
     init();
 }
 
 
-Fifo::~Fifo()
+dcommon::Fifo::~Fifo()
 {
-    node_double_t *current = m_head->next;
+    dcommon::node_double_t *current = m_head->next;
 
     while (current) {
         // if tail node
         if (current->data == NULL) break;
 
-        node_double_t *deleteNode = current;
+        dcommon::node_double_t *deleteNode = current;
 
         // advance the current pointer
         current = current->next;
@@ -55,21 +56,21 @@ Fifo::~Fifo()
     delete m_tail;
 }
 
-void Fifo::init()
+void dcommon::Fifo::init()
 {
     m_head->next = m_tail;
     m_tail->previous = m_head;
     m_size = 0;
 }
 
-const long Fifo::size()
+const long dcommon::Fifo::size()
 {
     return m_size;
 }
 
-void Fifo::enqueue(entry_t *const p_entry) throw (QueueException)
+void dcommon::Fifo::enqueue(dcommon::tEntrySP p_entry) throw (dcommon::QueueException)
 {
-    node_double_t *node = new node_double_t(p_entry, m_tail, m_tail->previous);
+    dcommon::node_double_t *node = new dcommon::node_double_t(p_entry, m_tail, m_tail->previous);
 
     m_tail->previous->next = node;
     m_tail->previous = node;
@@ -77,13 +78,14 @@ void Fifo::enqueue(entry_t *const p_entry) throw (QueueException)
     m_size++;
 }
 
-entry_t *const Fifo::dequeue()
+dcommon::tEntrySP dcommon::Fifo::dequeue()
 {
-    node_double_t *temp = m_head->next;
-    entry_t *const result = temp->data;
+    dcommon::node_double_t *temp = m_head->next;
+    dcommon::tEntrySP result = temp->data;
 
     if (m_size == 0) {
-        return NULL;
+        dcommon::entry_t *entry = NULL;
+        return dcommon::tEntrySP(entry);
     }
 
     m_head->next = temp->next;
@@ -98,10 +100,13 @@ entry_t *const Fifo::dequeue()
     return result;
 }
 
-node_double_t *Fifo::delist()
+dcommon::node_double_t *dcommon::Fifo::delist()
 {
-    node_double_t *head = new node_double_t(NULL, m_head->next, NULL);
-    node_double_t *tail = new node_double_t(NULL, NULL, m_tail->previous);
+    dcommon::entry_t *entry = NULL;
+    dcommon::node_double_t *head = new dcommon::node_double_t(
+        dcommon::tEntrySP(entry), m_head->next, NULL);
+    dcommon::node_double_t *tail = new dcommon::node_double_t(
+        dcommon::tEntrySP(entry), NULL, m_tail->previous);
 
     head->next->previous = head;
     tail->previous->next = tail;
@@ -113,7 +118,7 @@ node_double_t *Fifo::delist()
     return head;
 }
 
-void Fifo::enlist(node_double_t *p_list, long p_size)
+void dcommon::Fifo::enlist(dcommon::node_double_t *p_list, long p_size)
 {
     m_tail->previous->next = p_list;
     m_tail->previous = (p_list + (p_size - 1));

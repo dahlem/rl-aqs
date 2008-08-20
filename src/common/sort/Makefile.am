@@ -1,4 +1,4 @@
-# Copyright (C) 2007 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+# Copyright (C) 2007, 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 #  
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without 
@@ -12,11 +12,15 @@ noinst_LTLIBRARIES = libcommonsort.la
 
 libcommonsort_la_SOURCES = Mergesort.cc
 
-libcommonsort_la_CPPFLAGS =                                          \
-	-I./includes                                                 \
+libcommonsort_la_CPPFLAGS =                                           \
+	$(BOOST_CPPFLAGS)                                             \
+	-I./includes                                                  \
 	-I../list/includes
 
-LIBADD =  ../list/libcommonlist.la
+libcommonsort_la_LIBADD =                                             \
+	$(BOOST_LDFLAGS)                                              \
+	../list/libcommonlist.la
 
 
 include_HEADERS = includes
+MAINTAINERCLEANFILES = Makefile.in

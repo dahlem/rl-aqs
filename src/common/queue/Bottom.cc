@@ -36,14 +36,13 @@ namespace bio = boost::iostreams;
 #include <cstddef>
 
 #include "Bottom.hh"
-using des::common::Bottom;
-
+#include "Entry.hh"
 #include "Mergesort.hh"
-using des::common::Mergesort;
+namespace dcommon = des::common;
 
 
 
-Bottom::Bottom()
+dcommon::Bottom::Bottom()
 {
     m_lastEvent = 0.0;
 
@@ -64,15 +63,16 @@ Bottom::Bottom()
 #endif /* HAVE_LADDERSTATS */
 }
 
-Bottom::~Bottom()
+
+dcommon::Bottom::~Bottom()
 {
-    node_double_t *current = m_head->next;
+    dcommon::node_double_t *current = m_head->next;
 
     while (current) {
         // if tail node
         if (current->data == NULL) break;
 
-        node_double_t *deleteNode = current;
+        dcommon::node_double_t *deleteNode = current;
 
         // advance the current pointer
         current = current->next;
@@ -87,7 +87,7 @@ Bottom::~Bottom()
 
 
 #ifdef HAVE_LADDERSTATS
-void Bottom::record()
+void dcommon::Bottom::record()
 {
     (*os.get()) << events_in << "," << events_out << "," << size() << std::endl;
 
@@ -98,15 +98,17 @@ void Bottom::record()
 #endif /* HAVE_LADDERSTATS */
 
 
-const long Bottom::size()
+const long dcommon::Bottom::size()
 {
     return m_size;
 }
 
-void Bottom::init()
+
+void dcommon::Bottom::init()
 {
-    m_head = new node_double_t(NULL, NULL, NULL);
-    m_tail = new node_double_t(NULL, NULL, NULL);
+    dcommon::entry_t *entry = NULL;
+    m_head = new dcommon::node_double_t(dcommon::tEntrySP(entry), NULL, NULL);
+    m_tail = new dcommon::node_double_t(dcommon::tEntrySP(entry), NULL, NULL);
 
     m_head->next = m_tail;
     m_tail->previous = m_head;
@@ -114,30 +116,32 @@ void Bottom::init()
     m_size = 0;
 }
 
+
 /**
  * Insert an entry into the bottom structure. Since the bottom structure
  * maintains a sorted list, this enqueue operation uses an insertion algorithm
  * starting from the back of the queue in order to maintain stability. Otherwise,
  * the bottom structure would not offer stability characteristics.
  *
- * @see Queue#enqueue(entry_t*) throw (QueueException)
+ * @see Queue#enqueue(dcommon::tEntrySP) throw (QueueException)
  */
-void Bottom::enqueue(entry_t *const p_entry) throw (QueueException)
+void dcommon::Bottom::enqueue(dcommon::tEntrySP p_entry) throw (dcommon::QueueException)
 {
     if (p_entry == NULL) return;
 
     if (p_entry->arrival < m_lastEvent) {
-        throw QueueException(QueueException::PAST_EVENT_NOT_ALLOWED);
+        throw dcommon::QueueException(
+            dcommon::QueueException::PAST_EVENT_NOT_ALLOWED);
     }
 
-    node_double_t *temp = m_tail->previous;
+    dcommon::node_double_t *temp = m_tail->previous;
 
     // insertion sort from the back
     // maintain stability
     while (temp != NULL) {
         if ((temp->data == NULL)
             || (temp->data->arrival <= p_entry->arrival)) {
-            node_double_t *newEntry = new node_double_t(
+            dcommon::node_double_t *newEntry = new dcommon::node_double_t(
                 p_entry, temp->next, temp);
 
             temp->next->previous = newEntry;
@@ -162,7 +166,7 @@ void Bottom::enqueue(entry_t *const p_entry) throw (QueueException)
  *
  * @see List#enlist(node_double_t*, long)
  */
-void Bottom::enlist(node_double_t *p_list, long p_size)
+void dcommon::Bottom::enlist(dcommon::node_double_t *p_list, long p_size)
 {
     // insert data items of a small list individually, otherwise use mergesort
     if (p_size < 10) {
@@ -172,8 +176,8 @@ void Bottom::enlist(node_double_t *p_list, long p_size)
             p_list = p_list->next;
         }
     } else {
-        p_list = Mergesort::sort(p_list);
-        node_double_t *t = Mergesort::merge(m_head->next, p_list);
+        p_list = dcommon::Mergesort::sort(p_list);
+        dcommon::node_double_t *t = dcommon::Mergesort::merge(m_head->next, p_list);
 
         t->previous = m_head;
         m_head->next = t;
@@ -186,9 +190,10 @@ void Bottom::enlist(node_double_t *p_list, long p_size)
     }
 }
 
-node_double_t *Bottom::delist()
+
+dcommon::node_double_t *dcommon::Bottom::delist()
 {
-    node_double_t *list = m_head;
+    dcommon::node_double_t *list = m_head;
 
     // re-initialise the fifo data structure
     init();
@@ -197,14 +202,15 @@ node_double_t *Bottom::delist()
     return list;
 }
 
-entry_t *const Bottom::dequeue()
+dcommon::tEntrySP dcommon::Bottom::dequeue()
 {
     if (m_size == 0) {
-        return NULL;
+        dcommon::entry_t *entry = NULL;
+        return dcommon::tEntrySP(entry);
     }
 
-    node_double_t *temp = m_head->next;
-    entry_t *const result = temp->data;
+    dcommon::node_double_t *temp = m_head->next;
+    dcommon::tEntrySP result = temp->data;
 
     m_head->next = temp->next;
     temp->next->previous = m_head;
@@ -221,7 +227,7 @@ entry_t *const Bottom::dequeue()
     return result;
 }
 
-double Bottom::getMaxTS()
+double dcommon::Bottom::getMaxTS()
 {
     if (m_size != 0) {
         return m_tail->previous->data->arrival;
@@ -230,7 +236,7 @@ double Bottom::getMaxTS()
     return m_lastEvent;
 }
 
-double Bottom::getMinTS()
+double dcommon::Bottom::getMinTS()
 {
     if (m_size != 0) {
         return m_head->next->data->arrival;

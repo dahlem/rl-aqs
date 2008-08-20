@@ -18,6 +18,8 @@
  * Implementation of a basic arrival handler.
  */
 #include <iostream>
+#include <cstdlib>
+
 #include <gsl/gsl_randist.h>
 
 
@@ -54,10 +56,10 @@ dcore::ArrivalHandler::~ArrivalHandler()
 
 void dcore::ArrivalHandler::update(dcore::ArrivalEvent *subject)
 {
-    dcommon::entry_t *entry;
+    dcommon::tEntrySP entry;
+    dnet::Vertex vertex;
     double service_time;
     double departure;
-    dnet::Vertex vertex;
 
     entry = subject->getEvent();
     vertex = boost::vertex(entry->destination, *m_graph);
@@ -80,11 +82,11 @@ void dcore::ArrivalHandler::update(dcore::ArrivalEvent *subject)
         vertex_number_in_queue_map[vertex] = 1;
     }
 
-    dcommon::entry_t *new_entry = new dcommon::entry_t(
+    dcommon::tEntrySP new_entry = dcommon::tEntrySP(new dcommon::entry_t(
         departure,
         entry->destination,
         entry->destination,
-        dcore::DEPARTURE_EVENT);
+        dcore::DEPARTURE_EVENT));
 
     m_queue->enqueue(new_entry);
     vertex_time_service_ends_map[vertex] = departure;

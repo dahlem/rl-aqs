@@ -37,15 +37,15 @@ namespace bio = boost::iostreams;
 #include <cstddef>
 
 #include "LadderQueue.hh"
-using des::common::LadderQueue;
+namespace dcommon = des::common;
 
 
 
-LadderQueue::LadderQueue()
+dcommon::LadderQueue::LadderQueue()
 {
-    m_top = new Top();
-    m_ladder = new Ladder();
-    m_bottom = new Bottom();
+    m_top = new dcommon::Top();
+    m_ladder = new dcommon::Ladder();
+    m_bottom = new dcommon::Bottom();
 
 #ifdef HAVE_LADDERTIMING
     std::string enqueue = "./ladder-enqueue-timing.txt";
@@ -63,7 +63,7 @@ LadderQueue::LadderQueue()
 #endif /* HAVE_LADDERTIMING */
 }
 
-LadderQueue::~LadderQueue()
+dcommon::LadderQueue::~LadderQueue()
 {
     delete m_top;
     delete m_ladder;
@@ -72,7 +72,7 @@ LadderQueue::~LadderQueue()
 
 
 #ifdef HAVE_LADDERSTATS
-void LadderQueue::record()
+void dcommon::LadderQueue::record()
 {
     m_top->record();
     m_ladder->record();
@@ -81,7 +81,7 @@ void LadderQueue::record()
 #endif /* HAVE_LADDERSTATS */
 
 
-void LadderQueue::enqueue(entry_t *const p_entry) throw (QueueException)
+void dcommon::LadderQueue::enqueue(dcommon::tEntrySP p_entry) throw (dcommon::QueueException)
 {
 #ifdef HAVE_LADDERTIMING
     struct timeval start, finish;
@@ -97,7 +97,7 @@ void LadderQueue::enqueue(entry_t *const p_entry) throw (QueueException)
 
         try {
             m_ladder->enqueue(p_entry);
-        } catch (QueueException qe) {
+        } catch (dcommon::QueueException qe) {
             m_bottom->enqueue(p_entry);
 
             if (m_bottom->size() > m_ladder->getThres()) {
@@ -108,7 +108,7 @@ void LadderQueue::enqueue(entry_t *const p_entry) throw (QueueException)
                     double min = m_bottom->getMinTS();
                     long size = m_bottom->size();
 
-                    node_double_t *list = m_bottom->delist();
+                    dcommon::node_double_t *list = m_bottom->delist();
                     m_ladder->enlist(list->next, size, max, min);
                 } else {
                     // otherwise, spawn a new rung in the ladder and copy the
@@ -117,7 +117,7 @@ void LadderQueue::enqueue(entry_t *const p_entry) throw (QueueException)
 
                     if (success) {
                         long size = m_bottom->size();
-                        node_double_t *list = m_bottom->delist();
+                        dcommon::node_double_t *list = m_bottom->delist();
 
                         m_ladder->pushBack(list, size);
                     }
@@ -136,7 +136,7 @@ void LadderQueue::enqueue(entry_t *const p_entry) throw (QueueException)
 #endif /* HAVE_LADDERTIMING */
 }
 
-entry_t *const LadderQueue::dequeue()
+dcommon::tEntrySP dcommon::LadderQueue::dequeue()
 {
 #ifdef HAVE_LADDERTIMING
     struct timeval start, finish;
@@ -144,7 +144,7 @@ entry_t *const LadderQueue::dequeue()
     gettimeofday(&start, NULL);
 #endif /* HAVE_LADDERTIMING */
 
-    entry_t * entry = NULL;
+    dcommon::tEntrySP entry;
 
     if (m_bottom->size() > 0) {
         // bottom serves the dequeue operation

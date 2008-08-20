@@ -22,7 +22,7 @@
 
 
 #include "Entry.hh"
-using des::common::entry_t;
+namespace dcommon = des::common;
 
 
 
@@ -39,11 +39,11 @@ namespace des
  */
 struct node_single_t
 {
-    struct entry_t *data;
-    struct node_single_t *next;
+    tEntrySP data;
+    node_single_t *next;
 
-    node_single_t(struct entry_t *const d,
-                  struct node_single_t *n)
+    node_single_t(tEntrySP d,
+                  node_single_t *n)
         {
             data = d;
             next = n;
@@ -58,13 +58,13 @@ struct node_single_t
  */
 struct node_double_t
 {
-    struct entry_t *data;
-    struct node_double_t *next;
-    struct node_double_t *previous;
+    tEntrySP data;
+    node_double_t *next;
+    node_double_t *previous;
 
-    node_double_t(struct entry_t *const d,
-                  struct node_double_t *n,
-                  struct node_double_t *p)
+    node_double_t(tEntrySP d,
+                  node_double_t *n,
+                  node_double_t *p)
         {
             data = d;
             next = n;

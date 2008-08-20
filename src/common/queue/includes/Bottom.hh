@@ -25,17 +25,11 @@
 #endif
 
 #include "Entry.hh"
-using des::common::entry_t;
-
 #include "List.hh"
-using des::common::node_double_t;
-using des::common::List;
-
 #include "Queue.hh"
-using des::common::Queue;
-
 #include "QueueException.hh"
-using des::common::QueueException;
+namespace dcommon = des::common;
+
 
 
 namespace des
@@ -64,24 +58,24 @@ public:
 #endif /* HAVE_LADDERSTATS */
 
     /**
-     * @see Queue#enqueue(entry_t* const) throw (QueueException)
+     * @see Queue#enqueue(dcommon::tEntrySP) throw (QueueException)
      */
-    void enqueue(entry_t *const p_entry) throw (QueueException);
+    void enqueue(dcommon::tEntrySP p_entry) throw (dcommon::QueueException);
 
     /**
      * @see Queue#dequeue()
      */
-    entry_t *const dequeue();
+    dcommon::tEntrySP dequeue();
 
     /**
      * @see List#enlist(node_double_t*, long)
      */
-    void enlist(node_double_t *p_list, long p_size);
+    void enlist(dcommon::node_double_t *p_list, long p_size);
 
     /**
      * @see List#delist()
      */
-    node_double_t * delist();
+    dcommon::node_double_t * delist();
 
     /**
      * @return the maximum arrival timestamp of the events in the bottom.
@@ -107,8 +101,8 @@ private:
     long m_size;
     double m_lastEvent;
 
-    node_double_t *m_head;
-    node_double_t *m_tail;
+    dcommon::node_double_t *m_head;
+    dcommon::node_double_t *m_tail;
 };
 
     }

@@ -1,4 +1,4 @@
-# Copyright (C) 2007 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+# Copyright (C) 2007, 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 #  
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without 
@@ -12,7 +12,12 @@ noinst_LTLIBRARIES = libcommonlist.la
 
 libcommonlist_la_SOURCES = List.cc
 
-libcommonlist_la_CPPFLAGS = -I./includes
+libcommonlist_la_CPPFLAGS =                                           \
+	$(BOOST_CPPFLAGS)                                             \
+	 -I./includes
+
+libcommonlist_la_LIBADD =                                             \
+	$(BOOST_LDFLAGS)
 
 
 include_HEADERS = includes

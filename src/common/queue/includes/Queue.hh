@@ -29,10 +29,8 @@ namespace bio = boost::iostreams;
 #endif /* HAVE_LADDERSTATS */
 
 #include "Entry.hh"
-using des::common::entry_t;
-
 #include "QueueException.hh"
-using des::common::QueueException;
+namespace dcommon = des::common;
 
 
 
@@ -81,12 +79,12 @@ public:
      * @param entry_t* the entry structure to be enqueued into a queue.
      * @throws QueueException throw, if the queue cannot enqueue the entry.
      */
-    virtual void enqueue(entry_t *const p_entry) throw (QueueException) = 0;
+    virtual void enqueue(dcommon::tEntrySP p_entry) throw (dcommon::QueueException) = 0;
 
     /**
      * @return returns the next entry in a queue.
      */
-    virtual entry_t *const dequeue() = 0;
+    virtual dcommon::tEntrySP dequeue() = 0;
 
 #ifdef HAVE_LADDERSTATS
 protected:

@@ -1,4 +1,4 @@
-// Copyright (C) 2007 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2007, 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This file is free software; as a special exception the author gives
 // unlimited permission to copy and/or distribute it, with or without
@@ -13,7 +13,7 @@
 
 
 #include "List.hh"
-using des::common::node_double_t;
+namespace dcommon = des::common;
 
 
 
@@ -41,7 +41,7 @@ public:
      * @param node_double_t* the list to be sorted
      * @return the sorted list
      */
-    static node_double_t* sort(node_double_t* p_list);
+    static dcommon::node_double_t* sort(dcommon::node_double_t* p_list);
 
     /**
      * Merge operation of two sorted lists.
@@ -49,9 +49,9 @@ public:
      * @param node_double_t* sorted list
      * @param node_double_t* sorted list
      */
-    static node_double_t* merge(
-        node_double_t* p_left,
-        node_double_t* p_right);
+    static dcommon::node_double_t* merge(
+        dcommon::node_double_t* p_left,
+        dcommon::node_double_t* p_right);
 
 private:
     /**

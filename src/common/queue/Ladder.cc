@@ -38,23 +38,23 @@ namespace bio = boost::iostreams;
 #include <cstring>
 
 #include "Ladder.hh"
-using des::common::Ladder;
+namespace dcommon = des::common;
 
 
 
-Ladder::Ladder(int p_thres)
+dcommon::Ladder::Ladder(int p_thres)
 {
     m_Thres = p_thres;
     init();
 }
 
-Ladder::Ladder()
+dcommon::Ladder::Ladder()
 {
     m_Thres = DEFAULT_THRES;
     init();
 }
 
-void Ladder::init()
+void dcommon::Ladder::init()
 {
     m_NRung = 5;
     m_lowestRung = 0;
@@ -74,12 +74,12 @@ void Ladder::init()
     memset(m_RCur, 0, sizeof(double) * m_NRung);
     memset(m_RStart, 0, sizeof(double) * m_NRung);
 
-    m_rungs = new Fifo**[m_NRung];
+    m_rungs = new dcommon::Fifo**[m_NRung];
 
     for (int i = 0; i < m_NRung; ++i) {
-        m_rungs[i] = new Fifo*[m_Thres];
+        m_rungs[i] = new dcommon::Fifo*[m_Thres];
         for (int j = 0; j < m_Thres; ++j) {
-            m_rungs[i][j] = new Fifo();
+            m_rungs[i][j] = new dcommon::Fifo();
         }
     }
 
@@ -98,7 +98,7 @@ void Ladder::init()
 #endif /* HAVE_LADDERSTATS */
 }
 
-Ladder::~Ladder()
+dcommon::Ladder::~Ladder()
 {
     for (int j = 0; j < m_BucketsFirstRung; ++j) {
         delete m_rungs[0][j];
@@ -123,7 +123,7 @@ Ladder::~Ladder()
 }
 
 #ifdef HAVE_LADDERSTATS
-void Ladder::record()
+void dcommon::Ladder::record()
 {
     (*os.get()) << events_in << "," << events_out << "," << getNBC() << getNRung() << std::endl;
 
@@ -134,80 +134,80 @@ void Ladder::record()
 #endif /* HAVE_LADDERSTATS */
 
 
-double Ladder::getBucketwidth(int p_rung) throw (QueueException)
+double dcommon::Ladder::getBucketwidth(int p_rung) throw (dcommon::QueueException)
 {
     if (p_rung >= m_NRung) {
-        throw QueueException(QueueException::RUNG_OUT_OF_BOUNDS);
+        throw dcommon::QueueException(dcommon::QueueException::RUNG_OUT_OF_BOUNDS);
     }
 
     return m_bucketwidth[p_rung];
 }
 
-double Ladder::getBucketwidth()
+double dcommon::Ladder::getBucketwidth()
 {
     return m_bucketwidth[m_lowestRung];
 }
 
-int Ladder::getNBC()
+int dcommon::Ladder::getNBC()
 {
     return m_NBC;
 }
 
-long Ladder::getNBucket(int p_rung, int p_bucket) throw (QueueException)
+long dcommon::Ladder::getNBucket(int p_rung, int p_bucket) throw (dcommon::QueueException)
 {
     if (p_rung >= m_NRung) {
-        throw QueueException(QueueException::RUNG_OUT_OF_BOUNDS);
+        throw dcommon::QueueException(dcommon::QueueException::RUNG_OUT_OF_BOUNDS);
     }
     if (p_rung == 0) {
         if (p_bucket >= m_BucketsFirstRung) {
-            throw QueueException(QueueException::BUCKET_OUT_OF_BOUNDS);
+            throw dcommon::QueueException(dcommon::QueueException::BUCKET_OUT_OF_BOUNDS);
         }
     } else {
         if (p_bucket >= m_Thres) {
-            throw QueueException(QueueException::BUCKET_OUT_OF_BOUNDS);
+            throw dcommon::QueueException(dcommon::QueueException::BUCKET_OUT_OF_BOUNDS);
         }
     }
 
     return m_rungs[p_rung][p_bucket]->size();
 }
 
-long Ladder::getNBucket()
+long dcommon::Ladder::getNBucket()
 {
     return m_rungs[m_lowestRung][m_currentBucket[m_lowestRung]]->size();
 }
 
-int Ladder::getNRung()
+int dcommon::Ladder::getNRung()
 {
     return m_NRung;
 }
 
-int Ladder::getThres()
+int dcommon::Ladder::getThres()
 {
     return m_Thres;
 }
 
-double Ladder::getRCur(int p_rung)
+double dcommon::Ladder::getRCur(int p_rung)
 {
     if (p_rung >= m_NRung) {
-        throw QueueException(QueueException::RUNG_OUT_OF_BOUNDS);
+        throw dcommon::QueueException(dcommon::QueueException::RUNG_OUT_OF_BOUNDS);
     }
     return m_RCur[p_rung];
 }
 
-double Ladder::getRCur()
+double dcommon::Ladder::getRCur()
 {
     return m_RCur[m_lowestRung];
 }
 
-double Ladder::getRStart(int p_rung)
+double dcommon::Ladder::getRStart(int p_rung)
 {
     if (p_rung >= m_NRung) {
-        throw QueueException(QueueException::RUNG_OUT_OF_BOUNDS);
+        throw dcommon::QueueException(dcommon::QueueException::RUNG_OUT_OF_BOUNDS);
     }
     return m_RStart[p_rung];
 }
 
-double Ladder::bucketwidth(double p_max, double p_min, long p_n)
+double dcommon::Ladder::bucketwidth(double p_max, double p_min, long p_n)
 {
     if (p_max == p_min) {
         return 1.0;
@@ -216,7 +216,7 @@ double Ladder::bucketwidth(double p_max, double p_min, long p_n)
     }
 }
 
-int Ladder::bucket(double p_TS, int p_rung)
+int dcommon::Ladder::bucket(double p_TS, int p_rung)
 {
     double diff = (p_TS - getRStart(p_rung));
     double result = diff / getBucketwidth(p_rung);
@@ -225,7 +225,7 @@ int Ladder::bucket(double p_TS, int p_rung)
     return retVal;
 }
 
-void Ladder::pushBack(node_double_t *p_list, long p_size)
+void dcommon::Ladder::pushBack(dcommon::node_double_t *p_list, long p_size)
 {
     enlist(m_lowestRung, p_list, p_size);
 
@@ -233,12 +233,12 @@ void Ladder::pushBack(node_double_t *p_list, long p_size)
     advanceDequeueBucket(1);
 }
 
-void Ladder::enqueue(entry_t *const p_entry) throw (QueueException)
+void dcommon::Ladder::enqueue(dcommon::tEntrySP p_entry) throw (dcommon::QueueException)
 {
     // cannot enqueue, if the internal structure has not been initialised
     // by an epoch
     if (getNBucket() == 0) {
-        throw QueueException(QueueException::NO_EPOCH_INIT);
+        throw dcommon::QueueException(dcommon::QueueException::NO_EPOCH_INIT);
     }
 
     int nRungs = 0;
@@ -251,19 +251,20 @@ void Ladder::enqueue(entry_t *const p_entry) throw (QueueException)
     // found
     if (nRungs <= m_lowestRung) {
         // insert into tail of rung x, bucket k
-        node_double_t *newNode = new node_double_t(p_entry, NULL, NULL);
+        dcommon::node_double_t *newNode = new dcommon::node_double_t(p_entry, NULL, NULL);
         enlist(nRungs, newNode, 1);
     } else {
-        throw QueueException(QueueException::RUNG_NOT_FOUND);
+        throw dcommon::QueueException(dcommon::QueueException::RUNG_NOT_FOUND);
     }
 }
 
-entry_t *const Ladder::dequeue()
+dcommon::tEntrySP dcommon::Ladder::dequeue()
 {
-    return NULL;
+    dcommon::entry_t *entry = NULL;
+    return dcommon::tEntrySP(entry);
 }
 
-void Ladder::enlist(int p_rung, node_double_t *p_list, long p_size)
+void dcommon::Ladder::enlist(int p_rung, dcommon::node_double_t *p_list, long p_size)
 {
     // transfer one event at a time
     for (int i = 0; i < p_size; ++i) {
@@ -277,7 +278,7 @@ void Ladder::enlist(int p_rung, node_double_t *p_list, long p_size)
     }
 }
 
-void Ladder::enlist(node_double_t *p_list, long p_size)
+void dcommon::Ladder::enlist(dcommon::node_double_t *p_list, long p_size)
 {
     // resize if necessary
     if (p_size >= m_BucketsFirstRung) {
@@ -287,12 +288,12 @@ void Ladder::enlist(node_double_t *p_list, long p_size)
     enlist(0, p_list, p_size);
 }
 
-void Ladder::enlist(node_double_t *p_list, long p_size,
-                    double p_maxTS, double p_minTS)
-    throw (QueueException)
+void dcommon::Ladder::enlist(dcommon::node_double_t *p_list, long p_size,
+                             double p_maxTS, double p_minTS)
+    throw (dcommon::QueueException)
 {
     if (getNBucket() != 0) {
-        throw QueueException(QueueException::EPOCH_EXISTS);
+        throw dcommon::QueueException(dcommon::QueueException::EPOCH_EXISTS);
     }
 
     // nothing to do
@@ -312,7 +313,7 @@ void Ladder::enlist(node_double_t *p_list, long p_size,
     advanceDequeueBucket(1);
 }
 
-node_double_t *Ladder::delist()
+dcommon::node_double_t *dcommon::Ladder::delist()
 {
 #ifdef HAVE_LADDERSTATS
     events_out += m_rungs[m_lowestRung][m_currentBucket[m_lowestRung]]->size();
@@ -322,7 +323,7 @@ node_double_t *Ladder::delist()
     m_events[m_lowestRung] -= m_rungs[m_lowestRung][m_currentBucket[m_lowestRung]]->size();
 
     // get the nodes of the list
-    node_double_t *temp = m_rungs[m_lowestRung][m_currentBucket[m_lowestRung]]->delist();
+    dcommon::node_double_t *temp = m_rungs[m_lowestRung][m_currentBucket[m_lowestRung]]->delist();
 
     // advance the current dequeue bucket
     advanceDequeueBucket(1);
@@ -330,7 +331,7 @@ node_double_t *Ladder::delist()
     return temp;
 }
 
-void Ladder::resizeFirstRung(int p_base)
+void dcommon::Ladder::resizeFirstRung(int p_base)
 {
     // delete the individual elements
     for (int i = 0; i < m_BucketsFirstRung; ++i) {
@@ -350,7 +351,7 @@ void Ladder::resizeFirstRung(int p_base)
     }
 }
 
-void Ladder::advanceDequeueBucket(bool p_spawn)
+void dcommon::Ladder::advanceDequeueBucket(bool p_spawn)
 {
     int elements = 0;
 
@@ -390,7 +391,7 @@ void Ladder::advanceDequeueBucket(bool p_spawn)
     }
 }
 
-bool Ladder::spawn(bool p_doEnlist)
+bool dcommon::Ladder::spawn(bool p_doEnlist)
 {
     bool result = false;
 
@@ -435,14 +436,14 @@ bool Ladder::spawn(bool p_doEnlist)
     return result;
 }
 
-void Ladder::createRung()
+void dcommon::Ladder::createRung()
 {
     m_NRung++;
 
     // create a new rung
-    Fifo*** rungs = new Fifo**[m_NRung];
+    dcommon::Fifo*** rungs = new dcommon::Fifo**[m_NRung];
 
-    rungs[m_lowestRung] = new Fifo*[m_Thres];
+    rungs[m_lowestRung] = new dcommon::Fifo*[m_Thres];
     for (int j = 0; j < m_Thres; ++j) {
         rungs[m_lowestRung][j] = new Fifo();
     }

@@ -19,9 +19,9 @@
  */
 
 #include "List.hh"
-using des::common::List;
+namespace dcommon = des::common;
 
 
 
-List::~List()
+dcommon::List::~List()
 {}

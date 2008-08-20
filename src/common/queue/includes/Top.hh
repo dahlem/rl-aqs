@@ -25,20 +25,11 @@
 #endif
 
 #include "Entry.hh"
-using des::common::entry_t;
-
 #include "Fifo.hh"
-using des::common::Fifo;
-
 #include "List.hh"
-using des::common::node_double_t;
-using des::common::List;
-
 #include "Queue.hh"
-using des::common::Queue;
-
 #include "QueueException.hh"
-using des::common::QueueException;
+namespace dcommon = des::common;
 
 
 
@@ -57,7 +48,7 @@ namespace des
  *
  * @author <a href="mailto:Dominik.Dahlem@cs.tcd.ie">Dominik Dahlem</a>
  */
-class Top: public Queue, List
+class Top: public dcommon::Queue, dcommon::List
 {
 public:
     Top();
@@ -68,24 +59,24 @@ public:
 #endif /* HAVE_LADDERSTATS */
 
     /**
-     * @see Queue#enqueue(entry_t* const) throw (QueueException)
+     * @see Queue#enqueue(dcommon::tEntrySP) throw (QueueException)
      */
-    void enqueue(entry_t *const p_entry) throw (QueueException);
+    void enqueue(dcommon::tEntrySP p_entry) throw (dcommon::QueueException);
 
     /**
      * @see Queue#dequeue()
      */
-    entry_t *const dequeue();
+    dcommon::tEntrySP dequeue();
 
     /**
      * @see List#enlist(node_double_t*, long)
      */
-    void enlist(node_double_t *p_list, long p_size);
+    void enlist(dcommon::node_double_t *p_list, long p_size);
 
     /**
      * @see List#delist()
      */
-    node_double_t * delist();
+    dcommon::node_double_t * delist();
 
     /**
      * @return double the maximum arrival timestamp
@@ -112,7 +103,7 @@ public:
      * @throws QueueException thrown, if the reset is not allowed (which is the
      *                        case if the queue has not been emptied before).
      */
-    void reset() throw (QueueException);
+    void reset() throw (dcommon::QueueException);
 
 private:
     /**
@@ -128,7 +119,8 @@ private:
     double m_maxTS;
     double m_minTS;
     double m_topStart;
-    Fifo *m_fifo;
+    dcommon::Fifo *m_fifo;
+
 };
 
     }
