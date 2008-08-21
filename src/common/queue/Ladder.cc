@@ -33,6 +33,7 @@ namespace bio = boost::iostreams;
 #endif /* HAVE_LADDERSTATS */
 
 
+#include <iostream>
 #include <cmath>
 #include <cstddef>
 #include <cstring>
@@ -61,26 +62,23 @@ void dcommon::Ladder::init()
     m_NBC = 0;
     m_BucketsFirstRung = m_Thres;
 
-    m_events = new int[m_NRung];
-    m_currentBucket = new int[m_NRung];
-    m_bucketwidth = new double[m_NRung];
-    m_RCur = new double[m_NRung];
-    m_RStart = new double[m_NRung];
+    m_events = dcommon::tIntSA(new int[m_NRung]);
+    m_currentBucket = dcommon::tIntSA(new int[m_NRung]);
+    m_bucketwidth = dcommon::tDoubleSA(new double[m_NRung]);
+    m_RCur = dcommon::tDoubleSA(new double[m_NRung]);
+    m_RStart = dcommon::tDoubleSA(new double[m_NRung]);
 
     // initialise the allocated memory
-    memset(m_events, 0, sizeof(int) * m_NRung);
-    memset(m_currentBucket, 0, sizeof(int) * m_NRung);
-    memset(m_bucketwidth, 0, sizeof(double) * m_NRung);
-    memset(m_RCur, 0, sizeof(double) * m_NRung);
-    memset(m_RStart, 0, sizeof(double) * m_NRung);
+    memset(m_events.get(), 0, sizeof(int) * m_NRung);
+    memset(m_currentBucket.get(), 0, sizeof(int) * m_NRung);
+    memset(m_bucketwidth.get(), 0, sizeof(double) * m_NRung);
+    memset(m_RCur.get(), 0, sizeof(double) * m_NRung);
+    memset(m_RStart.get(), 0, sizeof(double) * m_NRung);
 
-    m_rungs = new dcommon::Fifo**[m_NRung];
+    m_rungs = dcommon::tFifoSM(new dcommon::tFifoSA[m_NRung]);
 
     for (int i = 0; i < m_NRung; ++i) {
-        m_rungs[i] = new dcommon::Fifo*[m_Thres];
-        for (int j = 0; j < m_Thres; ++j) {
-            m_rungs[i][j] = new dcommon::Fifo();
-        }
+        m_rungs[i] = dcommon::tFifoSA(new dcommon::Fifo[m_Thres]);
     }
 
 #ifdef HAVE_LADDERSTATS
@@ -100,26 +98,21 @@ void dcommon::Ladder::init()
 
 dcommon::Ladder::~Ladder()
 {
-    for (int j = 0; j < m_BucketsFirstRung; ++j) {
-        delete m_rungs[0][j];
-    }
-    delete[] m_rungs[0];
-    m_rungs[0] = NULL;
+//     for (int j = 0; j < m_BucketsFirstRung; ++j) {
+//         delete m_rungs[0][j];
+//     }
+//     delete[] m_rungs[0];
+//     m_rungs[0] = NULL;
 
-    for (int i = 1; i < m_NRung; ++i) {
-        for (int j = 0; j < m_Thres; ++j) {
-            delete m_rungs[i][j];
-        }
-        delete[] m_rungs[i];
-        m_rungs[i] = NULL;
-    }
+//     for (int i = 1; i < m_NRung; ++i) {
+//         for (int j = 0; j < m_Thres; ++j) {
+//             delete m_rungs[i][j];
+//         }
+//         delete[] m_rungs[i];
+//         m_rungs[i] = NULL;
+//     }
 
-    delete[] m_rungs;
-    delete[] m_bucketwidth;
-    delete[] m_RCur;
-    delete[] m_RStart;
-    delete[] m_events;
-    delete[] m_currentBucket;
+//     delete[] m_rungs;
 }
 
 #ifdef HAVE_LADDERSTATS
@@ -168,12 +161,12 @@ long dcommon::Ladder::getNBucket(int p_rung, int p_bucket) throw (dcommon::Queue
         }
     }
 
-    return m_rungs[p_rung][p_bucket]->size();
+    return m_rungs[p_rung][p_bucket].size();
 }
 
 long dcommon::Ladder::getNBucket()
 {
-    return m_rungs[m_lowestRung][m_currentBucket[m_lowestRung]]->size();
+    return m_rungs[m_lowestRung][m_currentBucket[m_lowestRung]].size();
 }
 
 int dcommon::Ladder::getNRung()
@@ -268,7 +261,7 @@ void dcommon::Ladder::enlist(int p_rung, dcommon::node_double_t *p_list, long p_
 {
     // transfer one event at a time
     for (int i = 0; i < p_size; ++i) {
-        m_rungs[p_rung][bucket(p_list->data->arrival, p_rung)]->enlist(p_list, 1);
+        m_rungs[p_rung][bucket(p_list->data->arrival, p_rung)].enlist(p_list, 1);
         m_events[p_rung]++;
         p_list = p_list->next;
 
@@ -320,10 +313,10 @@ dcommon::node_double_t *dcommon::Ladder::delist()
 #endif /* HAVE_LADDERSTATS */
 
     // keep track of the events in each rung
-    m_events[m_lowestRung] -= m_rungs[m_lowestRung][m_currentBucket[m_lowestRung]]->size();
+    m_events[m_lowestRung] -= m_rungs[m_lowestRung][m_currentBucket[m_lowestRung]].size();
 
     // get the nodes of the list
-    dcommon::node_double_t *temp = m_rungs[m_lowestRung][m_currentBucket[m_lowestRung]]->delist();
+    dcommon::node_double_t *temp = m_rungs[m_lowestRung][m_currentBucket[m_lowestRung]].delist();
 
     // advance the current dequeue bucket
     advanceDequeueBucket(1);
@@ -333,22 +326,31 @@ dcommon::node_double_t *dcommon::Ladder::delist()
 
 void dcommon::Ladder::resizeFirstRung(int p_base)
 {
+//     m_rungs = dcommon::tFifoSM(new dcommon::tFifoSA[m_NRung]);
+
+//     for (int i = 0; i < m_NRung; ++i) {
+//         m_rungs[i] = dcommon::tFifoSA(new dcommon::Fifo[m_Thres]);
+//     }
+
     // delete the individual elements
-    for (int i = 0; i < m_BucketsFirstRung; ++i) {
-        delete m_rungs[0][i];
-    }
+//    for (int i = 0; i < m_BucketsFirstRung; ++i) {
+//        delete m_rungs[0][i];
+//    }
 
     // delete the first rung
-    delete[] m_rungs[0];
+//    delete[] m_rungs[0];
 
     // resize the rung size
     m_BucketsFirstRung = 2 * p_base;
-    m_rungs[0] = new Fifo*[m_BucketsFirstRung];
+    m_rungs[0].reset(new dcommon::Fifo[m_BucketsFirstRung]);
+//    dcommon::tFifoSA firstRung = dcommon::tFifoSA(new dcommon::Fifo[m_BucketsFirstRung]);
+
+//    m_rungs[0].reset(firstRung);
 
     // create new fifos
-    for (int i = 0; i < m_BucketsFirstRung; ++i) {
-        m_rungs[0][i] = new Fifo();
-    }
+//    for (int i = 0; i < m_BucketsFirstRung; ++i) {
+//        m_rungs[0][i] = new Fifo();
+//    }
 }
 
 void dcommon::Ladder::advanceDequeueBucket(bool p_spawn)
@@ -375,7 +377,7 @@ void dcommon::Ladder::advanceDequeueBucket(bool p_spawn)
         }
 
         // how many elements are in this bucket?
-        elements = m_rungs[m_lowestRung][m_currentBucket[m_lowestRung]]->size();
+        elements = m_rungs[m_lowestRung][m_currentBucket[m_lowestRung]].size();
 
         // advance to next bucket
         if (elements == 0) {
@@ -421,12 +423,12 @@ bool dcommon::Ladder::spawn(bool p_doEnlist)
 
         if (p_doEnlist) {
             // copy the elements from the previous bucket to the next rung
-            int size = m_rungs[m_lowestRung - 1][m_currentBucket[m_lowestRung - 1]]->size();
+            int size = m_rungs[m_lowestRung - 1][m_currentBucket[m_lowestRung - 1]].size();
             m_events[m_lowestRung - 1] -= size;
 
             enlist(
                 m_lowestRung,
-                m_rungs[m_lowestRung - 1][m_currentBucket[m_lowestRung - 1]]->delist()->next,
+                m_rungs[m_lowestRung - 1][m_currentBucket[m_lowestRung - 1]].delist()->next,
                 size);
         }
 
@@ -441,19 +443,17 @@ void dcommon::Ladder::createRung()
     m_NRung++;
 
     // create a new rung
-    dcommon::Fifo*** rungs = new dcommon::Fifo**[m_NRung];
+    dcommon::tFifoSM rungs = dcommon::tFifoSM(new dcommon::tFifoSA[m_NRung]);
 
-    rungs[m_lowestRung] = new dcommon::Fifo*[m_Thres];
-    for (int j = 0; j < m_Thres; ++j) {
-        rungs[m_lowestRung][j] = new Fifo();
+    for (int i = 0; i < m_NRung; ++i) {
+        rungs[i] = dcommon::tFifoSA(new dcommon::Fifo[m_Thres]);
     }
 
     // copy the old rungs over
     for (int i = 0; i < m_lowestRung; ++i) {
-        rungs[i] = m_rungs[i];
+        rungs[i].swap(m_rungs[i]);
     }
 
-    delete[] m_rungs;
     m_rungs = rungs;
 
     // resize the events data structure
@@ -463,8 +463,7 @@ void dcommon::Ladder::createRung()
         events[i] = m_events[i];
     }
 
-    delete[] m_events;
-    m_events = events;
+    m_events.reset(events);
 
     // resize the currentBucket data structure
     int *currentBucket = new int[m_NRung];
@@ -473,8 +472,7 @@ void dcommon::Ladder::createRung()
         currentBucket[i] = m_currentBucket[i];
     }
 
-    delete[] m_currentBucket;
-    m_currentBucket = currentBucket;
+    m_currentBucket.reset(currentBucket);
 
     // resize the bucketwidth data structure
     double *bucketwidth = new double[m_NRung];
@@ -483,8 +481,7 @@ void dcommon::Ladder::createRung()
         bucketwidth[i] = m_bucketwidth[i];
     }
 
-    delete[] m_bucketwidth;
-    m_bucketwidth = bucketwidth;
+    m_bucketwidth.reset(bucketwidth);
 
     // resize the rcur data structure
     double *rcur = new double[m_NRung];
@@ -493,8 +490,7 @@ void dcommon::Ladder::createRung()
         rcur[i] = m_RCur[i];
     }
 
-    delete[] m_RCur;
-    m_RCur = rcur;
+    m_RCur.reset(rcur);
 
     // resize the rstart data structure
     double *rstart = new double[m_NRung];
@@ -503,6 +499,5 @@ void dcommon::Ladder::createRung()
         rstart[i] = m_RStart[i];
     }
 
-    delete[] m_RStart;
-    m_RStart = rstart;
+    m_RStart.reset(rstart);
 }

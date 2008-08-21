@@ -1,9 +1,9 @@
-// Copyright (C) 2007 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
-//  
+// Copyright (C) 2007, 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+//
 // This file is free software; as a special exception the author gives
-// unlimited permission to copy and/or distribute it, with or without 
+// unlimited permission to copy and/or distribute it, with or without
 // modifications, as long as this notice is preserved.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 // implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
@@ -22,7 +22,7 @@ using des::common::LadderQueue;
 class LadderQueueTest : public CppUnit::TestFixture
 {
     CPPUNIT_TEST_SUITE(LadderQueueTest);
-    CPPUNIT_TEST(testEnqueueVeryLarge);
+//    CPPUNIT_TEST(testEnqueueVeryLarge);
     CPPUNIT_TEST(testEnqueue10);
     CPPUNIT_TEST(testEnqueueDequeue20);
     CPPUNIT_TEST_SUITE_END();

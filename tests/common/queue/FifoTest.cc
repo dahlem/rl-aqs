@@ -34,8 +34,8 @@ void FifoTest::tearDown()
 
 void FifoTest::testEnqueue()
 {
-    entry_t *const entry = new entry_t(0.0, 1, 1, 0);
-    entry_t *result = NULL;
+    dcommon::tEntrySP entry = dcommon::tEntrySP(new entry_t(0.0, 1, 1, 0));
+    dcommon::tEntrySP result;
 
     m_fifo->enqueue(entry);
     result = m_fifo->dequeue();
@@ -44,15 +44,13 @@ void FifoTest::testEnqueue()
     CPPUNIT_ASSERT_EQUAL(entry->destination, result->destination);
     CPPUNIT_ASSERT_EQUAL(entry->origin, result->origin);
     CPPUNIT_ASSERT_EQUAL(entry->type, result->type);
-
-    delete entry;
 }
 
 void FifoTest::testOrder()
 {
-    entry_t *const entry1 = new entry_t(0.0, 1, 1, 0);
-    entry_t *const entry2 = new entry_t(1.0, 2, 2, 1);
-    entry_t *result = NULL;
+    dcommon::tEntrySP entry1 = dcommon::tEntrySP(new entry_t(0.0, 1, 1, 0));
+    dcommon::tEntrySP entry2 = dcommon::tEntrySP(new entry_t(1.0, 2, 2, 1));
+    dcommon::tEntrySP result;
 
     CPPUNIT_ASSERT(m_fifo->size() == 0);
 
@@ -83,14 +81,11 @@ void FifoTest::testOrder()
     CPPUNIT_ASSERT_EQUAL(entry2->destination, result->destination);
     CPPUNIT_ASSERT_EQUAL(entry2->origin, result->origin);
     CPPUNIT_ASSERT_EQUAL(entry2->type, result->type);
-
-    delete entry1;
-    delete entry2;
 }
 
 void FifoTest::testEmpty()
 {
-    entry_t *result = NULL;
+    dcommon::tEntrySP result;
 
     CPPUNIT_ASSERT(m_fifo->size() == 0);
 
@@ -98,13 +93,13 @@ void FifoTest::testEmpty()
     result = m_fifo->dequeue();
 
     CPPUNIT_ASSERT(m_fifo->size() == 0);
-    CPPUNIT_ASSERT(result == NULL);
+    CPPUNIT_ASSERT(result.get() == NULL);
 }
 
 void FifoTest::testList()
 {
-    entry_t *const entry1 = new entry_t(0.0, 1, 1, 0);
-    entry_t *const entry2 = new entry_t(1.0, 2, 2, 1);
+    dcommon::tEntrySP entry1 = dcommon::tEntrySP(new entry_t(0.0, 1, 1, 0));
+    dcommon::tEntrySP entry2 = dcommon::tEntrySP(new entry_t(1.0, 2, 2, 1));
     node_double_t *result = NULL;
     node_double_t *current = NULL;
 
@@ -121,10 +116,7 @@ void FifoTest::testList()
     CPPUNIT_ASSERT_EQUAL(entry2->arrival, current->data->arrival);
 
     current = current->next;
-    CPPUNIT_ASSERT(current->data == NULL);
-
-    delete entry1;
-    delete entry2;
+    CPPUNIT_ASSERT((current->data).get() == NULL);
 
     delete result->next->next->next;
     delete result->next->next;
@@ -134,10 +126,10 @@ void FifoTest::testList()
 
 void FifoTest::testNewList()
 {
-    entry_t *const entry1 = new entry_t(0.0, 1, 1, 0);
-    entry_t *const entry2 = new entry_t(1.0, 2, 2, 1);
-    entry_t *const entry3 = new entry_t(1.0, 2, 2, 1);
-    entry_t *entry = NULL;
+    dcommon::tEntrySP entry1 = dcommon::tEntrySP(new entry_t(0.0, 1, 1, 0));
+    dcommon::tEntrySP entry2 = dcommon::tEntrySP(new entry_t(1.0, 2, 2, 1));
+    dcommon::tEntrySP entry3 = dcommon::tEntrySP(new entry_t(1.0, 2, 2, 1));
+    dcommon::tEntrySP entry;
     node_double_t *result = NULL;
 
     m_fifo->enqueue(entry1);
@@ -158,10 +150,6 @@ void FifoTest::testNewList()
     CPPUNIT_ASSERT_EQUAL(entry3->type, entry->type);
     CPPUNIT_ASSERT(m_fifo->size() == 0);
 
-    delete entry1;
-    delete entry2;
-    delete entry3;
-
     delete result->next->next->next;
     delete result->next->next;
     delete result->next;
@@ -172,12 +160,12 @@ void FifoTest::testEnlist()
 {
     Fifo *fifo = new Fifo();
 
-    entry_t *resultOld = NULL;
-    entry_t *resultNew = NULL;
-    entry_t *entry = NULL;
+    dcommon::tEntrySP resultOld;
+    dcommon::tEntrySP resultNew;
+    dcommon::tEntrySP entry;
 
     for (int i = 0; i < 3; ++i) {
-        entry = new entry_t((double) i, i, 1, 0);
+        entry = dcommon::tEntrySP(new entry_t((double) i, i, 1, 0));
         fifo->enqueue(entry);
     }
 
@@ -189,14 +177,11 @@ void FifoTest::testEnlist()
     resultOld = m_fifo->dequeue();
     resultNew = m_fifo->dequeue();
 
-    while (resultNew != NULL) {
+    while (resultNew.get() != NULL) {
         CPPUNIT_ASSERT(resultOld->destination < resultNew->destination);
-        delete resultOld;
         resultOld = resultNew;
         resultNew = m_fifo->dequeue();
     }
 
-    delete resultOld;
-    delete resultNew;
     delete fifo;
 }

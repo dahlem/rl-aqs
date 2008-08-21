@@ -28,14 +28,17 @@ CPPUNIT_TEST_SUITE_REGISTRATION(MergesortTest);
 
 void MergesortTest::testMergeLists(int p_size1, int p_size2)
 {
-    node_double_t *HEAD1 = new node_double_t(NULL, NULL, NULL);
-    node_double_t *TAIL1 = new node_double_t(NULL, NULL, NULL);
+    dcommon::entry_t *e = NULL;
+    dcommon::tEntrySP dummy = dcommon::tEntrySP(e);
+
+    node_double_t *HEAD1 = new node_double_t(dummy, NULL, NULL);
+    node_double_t *TAIL1 = new node_double_t(dummy, NULL, NULL);
     node_double_t *result = NULL;
     node_double_t *current = HEAD;
 
 
     for (int i = 0; i < p_size1; ++i) {
-        entry_t *const entry = new entry_t((double) i, i, 1, 0);
+        dcommon::tEntrySP entry = dcommon::tEntrySP(new entry_t((double) i, i, 1, 0));
         node_double_t *const node = new node_double_t(entry, NULL, NULL);
         current = ListHelper::link(current, node);
         current = node;
@@ -45,7 +48,7 @@ void MergesortTest::testMergeLists(int p_size1, int p_size2)
     current = HEAD1;
 
     for (int i = 0; i < p_size2; ++i) {
-        entry_t *const entry = new entry_t((double) i + p_size1 + 1, 1, 1, 0);
+        dcommon::tEntrySP entry = dcommon::tEntrySP(new entry_t((double) i + p_size1 + 1, 1, 1, 0));
         node_double_t *const node = new node_double_t(entry, NULL, NULL);
         current = ListHelper::link(current, node);
         current = node;
@@ -68,8 +71,7 @@ void MergesortTest::testMergeLists(int p_size1, int p_size2)
         // advance the current pointer
         current = current->next;
 
-        // delete the data and the node
-        delete deleteNode->data;
+        // delete the node
         delete deleteNode;
     }
 
@@ -115,7 +117,7 @@ void MergesortTest::testReverse(int p_max)
     node_double_t *result = NULL;
 
     for (int i = p_max; i >= 0; --i) {
-        entry_t *const entry = new entry_t((double) i, 1, 1, 0);
+        dcommon::tEntrySP entry = dcommon::tEntrySP(new entry_t((double) i, 1, 1, 0));
         node_double_t *const node = new node_double_t(entry, NULL, NULL);
         current = ListHelper::link(current, node);
         current = node;
@@ -139,16 +141,18 @@ void MergesortTest::testReverse(int p_max)
         // advance the current pointer
         current = current->next;
 
-        // delete the data and the node
-        delete deleteNode->data;
+        // delete the node
         delete deleteNode;
     }
 }
 
 void MergesortTest::setUp()
 {
-    HEAD = new node_double_t(NULL, NULL, NULL);
-    TAIL = new node_double_t(NULL, NULL, NULL);
+    dcommon::entry_t *e = NULL;
+    dcommon::tEntrySP dummy = dcommon::tEntrySP(e);
+
+    HEAD = new node_double_t(dummy, NULL, NULL);
+    TAIL = new node_double_t(dummy, NULL, NULL);
 }
 
 void MergesortTest::tearDown()
@@ -163,19 +167,19 @@ void MergesortTest::testStability()
     node_double_t *result = NULL;
 
     for (int i = 0; i < 3; ++i) {
-        entry_t *const entry = new entry_t((double) i, i, 1, 0);
+        dcommon::tEntrySP entry = dcommon::tEntrySP(new entry_t((double) i, i, 1, 0));
         node_double_t *const node = new node_double_t(entry, NULL, NULL);
         current = ListHelper::link(current, node);
         current = node;
     }
     for (int i = 0; i < 10; ++i) {
-        entry_t *const entry = new entry_t(4.0, i + 3, 1, 0);
+        dcommon::tEntrySP entry = dcommon::tEntrySP(new entry_t(4.0, i + 3, 1, 0));
         node_double_t *const node = new node_double_t(entry, NULL, NULL);
         current = ListHelper::link(current, node);
         current = node;
     }
     for (int i = 0; i < 3; ++i) {
-        entry_t *const entry = new entry_t((double) i + 5.0, i + 13, 1, 0);
+        dcommon::tEntrySP entry = dcommon::tEntrySP(new entry_t((double) i + 5.0, i + 13, 1, 0));
         node_double_t *const node = new node_double_t(entry, NULL, NULL);
         current = ListHelper::link(current, node);
         current = node;
@@ -201,7 +205,6 @@ void MergesortTest::testStability()
         current = current->next;
 
         // delete the data and the node
-        delete deleteNode->data;
         delete deleteNode;
     }
 }

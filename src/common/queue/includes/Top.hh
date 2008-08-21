@@ -24,6 +24,8 @@
 # include <config.h>
 #endif
 
+#include <boost/shared_ptr.hpp>
+
 #include "Entry.hh"
 #include "Fifo.hh"
 #include "List.hh"
@@ -119,9 +121,16 @@ private:
     double m_maxTS;
     double m_minTS;
     double m_topStart;
-    dcommon::Fifo *m_fifo;
+    dcommon::tFifoSP m_fifo;
 
 };
+
+
+/** @typedef tTopSP
+ * a type defintion of a shared pointer of a top structure
+ */
+typedef boost::shared_ptr <Top> tTopSP;
+
 
     }
 }

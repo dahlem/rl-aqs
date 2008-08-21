@@ -111,9 +111,9 @@ public:
     dcommon::tEntrySP dequeue();
 
 private:
-    dcommon::Top *m_top;
-    dcommon::Ladder *m_ladder;
-    dcommon::Bottom *m_bottom;
+    dcommon::tTopSP m_top;
+    dcommon::tLadderSP m_ladder;
+    dcommon::tBottomSP m_bottom;
 
 #ifdef HAVE_LADDERTIMING
     tOstreamSP osEn;

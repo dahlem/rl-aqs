@@ -24,6 +24,8 @@
 # include <config.h>
 #endif
 
+#include <boost/shared_ptr.hpp>
+
 #include "Entry.hh"
 #include "List.hh"
 #include "Queue.hh"
@@ -104,6 +106,13 @@ private:
     dcommon::node_double_t *m_head;
     dcommon::node_double_t *m_tail;
 };
+
+
+/** @typedef tBottomSP
+ * a type defintion of a shared pointer of a bottom structure
+ */
+typedef boost::shared_ptr <Bottom> tBottomSP;
+
 
     }
 }

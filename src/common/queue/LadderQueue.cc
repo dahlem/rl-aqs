@@ -43,9 +43,9 @@ namespace dcommon = des::common;
 
 dcommon::LadderQueue::LadderQueue()
 {
-    m_top = new dcommon::Top();
-    m_ladder = new dcommon::Ladder();
-    m_bottom = new dcommon::Bottom();
+    m_top = dcommon::tTopSP(new dcommon::Top());
+    m_ladder = dcommon::tLadderSP(new dcommon::Ladder());
+    m_bottom = dcommon::tBottomSP(new dcommon::Bottom());
 
 #ifdef HAVE_LADDERTIMING
     std::string enqueue = "./ladder-enqueue-timing.txt";
@@ -65,9 +65,6 @@ dcommon::LadderQueue::LadderQueue()
 
 dcommon::LadderQueue::~LadderQueue()
 {
-    delete m_top;
-    delete m_ladder;
-    delete m_bottom;
 }
 
 

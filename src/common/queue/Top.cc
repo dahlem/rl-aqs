@@ -44,7 +44,7 @@ namespace dcommon = des::common;
 dcommon::Top::Top()
     : m_maxTS(0.0), m_minTS(DBL_MAX), m_topStart(0.0)
 {
-    m_fifo = new dcommon::Fifo();
+    m_fifo = dcommon::tFifoSP(new dcommon::Fifo);
 
 #ifdef HAVE_LADDERSTATS
     events_in = 0;
@@ -64,7 +64,6 @@ dcommon::Top::Top()
 
 dcommon::Top::~Top()
 {
-    delete m_fifo;
 }
 
 

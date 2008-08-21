@@ -21,6 +21,8 @@
 #ifndef __FIFO_HH__
 #define __FIFO_HH__
 
+#include <boost/shared_ptr.hpp>
+#include <boost/shared_array.hpp>
 
 #include "Entry.hh"
 #include "List.hh"
@@ -82,6 +84,23 @@ private:
     dcommon::node_double_t *m_head;
     dcommon::node_double_t *m_tail;
 };
+
+
+/** @typedef tFifoSP
+ * a type defintion of a shared pointer of a fifo queue
+ */
+typedef boost::shared_ptr <Fifo> tFifoSP;
+
+/** @typedef tFifoSA
+ * a type defintion of a shared array of a shared fifo queue
+ */
+typedef boost::shared_array <Fifo> tFifoSA;
+
+/** @typedef tFifoSM
+ * a type defintion of a shared array of shared arrays of a fifo queue
+ */
+typedef boost::shared_array <tFifoSA> tFifoSM;
+
 
     }
 }

@@ -24,6 +24,9 @@
 # include <config.h>
 #endif
 
+#include <boost/shared_ptr.hpp>
+#include <boost/shared_array.hpp>
+
 #include "Entry.hh"
 #include "Fifo.hh"
 #include "List.hh"
@@ -37,6 +40,16 @@ namespace des
 {
     namespace common
     {
+
+/** @typedef tIntSA
+ * a type defintion of a shared array of ints
+ */
+typedef boost::shared_array <int> tIntSA;
+
+/** @typedef tDoubleSA
+ * a type defintion of a shared array of doubles
+ */
+typedef boost::shared_array <double> tDoubleSA;
 
 
 
@@ -266,7 +279,7 @@ private:
      */
     static const int MAX_RUNGS = 8;
 
-    dcommon::Fifo ***m_rungs;
+    dcommon::tFifoSM m_rungs;
     int m_BucketsFirstRung;
 
     int m_NRung;
@@ -274,13 +287,19 @@ private:
     int m_lowestRung;
     int m_Thres;
 
-    int *m_events;
-    int *m_currentBucket;
+    tIntSA m_events;
+    tIntSA m_currentBucket;
 
-    double *m_bucketwidth;
-    double *m_RCur;
-    double *m_RStart;
+    tDoubleSA m_bucketwidth;
+    tDoubleSA m_RCur;
+    tDoubleSA m_RStart;
 };
+
+
+/** @typedef tLadderSP
+ * a type defintion of a shared pointer of a ladder structure
+ */
+typedef boost::shared_ptr <Ladder> tLadderSP;
 
     }
 }

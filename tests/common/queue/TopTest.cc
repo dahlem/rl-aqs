@@ -44,7 +44,7 @@ void TopTest::testInitial()
 }
 void TopTest::testEnqueueOnce()
 {
-    entry_t *const entry = new entry_t(3.1, 1, 1, 0);
+    dcommon::tEntrySP entry = dcommon::tEntrySP(new entry_t(3.1, 1, 1, 0));
 
     CPPUNIT_ASSERT(m_top->getNTop() == 0);
     m_top->enqueue(entry);
@@ -52,15 +52,13 @@ void TopTest::testEnqueueOnce()
 
     CPPUNIT_ASSERT_EQUAL(m_top->getMaxTS(), 3.1);
     CPPUNIT_ASSERT_EQUAL(m_top->getMinTS(), 3.1);
-
-    delete entry;
 }
 
 void TopTest::testEnqueueTwice()
 {
-    entry_t *const entry1 = new entry_t(0.5, 1, 1, 0);
-    entry_t *const entry2 = new entry_t(1.0, 2, 2, 1);
-    entry_t *result = NULL;
+    dcommon::tEntrySP entry1 = dcommon::tEntrySP(new entry_t(0.5, 1, 1, 0));
+    dcommon::tEntrySP entry2 = dcommon::tEntrySP(new entry_t(1.0, 2, 2, 1));
+    dcommon::tEntrySP result;
 
     CPPUNIT_ASSERT(m_top->getNTop() == 0);
 
@@ -85,14 +83,11 @@ void TopTest::testEnqueueTwice()
     result = m_top->dequeue();
 
     CPPUNIT_ASSERT(m_top->getNTop() == 0);
-
-    delete entry1;
-    delete entry2;
 }
 
 void TopTest::testResetOk()
 {
-    entry_t *const entry1 = new entry_t(0.5, 1, 1, 0);
+    dcommon::tEntrySP entry1 = dcommon::tEntrySP(new entry_t(0.5, 1, 1, 0));
 
     m_top->reset();
 
@@ -100,31 +95,27 @@ void TopTest::testResetOk()
     m_top->dequeue();
 
     m_top->reset();
-
-    delete entry1;
 }
 
 void TopTest::testResetThrows()
 {
-    entry_t *const entry1 = new entry_t(0.5, 1, 1, 0);
+    dcommon::tEntrySP entry1 = dcommon::tEntrySP(new entry_t(0.5, 1, 1, 0));
 
     m_top->enqueue(entry1);
 
     try {
         m_top->reset();
         CPPUNIT_FAIL("Expected an exception!");
-    } catch (QueueException &qe) {
+    } catch (dcommon::QueueException &qe) {
     }
-
-    delete entry1;
 }
 
 void TopTest::testList()
 {
-    entry_t *const entry1 = new entry_t(0.0, 1, 1, 0);
-    entry_t *const entry2 = new entry_t(1.0, 2, 2, 1);
-    entry_t *const entry3 = new entry_t(1.0, 2, 2, 1);
-    entry_t *entry = NULL;
+    dcommon::tEntrySP entry1 = dcommon::tEntrySP(new entry_t(0.0, 1, 1, 0));
+    dcommon::tEntrySP entry2 = dcommon::tEntrySP(new entry_t(1.0, 2, 2, 1));
+    dcommon::tEntrySP entry3 = dcommon::tEntrySP(new entry_t(1.0, 2, 2, 1));
+    dcommon::tEntrySP entry;
     node_double_t *result = NULL;
 
     m_top->enqueue(entry1);
@@ -145,10 +136,6 @@ void TopTest::testList()
     CPPUNIT_ASSERT_EQUAL(entry3->type, entry->type);
     CPPUNIT_ASSERT(m_top->getNTop() == 0);
 
-    delete entry1;
-    delete entry2;
-    delete entry3;
-
     delete result->next->next->next;
     delete result->next->next;
     delete result->next;
@@ -158,16 +145,15 @@ void TopTest::testList()
 void TopTest::test100()
 {
     for (int i = 0; i < 100; ++i) {
-        struct entry_t *const entry = new entry_t((double) i, 1, 1, 0);
+        dcommon::tEntrySP entry = dcommon::tEntrySP(new entry_t((double) i, 1, 1, 0));
         m_top->enqueue(entry);
     }
 
     CPPUNIT_ASSERT(m_top->getNTop() == 100);
 
     for (int i = 0; i < 100; ++i) {
-        struct entry_t *const entry = m_top->dequeue();
+        dcommon::tEntrySP entry = m_top->dequeue();
         CPPUNIT_ASSERT(entry->arrival == i);
-        delete entry;
     }
 
     CPPUNIT_ASSERT(m_top->getNTop() == 0);
@@ -175,11 +161,11 @@ void TopTest::test100()
 
 void TopTest::test100EnDe()
 {
-    entry_t *entry = NULL;
-    entry_t *result = NULL;
+    dcommon::tEntrySP entry;
+    dcommon::tEntrySP result;
 
     for (int i = 0; i < 100; ++i) {
-        entry = new entry_t((double) i, 1, 1, 0);
+        entry = dcommon::tEntrySP(new entry_t((double) i, 1, 1, 0));
 
         m_top->enqueue(entry);
         CPPUNIT_ASSERT(m_top->getNTop() == 1);
@@ -187,8 +173,6 @@ void TopTest::test100EnDe()
         result = m_top->dequeue();
         CPPUNIT_ASSERT(result->arrival == i);
         CPPUNIT_ASSERT(m_top->getNTop() == 0);
-
-        delete entry;
     }
 }
 
@@ -196,12 +180,12 @@ void TopTest::testEnlist()
 {
     Fifo *fifo = new Fifo();
 
-    entry_t *resultOld = NULL;
-    entry_t *resultNew = NULL;
-    entry_t *entry = NULL;
+    dcommon::tEntrySP resultOld;
+    dcommon::tEntrySP resultNew;
+    dcommon::tEntrySP entry;
 
     for (int i = 0; i < 3; ++i) {
-        entry = new entry_t((double) i, i, 1, 0);
+        entry = dcommon::tEntrySP(new entry_t((double) i, i, 1, 0));
         fifo->enqueue(entry);
     }
 
@@ -213,14 +197,11 @@ void TopTest::testEnlist()
     resultOld = m_top->dequeue();
     resultNew = m_top->dequeue();
 
-    while (resultNew != NULL) {
+    while (resultNew.get() != NULL) {
         CPPUNIT_ASSERT(resultOld->destination < resultNew->destination);
-        delete resultOld;
         resultOld = resultNew;
         resultNew = m_top->dequeue();
     }
 
-    delete resultOld;
-    delete resultNew;
     delete fifo;
 }
