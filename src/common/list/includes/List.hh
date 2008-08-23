@@ -17,9 +17,11 @@
 /** @file List.hh
  * Defines structures for single-/double-linked lists.
  */
-#ifndef LIST_HH
-#define LIST_HH
+#ifndef __LIST_HH__
+#define __LIST_HH__
 
+
+#include <boost/shared_ptr.hpp>
 
 #include "Entry.hh"
 namespace dcommon = des::common;
@@ -72,6 +74,16 @@ struct node_double_t
         }
 
 };
+
+/** @typedef tNodeDoubleSP
+ * a type definition of a shared pointer of a double-linked list element
+ */
+typedef boost::shared_ptr <node_double_t> tNodeDoubleSP;
+
+/** @typedef tNodeSingleSP
+ * a type definition of a shared pointer of an single-linked list element
+ */
+typedef boost::shared_ptr <node_single_t> tNodeSingleSP;
 
 
 /**

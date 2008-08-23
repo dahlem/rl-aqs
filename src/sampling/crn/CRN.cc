@@ -21,8 +21,6 @@ namespace dsample = des::sampling;
 
 dsample::CRN::CRN()
 {
-    std::cout << "set up rng" << std::endl;
-
     gsl_rng_env_setup();
 }
 
@@ -35,10 +33,9 @@ dsample::CRN::~CRN()
 const boost::int32_t dsample::CRN::init(const boost::intmax_t p_seed)
 {
     const gsl_rng_type *rng_type = gsl_rng_default;
-
     dsample::tGslRngSP rng = tGslRngSP(gsl_rng_alloc(rng_type), gsl_rng_free);
-    gsl_rng_set(rng.get(), p_seed);
 
+    gsl_rng_set(rng.get(), p_seed);
     m_gslRngs.push_back(rng);
 
     return m_gslRngs.size();

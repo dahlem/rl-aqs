@@ -50,11 +50,6 @@ namespace des
     namespace core
     {
 
-/** @typedef tQueueSP
- * a type definition of the shared pointer of the @ref{LadderQueue}
- */
-typedef boost::shared_ptr <dcommon::LadderQueue> tQueueSP;
-
 
 /** @class ArrivalHandler
  * The class @code{ArrivalHandler} handles arrival events in the DES.
@@ -62,13 +57,13 @@ typedef boost::shared_ptr <dcommon::LadderQueue> tQueueSP;
 class ArrivalHandler : public design::Observer<dcore::ArrivalEvent>
 {
 public:
-    ArrivalHandler(dnet::tGraphSP p_graph, tQueueSP p_queue, boost::uint32_t p_service_idx);
+    ArrivalHandler(dcommon::tQueueWP p_queue, dnet::tGraphSP p_graph, boost::uint32_t p_service_idx);
     ~ArrivalHandler();
 
     void update(dcore::ArrivalEvent *subject);
 
 private:
-    tQueueSP m_queue;
+    dcommon::tQueueWP m_queue;
     dnet::tGraphSP m_graph;
     boost::uint32_t m_service_idx;
     dsample::tGslRngSP m_service_rng;

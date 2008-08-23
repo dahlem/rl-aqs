@@ -21,6 +21,9 @@
 #ifndef __DEPARTUREEVENT_HH__
 #define __DEPARTUREEVENT_HH__
 
+#include <boost/shared_ptr.hpp>
+#include <boost/weak_ptr.hpp>
+
 #include "Entry.hh"
 namespace dcommon = des::common;
 
@@ -49,7 +52,16 @@ public:
     void departure(dcommon::tEntrySP event);
 };
 
+/** @typedef tDepartureEventSP
+ * a type definition of a shared pointer to an departure event
+ */
 typedef boost::shared_ptr <DepartureEvent> tDepartureEventSP;
+
+
+/** @typedef tDepartureEventSP
+ * a type definition of a weak pointer to an departure event
+ */
+typedef boost::weak_ptr <DepartureEvent> tDepartureEventWP;
 
     }
 }

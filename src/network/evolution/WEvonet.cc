@@ -132,7 +132,7 @@ void dnet::WEvonet::advance(int p_steps)
         std::vector <float> service_rates(vertices);
 
         // Use std::sort to order the vertices by their service rate
-        std::vector <graph_traits <Graph>::vertices_size_type>
+        std::vector <boost::graph_traits <Graph>::vertices_size_type>
             service_rate_order(vertices);
         boost::integer_range <int> range(0, vertices);
 
@@ -210,7 +210,7 @@ void dnet::WEvonet::balance_vertex_strength(Vertex &v)
     std::vector <float> strength_diff_apply_vec(vertices);
 
     typedef boost::iterator_property_map <std::vector <float>::iterator,
-        property_map <dnet::Graph, boost::vertex_index_t>::type, float, float&> IterStrDiffMap;
+        boost::property_map <dnet::Graph, boost::vertex_index_t>::type, float, float&> IterStrDiffMap;
 
     IterStrDiffMap strength_diff_map(strength_diff_vec.begin(), vertex_index_props_map);
     IterStrDiffMap strength_diff_apply_map(strength_diff_apply_vec.begin(), vertex_index_props_map);

@@ -177,24 +177,24 @@ int main(int argc, char *argv[])
         arrival_rate = vertex_arrival_props_map[*p.first];
 
         dcore::EventGenerator::generate(
-            queue, arrival_rng, destination, arrival_rate, stopTime);
+            dcommon::tQueueWP(queue), arrival_rng, destination, arrival_rate, stopTime);
     }
 
     // instantiate the events & handlers
     dcore::tArrivalEventSP arrivalEvent(new dcore::ArrivalEvent);
     dcore::tDepartureEventSP departureEvent(new dcore::DepartureEvent);
     dcore::tArrivalHandlerSP arrivalHandler(
-        new dcore::ArrivalHandler(graph, queue, service_rng_index));
+        new dcore::ArrivalHandler(dcommon::tQueueWP(queue), graph, service_rng_index));
     dcore::tDepartureHandlerSP departureHandler(
-        new dcore::DepartureHandler(graph, queue, depart_uniform_rng_index));
+        new dcore::DepartureHandler(dcommon::tQueueWP(queue), graph, depart_uniform_rng_index));
 
     // attach the handlers to the events
-    arrivalEvent->attach(arrivalHandler);
+//    arrivalEvent->attach(arrivalHandler);
     departureEvent->attach(departureHandler);
 
     // instantiate the event processor and set the events
     dcore::tEventProcessorSP processor(
-        new dcore::EventProcessor(queue, graph, arrivalEvent, departureEvent));
+        new dcore::EventProcessor(dcommon::tQueueWP(queue), graph, arrivalEvent, departureEvent));
 
     // process the events
     processor->process();

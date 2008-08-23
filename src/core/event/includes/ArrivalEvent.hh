@@ -22,6 +22,7 @@
 #define __ARRIVALEVENT_HH__
 
 #include <boost/shared_ptr.hpp>
+#include <boost/weak_ptr.hpp>
 
 #include "Entry.hh"
 namespace dcommon = des::common;
@@ -51,7 +52,15 @@ public:
     void arrival(dcommon::tEntrySP event);
 };
 
+/** @typedef tArrivalEventSP
+ * a type definition of a shared pointer to an arrival event
+ */
 typedef boost::shared_ptr <ArrivalEvent> tArrivalEventSP;
+
+/** @typedef tArrivalEventWP
+ * a type definition of a weak pointer to an arrival event
+ */
+typedef boost::weak_ptr <ArrivalEvent> tArrivalEventWP;
 
     }
 }

@@ -37,8 +37,9 @@ wevonet_main_LDADD =                                                  \
 	$(top_srcdir)/src/network/evolution/libnetevo.la              \
 	$(top_srcdir)/src/sampling/crn/libsamplingcrn.la              \
 	$(top_srcdir)/src/sampling/common/libsamplingcommon.la        \
-	-lboost_program_options                                       \
-	-lboost_filesystem                                            \
+	$(BOOST_PROGRAM_OPTIONS_LIB)                                  \
+	$(BOOST_FILESYSTEM_LIB)                                       \
+	$(BOOST_SYSTEM_LIB)                                           \
 	$(BOOST_LDFLAGS)
 
 

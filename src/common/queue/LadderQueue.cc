@@ -106,7 +106,10 @@ void dcommon::LadderQueue::enqueue(dcommon::tEntrySP p_entry) throw (dcommon::Qu
                     long size = m_bottom->size();
 
                     dcommon::node_double_t *list = m_bottom->delist();
-                    m_ladder->enlist(list->next, size, max, min);
+                    dcommon::node_double_t *next = list->next;
+                    next->previous = NULL;
+//                    delete list;
+                    m_ladder->enlist(next, size, max, min);
                 } else {
                     // otherwise, spawn a new rung in the ladder and copy the
                     // events from bottom to the ladder rung just created.
@@ -142,6 +145,7 @@ dcommon::tEntrySP dcommon::LadderQueue::dequeue()
 #endif /* HAVE_LADDERTIMING */
 
     dcommon::tEntrySP entry;
+    dcommon::node_double_t *list, *next;
 
     if (m_bottom->size() > 0) {
         // bottom serves the dequeue operation
@@ -152,7 +156,11 @@ dcommon::tEntrySP dcommon::LadderQueue::dequeue()
 
         if (size > 0) {
             // the ladder contains events to be transferred to bottom
-            m_bottom->enlist(m_ladder->delist()->next, size);
+            list = m_ladder->delist();
+            next = list->next;
+            next->previous = NULL;
+//            delete list;
+            m_bottom->enlist(next, size);
             entry = m_bottom->dequeue();
         } else {
             // check whether the top structure has events
@@ -163,9 +171,18 @@ dcommon::tEntrySP dcommon::LadderQueue::dequeue()
             if (size > 0) {
                 // the top structure transfers to the ladder and the ladder
                 // to the bottom structure
-                m_ladder->enlist(m_top->delist()->next, size, max, min);
+                list = m_top->delist();
+                next = list->next;
+                next->previous = NULL;
+//                delete list;
+                m_ladder->enlist(next, size, max, min);
                 size = m_ladder->getNBucket();
-                m_bottom->enlist(m_ladder->delist()->next, size);
+
+                list = m_ladder->delist();
+                next = list->next;
+                next->previous = NULL;
+//                delete list;
+                m_bottom->enlist(next, size);
                 entry = m_bottom->dequeue();
             }
         }

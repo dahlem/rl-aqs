@@ -22,13 +22,13 @@
 #endif /* __STDC_CONSTANT_MACROS */
 
 #include <boost/cstdint.hpp>
-#include <boost/shared_ptr.hpp>
 
 #include "CRN.hh"
 namespace dsample = des::sampling;
 
 #include "LadderQueue.hh"
 namespace dcommon = des::common;
+
 
 
 
@@ -48,7 +48,7 @@ private:
 
 public:
     static void generate(
-        boost::shared_ptr <dcommon::LadderQueue> queue,
+        dcommon::tQueueWP p_queue,
         dsample::tGslRngSP arrival_rng,
         boost::int32_t destination,
         double arrival_rate,

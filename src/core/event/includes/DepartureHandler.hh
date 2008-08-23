@@ -32,11 +32,11 @@
 #include "DepartureEvent.hh"
 namespace dcore = des::core;
 
-#include "Observer.hh"
-namespace design = des::design;
-
 #include "LadderQueue.hh"
 namespace dcommon = des::common;
+
+#include "Observer.hh"
+namespace design = des::design;
 
 #include "WEvonet.hh"
 namespace dnet = des::network;
@@ -50,25 +50,19 @@ namespace des
     namespace core
     {
 
-/** @typedef tQueueSP
- * a type definition of the shared pointer of the @ref{LadderQueue}
- */
-typedef boost::shared_ptr <dcommon::LadderQueue> tQueueSP;
-
-
 /** @class DepartureHandler
  * The class @code{DepartureHandler} handles departure events in the DES.
  */
 class DepartureHandler : public design::Observer<dcore::DepartureEvent>
 {
 public:
-    DepartureHandler(dnet::tGraphSP p_graph, tQueueSP p_queue, boost::uint32_t p_depart_uniform_idx);
+    DepartureHandler(dcommon::tQueueWP p_queue, dnet::tGraphSP p_graph, boost::uint32_t p_depart_uniform_idx);
     ~DepartureHandler();
 
     void update(dcore::DepartureEvent *subject);
 
 private:
-    tQueueSP m_queue;
+    dcommon::tQueueWP m_queue;
     boost::uint32_t m_depart_uniform_idx;
     dsample::tGslRngSP m_depart_uniform_rng;
     dnet::tGraphSP m_graph;

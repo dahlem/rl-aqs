@@ -37,23 +37,27 @@ dcommon::Fifo::Fifo()
 
 dcommon::Fifo::~Fifo()
 {
-    dcommon::node_double_t *current = m_head->next;
+    if ((m_head != NULL ) && (m_tail != NULL)) {
+        dcommon::node_double_t *current = m_head->next;
 
-    while (current) {
-        // if tail node
-        if (current->data == NULL) break;
+        while (current != NULL) {
+            // if tail node
+//            dcommon::tEntrySP entry = current->data;
+//            if (entry == NULL) break;
 
-        dcommon::node_double_t *deleteNode = current;
+            dcommon::node_double_t *deleteNode = current;
 
-        // advance the current pointer
-        current = current->next;
+            // advance the current pointer
+            current = current->next;
 
-        // delete and the node
-        delete deleteNode;
+            // delete and the node
+            delete deleteNode;
+        }
+
+        delete m_head;
+//        delete m_tail;
     }
 
-    delete m_head;
-    delete m_tail;
 }
 
 void dcommon::Fifo::init()
@@ -110,6 +114,12 @@ dcommon::node_double_t *dcommon::Fifo::delist()
 
     head->next->previous = head;
     tail->previous->next = tail;
+
+    m_head->next = NULL;
+    m_tail->previous = NULL;
+
+//    delete m_head;
+//    delete m_tail;
 
     // re-initialise the fifo data structure
     init();

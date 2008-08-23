@@ -25,23 +25,10 @@
 #include <limits>
 
 #include <boost/shared_ptr.hpp>
-using boost::shared_ptr;
-
+#include <boost/weak_ptr.hpp>
 #include <boost/graph/adjacency_list.hpp>
-using boost::adjacency_list;
-using boost::directedS;
-using boost::graph_traits;
-using boost::listS;
-using boost::setS;
-using boost::vertex_index_t;
-using boost::edge_weight_t;
-
 #include <boost/graph/properties.hpp>
-using boost::property;
-using boost::property_map;
-
 #include <boost/graph/property_iter_range.hpp>
-using boost::graph_property_iter_range;
 
 #include <gsl/gsl_rng.h>
 
@@ -203,6 +190,11 @@ typedef boost::graph_traits <Graph>::out_edge_iterator OutEdgeIterator;
  * Specifies shared pointer to the Graph object
  */
 typedef boost::shared_ptr <Graph> tGraphSP;
+
+/** @typedef tGraphwP
+ * Specifies weak pointer to the Graph object
+ */
+typedef boost::weak_ptr <Graph> tGraphWP;
 
 /** @typedef tGslRngSP
  * Specifies shared pointer to the GSL random number generator objects

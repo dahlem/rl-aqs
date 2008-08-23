@@ -31,8 +31,10 @@
 # include <boost/iostreams/device/file.hpp>
 namespace bio = boost::iostreams;
 
-# include <boost/shared_ptr.hpp>
 #endif /* HAVE_LADDERTIMING */
+
+#include <boost/shared_ptr.hpp>
+#include <boost/weak_ptr.hpp>
 
 #include "Bottom.hh"
 #include "Entry.hh"
@@ -124,6 +126,18 @@ private:
 #endif /* HAVE_LADDERSTATS */
 
 };
+
+
+/** @typedef tQueueSP
+ * type definition of a shared pointer to a LadderQueue
+ */
+typedef boost::shared_ptr <LadderQueue> tQueueSP;
+
+/** @typedef tQueueSP
+ * type definition of a weak pointer to a LadderQueue
+ */
+typedef boost::weak_ptr <LadderQueue> tQueueWP;
+
 
     }
 }

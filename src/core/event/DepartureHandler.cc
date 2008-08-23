@@ -34,6 +34,7 @@
 namespace dcore = des::core;
 
 #include "Entry.hh"
+#include "LadderQueue.hh"
 namespace dcommon = des::common;
 
 #include "WEvonet.hh"
@@ -43,9 +44,9 @@ namespace dnet = des::network;
 namespace dsample = des::sampling;
 
 
-dcore::DepartureHandler::DepartureHandler(
-    dnet::tGraphSP p_graph, tQueueSP p_queue, boost::uint32_t p_depart_uniform_idx)
-    : m_graph(p_graph), m_queue(p_queue), m_depart_uniform_idx(p_depart_uniform_idx)
+dcore::DepartureHandler::DepartureHandler(dcommon::tQueueWP p_queue,
+    dnet::tGraphSP p_graph, boost::uint32_t p_depart_uniform_idx)
+    : m_queue(p_queue), m_graph(p_graph), m_depart_uniform_idx(p_depart_uniform_idx)
 {
     m_depart_uniform_rng = dsample::CRN::getInstance().get(m_depart_uniform_idx - 1);
     vertex_busy_map = get(vertex_busy, *m_graph);
@@ -125,7 +126,12 @@ void dcore::DepartureHandler::update(dcore::DepartureEvent *subject)
                         dcore::INTERNAL_EVENT,
                         dcore::ARRIVAL_EVENT));
 
-                    m_queue->enqueue(new_entry);
+                    dcommon::tQueueSP q;
+
+                    if (q = m_queue.lock()) {
+                        q->enqueue(new_entry);
+                    }
+                    
                     break;
                 }
             }

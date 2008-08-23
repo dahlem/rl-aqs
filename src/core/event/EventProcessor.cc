@@ -25,17 +25,17 @@
 namespace dcore = des::core;
 
 #include "Entry.hh"
+#include "LadderQueue.hh"
 namespace dcommon = des::common;
 
 
-dcore::EventProcessor::EventProcessor(tQueueSP p_queue,
-                                      dnet::tGraphSP p_graph,
-                                      dcore::tArrivalEventSP p_arrivalEvent,
-                                      dcore::tDepartureEventSP p_departureEvent)
+dcore::EventProcessor::EventProcessor(dcommon::tQueueWP p_queue,
+                                      dnet::tGraphWP p_graph,
+                                      dcore::tArrivalEventWP p_arrivalEvent,
+                                      dcore::tDepartureEventWP p_departureEvent)
     : m_queue(p_queue), m_graph(p_graph), m_arrivalEvent(p_arrivalEvent),
       m_departureEvent(p_departureEvent)
-{
-}
+{}
 
 
 dcore::EventProcessor::~EventProcessor()
@@ -45,33 +45,30 @@ dcore::EventProcessor::~EventProcessor()
 void dcore::EventProcessor::process()
 {
     dcommon::tEntrySP entry;
+    dcommon::tQueueSP q;
+    dcore::tArrivalEventSP a;
+    dcore::tDepartureEventSP d;
 
-    while ((entry = m_queue->dequeue()) != NULL) {
+    if((q = m_queue.lock()) && (a = m_arrivalEvent.lock()) && (d = m_departureEvent.lock()))
+    {
+        while ((entry = q->dequeue()) != NULL) {
+            // log the event here
+            std::cout << std::setprecision(14) << entry->arrival << ","
+                      << entry->destination << "," << entry->type
+                      << std::endl;
 
-        // log the event here
-        std::cout << std::setprecision(14) << entry->arrival << ","
-                  << entry->destination << "," << entry->type
-                  << std::endl;
-
-        switch (entry->type) {
-          case LAST_ARRIVAL_EVENT:
-              // generate new events
-          case ARRIVAL_EVENT:
-              if (m_arrivalEvent != NULL) {
-                  m_arrivalEvent->arrival(entry);
-              } else {
-                  // throw exception
-              }
-              break;
-          case DEPARTURE_EVENT:
-              if (m_departureEvent != NULL) {
-                  m_departureEvent->departure(entry);
-              } else {
-                  // throw exception
-              }
-              break;
-          default:
-              break;
+            switch (entry->type) {
+              case LAST_ARRIVAL_EVENT:
+                  // generate new events
+              case ARRIVAL_EVENT:
+                  a->arrival(entry);
+                  break;
+              case DEPARTURE_EVENT:
+                  d->departure(entry);
+                  break;
+              default:
+                  break;
+            }
         }
     }
 }

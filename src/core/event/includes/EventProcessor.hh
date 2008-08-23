@@ -22,15 +22,15 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "LadderQueue.hh"
-namespace dcommon = des::common;
-
 #include "WEvonet.hh"
 namespace dnet = des::network;
 
 #include "ArrivalEvent.hh"
 #include "DepartureEvent.hh"
 namespace dcore = des::core;
+
+#include "LadderQueue.hh"
+namespace dcommon = des::common;
 
 
 namespace des
@@ -39,30 +39,25 @@ namespace des
     {
 
 
-/** @typedef tQueueSP
- * type definition of a shared pointer of a ladder queue
- */
-typedef boost::shared_ptr <dcommon::LadderQueue> tQueueSP;
-
-
 /** @class EventProcessor
  * This class processes the events in the event queue
  */
 class EventProcessor
 {
 public:
-    EventProcessor(tQueueSP p_queue, dnet::tGraphSP p_graph,
-                   dcore::tArrivalEventSP p_arrivalEvent,
-                   dcore::tDepartureEventSP p_departureEvent);
+    EventProcessor(dcommon::tQueueWP p_queue,
+                   dnet::tGraphWP p_graph,
+                   dcore::tArrivalEventWP p_arrivalEvent,
+                   dcore::tDepartureEventWP p_departureEvent);
     ~EventProcessor();
 
     void process();
 
 private:
-    tQueueSP m_queue;
-    dnet::tGraphSP m_graph;
-    dcore::tArrivalEventSP m_arrivalEvent;
-    dcore::tDepartureEventSP m_departureEvent;
+    dcommon::tQueueWP m_queue;
+    dnet::tGraphWP m_graph;
+    dcore::tArrivalEventWP m_arrivalEvent;
+    dcore::tDepartureEventWP m_departureEvent;
 
 };
 

@@ -98,21 +98,6 @@ void dcommon::Ladder::init()
 
 dcommon::Ladder::~Ladder()
 {
-//     for (int j = 0; j < m_BucketsFirstRung; ++j) {
-//         delete m_rungs[0][j];
-//     }
-//     delete[] m_rungs[0];
-//     m_rungs[0] = NULL;
-
-//     for (int i = 1; i < m_NRung; ++i) {
-//         for (int j = 0; j < m_Thres; ++j) {
-//             delete m_rungs[i][j];
-//         }
-//         delete[] m_rungs[i];
-//         m_rungs[i] = NULL;
-//     }
-
-//     delete[] m_rungs;
 }
 
 #ifdef HAVE_LADDERSTATS
@@ -220,6 +205,8 @@ int dcommon::Ladder::bucket(double p_TS, int p_rung)
 
 void dcommon::Ladder::pushBack(dcommon::node_double_t *p_list, long p_size)
 {
+    std::cout << "pushBack: " << (p_list->data).get() << std::endl;
+
     enlist(m_lowestRung, p_list, p_size);
 
     // advance dequeue bucket
@@ -326,31 +313,9 @@ dcommon::node_double_t *dcommon::Ladder::delist()
 
 void dcommon::Ladder::resizeFirstRung(int p_base)
 {
-//     m_rungs = dcommon::tFifoSM(new dcommon::tFifoSA[m_NRung]);
-
-//     for (int i = 0; i < m_NRung; ++i) {
-//         m_rungs[i] = dcommon::tFifoSA(new dcommon::Fifo[m_Thres]);
-//     }
-
-    // delete the individual elements
-//    for (int i = 0; i < m_BucketsFirstRung; ++i) {
-//        delete m_rungs[0][i];
-//    }
-
-    // delete the first rung
-//    delete[] m_rungs[0];
-
     // resize the rung size
     m_BucketsFirstRung = 2 * p_base;
     m_rungs[0].reset(new dcommon::Fifo[m_BucketsFirstRung]);
-//    dcommon::tFifoSA firstRung = dcommon::tFifoSA(new dcommon::Fifo[m_BucketsFirstRung]);
-
-//    m_rungs[0].reset(firstRung);
-
-    // create new fifos
-//    for (int i = 0; i < m_BucketsFirstRung; ++i) {
-//        m_rungs[0][i] = new Fifo();
-//    }
 }
 
 void dcommon::Ladder::advanceDequeueBucket(bool p_spawn)
@@ -426,9 +391,15 @@ bool dcommon::Ladder::spawn(bool p_doEnlist)
             int size = m_rungs[m_lowestRung - 1][m_currentBucket[m_lowestRung - 1]].size();
             m_events[m_lowestRung - 1] -= size;
 
+            dcommon::node_double_t *list =
+                m_rungs[m_lowestRung - 1][m_currentBucket[m_lowestRung - 1]].delist();
+            dcommon::node_double_t *next = list->next;
+            next->previous = NULL;
+            delete list;
+
             enlist(
                 m_lowestRung,
-                m_rungs[m_lowestRung - 1][m_currentBucket[m_lowestRung - 1]].delist()->next,
+                next,
                 size);
         }
 

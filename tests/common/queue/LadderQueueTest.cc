@@ -97,6 +97,9 @@ void LadderQueueTest::testEnqueueDequeue20()
 
     for (int i = 0; i < 11; ++i) {
         dcommon::tEntrySP newE = m_ladderqueue->dequeue();
+
+        std::cout << newE->arrival << std::endl;
+
         CPPUNIT_ASSERT(oldE->arrival <= newE->arrival);
         oldE.reset(newE.get());
     }

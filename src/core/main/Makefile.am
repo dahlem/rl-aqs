@@ -29,9 +29,10 @@ des_main_CPPFLAGS =                                                   \
 
 des_main_LDADD =                                                      \
 	$(BOOST_LDFLAGS)                                              \
-	-lboost_program_options                                       \
+	$(BOOST_PROGRAM_OPTIONS_LIB)                                  \
+	$(BOOST_FILESYSTEM_LIB)                                       \
+	$(BOOST_SYSTEM_LIB)                                           \
 	-lboost_graph                                                 \
-	-lboost_filesystem                                            \
 	-lgsl                                                         \
 	-lm                                                           \
 	$(top_srcdir)/src/sampling/crn/libsamplingcrn.la              \

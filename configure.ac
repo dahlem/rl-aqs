@@ -10,7 +10,7 @@
 
 AC_PREREQ(2.61)
 AC_INIT([Discrete Event Simulation for Service Interaction],
-        [1.0],
+        [1.1],
         [Dominik Dahlem Dominik.Dahlem@cs.tcd.ie], 
         [des])
 
@@ -62,6 +62,11 @@ AC_ARG_ENABLE(boost, AS_HELP_STRING(
 
 if test x$BOOSTLIB = xyes; then
   AX_BOOST_BASE([1.35])
+  AX_BOOST_SYSTEM
+  AX_BOOST_DATE_TIME
+  AX_BOOST_FILESYSTEM
+  AX_BOOST_IOSTREAMS
+  AX_BOOST_PROGRAM_OPTIONS
   AM_CONDITIONAL(BOOST_SUPPORT, true)
 else
   AM_CONDITIONAL(BOOST_SUPPORT, false)
@@ -190,6 +195,7 @@ AC_CONFIG_FILES([
    src/network/evolution/Makefile
    src/network/main/Makefile
    src/core/Makefile
+   src/core/mgmt/Makefile
    src/core/event/Makefile
    src/core/main/Makefile
    tests/Makefile
