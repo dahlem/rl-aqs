@@ -46,7 +46,8 @@ function [l, beta, sigma_squared] = krig_likelihood(theta, X, y, f)
 
 #  l = - (n/2) * log(2 * pi * sigma_squared) - 1/2 * log(det(R)) - 1/(2 * sigma_squared) * (temp' * R_inf * temp);
 #  l = - 0.5 * (n * log(2 * pi) + log(det(R)) + (temp' * R_inf * temp));
-  l = - 0.5 * (n * log(sigma_squared) + log(det(R)));
+#  l = - 0.5 * (n * log(sigma_squared) + log(det(R)));
+  l = - 0.5 * (n * log(2 * pi * sigma_squared) + log(det(R)) + n); #from PhD JD Martin Eq 2.37
 
 endfunction
 
