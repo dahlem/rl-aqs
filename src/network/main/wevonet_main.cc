@@ -44,6 +44,7 @@ const std::string SEEDS = "seeds";
 const std::string SIZE = "size";
 const std::string MAX_EDGES = "max_edges";
 const std::string FILENAME = "filename";
+const std::string FORMAT = "format";
 
 
 
@@ -51,6 +52,7 @@ int main(int argc, char *argv[])
 {
     int net_size;
     int max_edges;
+    int format, format_temp;
     dsample::tGslRngSP r1, r2, r3;
     std::string filename;
     std::string seeds_file;
@@ -63,6 +65,7 @@ int main(int argc, char *argv[])
         (MAX_EDGES.c_str(), po::value<int>(), "set the maximum number of edges to connect a new vertex")
         (FILENAME.c_str(), po::value<std::string>(), "set the filename for the graph output")
         (SEEDS.c_str(), po::value <std::string>(), "set the seeds for the event simulator.")
+        (FORMAT.c_str(), po::value <int>(), "set the output format (1=dot, 2=graphML).")
         ;
 
     po::variables_map vm;
@@ -90,6 +93,21 @@ int main(int argc, char *argv[])
     } else {
         std::cout << "Default maximum number of edges is to MAX_edges." << std::endl;
         max_edges = WEvonet::MAX_EDGES;
+    }
+
+    if (vm.count(FORMAT.c_str())) {
+        format_temp = vm[FORMAT.c_str()].as<int>();
+
+        if (format_temp == 1) {
+            std::cout << "Use the dot output format." << std::endl;
+            format = WEvonet::GRAPHVIZ;
+        } else {
+            std::cout << "Use the GraphML output format." << std::endl;
+            format = WEvonet::GRAPHML;
+        }
+    } else {
+        std::cout << "Use the GraphML output format." << std::endl;
+        format = WEvonet::GRAPHML;
     }
 
     if (vm.count(FILENAME.c_str())) {
@@ -164,7 +182,12 @@ int main(int argc, char *argv[])
     std::cout << "Generating Graph..." << std::endl;
 
     WEvonet net(net_size, max_edges, r1, r2, r3);
-    net.print(filename, WEvonet::GRAPHML);
+
+    if (format == WEvonet::GRAPHVIZ) {
+        net.print(filename, WEvonet::GRAPHVIZ);
+    } else {
+        net.print(filename, WEvonet::GRAPHML);
+    }
 
     return EXIT_SUCCESS;
 }
