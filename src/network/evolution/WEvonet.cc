@@ -299,7 +299,7 @@ void dnet::WEvonet::print_dot(const std::string& filename)
 
     if (out.is_open()) {
         boost::dynamic_properties dp;
-        dp.property("id", vertex_index_props_map);
+        dp.property("node_id", vertex_index_props_map);
         dp.property("weight", edge_weight_props_map);
         dp.property("service_rate", vertex_service_props_map);
         dp.property("arrival_rate", vertex_arrival_props_map);
