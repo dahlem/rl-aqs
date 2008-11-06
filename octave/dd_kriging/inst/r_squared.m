@@ -88,16 +88,16 @@ endfunction
 ## y: the vector of responses from the experiment
 ## theta: the estimated theta parameters from MLE or BA MCMC
 ## beta: the estimated beta parameters from MLE or BA MCMC
-function r_p = r_pred(X, y, theta, beta)
+function r_p = r_pred(X, y, theta, beta, nugget=0)
   x1_vec = X(:,1)';
   x2_vec = X(:,2)';
 
-  R = scf_gaussianm(X, theta);
+  R = scf_gaussianm(X, theta, nugget);
   f = ones(rows(X), 1);
   y_s = [];
   
   for i = 1:rows(X)
-    y_s = [y_s; krig(X, [X(i,1), X(i,2)], R, beta, theta, y, f)(1)];
+    y_s = [y_s; krig(X, [X(i,1), X(i,2)], R, beta, theta, y, f, nugget)(1)];
   endfor
 
   ttss = sst(y_s);
@@ -107,16 +107,7 @@ function r_p = r_pred(X, y, theta, beta)
 endfunction
 
 
-## Cross Validation : Root Mean Square Error from PHD Thesis JD Martin
-## equation 5.2
-## Use the CV errors
-function cvmse = cv_mse(e)
-  cvmse = 0;
-
-  for i = 1:rows(e)
-    cvmse += e(i)^2;
-  endfor
-
-  cvmse /= rows(e);
-  cvmse = sqrt(cvmse);
+function r_pa = r_predadj(X, y, theta, beta, nugget=0)
+  r_p = r_pred(X, y, theta, beta, nugget);
+  r_pa = 1 - ((rows(y) - 1) / (rows(y) - columns(theta))) * (1 - r_p);
 endfunction

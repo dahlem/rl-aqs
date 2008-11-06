@@ -24,10 +24,10 @@
 ## observations (rows) with d dimensions (columns), y is the output
 ## vector at the n observations, and n is the number of iterations for
 ## the monte carlo sampling.
-function chain = mcmc_mh(scale, x0_theta, X, y, n, prior = "Jeffrey")
-  if (nargin < 5 || nargin > 6)
-    usage("mcmc_mh(scale, x0_theta, X, y, n, prior)");
-  endif
+function chain = mcmc_mh(scale, x0_theta, X, y, n, prior = "Jeffrey", nugget = 0)
+#  if (nargin < 6 || nargin > 7)
+#    usage("mcmc_mh(scale, x0_theta, X, y, n, prior)");
+#  endif
 
   if (rows(y) != rows(X))
     error("The vector y has to have the same dimension as matrix columns.");
@@ -51,7 +51,7 @@ function chain = mcmc_mh(scale, x0_theta, X, y, n, prior = "Jeffrey")
   x.sigma = 0.0;
 
   # "krig_likelihood(sigma, theta, X, y, beta, f)"
-  [q_old, x_old.beta, x_old.sigma] = krig_likelihood(x0_theta, X, y, f);
+  [q_old, x_old.beta, x_old.sigma] = krig_likelihood(x0_theta, X, y, f, nugget);
 
   # if the berger prior is required transform sigma
   if (strcmp(prior, "Berger"))
@@ -60,32 +60,30 @@ function chain = mcmc_mh(scale, x0_theta, X, y, n, prior = "Jeffrey")
   
   pi_old = 1 / x_old.sigma;
 
-  C = cov(X);
-  theta_var = diag(C);
+#  C = cov(X);
+#  theta_var = diag(C)';
   
   # initialise the chain
   chain.accepted = 0;
-  chain.beta = [];
-  chain.theta = [];
-  chain.sigma = [];
+  chain.beta = zeros(1, n);
+  chain.theta = zeros(n, 2);
+  chain.sigma = zeros(1, n);
+  chain.l = zeros(1, n);
 
   for i = 1:n
     # step 1: generate x from the proposal distribution
-
-    for i = 1:columns(x.theta)
-      x.theta(i) = normrnd(x_old.theta(i), scale * theta_var(i));
-
-      # theta has to be positive
-#      while ((x.theta(i) < 0) || (x.theta(i) > 5))
-#	x.theta(i) = normrnd(x_old.theta(i), scale * theta_var(i));
-#      endwhile
-      while (x.theta(i) < 0)
-	x.theta(i) = normrnd(x_old.theta(i), scale * theta_var(i));
-      endwhile
+    # theta has to be positive
+    for k = 1:columns(X)
+#      do
+#      a = gamma_rnd(scale, scale)
+#      1/sqrt(a)
+#        x.theta(k) = 1/sqrt(a);
+				#      until (x.theta(k) < 5)
+      x.theta(k) = prior_pick(5, scale, columns(X));
+      x.theta(k) = e.^x.theta(k);
     endfor
-
     # step 2: calcuate the probability of move
-    [q_new, x.beta, x.sigma] = krig_likelihood(x.theta, X, y, f);
+    [q_new, x.beta, x.sigma] = krig_likelihood(x.theta, X, y, f, nugget);
 
     # if the berger prior is required transform sigma
     if (strcmp(prior, "Berger"))
@@ -100,6 +98,7 @@ function chain = mcmc_mh(scale, x0_theta, X, y, n, prior = "Jeffrey")
     u = rand();
     
     if u <= min(ratio, 1)
+      ## reject also above a certain threshold
       chain.accepted++;
       pi_old = pi_new;
       q_old = q_new;
@@ -108,15 +107,119 @@ function chain = mcmc_mh(scale, x0_theta, X, y, n, prior = "Jeffrey")
       x_old.sigma = x.sigma;
 
       # put results into markov chain
-      chain.beta = [chain.beta, x_old.beta];
-      chain.theta = [chain.theta; x_old.theta];
-      chain.sigma = [chain.sigma, x_old.sigma];
+      chain.beta(chain.accepted) = x_old.beta;
+      chain.theta(chain.accepted, :) = x_old.theta;
+      chain.sigma(chain.accepted) = x_old.sigma;
+      chain.l(chain.accepted) = q_old;
     endif
   endfor
 
+  chain.beta = chain.beta(1:chain.accepted);
+  chain.sigma = chain.sigma(1:chain.accepted);
+  chain.theta = chain.theta(1:chain.accepted,:);
 endfunction
 
 
 function berger = bergerPrior(sigma)
   berger = sqrt(sigma)^3;
+endfunction
+
+
+## -------------------------------------------------
+## From "A nonstationary covariance based kriging method for
+## metamodeling in engineering design" by Xiong et. al.
+## -------------------------------------------------
+function chain = mcmc_nonst_mh(var, x0_eta, x0_sigma_sq, X, y, n, prior = "Jeffrey", xi)
+#  if (nargin < 6 || nargin > 7)
+#    usage("mcmc_mh(scale, x0_theta, X, y, n, prior)");
+#  endif
+
+  if (rows(y) != rows(X))
+    error("The vector y has to have the same dimension as matrix columns.");
+  endif
+
+  if (!strcmp(prior, "Jeffrey") && !strcmp(prior, "Berger"))
+    error("The given prior is not supported");
+  endif
+
+  f = ones(rows(X), 1);
+  k = rows(xi);
+  l = columns(xi);
+
+  # initialise the x values
+  x.eta = zeros(k, l);
+  x_old.eta = x0_eta;
+  x.beta = 0.0;
+  x.sigma = 0.0;
+  x_old.sigma = x0_sigma_sq;
+
+  # "krig_likelihood(sigma, theta, X, y, beta, f)"
+  [q_old, x_old.beta] = krig_nonst_likelihood(X, y, f, xi, x_old.eta, x_old.sigma);
+
+  # if the berger prior is required transform sigma
+  if (strcmp(prior, "Berger"))
+    x_old.sigma = bergerPrior(x_old.sigma);
+  endif
+  
+  pi_old = 1 / x_old.sigma;
+
+  # initialise the chain
+  chain.accepted = 0;
+  chain.beta = zeros(1, n);
+  chain.eta = zeros(k+1, l, n);
+  chain.sigma = zeros(1, n);
+
+  for i = 1:n
+    # step 1: generate x from the proposal distribution
+    for r = 1:rows(x.eta)
+      for c = 1:columns(x.eta)
+	do
+          x.eta(r,c) = normrnd(x_old.eta(r,c), var);
+	until (x.eta(r,c) > 0)
+      endfor
+    endfor
+
+    do
+      x.sigma = normrnd(x_old.sigma, var);
+    until (x.sigma > 0)
+
+    # step 2: calcuate the probability of move
+    [q_new, x.beta] = krig_nonst_likelihood(X, y, f, xi, x.eta, x.sigma);
+
+    # if the berger prior is required transform sigma
+    if (strcmp(prior, "Berger"))
+      x.sigma = bergerPrior(x.sigma);
+    endif
+  
+    pi_new = 1 / x.sigma;
+
+    ratio = (pi_new * q_old) / (pi_old * q_new);
+
+    # step 3: accept, if u < alpha(x, x')
+    u = rand();
+    
+    if u <= min(ratio, 1)
+      ## reject also above a certain threshold
+      chain.accepted++;
+      pi_old = pi_new;
+      q_old = q_new;
+      x_old.beta = x.beta;
+      x_old.eta = x.eta;
+      x_old.sigma = x.sigma;
+
+      # put results into markov chain
+      chain.beta(chain.accepted) = x_old.beta;
+      chain.sigma(chain.accepted) = x_old.sigma;
+
+      for a = 1:rows(x_old.eta)
+	for b = 1:columns(x_old.eta)
+	  chain.eta(a,b,chain.accepted) = x_old.eta(a,b);
+	endfor
+      endfor
+    endif
+  endfor
+
+  chain.beta = chain.beta(1:chain.accepted);
+  chain.sigma = chain.sigma(1:chain.accepted);
+  chain.eta = chain.eta(:,:,1:chain.accepted);
 endfunction

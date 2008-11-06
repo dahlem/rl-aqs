@@ -19,9 +19,9 @@
 ## This function implements the gaussian spatial correlation between
 ## two vectors and a correlation vector theta. The correlation vector
 ## theta correlates each dimension of the two vectors.
-function r = scf_gaussian(x, y, theta)
-  if (nargin != 3)
-    usage("scf_gaussianv(x, y, theta)");
+function r = scf_gaussian(x, y, theta, nugget = 0)
+  if (nargin < 3)
+    usage("scf_gaussianv(x, y, theta, nugget)");
   endif
 
   if (theta <= 0)
@@ -32,17 +32,17 @@ function r = scf_gaussian(x, y, theta)
     error("The vectors x and y have to have the same dimension.");
   endif
 
-  r = 1.0;
-  
-  for i = 1:columns(x)
-    r *= e^-((y(i) - x(i))^2 / theta(i));
-  endfor
+  r_v = e.^-(((y - x).^2) .* theta);
+#  r_v = e.^-(((y - x).^2) ./ theta);
+#  r_p = sum(r_v); # the R matrix is better conditioned
+  r_p = prod(r_v);
+  r = r_p .* (1 - nugget);
 endfunction
 
 
-function R = scf_gaussianm(X, theta)
-  if (nargin != 2)
-    usage("scf_gaussianm(X, theta)");
+function R = scf_gaussianm(X, theta, nugget = 0)
+  if (nargin != 3)
+    usage("scf_gaussianm(X, theta, nugget)");
   endif
 
   if (theta <= 0)
@@ -53,16 +53,38 @@ function R = scf_gaussianm(X, theta)
 
   for i = 1:rows(R)
     for j = i+1:columns(R)
-      R(i, j) = scf_gaussian(X(i,:), X(j,:), theta);
+      R(i, j) = scf_gaussian(X(i,:), X(j,:), theta, nugget);
       R(j, i) = R(i, j);
     endfor
   endfor
 endfunction
 
 
-function r = scf_gaussianu(X, x, theta)
-  if (nargin != 3)
-    usage("scf_gaussianu(X, x, theta)");
+function Rd = scf_gaussianm_deriv(X, theta, deriv, nugget = 0)
+  if (nargin != 4)
+    usage("scf_gaussianm_deriv(X, theta, deriv, nugget)");
+  endif
+
+  if (theta <= 0)
+    error("The parameter theta has to be positive");
+  endif
+
+  Rd = zeros(rows(X));
+
+  for i = 1:rows(Rd)
+    for j = i+1:columns(Rd)
+      Rd(i, j) = - scf_gaussian(X(i,deriv), X(j,deriv), theta(deriv),
+				nugget) * \ 
+	  (X(i,deriv) - X(j,deriv))^2;
+      Rd(j, i) = Rd(i, j);
+    endfor
+  endfor
+endfunction
+
+
+function r = scf_gaussianu(X, x, theta, nugget = 0)
+  if (nargin != 4)
+    usage("scf_gaussianu(X, x, theta, nugget)");
   endif
 
   if (theta <= 0)
@@ -76,6 +98,121 @@ function r = scf_gaussianu(X, x, theta)
   r = zeros(rows(X), 1);
 
   for i = 1:rows(X)
-    r(i,:) = scf_gaussian(x, X(i,:), theta);
+    r(i,:) = scf_gaussian(x, X(i,:), theta, nugget);
+  endfor
+endfunction
+
+
+
+## -------------------------------------------------
+## From "A nonstationary covariance based kriging method for
+## metamodeling in engineering design" by Xiong et. al.
+## -------------------------------------------------
+## This function implements the nonstationary version of the correlation
+## function.
+function r = scf_nonst_corr(flm, fln, sigma_sq)
+  if (nargin < 3)
+    usage("scf_nonst_corr(flm, fln, sigma_sq)");
+  endif
+
+  if (columns(flm) != columns(fln))
+    error("The vectors flm and fln have to have the same dimension.");
+  endif
+
+  exp = (flm - fln).^2;
+  s = sum(exp);
+  r = sigma_sq * e^(-s);
+endfunction
+
+
+function R = scf_nonst_m(X, xi, eta, sigma_sq)
+  if (nargin != 4)
+    usage("scf_nonst_m(X, xi, eta, sigma_sq)");
+  endif
+
+  R = eye(rows(X));
+  flm = zeros(1, columns(X));
+  fln = zeros(1, columns(X));
+
+  for i = 1:rows(R)
+    for j = i+1:columns(R)
+      for l = 1:columns(X)
+	flm(l) = mapping_func(X(i,l), xi(:,l), eta(:,l));
+	fln(l) = mapping_func(X(j,l), xi(:,l), eta(:,l));
+      endfor
+      R(i, j) = scf_nonst_corr(flm, fln, sigma_sq);
+      R(j, i) = R(i, j);
+    endfor
+  endfor
+endfunction
+
+
+function glk = density_knot(xl, xil, etal, k_up)
+  glk = 0;
+
+  isInRange = ((xl <= xil(k_up)) & (xl >= xil((k_up) - 1)));
+  
+  alk = (xil(k_up) .* etal((k_up)-1) - xil((k_up)-1) .* etal(k_up)) .* \
+      (xil(k_up) - xil((k_up)-1)).^-1;
+  blk = (etal(k_up) - etal((k_up)-1)) .* (xil(k_up) - xil((k_up)-1)).^-1;;
+  glk = (alk + blk .* xl) .* (isInRange);
+endfunction
+
+
+function glk = density_knot_integr(xl, xil, etal, k_up)
+  glk = 0;
+
+  isInRange = ((xl <= xil(k_up)) & (xl >= xil((k_up) - 1)));
+
+  alk = (xil(k_up) .* etal((k_up)-1) - xil((k_up)-1) .* etal(k_up)) .* \
+      (xil(k_up) - xil((k_up)-1)).^-1;
+  blk = (etal(k_up) - etal((k_up)-1)) .* (xil(k_up) - xil(k_up-1)).^-1;;
+  glk = (alk .* xl + blk .* 1 / 2 .* xl.^2) .* (isInRange);
+endfunction
+
+
+function gl = density(xl, xil, etal)
+    gl = sum(density_knot(xl, xil, etal, 2:rows(xil)));
+endfunction
+
+
+function fl = mapping_func(xl, xil, etal)
+  fl = xil(1);
+  k = 0;
+  
+  for k = 2:rows(xil)
+    if (xl > xil(k))
+      break;
+    else
+      fl += (density_knot_integr(xil(k), xil, etal, k) - \
+	     density_knot_integr(xil(k-1), xil, etal, k));
+    endif
+  endfor
+
+  fl += (density_knot_integr(xl, xil, etal, k) - \
+	 density_knot_integr(xil(k-1), xil, etal, k));
+endfunction
+
+
+function r = scf_nonst_u(X, x, xi, eta, sigma_sq)
+  if (nargin != 5)
+    usage("scf_nonst_u(X, x, xi, eta, sigma_sq)");
+  endif
+
+  if (columns(x) != columns(X))
+    error("The vector x has to have the same dimension as matrix columns.");
+  endif
+
+  r = zeros(rows(X), 1);
+
+  for l = 1:columns(X)
+    flx(l) = mapping_func(x(l), xi(:,l), eta(:,l));
+  endfor
+
+  for i = 1:rows(X)
+    for l = 1:columns(X)
+      fln(l) = mapping_func(X(i,l), xi(:,l), eta(:,l));
+    endfor
+    r(i,:) = scf_nonst_corr(flx, fln, sigma_sq);
   endfor
 endfunction

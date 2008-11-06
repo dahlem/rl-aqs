@@ -16,9 +16,9 @@
 ## Version: 0.1
 
 
-function [l, beta, sigma_squared] = krig_likelihood(theta, X, y, f)
-  if (nargin != 4)
-    usage("krig_likelihood(theta, X, y, f)");
+function [l, beta, sigma_squared] = krig_likelihood(theta, X, y, f, nugget = 0)
+  if (nargin != 5)
+    usage("krig_likelihood(theta, X, y, f, nugget)");
   endif
 
   if (theta <= 0)
@@ -37,22 +37,59 @@ function [l, beta, sigma_squared] = krig_likelihood(theta, X, y, f)
     error("The vector theta has to have the same dimension as matrix columns.");
   endif
 
-  R = scf_gaussianm(X, theta);
-  R_inf = R^-1;
+  R = scf_gaussianm(X, theta, nugget);
+  R_inv = inv(R);
   n = rows(y);
-  beta = (f' * R_inf * f)^-1 * f' * R_inf * y;
+  beta = (f' * R_inv * f)^-1 * f' * R_inv * y;
   temp = y - f * beta;
-  sigma_squared = 1 / n * temp' * R_inf * temp;
+  sigma_squared = 1 / n * temp' * R_inv * temp;
 
-#  l = - (n/2) * log(2 * pi * sigma_squared) - 1/2 * log(det(R)) - 1/(2 * sigma_squared) * (temp' * R_inf * temp);
-#  l = - 0.5 * (n * log(2 * pi) + log(det(R)) + (temp' * R_inf * temp));
-#  l = - 0.5 * (n * log(sigma_squared) + log(det(R)));
   l = - 0.5 * (n * log(2 * pi * sigma_squared) + log(det(R)) + n); #from PhD JD Martin Eq 2.37
-
 endfunction
 
 
-function y = krig(X, x, R, beta, theta, y, f)
-  r = scf_gaussianu(X, x, theta);
+function l = likelihood(X, y, f, beta, sigma, theta, R, R_inv, nugget = 0)
+  n = rows(y);
+  temp = y - f * beta;
+  l = 1 / (sqrt((2 * pi * sigma)^n * det(R))) * exp(-(temp' * R_inv * temp) / (2 * sigma));
+endfunction
+
+
+function y = krig(X, x, R, beta, theta, y, f, nugget = 0)
+  r = scf_gaussianu(X, x, theta, nugget);
+  R_inv = inv(R);
+  y = f' * beta + r' * R_inv * (y - f * beta);
+endfunction
+
+
+## -------------------------------------------------
+## From "A nonstationary covariance based kriging method for
+## metamodeling in engineering design" by Xiong et. al.
+## -------------------------------------------------
+function [l, beta] = krig_nonst_likelihood(X, y, f, xi, eta, sigma_sq)
+  if (nargin != 6)
+    usage("krig_nonst_likelihood(X, y, f, xi, eta, sigma_sq)");
+  endif
+
+  if (rows(y) != rows(X))
+    error("The vectors x and y have to have the same dimensions.");
+  endif
+
+  if (rows(f) != rows(X))
+    error("The vector f has to have the same dimension as matrix rows.");
+  endif
+
+  R = scf_nonst_m(X, xi, eta, sigma_sq);
+  R_inv = inv(R);
+  n = rows(y);
+  beta = (f' * R_inv * f)^-1 * f' * R_inv * y;
+  temp = y - f * beta;
+
+  l = - 0.5 * (n * log(2 * pi * sigma_sq) + log(det(R)) + n); #from PhD JD Martin Eq 2.37
+endfunction
+
+
+function y = krig_nonst(X, x, R, beta, xi, eta, y, f, sigma_sq)
+  r = scf_nonst_u(X, x, xi, eta, sigma_sq);
   y = f' * beta + r' * R^-1 * (y - f * beta);
 endfunction

@@ -14,8 +14,8 @@ libcommonqueue_la_SOURCES =                                           \
 	Queue.cc                                                      \
 	QueueException.cc                                             \
 	Fifo.cc                                                       \
-	Top.cc                                                        \
-	Bottom.cc                                                     \
+	Top.cc                                                       # \
+#	Bottom.cc                                                     \
 	Ladder.cc                                                     \
 	LadderQueue.cc
 
