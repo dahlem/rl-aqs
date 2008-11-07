@@ -15,7 +15,6 @@ function en = mc_app_energy(alpha, width, n, rel_cm, R, sigma_sq)
   en = -lp;
 
   n_i = rows(R);
-#  l = - 0.5 * (n_i * log(2 * pi * sigma_sq) + log(det(R))) #from PhD JD Martin Eq 2.37
   l = - 0.5 * (n_i * log(2 * pi * sigma_sq) + log(det(R)) + n_i); #from PhD JD Martin Eq 2.37
   en += l;
 
@@ -106,17 +105,22 @@ function [chain] = hmc (theta, L, eta, Taumax = 13, X, y, alpha, width, nugget =
     Mnew  = mc_app_energy(alpha, width, num_inputs, wnew, R, sigma_sq);
     Hnew = dot(p, p) / 2 + Mnew;  # evaluate new value of H (energy)
 
-    dH = Hnew - H;
-    u = rand();
-    if ( dH < 0 )
-      accept = 1 ;
-    elseif ( u < exp ( - dH ) )
-      accept = 1 ;
+    if (wnew > width)
+      wnew
+      accept = 0;
     else
-      accept = 0 ;
+      dH = Hnew - H;
+      u = rand();
+      if ( dH < 0 )
+	accept = 1 ;
+      elseif ( u < exp ( - dH ) )
+	accept = 1 ;
+      else
+	accept = 0 ;
+      endif
     endif
 
-    if ( accept )
+    if (accept)
       chain.accepts ++ ;
       gw = gwnew ;
       w = wnew ;
@@ -136,6 +140,3 @@ function [chain] = hmc (theta, L, eta, Taumax = 13, X, y, alpha, width, nugget =
   chain.pot = chain.pot(1:chain.accepts);
   chain.theta = chain.theta(1:chain.accepts,:);
 endfunction
-
-
-

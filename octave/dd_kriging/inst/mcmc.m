@@ -116,6 +116,7 @@ function chain = mcmc_mh(scale, x0_theta, X, y, n, prior = "Jeffrey", nugget = 0
 
   chain.beta = chain.beta(1:chain.accepted);
   chain.sigma = chain.sigma(1:chain.accepted);
+  chain.l = chain.l(1:chain.accepted);
   chain.theta = chain.theta(1:chain.accepted,:);
 endfunction
 

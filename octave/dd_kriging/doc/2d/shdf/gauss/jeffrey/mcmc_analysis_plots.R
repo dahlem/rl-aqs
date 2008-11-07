@@ -1,8 +1,136 @@
+des.kriging.mcmc.evo.plot <- function(prefix="2d-shdf") {
+  des.kriging.mcmc.posterior.plot(prefix)
+  des.kriging.mcmc.beta.plot(prefix)
+  des.kriging.mcmc.sigma.plot(prefix)
+  des.kriging.mcmc.theta.plot(prefix, idx="1")
+  des.kriging.mcmc.theta.plot(prefix, idx="2")
+}
+
+
+des.kriging.mcmc.posterior.plot <- function(prefix="2d-shdf", ps=TRUE) {
+  if (ps) {
+    postscript(paste(prefix, "-chain-posterior.eps", sep=""), onefile=FALSE)
+  }
+
+  chain <- read.table(paste(prefix, "-chain-posterior.dat", sep=""), header=TRUE)
+  df <- data.frame(x=1:length(chain$posterior), y=chain$posterior)
+  p <- ggplot(df, aes(x=x, y=y))
+  p <- p + layer(geom = "line")
+  p <- p + scale_y_continuous(expression(paste("-log", p(theta))))))
+  p <- p + scale_x_continuous("")
+  p <- p + opts(title=expression(paste("Evolution of ", "-log", p(theta))))
+  p <- p + theme_bw()
+  print(p)
+  
+  if (ps) {
+    dev.off()
+  }
+}
+
+
+des.kriging.mcmc.beta.plot <- function(prefix="2d-shdf", ps=TRUE) {
+  if (ps) {
+    postscript(paste(prefix, "-chain-beta.eps", sep=""), onefile=FALSE)
+  }
+
+  chain <- read.table(paste(prefix, "-chain-beta.dat", sep=""), header=TRUE)
+  df <- data.frame(x=1:length(chain$beta), y=chain$beta)
+  p <- ggplot(df, aes(x=x, y=y))
+  p <- p + layer(geom = "line")
+  p <- p + scale_y_continuous(expression(beta))
+  p <- p + scale_x_continuous("")
+  p <- p + opts(title=expression(paste("Evolution of ", bar(beta))))
+  p <- p + theme_bw()
+  print(p)
+  
+  if (ps) {
+    dev.off()
+  }
+}
+
+
+des.kriging.mcmc.sigma.plot <- function(prefix="2d-shdf", ps=TRUE) {
+  if (ps) {
+    postscript(paste(prefix, "-chain-sigma.eps", sep=""), onefile=FALSE)
+  }
+
+  chain <- read.table(paste(prefix, "-chain-sigma.dat", sep=""), header=TRUE)
+  df <- data.frame(x=1:length(chain$sigma), y=chain$sigma)
+  p <- ggplot(df, aes(x=x, y=y))
+  p <- p + layer(geom = "line")
+  p <- p + scale_y_continuous(expression(sigma))
+  p <- p + scale_x_continuous("")
+  p <- p + opts(title=expression(paste("Evolution of ", bar(sigma))))
+  p <- p + theme_bw()
+  print(p)
+  
+  if (ps) {
+    dev.off()
+  }
+}
+
+
+des.kriging.mcmc.theta.plot <- function(prefix="2d-shdf", idx="1", ps=TRUE) {
+  if (ps) {
+    postscript(paste(prefix, "-chain-theta", idx, ".eps", sep=""), onefile=FALSE)
+  }
+
+  chain <- read.table(paste(prefix, "-chain-theta", idx, ".dat", sep=""),
+                      header=TRUE, col.names=c("theta"))
+  df <- data.frame(x=1:length(chain$theta), y=chain$theta)
+  p <- ggplot(df, aes(x=x, y=y))
+  p <- p + layer(geom = "line")
+  p <- p + scale_y_continuous(substitute(theta[I], list(I = idx)))
+  p <- p + scale_x_continuous("")
+  if (idx == "1") {
+    p <- p + opts(title=expression(paste("Evolution of ", bar(theta[1]))))
+  } else if (idx == "2") {
+    p <- p + opts(title=expression(paste("Evolution of ", bar(theta[2]))))
+  } else if (idx == "3") {
+    p <- p + opts(title=expression(paste("Evolution of ", bar(theta[3]))))
+  } else if (idx == "4") {
+    p <- p + opts(title=expression(paste("Evolution of ", bar(theta[4]))))
+  } else if (idx == "5") {
+    p <- p + opts(title=expression(paste("Evolution of ", bar(theta[5]))))
+  } else if (idx == "6") {
+    p <- p + opts(title=expression(paste("Evolution of ", bar(theta[6]))))
+  }
+  p <- p + theme_bw()
+  print(p)
+  
+  if (ps) {
+    dev.off()
+  }
+}
+
+
 des.kriging.mcmc.mean.plot <- function(prefix="2d-shdf") {
+  des.kriging.mcmc.posterior.mean.plot(prefix)
   des.kriging.mcmc.beta.mean.plot(prefix)
   des.kriging.mcmc.sigma.mean.plot(prefix)
   des.kriging.mcmc.theta.mean.plot(prefix, idx="1")
   des.kriging.mcmc.theta.mean.plot(prefix, idx="2")
+}
+
+
+des.kriging.mcmc.posterior.mean.plot <- function(prefix="2d-shdf", ps=TRUE) {
+  if (ps) {
+    postscript(paste(prefix, "-chain-posterior-mean.eps", sep=""), onefile=FALSE)
+  }
+
+  chain <- read.table(paste(prefix, "-chain-posterior-mean.dat", sep=""), header=TRUE)
+  df <- data.frame(x=1:length(chain$mean_posterior), y=chain$mean_posterior)
+  p <- ggplot(df, aes(x=x, y=y))
+  p <- p + layer(geom = "line")
+  p <- p + scale_y_continuous(expression(paste("-log", p(theta))))))
+  p <- p + scale_x_continuous("")
+  p <- p + opts(title=expression(paste("Equilibration of ", "-log", p(theta))))
+  p <- p + theme_bw()
+  print(p)
+  
+  if (ps) {
+    dev.off()
+  }
 }
 
 

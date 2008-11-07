@@ -48,9 +48,11 @@ function mean_chain = calc_mean(chain)
   mean_chain.beta = zeros(1, chain.accepted);
   mean_chain.theta = zeros(chain.accepted, columns(chain.theta));
   mean_chain.sigma = zeros(1, chain.accepted);;
+  mean_chain.l = zeros(1, chain.accepted);;
 
   # first element calculation
   mean_chain.beta(1) = welford_mean(1, 0, chain.beta(1));
+  mean_chain.l(1) = welford_mean(1, 0, chain.l(1));
   mean_chain.sigma(1) = welford_mean(1, 0, chain.sigma(1));
   for j = 1:columns(chain.theta)
     mean_chain.theta(1,j) = welford_mean(1, 0, chain.theta(1,j));
@@ -60,6 +62,7 @@ function mean_chain = calc_mean(chain)
   for i = 2:chain.accepted
     mean_chain.beta(i) = welford_mean(i, mean_chain.beta(i - 1), chain.beta(i));
     mean_chain.sigma(i) = welford_mean(i, mean_chain.sigma(i - 1), chain.sigma(i));
+    mean_chain.l(i) = welford_mean(i, mean_chain.l(i - 1), chain.l(i));
 
     for j = 1:columns(chain.theta)
       mean_chain.theta(i,j) = welford_mean(i, mean_chain.theta(i-1, j), chain.theta(i,j));
@@ -494,6 +497,10 @@ function serialiseOrigChain(dir, prefix="2d-shdf", chain)
   fprintf(fd, "theta2\n");
   fprintf(fd, "%.10f\n", chain.theta(:,2));
   fclose(fd);
+  fd = fopen([dir, "/", prefix, "-chain-posterior.dat"], "wt");
+  fprintf(fd, "posterior\n");
+  fprintf(fd, "%.10f\n", chain.l);
+  fclose(fd);
 
   mean_chain = calc_mean(chain);
   fd = fopen([dir, "/", prefix, "-chain-beta-mean.dat"], "wt");
@@ -511,6 +518,10 @@ function serialiseOrigChain(dir, prefix="2d-shdf", chain)
   fd = fopen([dir, "/", prefix, "-chain-theta2-mean.dat"], "wt");
   fprintf(fd, "mean_theta2\n");
   fprintf(fd, "%.10f\n", mean_chain.theta(:,2));
+  fclose(fd);
+  fd = fopen([dir, "/", prefix, "-chain-posterior-mean.dat"], "wt");
+  fprintf(fd, "mean_posterior\n");
+  fprintf(fd, "%.10f\n", mean_chain.l);
   fclose(fd);
 endfunction
 
