@@ -105,8 +105,7 @@ function [chain] = hmc (theta, L, eta, Taumax = 13, X, y, alpha, width, nugget =
     Mnew  = mc_app_energy(alpha, width, num_inputs, wnew, R, sigma_sq);
     Hnew = dot(p, p) / 2 + Mnew;  # evaluate new value of H (energy)
 
-    if (wnew > width)
-      wnew
+    if ((wnew(1) > width) || (wnew(2) > width))
       accept = 0;
     else
       dH = Hnew - H;
@@ -122,7 +121,7 @@ function [chain] = hmc (theta, L, eta, Taumax = 13, X, y, alpha, width, nugget =
 
     if (accept)
       chain.accepts ++ ;
-      gw = gwnew ;
+      gw = gwnew;
       w = wnew ;
       M = Mnew ;
 
@@ -131,7 +130,7 @@ function [chain] = hmc (theta, L, eta, Taumax = 13, X, y, alpha, width, nugget =
       chain.sigma(chain.accepts) = sigma_sq;
       chain.pot(chain.accepts) = Mnew;
     else
-      chain.rejects ++ ;
+      chain.rejects ++;
     endif
   endfor
 

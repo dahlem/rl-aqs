@@ -55,10 +55,18 @@ function l = likelihood(X, y, f, beta, sigma, theta, R, R_inv, nugget = 0)
 endfunction
 
 
-function y = krig(X, x, R, beta, theta, y, f, nugget = 0)
+function y = krig(x, X, R, beta, theta, y, f, nugget = 0)
   r = scf_gaussianu(X, x, theta, nugget);
   R_inv = inv(R);
   y = f' * beta + r' * R_inv * (y - f * beta);
+endfunction
+
+
+function y = krig1(x, X, R, beta, theta, y, f, nugget = 0)
+  r = scf_gaussianu(X, x, theta, nugget);
+  R_inv = inv(R);
+  y = f' * beta + r' * R_inv * (y - f * beta);
+  y = y(1);
 endfunction
 
 
@@ -89,7 +97,7 @@ function [l, beta] = krig_nonst_likelihood(X, y, f, xi, eta, sigma_sq)
 endfunction
 
 
-function y = krig_nonst(X, x, R, beta, xi, eta, y, f, sigma_sq)
+function y = krig_nonst(x, X, R, beta, xi, eta, y, f, sigma_sq)
   r = scf_nonst_u(X, x, xi, eta, sigma_sq);
   y = f' * beta + r' * R^-1 * (y - f * beta);
 endfunction

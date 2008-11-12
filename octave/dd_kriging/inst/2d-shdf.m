@@ -164,7 +164,7 @@ function shdf_jaydmartin_krig()
   
   for x1 = x1_vec
     for x2 = x2_vec
-      points = [points, x1, x2, krig(X, [x1, x2], R, beta, theta, y, f)(1)];
+      points = [points, x1, x2, krig([x1, x2], X, R, beta, theta, y, f)(1)];
     endfor
   endfor
 
@@ -283,7 +283,7 @@ function chain = shdf_krig(dir = "../doc/2d/shdf/gauss/jeffrey/4", burn_rate = 1
   fd = fopen(outfile, "wt");
   for x1 = x1_vec
     for x2 = x2_vec
-      y_krig = krig(X, [x1, x2], R, beta, theta, y, f)(1);
+      y_krig = krig([x1, x2], X, R, beta, theta, y, f)(1);
       fprintf(fd, "%14.6f %14.6f %14.6f\n", x1, x2, y_krig);
     endfor
     fprintf(fd, "\n");
@@ -300,7 +300,7 @@ function chain = shdf_krig(dir = "../doc/2d/shdf/gauss/jeffrey/4", burn_rate = 1
   fprintf(fd, "x1,x2,y_krig,mse\n");
   for i = 1:50
     mse_avg = mse_average(X, S(i,:), y, f, sampled, 0);
-    y_krig = krig(X, S(i,:), R, beta, theta, y, f)(1);
+    y_krig = krig(S(i,:), X, R, beta, theta, y, f)(1);
     fprintf(fd, "%.6f,%.6f,%.6f,%.10f\n", S(i,1), S(i,2), y_krig, mse_avg);
   endfor
   fclose(fd);
@@ -413,7 +413,7 @@ function chain = shdf_nonst_krig(dir = "../doc/2d/shdf/gauss/jeffrey/4", burn_ra
   fd = fopen(outfile, "wt");
   for x1 = x1_vec
     for x2 = x2_vec
-      y_krig = krig(X, [x1, x2], R, beta, theta, y, f)(1);
+      y_krig = krig([x1, x2], X, R, beta, theta, y, f)(1);
       fprintf(fd, "%14.6f %14.6f %14.6f\n", x1, x2, y_krig);
     endfor
     fprintf(fd, "\n");
@@ -430,7 +430,7 @@ function chain = shdf_nonst_krig(dir = "../doc/2d/shdf/gauss/jeffrey/4", burn_ra
   fprintf(fd, "x1,x2,y_krig,mse\n");
   for i = 1:50
     mse_avg = mse_average(X, S(i,:), y, f, sampled, 0);
-    y_krig = krig(X, S(i,:), R, beta, theta, y, f)(1);
+    y_krig = krig(S(i,:), X, R, beta, theta, y, f)(1);
     fprintf(fd, "%.6f,%.6f,%.6f,%.10f\n", S(i,1), S(i,2), y_krig, mse_avg);
   endfor
   fclose(fd);
@@ -450,7 +450,7 @@ endfunction
 
 function test_surrogate(X, R, beta, theta, y, f)
   for i = 1:rows(X)
-    resK = krig(X, [X(i,1), X(i,2)], R, beta, theta, y, f);
+    resK = krig([X(i,1), X(i,2)], X, R, beta, theta, y, f);
     resR = shdf(X(i,1), X(i,2));
 
     if (abs(resK(1) - resR) > 0.00001)

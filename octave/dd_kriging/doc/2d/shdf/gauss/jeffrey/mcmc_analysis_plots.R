@@ -1,3 +1,122 @@
+des.ca.plot <- function(prefix="2d-shdf", ps=TRUE) {
+  if (ps) {
+    postscript(paste(prefix, "-ca-model.eps", sep=""), onefile=FALSE)
+  }
+
+  ca <- read.table(paste(prefix, "-ca-model.dat", sep=""), sep=",", header=TRUE)
+  pS <- read.table(paste(prefix, "-ca-statP.dat", sep=""), sep=",", header=TRUE)
+  eigen <- read.table(paste(prefix, "-ca-eigen.dat", sep=""), sep=",", header=TRUE)
+  df <- data.frame(x=ca$x1, y=ca$x2, z=ca$y);
+
+  isRidge <- FALSE;
+
+  if ((eigen$lambda[1] > 0) & (eigen$lambda[2] > 0)) {
+    isRidge <- FALSE;
+  } else if ((eigen$lambda[1] < 0) & (eigen$lambda[2] < 0)) {
+    isRidge <- FALSE;
+  } else {
+    isRidge <- TRUE;
+  }
+  
+  dim <- length(eigen$lambda)
+  M <- cbind(eigen$M1, eigen$M2);
+  MT <- t(M);
+
+  if (!isRidge) {
+    z1Intercept <- (M[1,2] * pS$x2 + M[1,1] * pS$x1) / M[1,1];
+    z2Intercept <- (M[2,1] * pS$x1 + M[2,2] * pS$x2) / M[2,2];
+    z1Slope <- M[1,2] / M[1,1];
+    z2Slope <- M[2,1] / M[2,2];
+    
+    minX <- min(ca$x1);
+    minY <- min(ca$x2);
+    maxX <- max(ca$x1);
+    maxY <- max(ca$x2);
+
+    ## calculate the coordinates for the transformed coord system
+    ## z2
+    ## end point
+    x11 <- z1Intercept + maxY * z1Slope;
+    x12 <- maxY;
+
+    ## start point
+    x112 <- minY + (pS$x2 - minY) / 2;
+    x111 <- z1Intercept + x112 * z1Slope;
+
+    ## z1
+    ## end point
+    x22 <- z2Intercept + maxX * z2Slope;
+    x21 <- maxX;
+
+    ## start point
+    x221 <- minX + (pS$x1 - minX) / 2;
+    x222 <- z2Intercept + x221 * z2Slope;
+
+    ## if they are out-of bounds, adjust accordingly
+    ## z2: 1. case: x11 > maxX
+    ## z2: 2. case: x11 < minX
+    if (x11 > maxX) {
+      x11 <- maxX;
+      x12 <- (x11 - z1Intercept) / z1Slope;
+    } else if (x11 < minX) {
+      x11 <- minX;
+      x12 <- (x11 - z1Intercept) / z1Slope;
+    }
+
+    if (x111 > maxX) {
+      x111 <- pS$x1 + (maxX - pS$x1) / 2;
+      x112 <- (x111 - z1Intercept) / z1Slope;
+    } else if (x111 < minX) {
+      x111 <- minX + (pS$x1 - minX) / 2;
+      x112 <- (x111 - z1Intercept) / z1Slope;
+    }
+    
+    ## z1: 1. case: x22 > maxY
+    ## z1: 2. case: x22 < minY
+    if (x22 > maxY) {
+      x22 <- maxY;
+      x21 <- (x22 - z2Intercept) / z2Slope;
+    } else if (x22 < minY) {
+      x22 <- minY;
+      x21 <- (x22 - z2Intercept) / z2Slope;
+    }
+    
+    if (x222 > maxY) {
+      x222 <- pS$x2 + (maxY - pS$x2) / 2;
+      x221 <- (x222 - z2Intercept) / z2Slope;
+    } else if (x222 < minY) {
+      x222 <- minY + (pS$x2 - minY) / 2;
+      x221 <- (x222 - z2Intercept) / z2Slope;
+    }
+  }
+  
+  p <- ggplot(df, aes(x=x, y=y, z=z))
+  p <- p + stat_contour(aes(size = ..level..))
+  p <- p + scale_y_continuous(substitute(x[I], list(I = 2)))
+  p <- p + scale_x_continuous(substitute(x[I], list(I = 1)))
+  p <- p + opts(title="Canonical Form of the Second-order Model")
+
+  if (!isRidge) {
+    p <- p + geom_segment(x=pS$x1,y=minY,xend=pS$x1,yend=pS$x2,linetype=2,size=0.5,colour="gray40")
+    p <- p + geom_text(x=pS$x1,y=minY,vjust=1.5,size=4,colour="gray40",aes(label="x1(S)"))
+    p <- p + geom_segment(x=minX,y=pS$x2,xend=pS$x1,yend=pS$x2,linetype=2,size=0.5,colour="gray40")
+    p <- p + geom_text(x=minX,y=pS$x2,vjust=1.5,size=4,colour="gray40",aes(label="x2(S)"))
+
+    ## plot the transformed coordinate system
+    p <- p + geom_segment(x=x111,y=x112,xend=x11,yend=x12,arrow=arrow(length=unit(0.2,"cm")))
+    p <- p + geom_text(x=x11,y=x12,vjust=-1,size=4,aes(label="z2"))
+    p <- p + geom_segment(x=x221,y=x222,xend=x21,yend=x22,arrow=arrow(length=unit(0.2,"cm")))
+    p <- p + geom_text(x=x21,y=x22,hjust=-1,size=4,aes(label="z1"))
+  }
+  p <- p + theme_bw()
+  print(p)
+  
+  if (ps) {
+    dev.off()
+  }
+}
+
+
 des.kriging.mcmc.evo.plot <- function(prefix="2d-shdf") {
   des.kriging.mcmc.posterior.plot(prefix)
   des.kriging.mcmc.beta.plot(prefix)
@@ -16,9 +135,9 @@ des.kriging.mcmc.posterior.plot <- function(prefix="2d-shdf", ps=TRUE) {
   df <- data.frame(x=1:length(chain$posterior), y=chain$posterior)
   p <- ggplot(df, aes(x=x, y=y))
   p <- p + layer(geom = "line")
-  p <- p + scale_y_continuous(expression(paste("-log", p(theta))))))
+  p <- p + scale_y_continuous(expression(paste("-log ", p(theta))))
   p <- p + scale_x_continuous("")
-  p <- p + opts(title=expression(paste("Evolution of ", "-log", p(theta))))
+  p <- p + opts(title=expression(paste("Evolution of ", "-log ", p(theta))))
   p <- p + theme_bw()
   print(p)
   
@@ -122,7 +241,7 @@ des.kriging.mcmc.posterior.mean.plot <- function(prefix="2d-shdf", ps=TRUE) {
   df <- data.frame(x=1:length(chain$mean_posterior), y=chain$mean_posterior)
   p <- ggplot(df, aes(x=x, y=y))
   p <- p + layer(geom = "line")
-  p <- p + scale_y_continuous(expression(paste("-log", p(theta))))))
+  p <- p + scale_y_continuous(expression(paste("-log", p(theta))))
   p <- p + scale_x_continuous("")
   p <- p + opts(title=expression(paste("Equilibration of ", "-log", p(theta))))
   p <- p + theme_bw()
