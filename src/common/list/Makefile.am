@@ -10,7 +10,9 @@
 
 noinst_LTLIBRARIES = libcommonlist.la
 
-libcommonlist_la_SOURCES = List.cc
+libcommonlist_la_SOURCES =                                            \
+	List.cc                                                       \
+	Entry.cc
 
 libcommonlist_la_CPPFLAGS =                                           \
 	$(BOOST_CPPFLAGS)                                             \

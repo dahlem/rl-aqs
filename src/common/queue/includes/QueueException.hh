@@ -51,6 +51,7 @@ public:
         NO_EPOCH_INIT,
         EPOCH_EXISTS,
         PAST_EVENT_NOT_ALLOWED,
+        QUEUE_EMPTY,
         NUM_ERRORS
     };
 

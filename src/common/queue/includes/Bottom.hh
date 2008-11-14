@@ -49,7 +49,7 @@ namespace des
  *
  * @author <a href="mailto:Dominik.Dahlem@cs.tcd.ie>Dominik Dahlem</a>
  */
-class Bottom: public Queue, List
+class Bottom: public Queue
 {
 public:
     Bottom();
@@ -60,34 +60,28 @@ public:
 #endif /* HAVE_LADDERSTATS */
 
     /**
-     * @see Queue#enqueue(dcommon::tEntrySP) throw (QueueException)
+     * @see Queue#enqueue(dcommon::Entry) throw (QueueException)
      */
-    void enqueue(dcommon::tEntrySP p_entry) throw (dcommon::QueueException);
+    bool push(dcommon::Entry *p_entry) throw (dcommon::QueueException);
 
     /**
-     * @see Queue#dequeue()
+     * @see Queue#dequeue() throw (QueueException)
      */
-    dcommon::tEntrySP dequeue();
+    dcommon::Entry* front() throw (dcommon::QueueException);
+    void pop_front() throw (dcommon::QueueException);
 
-    /**
-     * @see List#enlist(node_double_t*, long)
-     */
-    void enlist(dcommon::node_double_t *p_list, long p_size);
-
-    /**
-     * @see List#delist()
-     */
-    dcommon::node_double_t * delist();
+    void push(dcommon::EntryList* );
+    dcommon::EntryList* const list();
 
     /**
      * @return the maximum arrival timestamp of the events in the bottom.
      */
-    double getMaxTS();
+    const double getMaxTS();
 
     /**
      * @return the minimum arrival timestamp of the events in the bottom.
      */
-    double getMinTS();
+    const double getMinTS();
 
     /**
      * @return the size of the event queue in the bottom
@@ -95,16 +89,8 @@ public:
     const long size();
 
 private:
-    /**
-     * Initialise the bottom structure
-     */
-    void init();
-
-    long m_size;
     double m_lastEvent;
-
-    dcommon::node_double_t *m_head;
-    dcommon::node_double_t *m_tail;
+    dcommon::EntryList *m_list;
 };
 
 

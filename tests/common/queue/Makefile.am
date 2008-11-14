@@ -1,4 +1,4 @@
-# Copyright (C) 2007 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+# Copyright (C) 2007, 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 #  
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without 
@@ -18,12 +18,13 @@ TESTS = QueueSuite
 check_PROGRAMS = $(TESTS)
 
 QueueSuite_SOURCES =                                        \
-	FifoTest.cc                                         \
-	TopTest.cc                                          \
 	BottomTest.cc                                       \
-	LadderTest.cc                                       \
-	LadderQueueTest.cc                                  \
 	QueueSuite.cc
+
+#	FifoTest.cc                                         
+#	TopTest.cc                                          
+#	LadderTest.cc                                       
+#	LadderQueueTest.cc                                  
 
 QueueSuite_LDFLAGS = $(CPPUNIT_LIBS) -ldl
 
@@ -32,14 +33,12 @@ QueueSuite_CXXFLAGS =                                       \
 	-Iincludes                                          \
 	-I$(top_srcdir)/src/common/queue/includes           \
 	-I$(top_srcdir)/src/utils/numbers/includes          \
-	-I$(top_srcdir)/src/common/sort/includes            \
 	-I$(top_srcdir)/src/common/list/includes
 
 LDADD =                                                     \
 	$(top_srcdir)/src/common/queue/libcommonqueue.la    \
 	$(top_srcdir)/src/common/list/libcommonlist.la      \
-	$(top_srcdir)/src/utils/numbers/libutils_numbers.la \
-	$(top_srcdir)/src/common/sort/libcommonsort.la
+	$(top_srcdir)/src/utils/numbers/libutils_numbers.la
 
 
 include_HEADERS = includes

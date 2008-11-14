@@ -13,14 +13,16 @@ using std::cout;
 using std::endl;
 
 #include "BottomTest.hh"
+#include "Bottom.hh"
 #include "Entry.hh"
-using des::common::entry_t;
+namespace dcommon = des::common;
 
-#include "Fifo.hh"
-using des::common::Fifo;
 
-#include "List.hh"
-using des::common::node_double_t;
+//#include "Fifo.hh"
+//using des::common::Fifo;
+
+//#include "List.hh"
+//using des::common::node_double_t;
 
 
 
@@ -31,7 +33,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION(BottomTest);
 
 void BottomTest::setUp()
 {
-    m_bottom = new Bottom();
+    m_bottom = new dcommon::Bottom();
 }
 
 void BottomTest::tearDown()
@@ -39,311 +41,390 @@ void BottomTest::tearDown()
     delete m_bottom;
 }
 
-void BottomTest::testEnqueueNull()
-{
-    entry_t *e = NULL;
-    dcommon::tEntrySP entry1 = dcommon::tEntrySP(e);
-
-    m_bottom->enqueue(entry1);
-
-    dcommon::tEntrySP result = m_bottom->dequeue();
-
-    CPPUNIT_ASSERT(result.get() == NULL);
-}
-
 void BottomTest::testEnqueue()
 {
     for (int i = 1; i < 6; ++i) {
-        dcommon::tEntrySP entry = dcommon::tEntrySP(new entry_t((double) i, 1, 1, 0));
-        m_bottom->enqueue(entry);
+        dcommon::Entry *entry = new dcommon::Entry((double) i, 1, 1, 0);
+        m_bottom->push(entry);
     }
 
     CPPUNIT_ASSERT(m_bottom->size() == 5);
+
+    for (int i = 1; i < 6; ++i) {
+        dcommon::Entry *entryPtr = m_bottom->front();
+
+        m_bottom->pop_front();
+        delete entryPtr;
+    }
 }
 
 void BottomTest::testEnqueueOnce()
 {
-    dcommon::tEntrySP entry = dcommon::tEntrySP(new entry_t(0.0, 1, 1, 0));
-    dcommon::tEntrySP result;
+    dcommon::Entry *entry = new dcommon::Entry(0.0, 1, 1, 0);
+    dcommon::Entry *result = NULL;
 
-    m_bottom->enqueue(entry);
-    result = m_bottom->dequeue();
+    m_bottom->push(entry);
+
+    CPPUNIT_ASSERT(m_bottom->size() == 1);
+
+    try {
+        result = m_bottom->front();
+        m_bottom->pop_front();
+    } catch (dcommon::QueueException q) {
+        CPPUNIT_FAIL("Did not expect queue exception!");
+    }
 
     CPPUNIT_ASSERT_EQUAL(entry->arrival, result->arrival);
     CPPUNIT_ASSERT_EQUAL(entry->destination, result->destination);
     CPPUNIT_ASSERT_EQUAL(entry->origin, result->origin);
     CPPUNIT_ASSERT_EQUAL(entry->type, result->type);
+
+    delete result;
 }
 
 void BottomTest::testEnqueueTwiceOrdered()
 {
-    dcommon::tEntrySP entry1 = dcommon::tEntrySP(new entry_t(0.0, 1, 1, 0));
-    dcommon::tEntrySP entry2 = dcommon::tEntrySP(new entry_t(1.0, 1, 1, 0));
-    dcommon::tEntrySP result;
+    dcommon::Entry *entry1 = new dcommon::Entry(0.0, 1, 1, 0);
+    dcommon::Entry *entry2 = new dcommon::Entry(1.0, 1, 1, 0);
+    dcommon::Entry *result;
 
-    m_bottom->enqueue(entry1);
-    m_bottom->enqueue(entry2);
+    m_bottom->push(entry1);
+    m_bottom->push(entry2);
     CPPUNIT_ASSERT(m_bottom->size() == 2);
 
-    result = m_bottom->dequeue();
+    result = m_bottom->front();
+    m_bottom->pop_front();
+
     CPPUNIT_ASSERT(m_bottom->size() == 1);
 
     CPPUNIT_ASSERT_EQUAL(entry1->arrival, result->arrival);
     CPPUNIT_ASSERT_EQUAL(entry1->destination, result->destination);
     CPPUNIT_ASSERT_EQUAL(entry1->origin, result->origin);
     CPPUNIT_ASSERT_EQUAL(entry1->type, result->type);
+    delete result;
 
-    result = m_bottom->dequeue();
+    result = m_bottom->front();
+    m_bottom->pop_front();
     CPPUNIT_ASSERT(m_bottom->size() == 0);
 
     CPPUNIT_ASSERT_EQUAL(entry2->arrival, result->arrival);
     CPPUNIT_ASSERT_EQUAL(entry2->destination, result->destination);
     CPPUNIT_ASSERT_EQUAL(entry2->origin, result->origin);
     CPPUNIT_ASSERT_EQUAL(entry2->type, result->type);
+    delete result;
 }
 
 void BottomTest::testEnqueueAtTail()
 {
-    dcommon::tEntrySP resultOld;
-    dcommon::tEntrySP resultNew;
+    dcommon::Entry *resultOld = NULL;
+    dcommon::Entry *resultNew = NULL;
+    bool result = false;
 
-    for (int i = 6; i < 1; --i) {
-        dcommon::tEntrySP entry = dcommon::tEntrySP(new entry_t((double) i, 1, 1, 0));
-        m_bottom->enqueue(entry);
+    for (int i = 6; i > 1; --i) {
+        dcommon::Entry *entry = new dcommon::Entry((double) i, 1, 1, 0);
+        m_bottom->push(entry);
     }
 
-    dcommon::tEntrySP entry = dcommon::tEntrySP(new entry_t(7, 1, 1, 0));
-    m_bottom->enqueue(entry);
+    CPPUNIT_ASSERT_EQUAL((long) 5, m_bottom->size());
+    dcommon::Entry *entry = new dcommon::Entry(7, 1, 1, 0);
+    m_bottom->push(entry);
+    CPPUNIT_ASSERT_EQUAL((long) 6, m_bottom->size());
 
-    resultOld = m_bottom->dequeue();
-    resultNew = m_bottom->dequeue();
-
-
-    while (resultNew.get() != NULL) {
-        CPPUNIT_ASSERT(resultOld->arrival
-                       <= resultNew->arrival);
-        resultOld.reset(resultNew.get());
-        resultNew = m_bottom->dequeue();
+    try {
+        resultOld = m_bottom->front();
+        m_bottom->pop_front();
+        resultNew = m_bottom->front();
+        m_bottom->pop_front();
+    } catch (dcommon::QueueException q) {
+        CPPUNIT_FAIL("Did not expect queue exception!");
     }
+
+
+    while (m_bottom->size() > 0) {
+        result = (resultOld->arrival <= resultNew->arrival);
+
+        CPPUNIT_ASSERT(result);
+
+        resultOld = resultNew;
+        delete resultNew;
+
+        resultNew = m_bottom->front();
+        m_bottom->pop_front();
+    }
+
+    delete resultNew;
 }
 
 void BottomTest::testEnqueueAtHead()
 {
-    dcommon::tEntrySP resultOld;
-    dcommon::tEntrySP resultNew;
+    dcommon::Entry *resultOld = NULL;
+    dcommon::Entry *resultNew = NULL;
+    bool result = false;
 
     for (int i = 1; i < 6; ++i) {
-        dcommon::tEntrySP entry = dcommon::tEntrySP(new entry_t((double) i, 1, 1, 0));
-        m_bottom->enqueue(entry);
+        dcommon::Entry *entry = new dcommon::Entry((double) i, 1, 1, 0);
+        m_bottom->push(entry);
     }
 
-    dcommon::tEntrySP entry = dcommon::tEntrySP(new entry_t(0, 1, 1, 0));
-    m_bottom->enqueue(entry);
+    dcommon::Entry *entry = new dcommon::Entry(0, 1, 1, 0);
+    m_bottom->push(entry);
 
-    resultOld = m_bottom->dequeue();
-    resultNew = m_bottom->dequeue();
+    try {
+        resultOld = m_bottom->front();
+        m_bottom->pop_front();
+        resultNew = m_bottom->front();
+        m_bottom->pop_front();
+    } catch (dcommon::QueueException q) {
+        CPPUNIT_FAIL("Did not expect queue exception!");
+    }
 
-    while (resultNew.get() != NULL) {
-        CPPUNIT_ASSERT(resultOld->arrival
-                       <= resultNew->arrival);
+    while (m_bottom->size() > 0) {
+        result = (resultOld->arrival <= resultNew->arrival);
+
+        CPPUNIT_ASSERT(result);
+
         resultOld = resultNew;
-        resultNew = m_bottom->dequeue();
+        delete resultNew;
+
+        resultNew = m_bottom->front();
+        m_bottom->pop_front();
     }
+
+    delete resultNew;
 }
 
 void BottomTest::testStability()
 {
-    dcommon::tEntrySP resultOld;
-    dcommon::tEntrySP resultNew;
+    dcommon::Entry *resultOld = NULL;
+    dcommon::Entry *resultNew = NULL;
+    bool result = false;
 
     for (int i = 0; i < 3; ++i) {
-        dcommon::tEntrySP entry = dcommon::tEntrySP(new entry_t((double) i, i, 1, 0));
-        m_bottom->enqueue(entry);
+        dcommon::Entry *entry = new dcommon::Entry((double) i, i, 1, 0);
+        m_bottom->push(entry);
     }
     for (int i = 0; i < 10; ++i) {
-        dcommon::tEntrySP entry = dcommon::tEntrySP(new entry_t(4.0, i + 3, 1, 0));
-        m_bottom->enqueue(entry);
+        dcommon::Entry *entry = new dcommon::Entry(4.0, i + 3, 1, 0);
+        m_bottom->push(entry);
     }
     for (int i = 0; i < 3; ++i) {
-        dcommon::tEntrySP entry = dcommon::tEntrySP(new entry_t((double) i + 5.0, i + 13, 1, 0));
-        m_bottom->enqueue(entry);
+        dcommon::Entry *entry = new dcommon::Entry((double) i + 5.0, i + 13, 1, 0);
+        m_bottom->push(entry);
     }
 
-    resultOld = m_bottom->dequeue();
-    resultNew = m_bottom->dequeue();
+    try {
+        resultOld = m_bottom->front();
+        m_bottom->pop_front();
+        resultNew = m_bottom->front();
+        m_bottom->pop_front();
+    } catch (dcommon::QueueException q) {
+        CPPUNIT_FAIL("Did not expect queue exception!");
+    }
 
-    while (resultNew.get() != NULL) {
-        CPPUNIT_ASSERT(resultOld->destination < resultNew->destination);
+    while (m_bottom->size() > 0) {
+        result = (resultOld->destination < resultNew->destination);
+        CPPUNIT_ASSERT(result);
         resultOld = resultNew;
-        resultNew = m_bottom->dequeue();
+        delete resultNew;
+
+        resultNew = m_bottom->front();
+        m_bottom->pop_front();
     }
+
+    delete resultNew;
 }
 
 void BottomTest::testEnlistShort()
 {
-    Fifo *fifo = new Fifo();
-
-    dcommon::tEntrySP resultOld;
-    dcommon::tEntrySP resultNew;
+    dcommon::EntryList *list = new dcommon::EntryList();
+    dcommon::Entry *resultOld = NULL;
+    dcommon::Entry *resultNew = NULL;
+    bool result = false;
 
     for (int i = 6; i < 9; ++i) {
-        dcommon::tEntrySP entry = dcommon::tEntrySP(new entry_t((double) i, 1, 1, 0));
-        m_bottom->enqueue(entry);
+        dcommon::Entry *entry = new dcommon::Entry((double) i, 1, 1, 0);
+        m_bottom->push(entry);
     }
     CPPUNIT_ASSERT(m_bottom->size() == 3);
     for (int i = 5; i > 0; --i) {
-        dcommon::tEntrySP entry = dcommon::tEntrySP(new entry_t((double) i, i, 1, 0));
-        fifo->enqueue(entry);
+        dcommon::Entry *entry = new dcommon::Entry((double) i, i, 1, 0);
+        list->push_back(*entry);
     }
 
-    int size = fifo->size();
-    node_double_t *list = fifo->delist();
-
-    m_bottom->enlist(list->next, size);
+    m_bottom->push(list);
     CPPUNIT_ASSERT(m_bottom->size() == 8);
 
-    resultOld = m_bottom->dequeue();
-    resultNew = m_bottom->dequeue();
+    try {
+        resultOld = m_bottom->front();
+        m_bottom->pop_front();
+        resultNew = m_bottom->front();
+        m_bottom->pop_front();
+    } catch (dcommon::QueueException q) {
+        CPPUNIT_FAIL("Did not expect queue exception!");
+    }
 
-    while (resultNew.get() != NULL) {
-        CPPUNIT_ASSERT(resultOld->arrival < resultNew->arrival);
+    while (m_bottom->size() > 0) {
+        result = (resultOld->arrival <= resultNew->arrival);
+
+        CPPUNIT_ASSERT(result);
+
         resultOld = resultNew;
-        resultNew = m_bottom->dequeue();
+        delete resultNew;
+
+        resultNew = m_bottom->front();
+        m_bottom->pop_front();
     }
 
     CPPUNIT_ASSERT(m_bottom->size() == 0);
+
+    delete resultNew;
 }
 
-void BottomTest::testEnlistShortStability()
-{
-    Fifo *fifo = new Fifo();
+// void BottomTest::testEnlistShortStability()
+// {
+//     dcommon::EntryList *list = new dcommon::EntryList();
+//     dcommon::Entry *resultOld = NULL;
+//     dcommon::Entry *resultNew = NULL;
+//     bool result = false;
 
-    dcommon::tEntrySP resultOld;
-    dcommon::tEntrySP resultNew;
+//     for (int i = 0; i < 5; ++i) {
+//         dcommon::Entry *entry = new dcommon::Entry((double) i, i, 1, 0);
+//         m_bottom->push(entry);
+//     }
+//     for (int i = 0; i < 5; ++i) {
+//         dcommon::Entry *entry = new dcommon::Entry(5, i + 5, 1, 0);
+//         list->push_back(*entry);
+//     }
 
-    for (int i = 0; i < 5; ++i) {
-        dcommon::tEntrySP entry = dcommon::tEntrySP(new entry_t((double) i, i, 1, 0));
-        m_bottom->enqueue(entry);
-    }
-    for (int i = 0; i < 5; ++i) {
-        dcommon::tEntrySP entry = dcommon::tEntrySP(new entry_t(5, i + 5, 1, 0));
-        fifo->enqueue(entry);
-    }
+//     m_bottom->push(list);
 
-    int size = fifo->size();
-    node_double_t *list = fifo->delist();
+//     try {
+//         resultOld = m_bottom->front();
+//         m_bottom->pop_front();
+//         resultNew = m_bottom->front();
+//         m_bottom->pop_front();
+//     } catch (dcommon::QueueException q) {
+//         CPPUNIT_FAIL("Did not expect queue exception!");
+//     }
 
-    m_bottom->enlist(list->next, size);
+//     while (m_bottom->size() > 0) {
+//         result = (resultOld->destination < resultNew->destination);
+//         CPPUNIT_ASSERT(result);
+//         resultOld = resultNew;
+//         delete resultNew;
 
-    resultOld = m_bottom->dequeue();
-    resultNew = m_bottom->dequeue();
+//         resultNew = m_bottom->front();
+//         m_bottom->pop_front();
+//     }
 
-    while (resultNew.get() != NULL) {
-        CPPUNIT_ASSERT(resultOld->destination < resultNew->destination);
-        resultOld = resultNew;
-        resultNew = m_bottom->dequeue();
-    }
-}
+//     delete resultNew;
+// }
 
 void BottomTest::testEnlistLong()
 {
-    Fifo *fifo = new Fifo();
-
-    dcommon::tEntrySP resultOld;
-    dcommon::tEntrySP resultNew;
+    dcommon::EntryList *list = new dcommon::EntryList();
+    dcommon::Entry *resultOld = NULL;
+    dcommon::Entry *resultNew = NULL;
+    bool result = false;
 
     for (int i = 16; i < 19; ++i) {
-        dcommon::tEntrySP entry = dcommon::tEntrySP(new entry_t((double) i, 1, 1, 0));
-        m_bottom->enqueue(entry);
+        dcommon::Entry *entry = new dcommon::Entry((double) i, 1, 1, 0);
+        m_bottom->push(entry);
     }
     CPPUNIT_ASSERT(m_bottom->size() == 3);
     for (int i = 15; i > 0; --i) {
-        dcommon::tEntrySP entry = dcommon::tEntrySP(new entry_t((double) i, i, 1, 0));
-        fifo->enqueue(entry);
+        dcommon::Entry *entry = new dcommon::Entry((double) i, i, 1, 0);
+        list->push_back(*entry);
     }
 
-    int size = fifo->size();
-    node_double_t *list = fifo->delist();
-
-    m_bottom->enlist(list->next, size);
+    m_bottom->push(list);
     CPPUNIT_ASSERT(m_bottom->size() == 18);
 
-    resultOld = m_bottom->dequeue();
-    resultNew = m_bottom->dequeue();
+    try {
+        resultOld = m_bottom->front();
+        m_bottom->pop_front();
+        resultNew = m_bottom->front();
+        m_bottom->pop_front();
+    } catch (dcommon::QueueException q) {
+        CPPUNIT_FAIL("Did not expect queue exception!");
+    }
 
-    while (resultNew.get() != NULL) {
-        CPPUNIT_ASSERT(resultOld->arrival < resultNew->arrival);
+    while (m_bottom->size() > 0) {
+        result = (resultOld->arrival <= resultNew->arrival);
+
+        CPPUNIT_ASSERT(result);
+
         resultOld = resultNew;
-        resultNew = m_bottom->dequeue();
+        delete resultNew;
+
+        resultNew = m_bottom->front();
+        m_bottom->pop_front();
     }
-}
-
-void BottomTest::testEnlistLongStability()
-{
-    Fifo *fifo = new Fifo();
-
-    dcommon::tEntrySP resultOld;
-    dcommon::tEntrySP resultNew;
-    dcommon::tEntrySP entry;
-
-    for (int i = 0; i < 3; ++i) {
-        entry = dcommon::tEntrySP(new entry_t((double) i, i, 1, 0));
-        m_bottom->enqueue(entry);
-    }
-    for (int i = 0; i < 15; ++i) {
-        entry = dcommon::tEntrySP(new entry_t(3.0, i + 3, 1, 0));
-        fifo->enqueue(entry);
-    }
-
-    long size = fifo->size();
-    node_double_t *list = fifo->delist();
-
-    m_bottom->enlist(list->next, size);
-
-    resultOld = m_bottom->dequeue();
-    resultNew = m_bottom->dequeue();
-
-    while (resultNew.get() != NULL) {
-        CPPUNIT_ASSERT(resultOld->destination < resultNew->destination);
-        resultOld = resultNew;
-        resultNew = m_bottom->dequeue();
-    }
-}
-
-void BottomTest::testDelist()
-{
-    dcommon::tEntrySP entry1 = dcommon::tEntrySP(new entry_t(0.0, 1, 1, 0));
-    dcommon::tEntrySP entry2 = dcommon::tEntrySP(new entry_t(1.0, 2, 2, 1));
-    node_double_t *result = NULL;
-    node_double_t *current = NULL;
-
-    m_bottom->enqueue(entry1);
-    m_bottom->enqueue(entry2);
-    result = m_bottom->delist();
 
     CPPUNIT_ASSERT(m_bottom->size() == 0);
 
-    current = result->next;
-    CPPUNIT_ASSERT_EQUAL(entry1->arrival, current->data->arrival);
+    delete resultNew;
+}
 
-    current = current->next;
-    CPPUNIT_ASSERT_EQUAL(entry2->arrival, current->data->arrival);
+// void BottomTest::testEnlistLongStability()
+// {
+//     Fifo *fifo = new Fifo();
 
-    current = current->next;
-    CPPUNIT_ASSERT(current->data == NULL);
+//     dcommon::tEntrySP resultOld;
+//     dcommon::tEntrySP resultNew;
+//     dcommon::tEntrySP entry;
 
-    delete result->next->next->next;
-    delete result->next->next;
-    delete result->next;
-    delete result;
+//     for (int i = 0; i < 3; ++i) {
+//         entry = dcommon::tEntrySP(new entry_t((double) i, i, 1, 0));
+//         m_bottom->enqueue(entry);
+//     }
+//     for (int i = 0; i < 15; ++i) {
+//         entry = dcommon::tEntrySP(new entry_t(3.0, i + 3, 1, 0));
+//         fifo->enqueue(entry);
+//     }
+
+//     long size = fifo->size();
+//     node_double_t *list = fifo->delist();
+
+//     m_bottom->enlist(list->next, size);
+
+//     resultOld = m_bottom->dequeue();
+//     resultNew = m_bottom->dequeue();
+
+//     while (resultNew.get() != NULL) {
+//         CPPUNIT_ASSERT(resultOld->destination < resultNew->destination);
+//         resultOld = resultNew;
+//         resultNew = m_bottom->dequeue();
+//     }
+// }
+
+void BottomTest::testDelist()
+{
+    dcommon::Entry *entry1 = new dcommon::Entry(0.0, 1, 1, 0);
+    dcommon::Entry *entry2 = new dcommon::Entry(1.0, 2, 2, 1);
+    dcommon::EntryList *result;
+    dcommon::EntryListIterator it, itend;
+
+    m_bottom->push(entry1);
+    m_bottom->push(entry2);
+    result = m_bottom->list();
+
+    it = result->begin();
+    itend = result->end();
+
+    CPPUNIT_ASSERT_EQUAL(entry1->arrival, it->arrival);
+    CPPUNIT_ASSERT_EQUAL(entry2->arrival, (++it)->arrival);
+
+    result->clear_and_dispose(dcommon::delete_disposer());
+    CPPUNIT_ASSERT(m_bottom->size() == 0);
 }
 
 void BottomTest::testMaxTS()
 {
     CPPUNIT_ASSERT_EQUAL(m_bottom->getMaxTS(), (double) 0.0);
 
-    dcommon::tEntrySP entry1 = dcommon::tEntrySP(new entry_t(3.1, 1, 1, 0));
-    m_bottom->enqueue(entry1);
+    dcommon::Entry *entry1 = new dcommon::Entry(3.1, 1, 1, 0);
+    m_bottom->push(entry1);
     CPPUNIT_ASSERT_EQUAL(m_bottom->getMaxTS(), (double) 3.1);
 }
 
@@ -351,7 +432,7 @@ void BottomTest::testMinTS()
 {
     CPPUNIT_ASSERT_EQUAL(m_bottom->getMinTS(), (double) 0.0);
 
-    dcommon::tEntrySP entry1 = dcommon::tEntrySP(new entry_t(3.1, 1, 1, 0));
-    m_bottom->enqueue(entry1);
+    dcommon::Entry *entry1 = new dcommon::Entry(3.1, 1, 1, 0);
+    m_bottom->push(entry1);
     CPPUNIT_ASSERT_EQUAL(m_bottom->getMinTS(), (double) 3.1);
 }

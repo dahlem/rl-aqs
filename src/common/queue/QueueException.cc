@@ -33,6 +33,7 @@ const char* QueueException::m_errorStrings[NUM_ERRORS] =
     "Requested rung does not exist."
     "An epoch has not been started with the Ladder structure."
     "An epoch cannot be created, if another one is not finished yet."
+    "The queue is empty."
     "Cannot enqueue past event."
 };
 

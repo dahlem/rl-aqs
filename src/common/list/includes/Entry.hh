@@ -20,7 +20,14 @@
 #ifndef __ENTRY_HH__
 #define __ENTRY_HH__
 
+
+#if HAVE_CONFIG_H
+# include <config.h>
+#endif
+
 #include <boost/shared_ptr.hpp>
+#include <boost/intrusive/list.hpp>
+
 
 
 namespace des
@@ -58,6 +65,40 @@ struct entry_t
  * a type definition of a shared pointer of an entry
  */
 typedef boost::shared_ptr <entry_t> tEntrySP;
+
+
+class Entry : public boost::intrusive::list_base_hook<>
+{
+public:
+    Entry()
+        : arrival(0.0), destination(-99), origin(-99), type(-99)
+        {}
+
+    explicit Entry(double a, int d, int o, int t)
+        : arrival(a), destination(d), origin(o), type(t)
+        {}
+
+    bool operator< (const Entry& rhs) const;
+    bool operator< (const Entry& rhs);
+
+    double arrival;
+    int destination;
+    int origin;
+    int type;
+};
+
+typedef boost::intrusive::make_list<Entry>::type EntryList;
+typedef EntryList::iterator EntryListIterator;
+
+
+//The disposer object function
+struct delete_disposer
+{
+    void operator()(Entry *delete_this)
+        {
+            delete delete_this;
+        }
+};
 
 
     }

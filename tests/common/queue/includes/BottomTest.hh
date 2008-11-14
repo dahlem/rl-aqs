@@ -1,9 +1,9 @@
-// Copyright (C) 2007 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
-//  
+// Copyright (C) 2007-2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+//
 // This file is free software; as a special exception the author gives
-// unlimited permission to copy and/or distribute it, with or without 
+// unlimited permission to copy and/or distribute it, with or without
 // modifications, as long as this notice is preserved.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 // implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
@@ -15,23 +15,22 @@
 #include <cppunit/extensions/HelperMacros.h>
 
 #include "Bottom.hh"
-using des::common::Bottom;
+namespace dcommon = des::common;
 
 
 class BottomTest : public CppUnit::TestFixture
 {
     CPPUNIT_TEST_SUITE(BottomTest);
     CPPUNIT_TEST(testEnqueue);
-    CPPUNIT_TEST(testEnqueueNull);
     CPPUNIT_TEST(testEnqueueOnce);
     CPPUNIT_TEST(testEnqueueTwiceOrdered);
     CPPUNIT_TEST(testEnqueueAtTail);
     CPPUNIT_TEST(testEnqueueAtHead);
     CPPUNIT_TEST(testStability);
     CPPUNIT_TEST(testEnlistShort);
-    CPPUNIT_TEST(testEnlistShortStability);
+//    CPPUNIT_TEST(testEnlistShortStability);
     CPPUNIT_TEST(testEnlistLong);
-    CPPUNIT_TEST(testEnlistLongStability);
+//     CPPUNIT_TEST(testEnlistLongStability);
     CPPUNIT_TEST(testDelist);
     CPPUNIT_TEST(testMaxTS);
     CPPUNIT_TEST(testMinTS);
@@ -42,22 +41,21 @@ public:
     void tearDown();
 
     void testEnqueue();
-    void testEnqueueNull();
     void testEnqueueOnce();
     void testEnqueueTwiceOrdered();
     void testEnqueueAtTail();
     void testEnqueueAtHead();
     void testStability();
     void testEnlistShort();
-    void testEnlistShortStability();
+//    void testEnlistShortStability();
     void testEnlistLong();
-    void testEnlistLongStability();
+//     void testEnlistLongStability();
     void testDelist();
     void testMaxTS();
     void testMinTS();
 
 private:
-    Bottom *m_bottom;
+    dcommon::Bottom *m_bottom;
 };
 
 

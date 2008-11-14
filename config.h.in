@@ -1,5 +1,8 @@
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
+/* define boost asserts, if enabled */
+#undef BOOST_DISABLE_ASSERTS
+
 /* buggy for-loops */
 #undef CXX_HAS_BUGGY_FOR_LOOPS
 

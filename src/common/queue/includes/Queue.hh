@@ -76,15 +76,17 @@ public:
 #endif /* HAVE_LADDERSTATS */
 
     /**
-     * @param entry_t* the entry structure to be enqueued into a queue.
+     * @param Entry the entry structure to be enqueued into a queue.
      * @throws QueueException throw, if the queue cannot enqueue the entry.
      */
-    virtual void enqueue(dcommon::tEntrySP p_entry) throw (dcommon::QueueException) = 0;
+    virtual bool push(dcommon::Entry *p_entry) throw (dcommon::QueueException) = 0;
 
     /**
      * @return returns the next entry in a queue.
+     * @throws QueueException throw, if the queue is empty
      */
-    virtual dcommon::tEntrySP dequeue() = 0;
+    virtual dcommon::Entry* front() throw (dcommon::QueueException) = 0;
+    virtual void pop_front() throw (dcommon::QueueException) = 0;
 
 #ifdef HAVE_LADDERSTATS
 protected:

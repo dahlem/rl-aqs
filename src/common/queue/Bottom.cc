@@ -32,21 +32,17 @@ namespace bio = boost::iostreams;
 # include <boost/shared_ptr.hpp>
 #endif /* HAVE_LADDERSTATS */
 
-
 #include <cstddef>
 
 #include "Bottom.hh"
 #include "Entry.hh"
-#include "Mergesort.hh"
 namespace dcommon = des::common;
-
 
 
 dcommon::Bottom::Bottom()
 {
     m_lastEvent = 0.0;
-
-    init();
+    m_list = new dcommon::EntryList();
 
 #ifdef HAVE_LADDERSTATS
     events_in = 0;
@@ -66,23 +62,10 @@ dcommon::Bottom::Bottom()
 
 dcommon::Bottom::~Bottom()
 {
-    dcommon::node_double_t *current = m_head->next;
+    m_list->erase_and_dispose(m_list->begin(), m_list->end(),
+                              dcommon::delete_disposer());
 
-    while (current) {
-        // if tail node
-        if (current->data == NULL) break;
-
-        dcommon::node_double_t *deleteNode = current;
-
-        // advance the current pointer
-        current = current->next;
-
-        // delete and the node
-        delete deleteNode;
-    }
-
-    delete m_head;
-    delete m_tail;
+    delete m_list;
 }
 
 
@@ -100,20 +83,7 @@ void dcommon::Bottom::record()
 
 const long dcommon::Bottom::size()
 {
-    return m_size;
-}
-
-
-void dcommon::Bottom::init()
-{
-    dcommon::entry_t *entry = NULL;
-    m_head = new dcommon::node_double_t(dcommon::tEntrySP(entry), NULL, NULL);
-    m_tail = new dcommon::node_double_t(dcommon::tEntrySP(entry), NULL, NULL);
-
-    m_head->next = m_tail;
-    m_tail->previous = m_head;
-
-    m_size = 0;
+    return m_list->size();
 }
 
 
@@ -123,40 +93,53 @@ void dcommon::Bottom::init()
  * starting from the back of the queue in order to maintain stability. Otherwise,
  * the bottom structure would not offer stability characteristics.
  *
- * @see Queue#enqueue(dcommon::tEntrySP) throw (QueueException)
+ * @see Queue#push(dcommon::Entry) throw (QueueException)
  */
-void dcommon::Bottom::enqueue(dcommon::tEntrySP p_entry) throw (dcommon::QueueException)
+bool dcommon::Bottom::push(dcommon::Entry *p_entry) throw (dcommon::QueueException)
 {
-    if (p_entry == NULL) return;
+    bool inserted = false;
 
     if (p_entry->arrival < m_lastEvent) {
         throw dcommon::QueueException(
             dcommon::QueueException::PAST_EVENT_NOT_ALLOWED);
     }
 
-    dcommon::node_double_t *temp = m_tail->previous;
+    if (m_list->empty()) {
+        // insert straight-away
+        m_list->push_back(*p_entry);
+        inserted = true;
+    } else {
+        // if the last element is already <= the new entry then insert at the back
+        if (m_list->back().arrival <= p_entry->arrival) {
+            m_list->push_back(*p_entry);
+            inserted = true;
+        } else {
+            // insertion sort from the back
+            // maintain stability
+            dcommon::EntryList::reverse_iterator it(m_list->rbegin()), itend(m_list->rend());
 
-    // insertion sort from the back
-    // maintain stability
-    while (temp != NULL) {
-        if ((temp->data == NULL)
-            || (temp->data->arrival <= p_entry->arrival)) {
-            dcommon::node_double_t *newEntry = new dcommon::node_double_t(
-                p_entry, temp->next, temp);
-
-            temp->next->previous = newEntry;
-            temp->next = newEntry;
-            m_size++;
-
-            return;
+            for(; it != itend; ++it) {
+                if (it->arrival <= p_entry->arrival) {
+                    dcommon::EntryList::iterator pos = m_list->s_iterator_to(*it);
+                    m_list->insert(pos++, *p_entry);
+                    inserted = true;
+                    break;
+                }
+            }
         }
+    }
 
-        temp = temp->previous;
+    // worst case scenario: we ended up iterating from back to front without inserting
+    if (!inserted) {
+        m_list->push_front(*p_entry);
+        inserted = true;
     }
 
 #ifdef HAVE_LADDERSTATS
     events_in++;
 #endif /* HAVE_LADDERSTATS */
+
+    return inserted;
 }
 
 /**
@@ -166,80 +149,60 @@ void dcommon::Bottom::enqueue(dcommon::tEntrySP p_entry) throw (dcommon::QueueEx
  *
  * @see List#enlist(node_double_t*, long)
  */
-void dcommon::Bottom::enlist(dcommon::node_double_t *p_list, long p_size)
+void dcommon::Bottom::push(dcommon::EntryList* p_list)
 {
-    // insert data items of a small list individually, otherwise use mergesort
-    if (p_size < 10) {
-
-        for (int i = 0; i < p_size; ++i) {
-            enqueue(p_list->data);
-            p_list = p_list->next;
-        }
-    } else {
-        p_list = dcommon::Mergesort::sort(p_list);
-        dcommon::node_double_t *t = dcommon::Mergesort::merge(m_head->next, p_list);
-
-        t->previous = m_head;
-        m_head->next = t;
-
-        m_size += p_size;
+    // this sort does NOT seem to be stable at all
+    p_list->sort();
+    m_list->merge(*p_list);
 
 #ifdef HAVE_LADDERSTATS
-        events_in += p_size;
+        events_in += p_list->size();
 #endif /* HAVE_LADDERSTATS */
-    }
 }
 
 
-dcommon::node_double_t *dcommon::Bottom::delist()
+dcommon::EntryList* const dcommon::Bottom::list()
 {
-    dcommon::node_double_t *list = m_head;
-
-    // re-initialise the fifo data structure
-    init();
-
-    // return the current list
-    return list;
+    return m_list;
 }
 
-dcommon::tEntrySP dcommon::Bottom::dequeue()
+dcommon::Entry* dcommon::Bottom::front() throw (dcommon::QueueException)
 {
-    if (m_size == 0) {
-        dcommon::entry_t *entry = NULL;
-        return dcommon::tEntrySP(entry);
+    if (m_list->size() == 0) {
+        throw dcommon::QueueException(
+            dcommon::QueueException::QUEUE_EMPTY);
     }
 
-    dcommon::node_double_t *temp = m_head->next;
-    dcommon::tEntrySP result = temp->data;
+    return reinterpret_cast<dcommon::Entry*>(&m_list->front());
+}
 
-    m_head->next = temp->next;
-    temp->next->previous = m_head;
-
-    delete temp;
-    m_size--;
-
-    m_lastEvent = result->arrival;
+void dcommon::Bottom::pop_front() throw (dcommon::QueueException)
+{
+    if (m_list->size() == 0) {
+        throw dcommon::QueueException(
+            dcommon::QueueException::QUEUE_EMPTY);
+    }
 
 #ifdef HAVE_LADDERSTATS
     events_out++;
 #endif /* HAVE_LADDERSTATS */
 
-    return result;
+    m_list->pop_front();
 }
 
-double dcommon::Bottom::getMaxTS()
+const double dcommon::Bottom::getMaxTS()
 {
-    if (m_size != 0) {
-        return m_tail->previous->data->arrival;
+    if (!m_list->empty()) {
+        return m_list->back().arrival;
     }
 
     return m_lastEvent;
 }
 
-double dcommon::Bottom::getMinTS()
+const double dcommon::Bottom::getMinTS()
 {
-    if (m_size != 0) {
-        return m_head->next->data->arrival;
+    if (!m_list->empty()) {
+        return m_list->front().arrival;
     }
 
     return m_lastEvent;

@@ -79,6 +79,9 @@ AC_ARG_ENABLE(debug, AS_HELP_STRING(
 		     [DEBUGGING=$enableval], [DEBUGGING=no])
 if test "x$DEBUGGING" = xyes; then
   AC_DEFINE(NDEBUG, 1, [define debugging, if enabled])
+  AC_DEFINE(BOOST_DISABLE_ASSERTS, 0, [define boost asserts, if enabled])
+else
+  AC_DEFINE(BOOST_DISABLE_ASSERTS, 1, [define boost asserts, if enabled])
 fi
 
 # cppunit library check
