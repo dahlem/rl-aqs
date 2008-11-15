@@ -19,10 +19,10 @@ check_PROGRAMS = $(TESTS)
 
 QueueSuite_SOURCES =                                        \
 	BottomTest.cc                                       \
+	TopTest.cc                                          \
 	QueueSuite.cc
 
 #	FifoTest.cc                                         
-#	TopTest.cc                                          
 #	LadderTest.cc                                       
 #	LadderQueueTest.cc                                  
 

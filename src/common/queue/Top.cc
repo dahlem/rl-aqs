@@ -32,7 +32,6 @@ namespace bio = boost::iostreams;
 # include <boost/shared_ptr.hpp>
 #endif /* HAVE_LADDERSTATS */
 
-
 #include <cstddef>
 #include <cfloat>
 
@@ -44,7 +43,7 @@ namespace dcommon = des::common;
 dcommon::Top::Top()
     : m_maxTS(0.0), m_minTS(DBL_MAX), m_topStart(0.0)
 {
-    m_fifo = dcommon::tFifoSP(new dcommon::Fifo);
+    m_fifo = new dcommon::EntryList();
 
 #ifdef HAVE_LADDERSTATS
     events_in = 0;
@@ -64,6 +63,10 @@ dcommon::Top::Top()
 
 dcommon::Top::~Top()
 {
+    m_fifo->erase_and_dispose(m_fifo->begin(), m_fifo->end(),
+                              dcommon::delete_disposer());
+
+    delete m_fifo;
 }
 
 
@@ -114,35 +117,6 @@ void dcommon::Top::reset() throw (dcommon::QueueException)
 }
 
 
-void dcommon::Top::enqueue(dcommon::tEntrySP p_entry) throw (dcommon::QueueException)
-{
-#ifdef HAVE_LADDERSTATS
-    events_in++;
-#endif /* HAVE_LADDERSTATS */
-
-    setMaxTS(p_entry->arrival);
-    setMinTS(p_entry->arrival);
-
-    m_fifo->enqueue(p_entry);
-}
-
-
-dcommon::tEntrySP dcommon::Top::dequeue()
-{
-    dcommon::tEntrySP result = m_fifo->dequeue();
-
-    if (result != NULL) {
-#ifdef HAVE_LADDERSTATS
-        events_out++;
-#endif /* HAVE_LADDERSTATS */
-
-        m_topStart = result->arrival;
-    }
-
-    return result;
-}
-
-
 void dcommon::Top::setMaxTS(double p_maxTS)
 {
     if (p_maxTS > m_maxTS) {
@@ -159,24 +133,61 @@ void dcommon::Top::setMinTS(double p_minTS)
 }
 
 
-dcommon::node_double_t *dcommon::Top::delist()
+bool dcommon::Top::push(dcommon::Entry *p_entry) throw (dcommon::QueueException)
 {
-    dcommon::node_double_t *result = NULL;
+#ifdef HAVE_LADDERSTATS
+    events_in++;
+#endif /* HAVE_LADDERSTATS */
 
-    try {
-        result = m_fifo->delist();
-        m_topStart = m_maxTS;
+    setMaxTS(p_entry->arrival);
+    setMinTS(p_entry->arrival);
 
-        reset();
-    } catch (dcommon::QueueException &qe) {
-        // cannot happen here
-    }
-
-    return result;
+    m_fifo->push_back(*p_entry);
+    return true;
 }
 
 
-void dcommon::Top::enlist(dcommon::node_double_t *p_list, long p_size)
+void dcommon::Top::push(dcommon::EntryList* p_list)
 {
-    m_fifo->enlist(p_list, p_size);
+    dcommon::EntryListIterator it(p_list->begin()), itend(p_list->end());
+    dcommon::Entry *entry = NULL;
+
+    while (!p_list->empty()) {
+        entry = reinterpret_cast<dcommon::Entry*>(&p_list->front());
+        p_list->pop_front();
+        push(entry);
+    }
+}
+
+
+dcommon::EntryList* const dcommon::Top::delist()
+{
+    m_topStart = m_maxTS;
+    return m_fifo;
+}
+
+dcommon::Entry* dcommon::Top::front() throw (dcommon::QueueException)
+{
+    if (m_fifo->empty()) {
+        throw dcommon::QueueException(
+            dcommon::QueueException::QUEUE_EMPTY);
+    }
+
+    return reinterpret_cast<dcommon::Entry*>(&m_fifo->front());
+}
+
+void dcommon::Top::pop_front() throw (dcommon::QueueException)
+{
+    if (m_fifo->empty()) {
+        throw dcommon::QueueException(
+            dcommon::QueueException::QUEUE_EMPTY);
+    }
+
+#ifdef HAVE_LADDERSTATS
+    events_out++;
+#endif /* HAVE_LADDERSTATS */
+
+    m_topStart = m_fifo->front().arrival;
+
+    m_fifo->pop_front();
 }

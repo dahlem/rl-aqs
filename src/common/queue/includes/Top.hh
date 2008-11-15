@@ -17,8 +17,8 @@
 /** @file Top.hh
  * Declaration of the top structure of the Ladder Queue.
  */
-#ifndef TOP_HH
-#define TOP_HH
+#ifndef __TOP_HH__
+#define __TOP_HH__
 
 #if HAVE_CONFIG_H
 # include <config.h>
@@ -27,8 +27,6 @@
 #include <boost/shared_ptr.hpp>
 
 #include "Entry.hh"
-#include "Fifo.hh"
-#include "List.hh"
 #include "Queue.hh"
 #include "QueueException.hh"
 namespace dcommon = des::common;
@@ -50,7 +48,7 @@ namespace des
  *
  * @author <a href="mailto:Dominik.Dahlem@cs.tcd.ie">Dominik Dahlem</a>
  */
-class Top: public dcommon::Queue, dcommon::List
+class Top: public dcommon::Queue
 {
 public:
     Top();
@@ -60,25 +58,12 @@ public:
     void record();
 #endif /* HAVE_LADDERSTATS */
 
-    /**
-     * @see Queue#enqueue(dcommon::tEntrySP) throw (QueueException)
-     */
-    void enqueue(dcommon::tEntrySP p_entry) throw (dcommon::QueueException);
+    dcommon::Entry* front() throw (dcommon::QueueException);
+    void pop_front() throw (dcommon::QueueException);
 
-    /**
-     * @see Queue#dequeue()
-     */
-    dcommon::tEntrySP dequeue();
-
-    /**
-     * @see List#enlist(node_double_t*, long)
-     */
-    void enlist(dcommon::node_double_t *p_list, long p_size);
-
-    /**
-     * @see List#delist()
-     */
-    dcommon::node_double_t * delist();
+    bool push(dcommon::Entry *p_entry) throw (dcommon::QueueException);
+    void push(dcommon::EntryList* );
+    dcommon::EntryList* const delist();
 
     /**
      * @return double the maximum arrival timestamp
@@ -121,7 +106,8 @@ private:
     double m_maxTS;
     double m_minTS;
     double m_topStart;
-    dcommon::tFifoSP m_fifo;
+
+    dcommon::EntryList *m_fifo;
 
 };
 

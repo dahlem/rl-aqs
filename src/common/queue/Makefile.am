@@ -13,10 +13,10 @@ noinst_LTLIBRARIES = libcommonqueue.la
 libcommonqueue_la_SOURCES =                                           \
 	Queue.cc                                                      \
 	QueueException.cc                                             \
+	Top.cc                                                        \
 	Bottom.cc                                                     
 
 #	Fifo.cc                                                       \
-#	Top.cc                                                        \
 #	Ladder.cc                                                     \
 #	LadderQueue.cc
 
