@@ -131,7 +131,6 @@ void BottomTest::testEnqueueAtTail()
         CPPUNIT_FAIL("Did not expect queue exception!");
     }
 
-
     while (m_bottom->size() > 0) {
         result = (resultOld->arrival <= resultNew->arrival);
 

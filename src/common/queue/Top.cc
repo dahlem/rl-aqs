@@ -164,29 +164,3 @@ dcommon::EntryList* const dcommon::Top::delist()
     m_topStart = m_maxTS;
     return m_fifo;
 }
-
-dcommon::Entry* dcommon::Top::front() throw (dcommon::QueueException)
-{
-    if (m_fifo->empty()) {
-        throw dcommon::QueueException(
-            dcommon::QueueException::QUEUE_EMPTY);
-    }
-
-    return reinterpret_cast<dcommon::Entry*>(&m_fifo->front());
-}
-
-void dcommon::Top::pop_front() throw (dcommon::QueueException)
-{
-    if (m_fifo->empty()) {
-        throw dcommon::QueueException(
-            dcommon::QueueException::QUEUE_EMPTY);
-    }
-
-#ifdef HAVE_LADDERSTATS
-    events_out++;
-#endif /* HAVE_LADDERSTATS */
-
-    m_topStart = m_fifo->front().arrival;
-
-    m_fifo->pop_front();
-}

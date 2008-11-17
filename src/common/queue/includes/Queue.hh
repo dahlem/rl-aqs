@@ -81,13 +81,6 @@ public:
      */
     virtual const bool push(dcommon::Entry *p_entry) throw (dcommon::QueueException) = 0;
 
-    /**
-     * @return returns the next entry in a queue.
-     * @throws QueueException throw, if the queue is empty
-     */
-    virtual dcommon::Entry* front() throw (dcommon::QueueException) = 0;
-    virtual void pop_front() throw (dcommon::QueueException) = 0;
-
 #ifdef HAVE_LADDERSTATS
 protected:
 

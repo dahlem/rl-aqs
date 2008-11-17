@@ -15,23 +15,17 @@ libcommonqueue_la_SOURCES =                                           \
 	QueueException.cc                                             \
 	Top.cc                                                        \
 	Ladder.cc                                                     \
-	Bottom.cc
-
-#	Fifo.cc                                                       \
-#	LadderQueue.cc
+	Bottom.cc                                                     \
+	LadderQueue.cc
 
 libcommonqueue_la_CPPFLAGS =                                          \
 	$(BOOST_CPPFLAGS)                                             \
 	-I./includes                                                  \
 	-I../list/includes
 
-#	-I../sort/includes                                            
-
 libcommonqueue_la_LIBADD =                                            \
 	$(BOOST_LDFLAGS)                                              \
 	-lm                                                           \
 	../list/libcommonlist.la
-
-#	../sort/libcommonsort.la                                      
 
 include_HEADERS = includes

@@ -217,6 +217,21 @@ boost::uint32_t dcommon::Ladder::bucket(double p_TS, boost::uint32_t p_rung)
     return retVal;
 }
 
+void dcommon::Ladder::updateNEvents(boost::uint32_t p_rung, boost::int32_t size)
+{
+    m_events[p_rung] += size;
+    m_NBC += size;
+
+#ifdef HAVE_LADDERSTATS
+    events_in += size;
+
+    if (size < 0) {
+        events_out += (-size);
+    }
+#endif /* HAVE_LADDERSTATS */
+}
+
+
 const bool dcommon::Ladder::push(dcommon::Entry *p_entry) throw (dcommon::QueueException)
 {
     // cannot enqueue, if the internal structure has not been initialised
@@ -236,11 +251,7 @@ const bool dcommon::Ladder::push(dcommon::Entry *p_entry) throw (dcommon::QueueE
     if (nRungs <= m_lowestRung) {
         // insert into tail of rung x, bucket k
         m_rungs[nRungs][bucket(p_entry->arrival, nRungs)].push_back(*p_entry);
-        m_events[nRungs]++;
-
-#ifdef HAVE_LADDERSTATS
-        events_in++;
-#endif /* HAVE_LADDERSTATS */
+        updateNEvents(nRungs, 1);
     } else {
         throw dcommon::QueueException(dcommon::QueueException::RUNG_NOT_FOUND);
     }
@@ -267,11 +278,8 @@ void dcommon::Ladder::push(boost::uint32_t p_rung, dcommon::EntryList *p_list)
         entry = reinterpret_cast<dcommon::Entry*>(&p_list->front());
         p_list->pop_front();
         m_rungs[p_rung][bucket(entry->arrival, p_rung)].push_back(*entry);
-        m_events[p_rung]++;
 
-#ifdef HAVE_LADDERSTATS
-        events_in++;
-#endif /* HAVE_LADDERSTATS */
+        updateNEvents(p_rung, 1);
     }
 }
 
@@ -326,12 +334,7 @@ dcommon::EntryList* const dcommon::Ladder::delist()
             &(m_rungs[m_lowestRung][m_currentBucket[m_lowestRung]]));
     boost::uint32_t size = temp->size();
 
-#ifdef HAVE_LADDERSTATS
-    events_out += size;
-#endif /* HAVE_LADDERSTATS */
-
-    // keep track of the events in each rung
-    m_events[m_lowestRung] -= size;
+    updateNEvents(m_lowestRung, -size);
 
     return temp;
 }

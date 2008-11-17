@@ -21,14 +21,13 @@ QueueSuite_SOURCES =                                        \
 	BottomTest.cc                                       \
 	LadderTest.cc                                       \
 	TopTest.cc                                          \
-	QueueSuite.cc
-
-#	FifoTest.cc                                         
-#	LadderQueueTest.cc                                  
+	QueueSuite.cc                                       \
+	LadderQueueTest.cc
 
 QueueSuite_LDFLAGS = $(CPPUNIT_LIBS) -ldl
 
 QueueSuite_CXXFLAGS =                                       \
+	$(BOOST_CPPFLAGS)                                   \
 	$(CPPUNIT_CFLAGS)                                   \
 	-Iincludes                                          \
 	-I$(top_srcdir)/src/common/queue/includes           \
@@ -36,6 +35,7 @@ QueueSuite_CXXFLAGS =                                       \
 	-I$(top_srcdir)/src/common/list/includes
 
 LDADD =                                                     \
+	$(BOOST_LDFLAGS)                                    \
 	$(top_srcdir)/src/common/queue/libcommonqueue.la    \
 	$(top_srcdir)/src/common/list/libcommonlist.la      \
 	$(top_srcdir)/src/utils/numbers/libutils_numbers.la

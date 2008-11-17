@@ -22,8 +22,8 @@ using des::common::LadderQueue;
 class LadderQueueTest : public CppUnit::TestFixture
 {
     CPPUNIT_TEST_SUITE(LadderQueueTest);
-//    CPPUNIT_TEST(testEnqueueVeryLarge);
     CPPUNIT_TEST(testEnqueue10);
+    CPPUNIT_TEST(testEnqueueVeryLarge);
     CPPUNIT_TEST(testEnqueueDequeue20);
     CPPUNIT_TEST_SUITE_END();
 

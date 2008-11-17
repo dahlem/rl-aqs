@@ -17,8 +17,8 @@
 /** @file LadderQueue.hh
  * Declaration of the Ladder Queue.
  */
-#ifndef LADDERQUEUE_HH
-#define LADDERQUEUE_HH
+#ifndef __LADDERQUEUE_HH__
+#define __LADDERQUEUE_HH__
 
 #if HAVE_CONFIG_H
 # include <config.h>
@@ -34,7 +34,6 @@ namespace bio = boost::iostreams;
 #endif /* HAVE_LADDERTIMING */
 
 #include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
 
 #include "Bottom.hh"
 #include "Entry.hh"
@@ -103,14 +102,14 @@ public:
 #endif /* HAVE_LADDERSTATS */
 
     /**
-     * @see Queue#enqueue(dcommon::tEntrySP) throw (QueueException)
+     * @see Queue#push(dcommon::Entry*) throw (QueueException)
      */
-    void enqueue(dcommon::tEntrySP p_entry) throw (dcommon::QueueException);
+    const bool push(dcommon::Entry *p_entry) throw (dcommon::QueueException);
 
     /**
      * @see Queue#dequeue()
      */
-    dcommon::tEntrySP dequeue();
+    dcommon::Entry* dequeue();
 
 private:
     dcommon::tTopSP m_top;
@@ -132,11 +131,6 @@ private:
  * type definition of a shared pointer to a LadderQueue
  */
 typedef boost::shared_ptr <LadderQueue> tQueueSP;
-
-/** @typedef tQueueSP
- * type definition of a weak pointer to a LadderQueue
- */
-typedef boost::weak_ptr <LadderQueue> tQueueWP;
 
 
     }

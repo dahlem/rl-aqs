@@ -156,7 +156,7 @@ void dcommon::Bottom::push(dcommon::EntryList* p_list)
     m_list->merge(*p_list);
 
 #ifdef HAVE_LADDERSTATS
-        events_in += p_list->size();
+    events_in += p_list->size();
 #endif /* HAVE_LADDERSTATS */
 }
 
@@ -186,6 +186,9 @@ void dcommon::Bottom::pop_front() throw (dcommon::QueueException)
 #ifdef HAVE_LADDERSTATS
     events_out++;
 #endif /* HAVE_LADDERSTATS */
+
+    // record the last event time stamp
+    m_lastEvent = m_list->front().arrival;
 
     m_list->pop_front();
 }

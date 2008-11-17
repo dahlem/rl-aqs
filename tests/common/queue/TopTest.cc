@@ -55,7 +55,9 @@ void TopTest::testEnqueueTwice()
 {
     dcommon::Entry *entry1 = new dcommon::Entry(0.5, 1, 1, 0);
     dcommon::Entry *entry2 = new dcommon::Entry(1.0, 2, 2, 1);
-    dcommon::Entry *result = NULL;
+    dcommon::EntryList *result = NULL;
+    dcommon::Entry entry;
+    dcommon::Entry *toDelete;
 
     CPPUNIT_ASSERT(m_top->getNTop() == 0);
 
@@ -71,17 +73,18 @@ void TopTest::testEnqueueTwice()
     CPPUNIT_ASSERT(m_top->getMaxTS() == 1.0);
     CPPUNIT_ASSERT(m_top->getMinTS() == 0.5);
 
-    // first dequeue
-    result = m_top->front();
-    m_top->pop_front();
+    result = m_top->delist();
 
-    CPPUNIT_ASSERT(m_top->getNTop() == 1);
+    CPPUNIT_ASSERT_EQUAL((unsigned int) 2, result->size());
+    toDelete = reinterpret_cast<dcommon::Entry*>(&result->front());
+    result->pop_front();
+    delete toDelete;
 
-    // second dequeue
-    result = m_top->front();
-    m_top->pop_front();
+    toDelete = reinterpret_cast<dcommon::Entry*>(&result->front());
+    result->pop_front();
+    delete toDelete;
 
-    CPPUNIT_ASSERT(m_top->getNTop() == 0);
+    CPPUNIT_ASSERT_EQUAL((unsigned int) 0, m_top->getNTop());
 }
 
 void TopTest::testResetOk()
@@ -97,16 +100,15 @@ void TopTest::testResetOk()
     CPPUNIT_ASSERT(m_top->getMaxTS() == 0);
     CPPUNIT_ASSERT(m_top->getMinTS() == DBL_MAX);
     m_top->push(entry1);
-    m_top->pop_front();
 
     try {
         m_top->reset();
+        CPPUNIT_FAIL("Did expect queue exception!");
     } catch (dcommon::QueueException q) {
-        CPPUNIT_FAIL("Did not expect queue exception!");
     }
 
-    CPPUNIT_ASSERT(m_top->getMaxTS() == 0);
-    CPPUNIT_ASSERT(m_top->getMinTS() == DBL_MAX);
+    CPPUNIT_ASSERT(m_top->getMaxTS() == 0.5);
+    CPPUNIT_ASSERT(m_top->getMinTS() == 0.5);
 }
 
 void TopTest::testResetThrows()
@@ -152,19 +154,12 @@ void TopTest::testList()
     m_top->push(entry3);
 
     CPPUNIT_ASSERT(m_top->getNTop() == 1);
-
-    entry = m_top->front();
-    m_top->pop_front();
-
-    CPPUNIT_ASSERT_EQUAL(entry3->arrival, entry->arrival);
-    CPPUNIT_ASSERT_EQUAL(entry3->destination, entry->destination);
-    CPPUNIT_ASSERT_EQUAL(entry3->origin, entry->origin);
-    CPPUNIT_ASSERT_EQUAL(entry3->type, entry->type);
-    CPPUNIT_ASSERT(m_top->getNTop() == 0);
 }
 
 void TopTest::test100()
 {
+    dcommon::EntryList *result = NULL;
+
     for (int i = 0; i < 100; ++i) {
         dcommon::Entry *entry = new dcommon::Entry((double) i, 1, 1, 0);
         m_top->push(entry);
@@ -172,40 +167,29 @@ void TopTest::test100()
 
     CPPUNIT_ASSERT(m_top->getNTop() == 100);
 
-    for (int i = 0; i < 100; ++i) {
-        dcommon::Entry *entry = m_top->front();
-        m_top->pop_front();
+    result = m_top->delist();
+
+    int i = 0;
+    while (!result->empty()) {
+        dcommon::Entry *entry = reinterpret_cast<dcommon::Entry*>(&result->front());
+        result->pop_front();
         CPPUNIT_ASSERT(entry->arrival == i);
+        delete entry;
+        i++;
     }
 
     CPPUNIT_ASSERT(m_top->getNTop() == 0);
 }
 
-void TopTest::test100EnDe()
-{
-    dcommon::Entry *entry;
-    dcommon::Entry *result;
-
-    for (int i = 0; i < 100; ++i) {
-        entry = new dcommon::Entry((double) i, 1, 1, 0);
-
-        m_top->push(entry);
-        CPPUNIT_ASSERT(m_top->getNTop() == 1);
-
-        result = m_top->front();
-        m_top->pop_front();
-        CPPUNIT_ASSERT(result->arrival == i);
-        CPPUNIT_ASSERT(m_top->getNTop() == 0);
-    }
-}
 
 void TopTest::testEnlist()
 {
     dcommon::EntryList *fifo = new dcommon::EntryList();
+    dcommon::EntryList *result = NULL;
     dcommon::Entry *resultOld;
     dcommon::Entry *resultNew;
     dcommon::Entry *entry;
-    bool result;
+    bool test;
 
     for (int i = 0; i < 3; ++i) {
         entry = new dcommon::Entry((double) i, i, 1, 0);
@@ -214,19 +198,17 @@ void TopTest::testEnlist()
 
     m_top->push(fifo);
 
-    resultOld = m_top->front();
-    m_top->pop_front();
-    resultNew = m_top->front();
-    m_top->pop_front();
+    result = m_top->delist();
+    resultOld = reinterpret_cast<dcommon::Entry*>(&result->front());
+    result->pop_front();
 
-    while (m_top->getNTop() > 0) {
-        result = (resultOld->destination < resultNew->destination);
-        CPPUNIT_ASSERT(result);
+    while (!result->empty()) {
+        resultNew = reinterpret_cast<dcommon::Entry*>(&result->front());
+        result->pop_front();
+        test = (resultOld->destination < resultNew->destination);
+        CPPUNIT_ASSERT(test);
         resultOld = resultNew;
         delete resultNew;
-
-        resultNew = m_top->front();
-        m_top->pop_front();
     }
 
     delete fifo;

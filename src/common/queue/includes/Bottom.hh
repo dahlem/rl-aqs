@@ -17,8 +17,8 @@
 /** @file Bottom.hh
  * Declaration of the bottom structure for the Ladder Queue.
  */
-#ifndef BOTTOM_HH
-#define BOTTOM_HH
+#ifndef __BOTTOM_HH__
+#define __BOTTOM_HH__
 
 #if HAVE_CONFIG_H
 # include <config.h>

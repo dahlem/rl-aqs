@@ -34,7 +34,13 @@ namespace bio = boost::iostreams;
 # include <boost/shared_ptr.hpp>
 #endif
 
+#ifndef __STDC_CONSTANT_MACROS
+# define __STDC_CONSTANT_MACROS
+#endif /* __STDC_CONSTANT_MACROS */
+
 #include <cstddef>
+
+#include <boost/cstdint.hpp>
 
 #include "LadderQueue.hh"
 namespace dcommon = des::common;
@@ -63,6 +69,7 @@ dcommon::LadderQueue::LadderQueue()
 #endif /* HAVE_LADDERTIMING */
 }
 
+
 dcommon::LadderQueue::~LadderQueue()
 {
 }
@@ -78,7 +85,7 @@ void dcommon::LadderQueue::record()
 #endif /* HAVE_LADDERSTATS */
 
 
-void dcommon::LadderQueue::enqueue(dcommon::tEntrySP p_entry) throw (dcommon::QueueException)
+const bool dcommon::LadderQueue::push(dcommon::Entry *p_entry) throw (dcommon::QueueException)
 {
 #ifdef HAVE_LADDERTIMING
     struct timeval start, finish;
@@ -88,14 +95,12 @@ void dcommon::LadderQueue::enqueue(dcommon::tEntrySP p_entry) throw (dcommon::Qu
 
     if (p_entry->arrival >= m_top->getTopStart()) {
         // insert at the tail of top
-        m_top->enqueue(p_entry);
+        m_top->push(p_entry);
     } else {
-
-
         try {
-            m_ladder->enqueue(p_entry);
+            m_ladder->push(p_entry);
         } catch (dcommon::QueueException qe) {
-            m_bottom->enqueue(p_entry);
+            m_bottom->push(p_entry);
 
             if (m_bottom->size() > m_ladder->getThres()) {
                 // check whether ladder is empty
@@ -103,24 +108,12 @@ void dcommon::LadderQueue::enqueue(dcommon::tEntrySP p_entry) throw (dcommon::Qu
                 if (m_ladder->getNBucket() == 0) {
                     double max = m_bottom->getMaxTS();
                     double min = m_bottom->getMinTS();
-                    long size = m_bottom->size();
 
-                    dcommon::node_double_t *list = m_bottom->delist();
-                    dcommon::node_double_t *next = list->next;
-                    next->previous = NULL;
-//                    delete list;
-                    m_ladder->enlist(next, size, max, min);
+                    dcommon::EntryList *list = m_bottom->list();
+                    m_ladder->push(list, max, min);
                 } else {
-                    // otherwise, spawn a new rung in the ladder and copy the
-                    // events from bottom to the ladder rung just created.
-                    bool success = m_ladder->spawn(false);
-
-                    if (success) {
-                        long size = m_bottom->size();
-                        dcommon::node_double_t *list = m_bottom->delist();
-
-                        m_ladder->pushBack(list, size);
-                    }
+                    dcommon::EntryList *list = m_bottom->list();
+                    m_ladder->pushBack(list);
                 }
             }
         }
@@ -134,9 +127,12 @@ void dcommon::LadderQueue::enqueue(dcommon::tEntrySP p_entry) throw (dcommon::Qu
 
     (*osEn.get()) << time_delta  << std::endl;
 #endif /* HAVE_LADDERTIMING */
+
+    return true;
 }
 
-dcommon::tEntrySP dcommon::LadderQueue::dequeue()
+
+dcommon::Entry* dcommon::LadderQueue::dequeue()
 {
 #ifdef HAVE_LADDERTIMING
     struct timeval start, finish;
@@ -144,24 +140,23 @@ dcommon::tEntrySP dcommon::LadderQueue::dequeue()
     gettimeofday(&start, NULL);
 #endif /* HAVE_LADDERTIMING */
 
-    dcommon::tEntrySP entry;
-    dcommon::node_double_t *list, *next;
+    dcommon::Entry *entry = NULL;
+    dcommon::EntryList *list = NULL;
 
     if (m_bottom->size() > 0) {
         // bottom serves the dequeue operation
-        entry = m_bottom->dequeue();
+        entry = m_bottom->front();
+        m_bottom->pop_front();
     } else {
         // otherwise the ladder will transfer events to the bottom
-        int size = m_ladder->getNBucket();
+        boost::uint32_t size = m_ladder->getNBC();
 
         if (size > 0) {
             // the ladder contains events to be transferred to bottom
             list = m_ladder->delist();
-            next = list->next;
-            next->previous = NULL;
-//            delete list;
-            m_bottom->enlist(next, size);
-            entry = m_bottom->dequeue();
+            m_bottom->push(list);
+            entry = m_bottom->front();
+            m_bottom->pop_front();
         } else {
             // check whether the top structure has events
             size = m_top->getNTop();
@@ -172,22 +167,14 @@ dcommon::tEntrySP dcommon::LadderQueue::dequeue()
                 // the top structure transfers to the ladder and the ladder
                 // to the bottom structure
                 list = m_top->delist();
-                next = list->next;
-                next->previous = NULL;
-//                delete list;
-                m_ladder->enlist(next, size, max, min);
-                size = m_ladder->getNBucket();
-
+                m_ladder->push(list, max, min);
                 list = m_ladder->delist();
-                next = list->next;
-                next->previous = NULL;
-//                delete list;
-                m_bottom->enlist(next, size);
-                entry = m_bottom->dequeue();
+                m_bottom->push(list);
+                entry = m_bottom->front();
+                m_bottom->pop_front();
             }
         }
     }
-
 
 #ifdef HAVE_LADDERTIMING
     gettimeofday(&finish, NULL);

@@ -186,6 +186,8 @@ public:
 
 
 private:
+    void updateNEvents(boost::uint32_t p_rung, boost::int32_t size);
+
     /**
      * @see List#enlist(node_double_t*, long)
      */

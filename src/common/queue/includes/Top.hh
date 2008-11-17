@@ -63,9 +63,6 @@ public:
     void record();
 #endif /* HAVE_LADDERSTATS */
 
-    dcommon::Entry* front() throw (dcommon::QueueException);
-    void pop_front() throw (dcommon::QueueException);
-
     const bool push(dcommon::Entry *p_entry) throw (dcommon::QueueException);
     void push(dcommon::EntryList* );
     dcommon::EntryList* const delist();

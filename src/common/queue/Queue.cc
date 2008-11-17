@@ -34,4 +34,3 @@ dcommon::Queue::~Queue()
 #ifdef HAVE_LADDERSTATS
 void dcommon::Queue::record() {}
 #endif /* HAVE_LADDERSTATS */
-

@@ -29,7 +29,6 @@ class TopTest : public CppUnit::TestFixture
     CPPUNIT_TEST(testResetThrows);
     CPPUNIT_TEST(testList);
     CPPUNIT_TEST(test100);
-    CPPUNIT_TEST(test100EnDe);
     CPPUNIT_TEST(testEnlist);
     CPPUNIT_TEST_SUITE_END();
 
@@ -44,7 +43,6 @@ public:
     void testResetThrows();
     void testList();
     void test100();
-    void test100EnDe();
     void testEnlist();
 
 private:
