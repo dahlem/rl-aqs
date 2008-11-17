@@ -25,6 +25,7 @@
 # include <config.h>
 #endif
 
+#include <boost/shared_array.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/intrusive/list.hpp>
 
@@ -36,37 +37,13 @@ namespace des
     {
 
 
-/** @struct entry_t
+/** @class Entry
  * This structure specifies an (event) entry for the priority queue.
  * An event is specified by the arrival time, the destination, the origin, and
  * a type of the event.
  *
  * @author <a href="mailto:Dominik.Dahlem@cs.tcd.ie">Dominik Dahlem</a>
  */
-struct entry_t
-{
-    double arrival;
-    int destination;
-    int origin;
-    int type;
-
-    entry_t(double a, int d, int o, int t)
-        {
-            arrival = a;
-            destination = d;
-            origin = o;
-            type = t;
-        }
-
-};
-
-
-/** @typedef tEntrySP
- * a type definition of a shared pointer of an entry
- */
-typedef boost::shared_ptr <entry_t> tEntrySP;
-
-
 class Entry : public boost::intrusive::list_base_hook<>
 {
 public:
@@ -87,7 +64,10 @@ public:
     int type;
 };
 
-typedef boost::intrusive::make_list<Entry>::type EntryList;
+typedef boost::intrusive::make_list <Entry>::type EntryList;
+typedef boost::shared_array <EntryList> EntryListSA;
+typedef boost::shared_array <EntryListSA> EntryListSM;
+
 typedef EntryList::iterator EntryListIterator;
 
 

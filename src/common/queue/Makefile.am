@@ -14,10 +14,10 @@ libcommonqueue_la_SOURCES =                                           \
 	Queue.cc                                                      \
 	QueueException.cc                                             \
 	Top.cc                                                        \
-	Bottom.cc                                                     
+	Ladder.cc                                                     \
+	Bottom.cc
 
 #	Fifo.cc                                                       \
-#	Ladder.cc                                                     \
 #	LadderQueue.cc
 
 libcommonqueue_la_CPPFLAGS =                                          \

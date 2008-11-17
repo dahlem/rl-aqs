@@ -24,12 +24,15 @@
 # include <config.h>
 #endif
 
+#ifndef __STDC_CONSTANT_MACROS
+# define __STDC_CONSTANT_MACROS
+#endif /* __STDC_CONSTANT_MACROS */
+
+#include <boost/cstdint.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
 
 #include "Entry.hh"
-#include "Fifo.hh"
-#include "List.hh"
 #include "Queue.hh"
 #include "QueueException.hh"
 namespace dcommon = des::common;
@@ -44,7 +47,7 @@ namespace des
 /** @typedef tIntSA
  * a type defintion of a shared array of ints
  */
-typedef boost::shared_array <int> tIntSA;
+typedef boost::shared_array <boost::int32_t> tIntSA;
 
 /** @typedef tDoubleSA
  * a type defintion of a shared array of doubles
@@ -60,26 +63,22 @@ typedef boost::shared_array <double> tDoubleSA;
  *
  * @author <a href="mailto:Dominik.Dahlem@cs.tcd.ie">Dominik Dahlem</a>
  */
-class Ladder: public dcommon::Queue, dcommon::List
+class Ladder: public dcommon::Queue
 {
 public:
     Ladder();
-    Ladder(int p_thres);
+    Ladder(boost::int32_t p_thres);
     ~Ladder();
 
 #ifdef HAVE_LADDERSTATS
     void record();
 #endif /* HAVE_LADDERSTATS */
 
-    /**
-     * @see Queue#enqueue(dcommon::tEntrySP) throw (QueueException)
-     */
-    void enqueue(dcommon::tEntrySP p_entry) throw (dcommon::QueueException);
+    dcommon::Entry* front() throw (dcommon::QueueException);
+    void pop_front() throw (dcommon::QueueException);
 
-    /**
-     * @see Queue#dequeue()
-     */
-    dcommon::tEntrySP dequeue();
+    bool push(dcommon::Entry *p_entry) throw (dcommon::QueueException);
+    dcommon::EntryList* const delist();
 
     /**
      * Insert a list into the ladder structure and intialise the following
@@ -100,47 +99,42 @@ public:
      * @double the minimum arrival timestamp of the list to be inserted
      * @see List#enlist(node_double_t*, long)
      */
-    void enlist(dcommon::node_double_t *p_list, long p_size,
-                double p_maxTS, double p_minTS) throw (dcommon::QueueException);
-
-    /**
-     * @see List#delist()
-     */
-    dcommon::node_double_t *delist();
+    void push(dcommon::EntryList*, double p_maxTS, double p_minTS)
+        throw (dcommon::QueueException);
 
     /**
      * @return the number of events in the ladder structure
      */
-    int getNBC();
+    boost::int32_t getNBC();
 
     /**
      * The current number of instantiated rungs
      */
-    int getNRung();
+    boost::int32_t getNRung();
 
     /**
      * The event threshold of each bucket in the rung
      */
-    int getThres();
+    boost::int32_t getThres();
 
     /**
      * @param int the rung
      * @param int the bucket
      * @return the number of events in a given bucket in a given rung
      */
-    long getNBucket(int p_rung, int p_bucket) throw (dcommon::QueueException);
+    boost::int32_t getNBucket(boost::int32_t p_rung, boost::int32_t p_bucket) throw (dcommon::QueueException);
 
     /**
      * @return the number of events in the current dequeue bucket
      */
-    long getNBucket();
+    boost::int32_t getNBucket();
 
     /**
      * @param int rung
      * @return the bucketwidth of a given rung
      * @throws QueueException thrown, if the given rung has not been initialised
      */
-    double getBucketwidth(int p_rung) throw (dcommon::QueueException);
+    double getBucketwidth(boost::int32_t p_rung) throw (dcommon::QueueException);
 
     /**
      * @return the bucketwidth of the currently active dequeue rung
@@ -151,7 +145,7 @@ public:
      * @param int the rung
      * @return the minimum arrival timestamp of a given rung for enqueuing events
      */
-    double getRCur(int p_rung);
+    double getRCur(boost::int32_t p_rung);
 
     /**
      * @return the minimum arrival timestamp of a given rung for enqueuing events
@@ -163,7 +157,7 @@ public:
      * @param int the rung
      * @return the starting timestamp of a given rung
      */
-    double getRStart(int p_rung);
+    double getRStart(boost::int32_t p_rung);
 
     /**
      * The rung structure is updated according to the following equations. Those
@@ -185,15 +179,27 @@ public:
      *
      * @param node_double_t* the list to be inserted
      * @param long the size of the list to be inserted
+     * @throws QueueException, if the elements can not be inserted due to rungs
+     *         being out of bounds.
      */
-    void pushBack(dcommon::node_double_t *p_list, long p_size);
+    void pushBack(dcommon::EntryList* ) throw (dcommon::QueueException);
 
 
 private:
     /**
      * @see List#enlist(node_double_t*, long)
      */
-    void enlist(dcommon::node_double_t *p_list, long p_size);
+    void push(dcommon::EntryList* );
+
+    /**
+     * Insert a list into a specified rung.
+     *
+     * @param the rung
+     * @param the list
+     * @param the size of the list
+     * @see List#enlist(node_double_t*, long)
+     */
+    void push(boost::int32_t p_rung, dcommon::EntryList* );
 
     /**
      * This method adapts the one presented in the TOMACS journal in order to
@@ -212,7 +218,7 @@ private:
      * @return the bucketwidth given the max/min timestamps and the number of
      *         events.
      */
-    double bucketwidth(double p_max, double p_min, long p_n);
+    double bucketwidth(double p_max, double p_min, boost::int32_t p_n);
 
     /**
      * Determine the bucket to insert the event with a given arrival timestamp
@@ -226,7 +232,7 @@ private:
      * @return the index of the bucket in the given rung where the event with
      *         the given arrival timestamp is to be inserted
      */
-    int bucket(double p_TS, int p_rung);
+    boost::int32_t bucket(double p_TS, boost::int32_t p_rung);
 
     /**
      * This method resizes the first rung given the number of events to be
@@ -235,7 +241,7 @@ private:
      *
      * @param int the number of the events to be enqueued into the first rung
      */
-    void resizeFirstRung(int p_size);
+    void resizeFirstRung(boost::int32_t p_size);
 
     /**
      * This method advances the current dequeue bucket to the next non-empty
@@ -259,33 +265,28 @@ private:
     void init();
 
     /**
-     * Insert a list into a specified rung.
-     *
-     * @param the rung
-     * @param the list
-     * @param the size of the list
-     * @see List#enlist(node_double_t*, long)
+     * Check whether the dequeue bucket can be advanced further on the current rung.
+     * @return true, if it can be advanced. Otherwise false.
      */
-    void enlist(int p_rung, dcommon::node_double_t *p_list, long p_size);
-
+    bool canAdvance();
 
     /**
      * Default constant of the event threshold per bucket.
      */
-    static const int DEFAULT_THRES = 50;
+    static const boost::int32_t DEFAULT_THRES = 50;
 
     /**
      * Constang specifying the maximum number of rungs.
      */
-    static const int MAX_RUNGS = 8;
+    static const boost::int32_t MAX_RUNGS = 8;
 
-    dcommon::tFifoSM m_rungs;
-    int m_BucketsFirstRung;
+    dcommon::EntryListSM m_rungs;
+    boost::int32_t m_BucketsFirstRung;
 
-    int m_NRung;
-    int m_NBC;
-    int m_lowestRung;
-    int m_Thres;
+    boost::int32_t m_NRung;
+    boost::int32_t m_NBC;
+    boost::int32_t m_lowestRung;
+    boost::int32_t m_Thres;
 
     tIntSA m_events;
     tIntSA m_currentBucket;

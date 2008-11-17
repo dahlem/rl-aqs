@@ -8,20 +8,13 @@
 // WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 // implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-#include "Bottom.hh"
-using des::common::Bottom;
-
 #include "Compare.hh"
 using des::utils::Compare;
 
+#include "Bottom.hh"
 #include "Entry.hh"
-using des::common::entry_t;
-
-#include "List.hh"
-using des::common::node_double_t;
-
 #include "Top.hh"
-using des::common::Top;
+namespace dcommon = des::common;
 
 #include "QueueException.hh"
 #include "LadderTest.hh"
@@ -133,24 +126,22 @@ void LadderTest::testNBC()
 
 void LadderTest::testEnlistSmall()
 {
-    Top *top = new Top();
-
-    node_double_t *result = NULL;
-    node_double_t *current = NULL;
-    dcommon::tEntrySP entry;
+    dcommon::Top *top = new dcommon::Top();
+    dcommon::EntryList *result = NULL;
+    dcommon::Entry *entry = NULL;
 
     for (int i = 0; i < 3; ++i) {
-        entry = dcommon::tEntrySP(new entry_t((double) i, i, 1, 0));
-        top->enqueue(entry);
+        entry = new dcommon::Entry((double) i, i, 1, 0);
+        top->push(entry);
     }
 
-    long size = top->getNTop();
+    boost::int32_t size = top->getNTop();
     double max = top->getMaxTS();
     double min = top->getMinTS();
-    node_double_t *list = top->delist();
+    dcommon::EntryList *list = top->delist();
 
     // start the first epoch
-    m_ladder->enlist(list->next, size, max, min);
+    m_ladder->push(list, max, min);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(
         (double) ((max - min) / size),
         m_ladder->getBucketwidth(0),
@@ -161,72 +152,77 @@ void LadderTest::testEnlistSmall()
     for (int i = 0; i < 4; ++i) {
         nBucket += m_ladder->getNBucket(0, i);
     }
-    CPPUNIT_ASSERT(nBucket == 3);
+    CPPUNIT_ASSERT_EQUAL(3, nBucket);
 
     result = m_ladder->delist();
-    current = result->next;
-    CPPUNIT_ASSERT(current->data->arrival == 0.0);
-    delete result;
+    CPPUNIT_ASSERT_EQUAL((unsigned int) 1, result->size());
 
-    // second non-empty bucket
+    entry = reinterpret_cast<dcommon::Entry*>(&result->front());
+    result->pop_front();
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, entry->arrival, 0.00001);
+    delete entry;
+    CPPUNIT_ASSERT_EQUAL((unsigned int) 0, result->size());
+
     result = m_ladder->delist();
-    current = result->next;
-    CPPUNIT_ASSERT(current->data->arrival == 1.0);
-    delete result;
+    CPPUNIT_ASSERT_EQUAL((unsigned int) 1, result->size());
 
-    // third non-empty bucket
+    entry = reinterpret_cast<dcommon::Entry*>(&result->front());
+    result->pop_front();
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0, entry->arrival, 0.00001);
+    delete entry;
+    CPPUNIT_ASSERT_EQUAL((unsigned int) 0, result->size());
+
     result = m_ladder->delist();
-    current = result->next;
-    CPPUNIT_ASSERT(current->data->arrival == 2.0);
-    delete result;
+    CPPUNIT_ASSERT_EQUAL((unsigned int) 1, result->size());
 
-    delete current->next;
-    delete current;
+    entry = reinterpret_cast<dcommon::Entry*>(&result->front());
+    result->pop_front();
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0, entry->arrival, 0.00001);
+    delete entry;
+    CPPUNIT_ASSERT_EQUAL((unsigned int) 0, result->size());
+
     delete top;
 }
 
 void LadderTest::testEnlistLarge75()
 {
-    Top *top = new Top();
-
-    node_double_t *result = NULL;
-    node_double_t *current = NULL;
-    dcommon::tEntrySP entry;
+    dcommon::Top *top = new dcommon::Top();
+    dcommon::EntryList *result = NULL;
+    dcommon::Entry *entry = NULL;
 
     for (int i = 0; i < 75; ++i) {
-        entry = dcommon::tEntrySP(new entry_t((double) i, i, 1, 0));
-        top->enqueue(entry);
+        entry = new dcommon::Entry((double) i, i, 1, 0);
+        top->push(entry);
     }
 
-    long size = top->getNTop();
+    boost::int32_t size = top->getNTop();
     double max = top->getMaxTS();
     double min = top->getMinTS();
-    node_double_t *list = top->delist();
+    dcommon::EntryList *list = top->delist();
 
     // start the first epoch
-    m_ladder->enlist(list->next, size, max, min);
+    m_ladder->push(list, max, min);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(
         (double) ((max - min) / size),
         m_ladder->getBucketwidth(0),
         0.01);
 
+    // first bucket
     int nBucket = 0;
     for (int i = 0; i < 76; ++i) {
         nBucket += m_ladder->getNBucket(0, i);
     }
-    CPPUNIT_ASSERT(nBucket == 75);
+    CPPUNIT_ASSERT_EQUAL(75, nBucket);
 
     for (int i = 0; i < 75; ++i) {
         result = m_ladder->delist();
-        current = result->next;
+        CPPUNIT_ASSERT_EQUAL((unsigned int) 1, result->size());
 
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(
-            (double) i,
-            current->data->arrival,
-            0.00001);
-        delete current->next;
-        delete current;
-        delete result;
+        entry = reinterpret_cast<dcommon::Entry*>(&result->front());
+        result->pop_front();
+        CPPUNIT_ASSERT_DOUBLES_EQUAL((double) i, entry->arrival, 0.00001);
+        delete entry;
+        CPPUNIT_ASSERT_EQUAL((unsigned int) 0, result->size());
     }
 
     delete top;
@@ -234,32 +230,30 @@ void LadderTest::testEnlistLarge75()
 
 void LadderTest::testEnlistLarge75Fractions()
 {
-    Top *top = new Top();
-
-    node_double_t *result = NULL;
-    node_double_t *current = NULL;
-    dcommon::tEntrySP entry;
+    dcommon::Top *top = new dcommon::Top();
+    dcommon::EntryList *result = NULL;
+    dcommon::Entry *entry = NULL;
 
     for (int i = 0; i < 10; ++i) {
-        entry = dcommon::tEntrySP(new entry_t((double) i, i, 1, 0));
-        top->enqueue(entry);
+        entry = new dcommon::Entry((double) i, i, 1, 0);
+        top->push(entry);
     }
     for (int i = 0; i < 25; ++i) {
-        entry = dcommon::tEntrySP(new entry_t((double) (10.0 + ((double) i + 1) / (25.0 + 1.0)), i, 1, 0));
-        top->enqueue(entry);
+        entry = new dcommon::Entry((double) (10.0 + ((double) i + 1) / (25.0 + 1.0)), i, 1, 0);
+        top->push(entry);
     }
     for (int i = 0; i < 40; ++i) {
-        entry = dcommon::tEntrySP(new entry_t((double) i + 11.0, i, 1, 0));
-        top->enqueue(entry);
+        entry = new dcommon::Entry((double) i + 11.0, i, 1, 0);
+        top->push(entry);
     }
 
     long size = top->getNTop();
     double max = top->getMaxTS();
     double min = top->getMinTS();
-    node_double_t *list = top->delist();
+    result = top->delist();
 
     // start the first epoch
-    m_ladder->enlist(list->next, size, max, min);
+    m_ladder->push(result, max, min);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(
         (double) ((max - min) / size),
         m_ladder->getBucketwidth(0),
@@ -269,73 +263,66 @@ void LadderTest::testEnlistLarge75Fractions()
     for (int i = 0; i < 76; ++i) {
         nBucket += m_ladder->getNBucket(0, i);
     }
-    CPPUNIT_ASSERT(nBucket == 75);
+    CPPUNIT_ASSERT_EQUAL(75, nBucket);
 
     // individual buckets
     for (int i = 0; i < 10; ++i) {
-        double rcur = m_ladder->getRCur(0);
-
         result = m_ladder->delist();
-        current = result->next;
+        double rcur = m_ladder->getRCur(0);
+        CPPUNIT_ASSERT(result->size() > 0);
+
+        entry = reinterpret_cast<dcommon::Entry*>(&result->front());
+        result->pop_front();
 
         CPPUNIT_ASSERT(Compare::diff(
-                           current->data->arrival
-                           + m_ladder->getBucketwidth(0), rcur
-                           )
+                           entry->arrival + m_ladder->getBucketwidth(0),
+                           rcur)
                        < m_ladder->getBucketwidth(0)
             );
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(
-            (double) i,
-            current->data->arrival,
-            0.00001);
-        delete current->next;
-        delete current;
-        delete result;
+
+        CPPUNIT_ASSERT_DOUBLES_EQUAL((double) i, entry->arrival, 0.00001);
+        delete entry;
     }
+
 
     // many events in one bucket
-    double rcur = m_ladder->getRCur(0);
     result = m_ladder->delist();
-    node_double_t *temp;
-//    node_double_t *temp = result;
+    double rcur = m_ladder->getRCur(0);
+    CPPUNIT_ASSERT(result->size() > 0);
 
     for (int i = 0; i < 17; ++i) {
-        temp = result;
-//        temp = temp->next;
-//        current = temp;
-        current = result->next;
+        entry = reinterpret_cast<dcommon::Entry*>(&result->front());
+        result->pop_front();
 
-        CPPUNIT_ASSERT(current->data->arrival < rcur);
+        CPPUNIT_ASSERT(entry->arrival < rcur);
         CPPUNIT_ASSERT_DOUBLES_EQUAL(
             (double) (10.0 + ((double) i + 1.0) / (25.0 + 1.0)),
-            current->data->arrival,
+            entry->arrival,
             0.00001);
-
-        result = result->next;
-        delete temp;
-//        delete current;
+        delete entry;
     }
 
-    rcur = m_ladder->getRCur(0);
     result = m_ladder->delist();
-    temp = result;
+    rcur = m_ladder->getRCur(0);
+    CPPUNIT_ASSERT(result->size() > 0);
 
     for (int i = 0; i < 9; ++i) {
-        temp = temp->next;
-        current = temp;
+        entry = reinterpret_cast<dcommon::Entry*>(&result->front());
+        result->pop_front();
 
-        CPPUNIT_ASSERT(current->data->arrival < rcur);
+        CPPUNIT_ASSERT(entry->arrival < rcur);
+        delete entry;
     }
 
     for (int i = 0; i < 39; ++i) {
-        rcur = m_ladder->getRCur(0);
         result = m_ladder->delist();
-        current = result->next;
+        rcur = m_ladder->getRCur(0);
+        CPPUNIT_ASSERT(result->size() > 0);
+        entry = reinterpret_cast<dcommon::Entry*>(&result->front());
+        result->pop_front();
 
-        CPPUNIT_ASSERT(current->data->arrival < rcur);
-        delete current->next;
-        delete current;
-        delete result;
+        CPPUNIT_ASSERT(entry->arrival < rcur);
+        delete entry;
     }
 
     delete top;
@@ -343,133 +330,122 @@ void LadderTest::testEnlistLarge75Fractions()
 
 void LadderTest::testSpawnOnce()
 {
-    Top *top = new Top();
+    dcommon::Top *top = new dcommon::Top();
+    dcommon::EntryList *result = NULL;
+    dcommon::Entry *entry = NULL;
     int actualEvents = 0;
-    node_double_t *result = NULL;
-    node_double_t *current = NULL;
-    node_double_t *temp = NULL;
-    dcommon::tEntrySP entry;
 
     for (int i = 0; i < 1; ++i) {
         actualEvents++;
-        entry = dcommon::tEntrySP(new entry_t((double) i, i, 1, 0));
-        top->enqueue(entry);
+        entry = new dcommon::Entry((double) i, i, 1, 0);
+        top->push(entry);
     }
     for (int i = 0; i < 51; ++i) {
         actualEvents++;
-        entry = dcommon::tEntrySP(new entry_t((1.0 + ((double) i + 1.0) / (51.0)), i, 1, 0));
-        top->enqueue(entry);
+        entry = new dcommon::Entry((1.0 + ((double) i + 1.0) / (51.0)), i, 1, 0);
+        top->push(entry);
     }
     for (int i = 0; i < 1; ++i) {
         actualEvents++;
-        entry = dcommon::tEntrySP(new entry_t((double) i + 200.00, i, 1, 0));
-        top->enqueue(entry);
+        entry = new dcommon::Entry((double) i + 200.00, i, 1, 0);
+        top->push(entry);
     }
 
     long size = top->getNTop();
     double max = top->getMaxTS();
     double min = top->getMinTS();
-    node_double_t *list = top->delist();
+    result = top->delist();
 
     // start the first epoch
-    m_ladder->enlist(list->next, size, max, min);
+    m_ladder->push(result, max, min);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(
         (double) ((max - min) / size),
         m_ladder->getBucketwidth(0),
         0.01);
 
-    double rcur = m_ladder->getRCur();
-    long events = m_ladder->getNBucket();
     double bucketwidth = m_ladder->getBucketwidth();
-    long totalEvents = events;
 
     result = m_ladder->delist();
+    double rcur = m_ladder->getRCur();
+    long events = m_ladder->getNBucket();
+    CPPUNIT_ASSERT(events < actualEvents);
 
-    while (result->next->data != NULL) {
+    long totalEvents = events;
+
+    while (!result->empty()) {
         for (int i = 0; i < events; ++i) {
-//            result = result->next;
-//            current = result;
-            temp = result;
-            current = result->next;
-            CPPUNIT_ASSERT(current->data->arrival < rcur);
-            result = result->next;
-//            delete current;
-            delete temp;
+            entry = reinterpret_cast<dcommon::Entry*>(&result->front());
+            result->pop_front();
+            CPPUNIT_ASSERT(entry->arrival < rcur);
+            delete entry;
         }
 
+        result = m_ladder->delist();
         events = m_ladder->getNBucket();
         totalEvents += events;
         rcur = m_ladder->getRCur();
         bucketwidth = m_ladder->getBucketwidth();
-        result = m_ladder->delist();
     }
-    CPPUNIT_ASSERT(totalEvents == actualEvents);
 
+    CPPUNIT_ASSERT(totalEvents == actualEvents);
 
     delete top;
 }
 
 void LadderTest::testSpawnEqualArrivals()
 {
-    Top *top = new Top();
+    dcommon::Top *top = new dcommon::Top();
+    dcommon::EntryList *result = NULL;
+    dcommon::Entry *entry = NULL;
     int actualEvents = 0;
-    node_double_t *result = NULL;
-    node_double_t *current = NULL;
-    node_double_t *temp = NULL;
-    dcommon::tEntrySP entry;
 
     for (int i = 0; i < 1; ++i) {
         actualEvents++;
-        entry = dcommon::tEntrySP(new entry_t((double) i, i, 1, 0));
-        top->enqueue(entry);
+        entry = new dcommon::Entry((double) i, i, 1, 0);
+        top->push(entry);
     }
     for (int i = 0; i < 51; ++i) {
         actualEvents++;
-        entry = dcommon::tEntrySP(new entry_t(1.0, i, 1, 0));
-        top->enqueue(entry);
+        entry = new dcommon::Entry(1.0, i, 1, 0);
+        top->push(entry);
     }
     for (int i = 0; i < 1; ++i) {
         actualEvents++;
-        entry = dcommon::tEntrySP(new entry_t(2.0, i, 1, 0));
-        top->enqueue(entry);
+        entry = new dcommon::Entry(2.0, i, 1, 0);
+        top->push(entry);
     }
 
     long size = top->getNTop();
     double max = top->getMaxTS();
     double min = top->getMinTS();
-    node_double_t *list = top->delist();
+    result = top->delist();
 
     // start the first epoch
-    m_ladder->enlist(list->next, size, max, min);
+    m_ladder->push(result, max, min);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(
         (double) ((max - min) / size),
         m_ladder->getBucketwidth(0),
         0.01);
 
+    result = m_ladder->delist();
     double rcur = m_ladder->getRCur();
     long events = m_ladder->getNBucket();
     double bucketwidth = m_ladder->getBucketwidth();
     long totalEvents = events;
 
-    result = m_ladder->delist();
-
-    while (result->next->data != NULL) {
+    while (!result->empty()) {
         for (int i = 0; i < events; ++i) {
-//            result = result->next;
-//            current = result;
-            temp = result;
-            current = result->next;
-            CPPUNIT_ASSERT(current->data->arrival < rcur);
-            result = result->next;
-//            delete current;
-            delete temp;
+            entry = reinterpret_cast<dcommon::Entry*>(&result->front());
+            result->pop_front();
+            CPPUNIT_ASSERT(entry->arrival < rcur);
+            delete entry;
         }
 
+        result = m_ladder->delist();
         events = m_ladder->getNBucket();
         totalEvents += events;
         rcur = m_ladder->getRCur();
         bucketwidth = m_ladder->getBucketwidth();
-        result = m_ladder->delist();
     }
     CPPUNIT_ASSERT(totalEvents == actualEvents);
 
@@ -478,71 +454,63 @@ void LadderTest::testSpawnEqualArrivals()
 
 void LadderTest::testSpawnAll()
 {
-    Top *top = new Top();
+    dcommon::Top *top = new dcommon::Top();
+    dcommon::EntryList *result = NULL;
+    dcommon::Entry *entry = NULL;
     Ladder *ladder = new Ladder(3);
     long expectedEvents = 0;
-    node_double_t *result = NULL;
-    node_double_t *current = NULL;
-    node_double_t *temp = NULL;
-    dcommon::tEntrySP entry;
     double epsilon = 1/101;
 
 
     for (int i = 0; i < 100; ++i) {
         expectedEvents++;
-        entry = dcommon::tEntrySP(new entry_t(1.0 + (double) i * epsilon, i, 1, 0));
-        top->enqueue(entry);
+        entry = new dcommon::Entry(1.0 + (double) i * epsilon, i, 1, 0);
+        top->push(entry);
     }
     for (int i = 100; i < 200; ++i) {
         expectedEvents++;
-        entry = dcommon::tEntrySP(new entry_t(2.0 + (double) i * epsilon, i, 1, 0));
-        top->enqueue(entry);
+        entry = new dcommon::Entry(2.0 + (double) i * epsilon, i, 1, 0);
+        top->push(entry);
     }
     for (int i = 1; i < 3; ++i) {
         expectedEvents++;
-        entry = dcommon::tEntrySP(new entry_t(100.0 * (double) i, i, 1, 0));
-        top->enqueue(entry);
+        entry = new dcommon::Entry(100.0 * (double) i, i, 1, 0);
+        top->push(entry);
     }
 
     long size = top->getNTop();
     double max = top->getMaxTS();
     double min = top->getMinTS();
-    node_double_t *list = top->delist();
+    result = top->delist();
 
     // start the first epoch
-    ladder->enlist(list->next, size, max, min);
+    ladder->push(result, max, min);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(
         (double) ((max - min) / size),
         ladder->getBucketwidth(0),
         0.01);
 
+    result = ladder->delist();
     double rcur = ladder->getRCur();
     long events = ladder->getNBucket();
     double bucketwidth = ladder->getBucketwidth();
     long totalEvents = events;
 
-    result = ladder->delist();
-
-    while (result->next->data != NULL) {
+    while (!result->empty()) {
         for (int i = 0; i < events; ++i) {
-//            result = result->next;
-//            current = result;
-            temp = result;
-            current = result->next;
-            CPPUNIT_ASSERT(current->data->arrival < rcur);
-            result = result->next;
-//            delete current;
-            delete temp;
+            entry = reinterpret_cast<dcommon::Entry*>(&result->front());
+            result->pop_front();
+            CPPUNIT_ASSERT(entry->arrival < rcur);
+            delete entry;
         }
 
+        result = ladder->delist();
         events = ladder->getNBucket();
         totalEvents += events;
         rcur = ladder->getRCur();
         bucketwidth = ladder->getBucketwidth();
-        result = ladder->delist();
     }
     CPPUNIT_ASSERT_EQUAL(expectedEvents, totalEvents);
-
 
     delete top;
     delete ladder;
@@ -550,177 +518,172 @@ void LadderTest::testSpawnAll()
 
 void LadderTest::testEnlistException() throw (dcommon::QueueException)
 {
-    dcommon::tEntrySP newEntry1 = dcommon::tEntrySP(new entry_t(1.0, 1, 1, 0));
-    dcommon::tEntrySP newEntry2 = dcommon::tEntrySP(new entry_t(2.0, 1, 1, 0));
-    node_double_t *node1 = new node_double_t(newEntry1, NULL, NULL);
-    node_double_t *node2 = new node_double_t(newEntry2, NULL, NULL);
+    dcommon::Entry *newEntry1 = new dcommon::Entry(1.0, 1, 1, 0);
+    dcommon::Entry *newEntry2 = new dcommon::Entry(2.0, 1, 1, 0);
+    dcommon::Top *top1 = new dcommon::Top();
+    dcommon::Top *top2 = new dcommon::Top();
+    dcommon::EntryList *list1 = NULL;
+    dcommon::EntryList *list2 = NULL;
 
-    m_ladder->enlist(node1, 1, 1.0, 1.0);
-    m_ladder->enlist(node2, 1, 2.0, 2.0);
+    top1->push(newEntry1);
+    top2->push(newEntry2);
+
+    list1 = top1->delist();
+    list2 = top2->delist();
+
+    m_ladder->push(list1, 1.0, 1.0);
+    m_ladder->push(list2, 2.0, 2.0);
 }
 
 void LadderTest::testEnqueueException() throw (dcommon::QueueException)
 {
-    dcommon::tEntrySP newEntry1 = dcommon::tEntrySP(new entry_t(1.0, 1, 1, 0));
-    m_ladder->enqueue(newEntry1);
+    dcommon::Entry *newEntry1 = new dcommon::Entry(1.0, 1, 1, 0);
+    m_ladder->push(newEntry1);
 }
 
 void LadderTest::testEnqueue()
 {
-    dcommon::tEntrySP newEntry1 = dcommon::tEntrySP(new entry_t(1.0, 1, 1, 0));
-    dcommon::tEntrySP newEntry2 = dcommon::tEntrySP(new entry_t(2.0, 1, 1, 0));
-    node_double_t *node1 = new node_double_t(newEntry1, NULL, NULL);
-    node_double_t *result = NULL;
-    node_double_t *current = NULL;
+    dcommon::Entry *newEntry1 = new dcommon::Entry(1.0, 1, 1, 0);
+    dcommon::Entry *newEntry2 = new dcommon::Entry(2.0, 1, 1, 0);
+    dcommon::Entry *entry = NULL;
+    dcommon::Top *top1 = new dcommon::Top();
+    dcommon::EntryList *list1 = NULL;
+    dcommon::EntryList *result = NULL;
 
-    m_ladder->enlist(node1, 1, 1.0, 1.0);
-    m_ladder->enqueue(newEntry2);
+    top1->push(newEntry1);
+    list1 = top1->delist();
 
+    m_ladder->push(list1, 1.0, 1.0);
+    m_ladder->push(newEntry2);
+
+    result = m_ladder->delist();
     double rcur = m_ladder->getRCur();
     long events = m_ladder->getNBucket();
     double bucketwidth = m_ladder->getBucketwidth();
     long totalEvents = events;
 
-    result = m_ladder->delist();
-    while (result->next->data != NULL) {
+    while (!result->empty()) {
         for (int i = 0; i < events; ++i) {
-            result = result->next;
-            current = result;
-            CPPUNIT_ASSERT(current->data->arrival < rcur);
-            delete current;
+            entry = reinterpret_cast<dcommon::Entry*>(&result->front());
+            result->pop_front();
+            CPPUNIT_ASSERT(entry->arrival < rcur);
+            delete entry;
         }
 
+        result = m_ladder->delist();
         events = m_ladder->getNBucket();
         totalEvents += events;
         rcur = m_ladder->getRCur();
         bucketwidth = m_ladder->getBucketwidth();
-        result = m_ladder->delist();
     }
+
     CPPUNIT_ASSERT_EQUAL((long) 2, totalEvents);
 }
 
 void LadderTest::testEnqueueNotAllowed() throw (dcommon::QueueException)
 {
-    dcommon::tEntrySP newEntry1 = dcommon::tEntrySP(new entry_t(1.0, 1, 1, 0));
-    dcommon::tEntrySP newEntry2 = dcommon::tEntrySP(new entry_t(0.5, 1, 1, 0));
-    node_double_t *node1 = new node_double_t(newEntry1, NULL, NULL);
+    dcommon::Entry *newEntry1 = new dcommon::Entry(1.0, 1, 1, 0);
+    dcommon::Entry *newEntry2 = new dcommon::Entry(0.5, 1, 1, 0);
+    dcommon::Top *top1 = new dcommon::Top();
+    dcommon::EntryList *list1 = NULL;
 
-    m_ladder->enlist(node1, 1, 1.0, 1.0);
-    m_ladder->enqueue(newEntry2);
+    top1->push(newEntry1);
+    list1 = top1->delist();
+
+    m_ladder->push(list1, 1.0, 1.0);
+    m_ladder->push(newEntry2);
 }
 
 void LadderTest::testPushBack()
 {
-    Bottom *bottom = new Bottom();
+    dcommon::Top *top = new dcommon::Top();
+    dcommon::Bottom *bottom = new dcommon::Bottom();
+    dcommon::EntryList *result = NULL;
+    dcommon::Entry *entry = NULL;
+    int actualEvents = 0;
 
+    for (int i = 0; i < 1; ++i) {
+        actualEvents++;
+        entry = new dcommon::Entry((double) i, i, 1, 0);
+        top->push(entry);
+    }
     for (int i = 0; i < 51; ++i) {
-        dcommon::tEntrySP newEntry = dcommon::tEntrySP(new entry_t((double) i, 1, 1, 0));
-        bottom->enqueue(newEntry);
+        actualEvents++;
+        entry = new dcommon::Entry((1.0 + ((double) i + 1.0) / (51.0)), i, 1, 0);
+        top->push(entry);
     }
-
-    CPPUNIT_ASSERT(bottom->size() > m_ladder->getThres());
-    CPPUNIT_ASSERT(m_ladder->getNBucket() == 0);
-
-    double max = bottom->getMaxTS();
-    double min = bottom->getMinTS();
-    long size = bottom->size();
-
-    node_double_t *list = bottom->delist();
-    m_ladder->enlist(list->next, size, max, min);
-
-    double rcur = m_ladder->getRCur();
-    long events = m_ladder->getNBucket();
-    double bucketwidth = m_ladder->getBucketwidth();
-    long totalEvents = events;
-
-    node_double_t *result = m_ladder->delist();
-    node_double_t *current = NULL;
-
-    while (result->next->data != NULL) {
-        for (int i = 0; i < events; ++i) {
-            result = result->next;
-            current = result;
-            CPPUNIT_ASSERT(current->data->arrival < rcur);
-            delete current;
-        }
-
-        events = m_ladder->getNBucket();
-        totalEvents += events;
-        rcur = m_ladder->getRCur();
-        bucketwidth = m_ladder->getBucketwidth();
-        result = m_ladder->delist();
-    }
-
-    CPPUNIT_ASSERT_EQUAL((long) 51, totalEvents);
-
-    delete bottom;
-}
-
-void LadderTest::testPushBackSpawn()
-{
-    Top *top = new Top();
-    Bottom *bottom = new Bottom();
-    dcommon::tEntrySP entry;
-    node_double_t *temp = NULL;
-
-    for (int i = 0; i < 10; ++i) {
-        entry = dcommon::tEntrySP(new entry_t((double) i, i, 1, 0));
-        top->enqueue(entry);
+    for (int i = 0; i < 1; ++i) {
+        actualEvents++;
+        entry = new dcommon::Entry((double) i + 200.00, i, 1, 0);
+        top->push(entry);
     }
 
     long size = top->getNTop();
     double max = top->getMaxTS();
     double min = top->getMinTS();
-    node_double_t *list = top->delist();
+    result = top->delist();
 
     // start the first epoch
-    m_ladder->enlist(list->next, size, max, min);
+    m_ladder->push(result, max, min);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(
+        (double) ((max - min) / size),
+        m_ladder->getBucketwidth(0),
+        0.01);
 
-    for (int i = 0; i < 51; ++i) {
-        dcommon::tEntrySP newEntry = dcommon::tEntrySP(new entry_t((double) i * 0.9/75, 1, 1, 0));
-        bottom->enqueue(newEntry);
-    }
+    double bucketwidth = m_ladder->getBucketwidth();
 
-    CPPUNIT_ASSERT(bottom->size() > m_ladder->getThres());
-    CPPUNIT_ASSERT(m_ladder->getNBucket() != 0);
-
-    bool success = m_ladder->spawn(false);
-
-    CPPUNIT_ASSERT(success);
-    size = bottom->size();
-    list = bottom->delist();
-
-    m_ladder->pushBack(list->next, size);
-
+    result = m_ladder->delist();
     double rcur = m_ladder->getRCur();
     long events = m_ladder->getNBucket();
-    double bucketwidth = m_ladder->getBucketwidth();
+    CPPUNIT_ASSERT(events < actualEvents);
+
     long totalEvents = events;
 
-    node_double_t *result = m_ladder->delist();
-    node_double_t *current = NULL;
+    for (int i = 0; i < events; ++i) {
+        entry = reinterpret_cast<dcommon::Entry*>(&result->front());
+        result->pop_front();
+        CPPUNIT_ASSERT(entry->arrival < rcur);
+        delete entry;
+    }
 
-    while (result->next->data != NULL) {
+    result = m_ladder->delist();
+    events = m_ladder->getNBucket();
+    rcur = m_ladder->getRCur();
+    bucketwidth = m_ladder->getBucketwidth();
+
+    // simulate events coming from bottom
+    bottom->push(result);
+
+    try {
+        result = bottom->list();
+        m_ladder->pushBack(result);
+    } catch (dcommon::QueueException qe) {
+        CPPUNIT_FAIL(qe.what());
+    }
+
+    result = m_ladder->delist();
+    events = m_ladder->getNBucket();
+    totalEvents += events;
+    rcur = m_ladder->getRCur();
+    bucketwidth = m_ladder->getBucketwidth();
+
+    while (!result->empty()) {
         for (int i = 0; i < events; ++i) {
-//            result = result->next;
-//            current = result;
-            temp = result;
-            current = result->next;
-            CPPUNIT_ASSERT(current->data->arrival < rcur);
-            result = result->next;
-//            delete current;
-            delete temp;
+            entry = reinterpret_cast<dcommon::Entry*>(&result->front());
+            result->pop_front();
+            CPPUNIT_ASSERT(entry->arrival < rcur);
+            delete entry;
         }
 
+        result = m_ladder->delist();
         events = m_ladder->getNBucket();
         totalEvents += events;
         rcur = m_ladder->getRCur();
         bucketwidth = m_ladder->getBucketwidth();
-        result = m_ladder->delist();
     }
 
-    CPPUNIT_ASSERT_EQUAL((long) 61, totalEvents);
+    CPPUNIT_ASSERT(totalEvents == actualEvents);
 
-    delete bottom;
     delete top;
+    delete bottom;
 }

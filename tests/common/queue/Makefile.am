@@ -19,11 +19,11 @@ check_PROGRAMS = $(TESTS)
 
 QueueSuite_SOURCES =                                        \
 	BottomTest.cc                                       \
+	LadderTest.cc                                       \
 	TopTest.cc                                          \
 	QueueSuite.cc
 
 #	FifoTest.cc                                         
-#	LadderTest.cc                                       
 #	LadderQueueTest.cc                                  
 
 QueueSuite_LDFLAGS = $(CPPUNIT_LIBS) -ldl

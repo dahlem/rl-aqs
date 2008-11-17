@@ -149,7 +149,6 @@ bool dcommon::Top::push(dcommon::Entry *p_entry) throw (dcommon::QueueException)
 
 void dcommon::Top::push(dcommon::EntryList* p_list)
 {
-    dcommon::EntryListIterator it(p_list->begin()), itend(p_list->end());
     dcommon::Entry *entry = NULL;
 
     while (!p_list->empty()) {

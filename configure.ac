@@ -35,8 +35,6 @@ AC_PROG_CPP
 AC_PROG_LIBTOOL
 AC_SUBST(LIBTOOL_DEPS)
 
-CPPFLAGS="-W -Wall -pedantic ${CPPFLAGS}"
-
 # Checks for header files.
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL
@@ -96,8 +94,10 @@ if test x$TESTLIB = xyes; then
   AC_SUBST(CPPUNIT_CFLAGS)
   AC_SUBST(CPPUNIT_LIBS)
   AM_CONDITIONAL(CPPUNIT_SUPPORT, true)
+  CPPFLAGS="-W -Wall -pedantic -ggdb3 ${CPPFLAGS}"
 else
   AM_CONDITIONAL(CPPUNIT_SUPPORT, false)
+  CPPFLAGS="-W -Wall -pedantic -ggdb0 ${CPPFLAGS}"
 fi
 
 
