@@ -40,7 +40,7 @@ namespace dcommon = des::common;
 
 
 
-dcommon::Ladder::Ladder(boost::int32_t p_thres)
+dcommon::Ladder::Ladder(boost::uint32_t p_thres)
 {
     m_Thres = p_thres;
     init();
@@ -59,22 +59,22 @@ void dcommon::Ladder::init()
     m_NBC = 0;
     m_BucketsFirstRung = m_Thres;
 
-    m_events = dcommon::tIntSA(new boost::int32_t[m_NRung]);
-    m_currentBucket = dcommon::tIntSA(new boost::int32_t[m_NRung]);
+    m_events = dcommon::tIntSA(new boost::uint32_t[m_NRung]);
+    m_currentBucket = dcommon::tIntSA(new boost::uint32_t[m_NRung]);
     m_bucketwidth = dcommon::tDoubleSA(new double[m_NRung]);
     m_RCur = dcommon::tDoubleSA(new double[m_NRung]);
     m_RStart = dcommon::tDoubleSA(new double[m_NRung]);
 
     // initialise the allocated memory
-    memset(m_events.get(), 0, sizeof(boost::int32_t) * m_NRung);
-    memset(m_currentBucket.get(), 0, sizeof(boost::int32_t) * m_NRung);
+    memset(m_events.get(), 0, sizeof(boost::uint32_t) * m_NRung);
+    memset(m_currentBucket.get(), 0, sizeof(boost::uint32_t) * m_NRung);
     memset(m_bucketwidth.get(), 0, sizeof(double) * m_NRung);
     memset(m_RCur.get(), 0, sizeof(double) * m_NRung);
     memset(m_RStart.get(), 0, sizeof(double) * m_NRung);
 
     m_rungs = dcommon::EntryListSM(new dcommon::EntryListSA[m_NRung]);
 
-    for (boost::int32_t i = 0; i < m_NRung; ++i) {
+    for (boost::uint32_t i = 0; i < m_NRung; ++i) {
         m_rungs[i] = dcommon::EntryListSA(new dcommon::EntryList[m_Thres]);
     }
 
@@ -95,7 +95,7 @@ void dcommon::Ladder::init()
 
 dcommon::Ladder::~Ladder()
 {
-    for (boost::int32_t i = 0; i < m_BucketsFirstRung; ++i) {
+    for (boost::uint32_t i = 0; i < m_BucketsFirstRung; ++i) {
         dcommon::EntryList *list =
             reinterpret_cast<dcommon::EntryList*>(
                 &(m_rungs[0][i]));
@@ -103,8 +103,8 @@ dcommon::Ladder::~Ladder()
                                dcommon::delete_disposer());
     }
 
-    for (boost::int32_t i = 1; i < m_NRung; ++i) {
-        for (boost::int32_t j = 0; j < m_Thres; ++j) {
+    for (boost::uint32_t i = 1; i < m_NRung; ++i) {
+        for (boost::uint32_t j = 0; j < m_Thres; ++j) {
             dcommon::EntryList *list =
                 reinterpret_cast<dcommon::EntryList*>(
                     &(m_rungs[i][j]));
@@ -126,7 +126,7 @@ void dcommon::Ladder::record()
 #endif /* HAVE_LADDERSTATS */
 
 
-double dcommon::Ladder::getBucketwidth(boost::int32_t p_rung) throw (dcommon::QueueException)
+double dcommon::Ladder::getBucketwidth(boost::uint32_t p_rung) throw (dcommon::QueueException)
 {
     if (p_rung >= m_NRung) {
         throw dcommon::QueueException(dcommon::QueueException::RUNG_OUT_OF_BOUNDS);
@@ -140,12 +140,12 @@ double dcommon::Ladder::getBucketwidth()
     return m_bucketwidth[m_lowestRung];
 }
 
-boost::int32_t dcommon::Ladder::getNBC()
+boost::uint32_t dcommon::Ladder::getNBC()
 {
     return m_NBC;
 }
 
-boost::int32_t dcommon::Ladder::getNBucket(boost::int32_t p_rung, boost::int32_t p_bucket) throw (dcommon::QueueException)
+boost::uint32_t dcommon::Ladder::getNBucket(boost::uint32_t p_rung, boost::uint32_t p_bucket) throw (dcommon::QueueException)
 {
     if (p_rung >= m_NRung) {
         throw dcommon::QueueException(dcommon::QueueException::RUNG_OUT_OF_BOUNDS);
@@ -163,22 +163,22 @@ boost::int32_t dcommon::Ladder::getNBucket(boost::int32_t p_rung, boost::int32_t
     return m_rungs[p_rung][p_bucket].size();
 }
 
-boost::int32_t dcommon::Ladder::getNBucket()
+boost::uint32_t dcommon::Ladder::getNBucket()
 {
     return m_rungs[m_lowestRung][m_currentBucket[m_lowestRung]].size();
 }
 
-boost::int32_t dcommon::Ladder::getNRung()
+boost::uint32_t dcommon::Ladder::getNRung()
 {
     return m_NRung;
 }
 
-boost::int32_t dcommon::Ladder::getThres()
+boost::uint32_t dcommon::Ladder::getThres()
 {
     return m_Thres;
 }
 
-double dcommon::Ladder::getRCur(boost::int32_t p_rung)
+double dcommon::Ladder::getRCur(boost::uint32_t p_rung)
 {
     if (p_rung >= m_NRung) {
         throw dcommon::QueueException(dcommon::QueueException::RUNG_OUT_OF_BOUNDS);
@@ -191,7 +191,7 @@ double dcommon::Ladder::getRCur()
     return m_RCur[m_lowestRung];
 }
 
-double dcommon::Ladder::getRStart(boost::int32_t p_rung)
+double dcommon::Ladder::getRStart(boost::uint32_t p_rung)
 {
     if (p_rung >= m_NRung) {
         throw dcommon::QueueException(dcommon::QueueException::RUNG_OUT_OF_BOUNDS);
@@ -199,7 +199,7 @@ double dcommon::Ladder::getRStart(boost::int32_t p_rung)
     return m_RStart[p_rung];
 }
 
-double dcommon::Ladder::bucketwidth(double p_max, double p_min, boost::int32_t p_n)
+double dcommon::Ladder::bucketwidth(double p_max, double p_min, boost::uint32_t p_n)
 {
     if (p_max == p_min) {
         return 1.0;
@@ -208,16 +208,16 @@ double dcommon::Ladder::bucketwidth(double p_max, double p_min, boost::int32_t p
     }
 }
 
-boost::int32_t dcommon::Ladder::bucket(double p_TS, boost::int32_t p_rung)
+boost::uint32_t dcommon::Ladder::bucket(double p_TS, boost::uint32_t p_rung)
 {
     double diff = (p_TS - getRStart(p_rung));
     double result = diff / getBucketwidth(p_rung);
-    boost::int32_t retVal = (boost::int32_t) floor(result);
+    boost::uint32_t retVal = (boost::uint32_t) floor(result);
 
     return retVal;
 }
 
-bool dcommon::Ladder::push(dcommon::Entry *p_entry) throw (dcommon::QueueException)
+const bool dcommon::Ladder::push(dcommon::Entry *p_entry) throw (dcommon::QueueException)
 {
     // cannot enqueue, if the internal structure has not been initialised
     // by an epoch
@@ -225,7 +225,7 @@ bool dcommon::Ladder::push(dcommon::Entry *p_entry) throw (dcommon::QueueExcepti
         throw dcommon::QueueException(dcommon::QueueException::NO_EPOCH_INIT);
     }
 
-    boost::int32_t nRungs = 0;
+    boost::uint32_t nRungs = 0;
 
     // find the rung
     while ((p_entry->arrival < getRCur(nRungs)) && (nRungs <= m_lowestRung)) {
@@ -258,7 +258,7 @@ void dcommon::Ladder::pop_front() throw (dcommon::QueueException)
 }
 
 
-void dcommon::Ladder::push(boost::int32_t p_rung, dcommon::EntryList *p_list)
+void dcommon::Ladder::push(boost::uint32_t p_rung, dcommon::EntryList *p_list)
 {
     dcommon::Entry *entry = NULL;
 
@@ -305,7 +305,7 @@ void dcommon::Ladder::push(dcommon::EntryList *p_list, double p_maxTS, double p_
     m_RStart[0] = p_minTS;
     m_RCur[0] = p_minTS + getBucketwidth(0); // different in paper
 
-    boost::int32_t buckets = static_cast<boost::int32_t>(
+    boost::uint32_t buckets = static_cast<boost::uint32_t>(
         (p_maxTS - p_minTS) / m_bucketwidth[0]);
     if (buckets >= m_BucketsFirstRung) {
         resizeFirstRung(buckets);
@@ -324,7 +324,7 @@ dcommon::EntryList* const dcommon::Ladder::delist()
     dcommon::EntryList *temp =
         reinterpret_cast<dcommon::EntryList*>(
             &(m_rungs[m_lowestRung][m_currentBucket[m_lowestRung]]));
-    boost::int32_t size = temp->size();
+    boost::uint32_t size = temp->size();
 
 #ifdef HAVE_LADDERSTATS
     events_out += size;
@@ -336,7 +336,7 @@ dcommon::EntryList* const dcommon::Ladder::delist()
     return temp;
 }
 
-void dcommon::Ladder::resizeFirstRung(boost::int32_t p_base)
+void dcommon::Ladder::resizeFirstRung(boost::uint32_t p_base)
 {
     // resize the rung size
     m_BucketsFirstRung = 2 * p_base;
@@ -345,7 +345,7 @@ void dcommon::Ladder::resizeFirstRung(boost::int32_t p_base)
 
 void dcommon::Ladder::advanceDequeueBucket(bool p_spawn)
 {
-    boost::int32_t elements = 0;
+    boost::uint32_t elements = 0;
 
     // skip empty tail buckets of the current and lower rungs
     while ((m_lowestRung > 0) && (m_events[m_lowestRung] == 0)) {
@@ -445,30 +445,30 @@ void dcommon::Ladder::createRung()
     // create a new rung
     dcommon::EntryListSM rungs = dcommon::EntryListSM(new dcommon::EntryListSA[m_NRung]);
 
-    for (boost::int32_t i = 0; i < m_NRung; ++i) {
+    for (boost::uint32_t i = 0; i < m_NRung; ++i) {
         rungs[i] = dcommon::EntryListSA(new dcommon::EntryList[m_Thres]);
     }
 
     // copy the old rungs over
-    for (boost::int32_t i = 0; i < m_lowestRung; ++i) {
+    for (boost::uint32_t i = 0; i < m_lowestRung; ++i) {
         rungs[i].swap(m_rungs[i]);
     }
 
     m_rungs = rungs;
 
     // resize the events data structure
-    boost::int32_t *events = new boost::int32_t[m_NRung];
-    memset(events, 0, sizeof(boost::int32_t) * m_NRung);
-    for (boost::int32_t i = 0; i < m_lowestRung; ++i) {
+    boost::uint32_t *events = new boost::uint32_t[m_NRung];
+    memset(events, 0, sizeof(boost::uint32_t) * m_NRung);
+    for (boost::uint32_t i = 0; i < m_lowestRung; ++i) {
         events[i] = m_events[i];
     }
 
     m_events.reset(events);
 
     // resize the currentBucket data structure
-    boost::int32_t *currentBucket = new boost::int32_t[m_NRung];
-    memset(currentBucket, 0, sizeof(boost::int32_t) * m_NRung);
-    for (boost::int32_t i = 0; i < m_lowestRung; ++i) {
+    boost::uint32_t *currentBucket = new boost::uint32_t[m_NRung];
+    memset(currentBucket, 0, sizeof(boost::uint32_t) * m_NRung);
+    for (boost::uint32_t i = 0; i < m_lowestRung; ++i) {
         currentBucket[i] = m_currentBucket[i];
     }
 
@@ -477,7 +477,7 @@ void dcommon::Ladder::createRung()
     // resize the bucketwidth data structure
     double *bucketwidth = new double[m_NRung];
     memset(bucketwidth, 0, sizeof(double) * m_NRung);
-    for (boost::int32_t i = 0; i < m_lowestRung; ++i) {
+    for (boost::uint32_t i = 0; i < m_lowestRung; ++i) {
         bucketwidth[i] = m_bucketwidth[i];
     }
 
@@ -486,7 +486,7 @@ void dcommon::Ladder::createRung()
     // resize the rcur data structure
     double *rcur = new double[m_NRung];
     memset(rcur, 0, sizeof(double) * m_NRung);
-    for (boost::int32_t i = 0; i < m_lowestRung; ++i) {
+    for (boost::uint32_t i = 0; i < m_lowestRung; ++i) {
         rcur[i] = m_RCur[i];
     }
 
@@ -495,7 +495,7 @@ void dcommon::Ladder::createRung()
     // resize the rstart data structure
     double *rstart = new double[m_NRung];
     memset(rstart, 0, sizeof(double) * m_NRung);
-    for (boost::int32_t i = 0; i < m_lowestRung; ++i) {
+    for (boost::uint32_t i = 0; i < m_lowestRung; ++i) {
         rstart[i] = m_RStart[i];
     }
 

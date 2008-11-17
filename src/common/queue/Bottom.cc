@@ -81,9 +81,9 @@ void dcommon::Bottom::record()
 #endif /* HAVE_LADDERSTATS */
 
 
-const long dcommon::Bottom::size()
+const boost::uint32_t dcommon::Bottom::size()
 {
-    return m_list->size();
+    return static_cast<boost::uint32_t> (m_list->size());
 }
 
 
@@ -95,7 +95,7 @@ const long dcommon::Bottom::size()
  *
  * @see Queue#push(dcommon::Entry) throw (QueueException)
  */
-bool dcommon::Bottom::push(dcommon::Entry *p_entry) throw (dcommon::QueueException)
+const bool dcommon::Bottom::push(dcommon::Entry *p_entry) throw (dcommon::QueueException)
 {
     bool inserted = false;
 

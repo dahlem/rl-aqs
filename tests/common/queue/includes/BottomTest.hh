@@ -12,7 +12,13 @@
 #define BOTTOMTEST_H
 
 
+#ifndef __STDC_CONSTANT_MACROS
+# define __STDC_CONSTANT_MACROS
+#endif /* __STDC_CONSTANT_MACROS */
+
+#include <boost/cstdint.hpp>
 #include <cppunit/extensions/HelperMacros.h>
+
 
 #include "Bottom.hh"
 namespace dcommon = des::common;

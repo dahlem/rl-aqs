@@ -24,6 +24,11 @@
 # include <config.h>
 #endif
 
+#ifndef __STDC_CONSTANT_MACROS
+# define __STDC_CONSTANT_MACROS
+#endif /* __STDC_CONSTANT_MACROS */
+
+#include <boost/cstdint.hpp>
 #include <boost/shared_ptr.hpp>
 
 #include "Entry.hh"
@@ -61,29 +66,29 @@ public:
     dcommon::Entry* front() throw (dcommon::QueueException);
     void pop_front() throw (dcommon::QueueException);
 
-    bool push(dcommon::Entry *p_entry) throw (dcommon::QueueException);
+    const bool push(dcommon::Entry *p_entry) throw (dcommon::QueueException);
     void push(dcommon::EntryList* );
     dcommon::EntryList* const delist();
 
     /**
      * @return double the maximum arrival timestamp
      */
-    double getMaxTS();
+    const double getMaxTS();
 
     /**
      * @return double the minimum arrival timestamp
      */
-    double getMinTS();
+    const double getMinTS();
 
     /**
      * @return double the starting timestamp
      */
-    double getTopStart();
+    const double getTopStart();
 
     /**
      * @return double the number of events
      */
-    long getNTop();
+    const boost::uint32_t getNTop();
 
     /**
      * Reset the internal variables.

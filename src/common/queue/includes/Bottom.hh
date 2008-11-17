@@ -24,6 +24,11 @@
 # include <config.h>
 #endif
 
+#ifndef __STDC_CONSTANT_MACROS
+# define __STDC_CONSTANT_MACROS
+#endif /* __STDC_CONSTANT_MACROS */
+
+#include <boost/cstdint.hpp>
 #include <boost/shared_ptr.hpp>
 
 #include "Entry.hh"
@@ -62,7 +67,7 @@ public:
     /**
      * @see Queue#enqueue(dcommon::Entry) throw (QueueException)
      */
-    bool push(dcommon::Entry *p_entry) throw (dcommon::QueueException);
+    const bool push(dcommon::Entry *p_entry) throw (dcommon::QueueException);
 
     /**
      * @see Queue#dequeue() throw (QueueException)
@@ -86,7 +91,7 @@ public:
     /**
      * @return the size of the event queue in the bottom
      */
-    const long size();
+    const boost::uint32_t size();
 
 private:
     double m_lastEvent;

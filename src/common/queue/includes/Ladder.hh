@@ -47,7 +47,7 @@ namespace des
 /** @typedef tIntSA
  * a type defintion of a shared array of ints
  */
-typedef boost::shared_array <boost::int32_t> tIntSA;
+typedef boost::shared_array <boost::uint32_t> tIntSA;
 
 /** @typedef tDoubleSA
  * a type defintion of a shared array of doubles
@@ -67,7 +67,7 @@ class Ladder: public dcommon::Queue
 {
 public:
     Ladder();
-    Ladder(boost::int32_t p_thres);
+    Ladder(boost::uint32_t p_thres);
     ~Ladder();
 
 #ifdef HAVE_LADDERSTATS
@@ -77,7 +77,7 @@ public:
     dcommon::Entry* front() throw (dcommon::QueueException);
     void pop_front() throw (dcommon::QueueException);
 
-    bool push(dcommon::Entry *p_entry) throw (dcommon::QueueException);
+    const bool push(dcommon::Entry *p_entry) throw (dcommon::QueueException);
     dcommon::EntryList* const delist();
 
     /**
@@ -105,36 +105,36 @@ public:
     /**
      * @return the number of events in the ladder structure
      */
-    boost::int32_t getNBC();
+    boost::uint32_t getNBC();
 
     /**
      * The current number of instantiated rungs
      */
-    boost::int32_t getNRung();
+    boost::uint32_t getNRung();
 
     /**
      * The event threshold of each bucket in the rung
      */
-    boost::int32_t getThres();
+    boost::uint32_t getThres();
 
     /**
      * @param int the rung
      * @param int the bucket
      * @return the number of events in a given bucket in a given rung
      */
-    boost::int32_t getNBucket(boost::int32_t p_rung, boost::int32_t p_bucket) throw (dcommon::QueueException);
+    boost::uint32_t getNBucket(boost::uint32_t p_rung, boost::uint32_t p_bucket) throw (dcommon::QueueException);
 
     /**
      * @return the number of events in the current dequeue bucket
      */
-    boost::int32_t getNBucket();
+    boost::uint32_t getNBucket();
 
     /**
      * @param int rung
      * @return the bucketwidth of a given rung
      * @throws QueueException thrown, if the given rung has not been initialised
      */
-    double getBucketwidth(boost::int32_t p_rung) throw (dcommon::QueueException);
+    double getBucketwidth(boost::uint32_t p_rung) throw (dcommon::QueueException);
 
     /**
      * @return the bucketwidth of the currently active dequeue rung
@@ -145,7 +145,7 @@ public:
      * @param int the rung
      * @return the minimum arrival timestamp of a given rung for enqueuing events
      */
-    double getRCur(boost::int32_t p_rung);
+    double getRCur(boost::uint32_t p_rung);
 
     /**
      * @return the minimum arrival timestamp of a given rung for enqueuing events
@@ -157,7 +157,7 @@ public:
      * @param int the rung
      * @return the starting timestamp of a given rung
      */
-    double getRStart(boost::int32_t p_rung);
+    double getRStart(boost::uint32_t p_rung);
 
     /**
      * The rung structure is updated according to the following equations. Those
@@ -199,7 +199,7 @@ private:
      * @param the size of the list
      * @see List#enlist(node_double_t*, long)
      */
-    void push(boost::int32_t p_rung, dcommon::EntryList* );
+    void push(boost::uint32_t p_rung, dcommon::EntryList* );
 
     /**
      * This method adapts the one presented in the TOMACS journal in order to
@@ -218,7 +218,7 @@ private:
      * @return the bucketwidth given the max/min timestamps and the number of
      *         events.
      */
-    double bucketwidth(double p_max, double p_min, boost::int32_t p_n);
+    double bucketwidth(double p_max, double p_min, boost::uint32_t p_n);
 
     /**
      * Determine the bucket to insert the event with a given arrival timestamp
@@ -232,7 +232,7 @@ private:
      * @return the index of the bucket in the given rung where the event with
      *         the given arrival timestamp is to be inserted
      */
-    boost::int32_t bucket(double p_TS, boost::int32_t p_rung);
+    boost::uint32_t bucket(double p_TS, boost::uint32_t p_rung);
 
     /**
      * This method resizes the first rung given the number of events to be
@@ -241,7 +241,7 @@ private:
      *
      * @param int the number of the events to be enqueued into the first rung
      */
-    void resizeFirstRung(boost::int32_t p_size);
+    void resizeFirstRung(boost::uint32_t p_size);
 
     /**
      * This method advances the current dequeue bucket to the next non-empty
@@ -273,20 +273,20 @@ private:
     /**
      * Default constant of the event threshold per bucket.
      */
-    static const boost::int32_t DEFAULT_THRES = 50;
+    static const boost::uint32_t DEFAULT_THRES = 50;
 
     /**
      * Constang specifying the maximum number of rungs.
      */
-    static const boost::int32_t MAX_RUNGS = 8;
+    static const boost::uint32_t MAX_RUNGS = 8;
 
     dcommon::EntryListSM m_rungs;
-    boost::int32_t m_BucketsFirstRung;
+    boost::uint32_t m_BucketsFirstRung;
 
-    boost::int32_t m_NRung;
-    boost::int32_t m_NBC;
-    boost::int32_t m_lowestRung;
-    boost::int32_t m_Thres;
+    boost::uint32_t m_NRung;
+    boost::uint32_t m_NBC;
+    boost::uint32_t m_lowestRung;
+    boost::uint32_t m_Thres;
 
     tIntSA m_events;
     tIntSA m_currentBucket;

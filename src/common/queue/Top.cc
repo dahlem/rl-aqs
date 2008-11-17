@@ -82,27 +82,27 @@ void dcommon::Top::record()
 #endif /* HAVE_LADDERSTATS */
 
 
-double dcommon::Top::getMaxTS()
+const double dcommon::Top::getMaxTS()
 {
     return m_maxTS;
 }
 
 
-double dcommon::Top::getMinTS()
+const double dcommon::Top::getMinTS()
 {
     return m_minTS;
 }
 
 
-double dcommon::Top::getTopStart()
+const double dcommon::Top::getTopStart()
 {
     return m_topStart;
 }
 
 
-long dcommon::Top::getNTop()
+const boost::uint32_t dcommon::Top::getNTop()
 {
-    return m_fifo->size();
+    return static_cast<boost::uint32_t> (m_fifo->size());
 }
 
 
@@ -133,7 +133,7 @@ void dcommon::Top::setMinTS(double p_minTS)
 }
 
 
-bool dcommon::Top::push(dcommon::Entry *p_entry) throw (dcommon::QueueException)
+const bool dcommon::Top::push(dcommon::Entry *p_entry) throw (dcommon::QueueException)
 {
 #ifdef HAVE_LADDERSTATS
     events_in++;

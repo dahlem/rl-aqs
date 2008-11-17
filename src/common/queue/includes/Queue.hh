@@ -79,7 +79,7 @@ public:
      * @param Entry the entry structure to be enqueued into a queue.
      * @throws QueueException throw, if the queue cannot enqueue the entry.
      */
-    virtual bool push(dcommon::Entry *p_entry) throw (dcommon::QueueException) = 0;
+    virtual const bool push(dcommon::Entry *p_entry) throw (dcommon::QueueException) = 0;
 
     /**
      * @return returns the next entry in a queue.

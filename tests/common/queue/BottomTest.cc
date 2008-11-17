@@ -18,14 +18,6 @@ using std::endl;
 namespace dcommon = des::common;
 
 
-//#include "Fifo.hh"
-//using des::common::Fifo;
-
-//#include "List.hh"
-//using des::common::node_double_t;
-
-
-
 
 // Registers the fixture into the 'registry'
 CPPUNIT_TEST_SUITE_REGISTRATION(BottomTest);
@@ -125,10 +117,10 @@ void BottomTest::testEnqueueAtTail()
         m_bottom->push(entry);
     }
 
-    CPPUNIT_ASSERT_EQUAL((long) 5, m_bottom->size());
+    CPPUNIT_ASSERT_EQUAL((boost::uint32_t) 5, m_bottom->size());
     dcommon::Entry *entry = new dcommon::Entry(7, 1, 1, 0);
     m_bottom->push(entry);
-    CPPUNIT_ASSERT_EQUAL((long) 6, m_bottom->size());
+    CPPUNIT_ASSERT_EQUAL((boost::uint32_t) 6, m_bottom->size());
 
     try {
         resultOld = m_bottom->front();
