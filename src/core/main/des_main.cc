@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
 {
     dcore::tDesArgsSP desArgs(new dcore::desArgs_t);
     dcore::CL cl;
-    boost::shared_ptr <dcommon::LadderQueue> queue;
+    dcommon::tQueueSP queue(new dcommon::LadderQueue);
 
 
     if (cl.parse(argc, argv, desArgs)) {
@@ -153,10 +153,7 @@ int main(int argc, char *argv[])
         get(vertex_arrival_rate, *graph);
 
     // generate events for each vertex in the graph
-    typedef boost::graph_traits <dnet::Graph>::vertex_iterator vertex_iter_t;
-    std::pair <vertex_iter_t, vertex_iter_t> p;
-
-    queue = boost::shared_ptr<dcommon::LadderQueue>(new dcommon::LadderQueue);
+    std::pair <dnet::VertexIterator, dnet::VertexIterator> p;
 
     double stopTime;
 
@@ -177,24 +174,24 @@ int main(int argc, char *argv[])
         arrival_rate = vertex_arrival_props_map[*p.first];
 
         dcore::EventGenerator::generate(
-            dcommon::tQueueWP(queue), arrival_rng, destination, arrival_rate, stopTime);
+            queue, arrival_rng, destination, arrival_rate, stopTime);
     }
 
     // instantiate the events & handlers
     dcore::tArrivalEventSP arrivalEvent(new dcore::ArrivalEvent);
     dcore::tDepartureEventSP departureEvent(new dcore::DepartureEvent);
     dcore::tArrivalHandlerSP arrivalHandler(
-        new dcore::ArrivalHandler(dcommon::tQueueWP(queue), graph, service_rng_index));
+        new dcore::ArrivalHandler(queue, graph, service_rng_index));
     dcore::tDepartureHandlerSP departureHandler(
-        new dcore::DepartureHandler(dcommon::tQueueWP(queue), graph, depart_uniform_rng_index));
+        new dcore::DepartureHandler(queue, graph, depart_uniform_rng_index));
 
     // attach the handlers to the events
-//    arrivalEvent->attach(arrivalHandler);
+    arrivalEvent->attach(arrivalHandler);
     departureEvent->attach(departureHandler);
 
     // instantiate the event processor and set the events
     dcore::tEventProcessorSP processor(
-        new dcore::EventProcessor(dcommon::tQueueWP(queue), graph, arrivalEvent, departureEvent));
+        new dcore::EventProcessor(queue, graph, arrivalEvent, departureEvent));
 
     // process the events
     processor->process();

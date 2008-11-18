@@ -64,5 +64,7 @@ void dcore::EventProcessor::process()
           default:
               break;
         }
+
+        delete entry;
     }
 }
