@@ -48,10 +48,10 @@ public:
      *
      * @return the currently processed event.
      */
-    dcommon::tEntrySP getEvent();
+    dcommon::Entry* getEvent();
 
 protected:
-    dcommon::tEntrySP m_event;
+    dcommon::Entry *m_event;
 
 };
 

@@ -45,19 +45,19 @@ namespace des
 class EventProcessor
 {
 public:
-    EventProcessor(dcommon::tQueueWP p_queue,
-                   dnet::tGraphWP p_graph,
-                   dcore::tArrivalEventWP p_arrivalEvent,
-                   dcore::tDepartureEventWP p_departureEvent);
+    EventProcessor(dcommon::tQueueSP p_queue,
+                   dnet::tGraphSP p_graph,
+                   dcore::tArrivalEventSP p_arrivalEvent,
+                   dcore::tDepartureEventSP p_departureEvent);
     ~EventProcessor();
 
     void process();
 
 private:
-    dcommon::tQueueWP m_queue;
-    dnet::tGraphWP m_graph;
-    dcore::tArrivalEventWP m_arrivalEvent;
-    dcore::tDepartureEventWP m_departureEvent;
+    dcommon::tQueueSP m_queue;
+    dnet::tGraphSP m_graph;
+    dcore::tArrivalEventSP m_arrivalEvent;
+    dcore::tDepartureEventSP m_departureEvent;
 
 };
 

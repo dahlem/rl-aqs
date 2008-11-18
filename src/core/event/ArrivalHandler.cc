@@ -39,7 +39,7 @@ namespace dnet = des::network;
 namespace dsample = des::sampling;
 
 
-dcore::ArrivalHandler::ArrivalHandler(dcommon::tQueueWP p_queue,
+dcore::ArrivalHandler::ArrivalHandler(dcommon::tQueueSP p_queue,
     dnet::tGraphSP p_graph, boost::uint32_t p_service_idx)
     : m_queue(p_queue), m_graph(p_graph), m_service_idx(p_service_idx)
 {
@@ -57,7 +57,7 @@ dcore::ArrivalHandler::~ArrivalHandler()
 
 void dcore::ArrivalHandler::update(dcore::ArrivalEvent *subject)
 {
-    dcommon::tEntrySP entry;
+    dcommon::Entry *entry;
     dnet::Vertex vertex;
     double service_time;
     double departure;
@@ -83,17 +83,12 @@ void dcore::ArrivalHandler::update(dcore::ArrivalEvent *subject)
         vertex_number_in_queue_map[vertex] = 1;
     }
 
-    dcommon::tEntrySP new_entry = dcommon::tEntrySP(new dcommon::entry_t(
+    dcommon::Entry *new_entry = new dcommon::Entry(
         departure,
         entry->destination,
         entry->destination,
-        dcore::DEPARTURE_EVENT));
+        dcore::DEPARTURE_EVENT);
 
-    dcommon::tQueueSP q;
-
-    if (q = m_queue.lock()) {
-        q->enqueue(new_entry);
-    }
-
+    m_queue->push(new_entry);
     vertex_time_service_ends_map[vertex] = departure;
 }

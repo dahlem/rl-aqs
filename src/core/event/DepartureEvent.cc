@@ -33,7 +33,7 @@ dcore::DepartureEvent::~DepartureEvent()
 {}
 
 
-void dcore::DepartureEvent::departure(dcommon::tEntrySP event)
+void dcore::DepartureEvent::departure(dcommon::Entry *event)
 {
     m_event = event;
     notify();

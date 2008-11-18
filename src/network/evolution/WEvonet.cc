@@ -46,7 +46,7 @@ namespace dnet = des::network;
 
 
 
-dnet::WEvonet::WEvonet(int p_size, int p_max_edges,
+dnet::WEvonet::WEvonet(boost::uint32_t p_size, boost::uint32_t p_max_edges,
                  tGslRngSP p_edge_rng, tGslRngSP p_uniform_rng, tGslRngSP p_vertex_arrival_rng)
 {
     // create the graph
@@ -102,7 +102,7 @@ dnet::WEvonet::~WEvonet()
 {}
 
 
-void dnet::WEvonet::advance(int p_steps)
+void dnet::WEvonet::advance(boost::uint32_t p_steps)
 {
     dnet::VServiceIterator service_it, service_it_end;
     dnet::VertexArrivalRateMap vertex_arrival_props_map = get(vertex_arrival_rate, *g);
@@ -120,7 +120,7 @@ void dnet::WEvonet::advance(int p_steps)
     // 2. attach vertex via m links to existing ones
     // 3. assign weights to the edges
     // 4. evaluate the vertex strengths
-    for (int i = 0; i < p_steps; ++i) {
+    for (boost::uint32_t i = 0; i < p_steps; ++i) {
         vertices = boost::num_vertices(*g);
 
         // calculate the accumulated service rate
@@ -156,7 +156,7 @@ void dnet::WEvonet::advance(int p_steps)
         vertex_number_in_queue_map[v] = 0;
 
         // select vertices to connect to
-        unsigned int edges = 0;
+        boost::uint32_t edges = 0;
 
         // if MAX_EDGES is selected than the edges are deterministic
         // otherwise they are stochastic bounded on the maximum number of available
@@ -169,10 +169,10 @@ void dnet::WEvonet::advance(int p_steps)
             edges = gsl_rng_uniform_int(num_edges_rng.get(), max_edges) + 1;
         }
 
-        for (unsigned int e = 0; e < edges; ++e) {
+        for (boost::uint32_t e = 0; e < edges; ++e) {
             double temp = 0.0;
             double u = gsl_rng_uniform(uniform_rng.get());
-            for (unsigned int j = 0; j < vertices; ++j) {
+            for (boost::uint32_t j = 0; j < vertices; ++j) {
                 dnet::Vertex z = boost::vertex(service_rate_order[j], *g);
 
                 temp += vertex_service_props_map[z];
@@ -242,10 +242,9 @@ void dnet::WEvonet::balance_vertex_strength(Vertex &v)
                                       color_vec[0])));
 
 #ifdef NDEBUG
-    typedef graph_traits <dnet::Graph>::vertex_iterator vertex_iter_t;
-    std::pair <vertex_iter_t, vertex_iter_t> p;
+    std::pair <dnet::VertexIterator, dnet::VertexIterator> p;
 
-    for (p = vertices(*g); p.first != p.second; ++p.first) {
+    for (p = boost::vertices(*g); p.first != p.second; ++p.first) {
         std::cout << vertex_arrival_props_map[*p.first] << std::endl;
     }
 #endif /* NDEBUG */

@@ -37,47 +37,41 @@ namespace dcore = des::core;
 
 
 void dcore::EventGenerator::generate(
-    dcommon::tQueueWP p_queue,
+    dcommon::tQueueSP p_queue,
     dsample::tGslRngSP arrival_rng,
     boost::int32_t destination,
     double arrival_rate,
     double stop_time)
 {
     double cur_arrival, new_arrival;
-    dcommon::tQueueSP q;
 
     cur_arrival = -dsample::Rng::poiss(
         arrival_rate, gsl_rng_uniform(arrival_rng.get()));
 
-    if(q = p_queue.lock())
-    {
-        // for as long as there is no stopping event
-        while (cur_arrival < stop_time) {
-            // generate arrival events
-            new_arrival = dsample::Rng::poiss(
-                arrival_rate, gsl_rng_uniform(arrival_rng.get()));
+    // for as long as there is no stopping event
+    while (cur_arrival < stop_time) {
+        // generate arrival events
+        new_arrival = dsample::Rng::poiss(
+            arrival_rate, gsl_rng_uniform(arrival_rng.get()));
 
-            if ((cur_arrival - new_arrival) <= stop_time) {
-                // enqueue the last arrival event
-                dcommon::tEntrySP entry = dcommon::tEntrySP(
-                    new dcommon::entry_t(
-                        cur_arrival,
-                        destination,
-                        dcore::EXTERNAL_EVENT,
-                        dcore::ARRIVAL_EVENT));
-                q->enqueue(entry);
-                cur_arrival -= new_arrival;
-            } else {
-                // enqueue the last arrival event
-                dcommon::tEntrySP entry = dcommon::tEntrySP(
-                    new dcommon::entry_t(
-                        cur_arrival,
-                        destination,
-                        dcore::EXTERNAL_EVENT,
-                        dcore::LAST_ARRIVAL_EVENT));
-                q->enqueue(entry);
-                break;
-            }
+        if ((cur_arrival - new_arrival) <= stop_time) {
+            // enqueue the last arrival event
+            dcommon::Entry *entry = new dcommon::Entry(
+                cur_arrival,
+                destination,
+                dcore::EXTERNAL_EVENT,
+                dcore::ARRIVAL_EVENT);
+            p_queue->push(entry);
+            cur_arrival -= new_arrival;
+        } else {
+            // enqueue the last arrival event
+            dcommon::Entry *entry = new dcommon::Entry(
+                cur_arrival,
+                destination,
+                dcore::EXTERNAL_EVENT,
+                dcore::LAST_ARRIVAL_EVENT);
+            p_queue->push(entry);
+            break;
         }
     }
 

@@ -31,7 +31,7 @@ dcore::Event::~Event()
 }
 
 
-dcommon::tEntrySP dcore::Event::getEvent()
+dcommon::Entry* dcore::Event::getEvent()
 {
     return m_event;
 }

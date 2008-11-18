@@ -1,9 +1,9 @@
 // Copyright (C) 2007-2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
-//  
+//
 // This file is free software; as a special exception the author gives
-// unlimited permission to copy and/or distribute it, with or without 
+// unlimited permission to copy and/or distribute it, with or without
 // modifications, as long as this notice is preserved.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 // implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
@@ -24,13 +24,13 @@ using std::string;
 using des::sampling::Seeds;
 
 
-Seeds::Seeds() 
+Seeds::Seeds()
 {}
 
-Seeds::Seeds(const Seeds&)
+Seeds::Seeds(const Singleton<Seeds> &)
 {}
 
-Seeds::~Seeds() 
+Seeds::~Seeds()
 {
     if (is != NULL) {
         if (is.is_open()) {
@@ -54,7 +54,7 @@ const unsigned long Seeds::getSeed() throw (SamplingException)
 {
     string line;
     unsigned long seed = 0;
-    
+
     if (is.is_open()) {
         if (!is.eof()) {
             getline(is, line);

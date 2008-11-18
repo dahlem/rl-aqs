@@ -29,10 +29,10 @@ namespace dcore = des::core;
 namespace dcommon = des::common;
 
 
-dcore::EventProcessor::EventProcessor(dcommon::tQueueWP p_queue,
-                                      dnet::tGraphWP p_graph,
-                                      dcore::tArrivalEventWP p_arrivalEvent,
-                                      dcore::tDepartureEventWP p_departureEvent)
+dcore::EventProcessor::EventProcessor(dcommon::tQueueSP p_queue,
+                                      dnet::tGraphSP p_graph,
+                                      dcore::tArrivalEventSP p_arrivalEvent,
+                                      dcore::tDepartureEventSP p_departureEvent)
     : m_queue(p_queue), m_graph(p_graph), m_arrivalEvent(p_arrivalEvent),
       m_departureEvent(p_departureEvent)
 {}
@@ -44,31 +44,25 @@ dcore::EventProcessor::~EventProcessor()
 
 void dcore::EventProcessor::process()
 {
-    dcommon::tEntrySP entry;
-    dcommon::tQueueSP q;
-    dcore::tArrivalEventSP a;
-    dcore::tDepartureEventSP d;
+    dcommon::Entry *entry;
 
-    if((q = m_queue.lock()) && (a = m_arrivalEvent.lock()) && (d = m_departureEvent.lock()))
-    {
-        while ((entry = q->dequeue()) != NULL) {
-            // log the event here
-            std::cout << std::setprecision(14) << entry->arrival << ","
-                      << entry->destination << "," << entry->type
-                      << std::endl;
+    while ((entry = m_queue->dequeue()) != NULL) {
+        // log the event here
+        std::cout << std::setprecision(14) << entry->arrival << ","
+                  << entry->destination << "," << entry->type
+                  << std::endl;
 
-            switch (entry->type) {
-              case LAST_ARRIVAL_EVENT:
-                  // generate new events
-              case ARRIVAL_EVENT:
-                  a->arrival(entry);
-                  break;
-              case DEPARTURE_EVENT:
-                  d->departure(entry);
-                  break;
-              default:
-                  break;
-            }
+        switch (entry->type) {
+          case LAST_ARRIVAL_EVENT:
+              // generate new events
+          case ARRIVAL_EVENT:
+              m_arrivalEvent->arrival(entry);
+              break;
+          case DEPARTURE_EVENT:
+              m_departureEvent->departure(entry);
+              break;
+          default:
+              break;
         }
     }
 }

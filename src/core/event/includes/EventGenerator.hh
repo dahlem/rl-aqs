@@ -48,7 +48,7 @@ private:
 
 public:
     static void generate(
-        dcommon::tQueueWP p_queue,
+        dcommon::tQueueSP p_queue,
         dsample::tGslRngSP arrival_rng,
         boost::int32_t destination,
         double arrival_rate,

@@ -57,13 +57,13 @@ namespace des
 class ArrivalHandler : public design::Observer<dcore::ArrivalEvent>
 {
 public:
-    ArrivalHandler(dcommon::tQueueWP p_queue, dnet::tGraphSP p_graph, boost::uint32_t p_service_idx);
+    ArrivalHandler(dcommon::tQueueSP p_queue, dnet::tGraphSP p_graph, boost::uint32_t p_service_idx);
     ~ArrivalHandler();
 
     void update(dcore::ArrivalEvent *subject);
 
 private:
-    dcommon::tQueueWP m_queue;
+    dcommon::tQueueSP m_queue;
     dnet::tGraphSP m_graph;
     boost::uint32_t m_service_idx;
     dsample::tGslRngSP m_service_rng;

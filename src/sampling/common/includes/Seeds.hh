@@ -58,7 +58,7 @@ public:
     const unsigned long getSeed() throw (SamplingException);
 
 private:
-    Seeds(const Seeds&);
+    Seeds(const Singleton<Seeds> &);
 
     ifstream is;
 

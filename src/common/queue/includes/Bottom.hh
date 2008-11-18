@@ -32,7 +32,6 @@
 #include <boost/shared_ptr.hpp>
 
 #include "Entry.hh"
-#include "List.hh"
 #include "Queue.hh"
 #include "QueueException.hh"
 namespace dcommon = des::common;

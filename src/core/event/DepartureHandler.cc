@@ -44,7 +44,7 @@ namespace dnet = des::network;
 namespace dsample = des::sampling;
 
 
-dcore::DepartureHandler::DepartureHandler(dcommon::tQueueWP p_queue,
+dcore::DepartureHandler::DepartureHandler(dcommon::tQueueSP p_queue,
     dnet::tGraphSP p_graph, boost::uint32_t p_depart_uniform_idx)
     : m_queue(p_queue), m_graph(p_graph), m_depart_uniform_idx(p_depart_uniform_idx)
 {
@@ -63,7 +63,7 @@ dcore::DepartureHandler::~DepartureHandler()
 void dcore::DepartureHandler::update(dcore::DepartureEvent *subject)
 {
     dnet::OutEdgeIterator out_edge_it, out_edge_it_end;
-    dcommon::tEntrySP entry;
+    dcommon::Entry *entry;
     entry = subject->getEvent();
 
     dnet::Vertex vertex = boost::vertex(entry->destination, *m_graph);
@@ -107,7 +107,7 @@ void dcore::DepartureHandler::update(dcore::DepartureEvent *subject)
             double u = gsl_rng_uniform(m_depart_uniform_rng.get());
 
             std::cout << u << std::endl;
-            
+
             for (boost::uint32_t e = 0; e < degree; ++e) {
                 dnet::Edge edge = edges[sorted_edge_weights[e]];
                 temp += edge_weights[e];
@@ -120,18 +120,14 @@ void dcore::DepartureHandler::update(dcore::DepartureEvent *subject)
                     std::cout << "v: " << destination << ", arrival: " << entry->arrival
                               << ", e: " << sorted_edge_weights[e] << ", edge weight: "
                               << edge_weights[e] << std::endl;
-                    dcommon::tEntrySP new_entry = dcommon::tEntrySP(new dcommon::entry_t(
+                    dcommon::Entry *new_entry = new dcommon::Entry(
                         entry->arrival,
                         destination,
                         dcore::INTERNAL_EVENT,
-                        dcore::ARRIVAL_EVENT));
+                        dcore::ARRIVAL_EVENT);
 
-                    dcommon::tQueueSP q;
+                    m_queue->push(new_entry);
 
-                    if (q = m_queue.lock()) {
-                        q->enqueue(new_entry);
-                    }
-                    
                     break;
                 }
             }

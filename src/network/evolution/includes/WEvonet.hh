@@ -22,10 +22,14 @@
 #ifndef __WEVONET_HH__
 #define __WEVONET_HH__
 
+#ifndef __STDC_CONSTANT_MACROS
+# define __STDC_CONSTANT_MACROS
+#endif /* __STDC_CONSTANT_MACROS */
+
 #include <limits>
 
+#include <boost/cstdint.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/properties.hpp>
 #include <boost/graph/property_iter_range.hpp>
@@ -186,15 +190,15 @@ typedef boost::graph_property_iter_range <Graph, vertex_arrival_rate_t>::iterato
  */
 typedef boost::graph_traits <Graph>::out_edge_iterator OutEdgeIterator;
 
+/** @typedef VertexIterator
+ * Specifies the iterator for the vertices
+ */
+typedef boost::graph_traits <Graph>::vertex_iterator VertexIterator;
+
 /** @typedef tGraphSP
  * Specifies shared pointer to the Graph object
  */
 typedef boost::shared_ptr <Graph> tGraphSP;
-
-/** @typedef tGraphwP
- * Specifies weak pointer to the Graph object
- */
-typedef boost::weak_ptr <Graph> tGraphWP;
 
 /** @typedef tGslRngSP
  * Specifies shared pointer to the GSL random number generator objects
@@ -211,7 +215,7 @@ typedef boost::shared_ptr <gsl_rng> tGslRngSP;
 class WEvonet
 {
 public:
-    static const int MAX_EDGES = INT_MAX;
+    static const boost::uint32_t MAX_EDGES = UINT_MAX;
 
     /** @enum GraphTypes
      * This enum declares the supported output graph formats. Currently supported
@@ -222,8 +226,8 @@ public:
     /**
      * Constructor which evolves a weighted directed network given a particular size.
      *
-     * @param int the size of the network
-     * @param int the maximum number of edges
+     * @param boost::uint32_t the size of the network
+     * @param boost::uint32_t the maximum number of edges
      * @param tGslRngSP the GSL random number to draw the number of edges a new
      *        vertex is linked up to
      * @param tGslRngSP the GSL random number to draw a uniform number to decide
@@ -231,7 +235,7 @@ public:
      * @param tGslRngSP the GSL random number to draw a uniform number for the vertex
      *        arrival rate.
      */
-    WEvonet(int p_size, int p_max_edges,
+    WEvonet(boost::uint32_t p_size, boost::uint32_t p_max_edges,
             tGslRngSP p_edge_rng, tGslRngSP p_uniform_rng, tGslRngSP p_vertex_arrival_rng);
 
     /**
@@ -242,9 +246,9 @@ public:
     /** @fn void advance(int p_steps)
      * Evolve the network for a further given steps
      *
-     * @param int the number of iterations (i.e., vertices to add).
+     * @param boost::uint32_t the number of iterations (i.e., vertices to add).
      */
-    void advance(int p_steps);
+    void advance(boost::uint32_t p_steps);
 
     /** @fn void print(const std::string& filename, GraphTypes graphType)
      * Print the graph using either of the supported graph formats. The default format
@@ -315,7 +319,7 @@ private:
     /**
      * The maximum number of allowed edges for a newly created vertex.
      */
-    int max_edges;
+    boost::uint32_t max_edges;
 };
 
 

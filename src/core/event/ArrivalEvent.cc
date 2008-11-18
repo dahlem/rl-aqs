@@ -33,7 +33,7 @@ dcore::ArrivalEvent::~ArrivalEvent()
 {}
 
 
-void dcore::ArrivalEvent::arrival(dcommon::tEntrySP event)
+void dcore::ArrivalEvent::arrival(dcommon::Entry *event)
 {
     m_event = event;
     notify();
