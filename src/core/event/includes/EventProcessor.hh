@@ -32,6 +32,9 @@ namespace dcore = des::core;
 #include "LadderQueue.hh"
 namespace dcommon = des::common;
 
+#include "Results.hh"
+namespace dio = des::io;
+
 
 namespace des
 {
@@ -45,19 +48,28 @@ namespace des
 class EventProcessor
 {
 public:
-    EventProcessor(dcommon::tQueueSP p_queue,
-                   dnet::tGraphSP p_graph,
-                   dcore::tArrivalEventSP p_arrivalEvent,
-                   dcore::tDepartureEventSP p_departureEvent);
+    EventProcessor(dcommon::tQueueSP,
+                   dnet::tGraphSP,
+                   dcore::tArrivalEventSP,
+                   dcore::tDepartureEventSP,
+                   dio::tResultsSP,
+                   dio::tResultsSP,
+                   double);
     ~EventProcessor();
 
     void process();
 
 private:
+    void postProcess(dcommon::Entry*) throw (dcommon::QueueException);
+
+
     dcommon::tQueueSP m_queue;
     dnet::tGraphSP m_graph;
     dcore::tArrivalEventSP m_arrivalEvent;
     dcore::tDepartureEventSP m_departureEvent;
+    dio::tResultsSP m_unprocessedEvents;
+    dio::tResultsSP m_processedEvents;
+    double m_stopTime;
 
 };
 

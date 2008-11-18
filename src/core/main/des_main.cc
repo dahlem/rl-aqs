@@ -43,6 +43,9 @@
 #include "EventProcessor.hh"
 namespace dcore = des::core;
 
+#include "Results.hh"
+namespace dio = des::io;
+
 #include "CRN.hh"
 #include "Seeds.hh"
 namespace dsample = des::sampling;
@@ -189,27 +192,18 @@ int main(int argc, char *argv[])
     departureEvent->attach(departureHandler);
 
     // instantiate the event processor and set the events
+    dio::tResultsSP unprocessed_events(
+        new dio::Results(desArgs->events_unprocessed, desArgs->results_dir));
+    dio::tResultsSP processed_events(
+        new dio::Results(desArgs->events_processed, desArgs->results_dir));
+
     dcore::tEventProcessorSP processor(
-        new dcore::EventProcessor(queue, graph, arrivalEvent, departureEvent));
+        new dcore::EventProcessor(queue, graph, arrivalEvent,
+                                  departureEvent, unprocessed_events,
+                                  processed_events, stopTime));
 
     // process the events
     processor->process();
-
-    std::cout << "left overs:" << std::endl;
-
-    dcommon::Entry *entry = NULL;
-    try {
-        while ((entry = queue->dequeue()) != NULL) {
-            // log the event here
-            std::cout << std::setprecision(14) << entry->arrival << ","
-                      << entry->destination << "," << entry->type
-                      << std::endl;
-
-            delete entry;
-        }
-    } catch (dcommon::QueueException &qe) {
-        std::cout << qe.what() << std::endl;
-    }
 
     return EXIT_SUCCESS;
 }

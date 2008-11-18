@@ -26,6 +26,7 @@
 #include <string>
 
 #include <boost/iostreams/stream.hpp>
+#include <boost/iostreams/device/file.hpp>
 namespace bio = boost::iostreams;
 
 #include <boost/shared_ptr.hpp>
@@ -52,7 +53,7 @@ typedef shared_ptr <std::ostream> tOstreamSP;
 /** @typedef tStrBufSP
  * Specifies a shared pointer to the boost::iostreams::stream_buffer
  */
-typedef shared_ptr <str_buf > tStrBufSP;
+typedef shared_ptr <str_buf> tStrBufSP;
 
 
 /** @class Results
@@ -64,7 +65,7 @@ class Results
 {
 public:
 
-    Results(std::string filename);
+    Results(std::string&, std::string&);
     ~Results();
 
     /** @fn string get() const
@@ -79,6 +80,8 @@ private:
     tOstreamSP os;
     tStrBufSP buf;
 };
+
+typedef shared_ptr <Results> tResultsSP;
 
 
     }

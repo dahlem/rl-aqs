@@ -27,12 +27,16 @@ libcoreevent_la_CPPFLAGS =                                            \
 	-I$(top_srcdir)/src/sampling/common/includes                  \
 	-I$(top_srcdir)/src/common/queue/includes                     \
 	-I$(top_srcdir)/src/network/evolution/includes                \
+	-I$(top_srcdir)/src/io/includes                               \
 	-I$(top_srcdir)/src/common/list/includes
 
 libcoreevent_la_LIBADD =                                              \
 	$(BOOST_LDFLAGS)                                              \
+	$(BOOST_FILESYSTEM_LIB)                                       \
+	$(BOOST_SYSTEM_LIB)                                           \
 	-lgsl                                                         \
 	-lm                                                           \
+	$(top_srcdir)/src/io/libdesio.la                              \
 	$(top_srcdir)/src/sampling/common/libsamplingcommon.la        \
 	$(top_srcdir)/src/network/evolution/libnetevo.la              \
 	$(top_srcdir)/src/common/queue/libcommonqueue.la

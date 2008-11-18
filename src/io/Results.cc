@@ -19,15 +19,9 @@
  * a specified results file within a time-stamped directory.
  */
 #include <iostream>
-
 #include <sstream>
-using std::stringstream;
-
 #include <string>
-using std::string;
-
 #include <ostream>
-using std::ostream;
 
 #include <boost/iostreams/device/file.hpp>
 #include <boost/iostreams/stream.hpp>
@@ -44,15 +38,20 @@ using des::date::CurDateSingleton;
 using des::io::Results;
 
 
-Results::Results(string filename)
+Results::Results(std::string &filename, std::string &dir)
 {
-    stringstream path_str;
-    string today;
+    std::stringstream path_str;
+    std::string today;
 
     CurDate singleton = CurDateSingleton::getInstance();
     today = singleton.get();
 
-    path_str << "./" << today << "/";
+    // create the results directory
+    if (!fs::exists(dir)) {
+        fs::create_directory(dir);
+    }
+
+    path_str << dir << "/" << today << "/";
 
     // create directory if it doesn't already exist
     fs::path results_path(path_str.str());
@@ -76,7 +75,7 @@ Results::~Results()
 }
 
 
-void Results::print(stringstream &line) const
+void Results::print(std::stringstream &line) const
 {
     (*os.get()) << line.str() << std::endl;
 }

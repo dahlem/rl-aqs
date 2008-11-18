@@ -23,6 +23,7 @@ des_main_CPPFLAGS =                                                   \
 	-I$(top_srcdir)/src/design/pattern/includes                   \
 	-I$(top_srcdir)/src/sampling/common/includes                  \
 	-I$(top_srcdir)/src/common/queue/includes                     \
+	-I$(top_srcdir)/src/io/includes                               \
 	-I$(top_srcdir)/src/common/list/includes
 
 

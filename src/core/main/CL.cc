@@ -52,6 +52,7 @@ CL::CL()
         (GENERATIONS.c_str(), po::value <boost::int32_t>(), "set the number of generations for the event simulator (default -1).")
         (GRAPH.c_str(), po::value <std::string>(), "set the graph for the event simulator.")
         (SEEDS.c_str(), po::value <std::string>(), "set the seeds for the event simulator.")
+        (RESULTS.c_str(), po::value <std::string>(), "set directory for the results of the event simulator.")
         ;
 }
 
@@ -59,6 +60,8 @@ CL::CL()
 int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
 {
     po::variables_map vm;
+
+    std::cout << std::endl << "Parsing the command-line..." << std::endl;
 
     po::store(po::parse_command_line(argc, argv, (*opt_desc.get())), vm);
     po::notify(vm);
@@ -109,6 +112,27 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
             return EXIT_FAILURE;
         }
     }
+
+    if (vm.count(RESULTS.c_str())) {
+        desArgs->results_dir = vm[RESULTS.c_str()].as <std::string>();
+        std::cout << "Set the results directory "
+                  << desArgs->results_dir << "." << std::endl;
+    } else {
+        desArgs->results_dir = "./results";
+        std::cout << "Set the results directory "
+                  << desArgs->results_dir << "." << std::endl;
+    }
+
+    std::cout << std::endl;
+    std::cout << "Output Files:" << std::endl;
+
+    desArgs->events_unprocessed = "events_unprocessed.dat";
+    desArgs->events_processed = "events_processed.dat";
+
+    std::cout << "Unprocessed events\t" << desArgs->events_unprocessed << std::endl;
+    std::cout << "Processed events\t" << desArgs->events_processed << std::endl;
+
+    std::cout << "******************************" << std::endl << std::endl;
 
     return EXIT_SUCCESS;
 }

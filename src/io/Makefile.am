@@ -21,6 +21,8 @@ libdesio_la_CPPFLAGS =                                               \
 
 libdesio_la_LIBADD =                                                 \
 	$(top_srcdir)/src/date/libdesdate.la                         \
+	$(BOOST_FILESYSTEM_LIB)                                      \
+	$(BOOST_SYSTEM_LIB)                                          \
 	$(BOOST_LDFLAGS)
 
 include_HEADERS = includes

@@ -47,6 +47,7 @@ const std::string GENERATIONS = "generations";
 const std::string GRAPH = "graph";
 const std::string SEEDS = "seeds";
 const std::string HELP = "help";
+const std::string RESULTS = "results";
 
 
 /** @typedef tOptDescSP
@@ -63,6 +64,9 @@ struct desArgs_t {
     boost::int32_t generations;     /* number of generations for the event simulation */
     std::string graph_filename;     /* filename for the graph */
     std::string seeds_filename;     /* filename for the seeds */
+    std::string results_dir;        /* directory name for the results */
+    std::string events_unprocessed; /* filename for the unprocessed events */
+    std::string events_processed;   /* filename for the processed events */
 };
 
 /** @typedef tDesArgsSP
