@@ -101,7 +101,6 @@ const bool dcommon::LadderQueue::push(dcommon::Entry *p_entry) throw (dcommon::Q
             m_ladder->push(p_entry);
         } catch (dcommon::QueueException qe) {
             m_bottom->push(p_entry);
-
             if (m_bottom->size() > m_ladder->getThres()) {
                 // check whether ladder is empty
                 // if yes, get max and min TS values from bottom and enlist
@@ -132,7 +131,7 @@ const bool dcommon::LadderQueue::push(dcommon::Entry *p_entry) throw (dcommon::Q
 }
 
 
-dcommon::Entry* dcommon::LadderQueue::dequeue()
+dcommon::Entry* dcommon::LadderQueue::dequeue() throw (dcommon::QueueException)
 {
 #ifdef HAVE_LADDERTIMING
     struct timeval start, finish;
@@ -168,7 +167,9 @@ dcommon::Entry* dcommon::LadderQueue::dequeue()
                 // to the bottom structure
                 list = m_top->delist();
                 m_ladder->push(list, max, min);
+                m_top->reset();
                 list = m_ladder->delist();
+
                 m_bottom->push(list);
                 entry = m_bottom->front();
                 m_bottom->pop_front();

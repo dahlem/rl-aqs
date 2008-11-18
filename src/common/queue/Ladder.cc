@@ -236,9 +236,9 @@ const bool dcommon::Ladder::push(dcommon::Entry *p_entry) throw (dcommon::QueueE
 {
     // cannot enqueue, if the internal structure has not been initialised
     // by an epoch
-    if (getNBucket() == 0) {
-        throw dcommon::QueueException(dcommon::QueueException::NO_EPOCH_INIT);
-    }
+//     if (getNBC() == 0) {
+//         throw dcommon::QueueException(dcommon::QueueException::NO_EPOCH_INIT);
+//     }
 
     boost::uint32_t nRungs = 0;
 
@@ -299,7 +299,7 @@ void dcommon::Ladder::pushBack(dcommon::EntryList *p_list)
 void dcommon::Ladder::push(dcommon::EntryList *p_list, double p_maxTS, double p_minTS)
     throw (dcommon::QueueException)
 {
-    if (getNBucket() != 0) {
+    if (getNBC() != 0) {
         throw dcommon::QueueException(dcommon::QueueException::EPOCH_EXISTS);
     }
 

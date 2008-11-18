@@ -60,8 +60,8 @@ namespace dnet = des::network;
 int main(int argc, char *argv[])
 {
     dcore::tDesArgsSP desArgs(new dcore::desArgs_t);
-    dcore::CL cl;
     dcommon::tQueueSP queue(new dcommon::LadderQueue);
+    dcore::CL cl;
 
 
     if (cl.parse(argc, argv, desArgs)) {
@@ -153,8 +153,6 @@ int main(int argc, char *argv[])
         get(vertex_arrival_rate, *graph);
 
     // generate events for each vertex in the graph
-    std::pair <dnet::VertexIterator, dnet::VertexIterator> p;
-
     double stopTime;
 
     // find out whether we only generate the events in phases
@@ -169,6 +167,7 @@ int main(int argc, char *argv[])
     double arrival_rate;
 
     // generate events over this graph
+    std::pair <dnet::VertexIterator, dnet::VertexIterator> p;
     for (p = boost::vertices(*graph); p.first != p.second; ++p.first) {
         destination = vertex_index_props_map[*p.first];
         arrival_rate = vertex_arrival_props_map[*p.first];
@@ -195,6 +194,22 @@ int main(int argc, char *argv[])
 
     // process the events
     processor->process();
+
+    std::cout << "left overs:" << std::endl;
+
+    dcommon::Entry *entry = NULL;
+    try {
+        while ((entry = queue->dequeue()) != NULL) {
+            // log the event here
+            std::cout << std::setprecision(14) << entry->arrival << ","
+                      << entry->destination << "," << entry->type
+                      << std::endl;
+
+            delete entry;
+        }
+    } catch (dcommon::QueueException &qe) {
+        std::cout << qe.what() << std::endl;
+    }
 
     return EXIT_SUCCESS;
 }

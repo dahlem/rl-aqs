@@ -43,16 +43,16 @@ public:
 
     const char* what() const throw();
 
-    enum Errors {
-        BAD_RESET,
-        RUNG_NOT_FOUND,
-        RUNG_OUT_OF_BOUNDS,
-        BUCKET_OUT_OF_BOUNDS,
-        NO_EPOCH_INIT,
-        EPOCH_EXISTS,
-        PAST_EVENT_NOT_ALLOWED,
-        QUEUE_EMPTY,
-        NUM_ERRORS
+    enum {
+        BAD_RESET = 0,
+        RUNG_NOT_FOUND = 1,
+        RUNG_OUT_OF_BOUNDS = 2,
+        BUCKET_OUT_OF_BOUNDS = 3,
+        NO_EPOCH_INIT = 4,
+        EPOCH_EXISTS = 5,
+        PAST_EVENT_NOT_ALLOWED = 6,
+        QUEUE_EMPTY = 7,
+        NUM_ERRORS = 8
     };
 
 private:

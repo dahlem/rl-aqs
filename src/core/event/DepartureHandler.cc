@@ -78,7 +78,6 @@ void dcore::DepartureHandler::update(dcore::DepartureEvent *subject)
 
         dnet::Graph::degree_size_type degree =
             boost::out_degree(vertex, *m_graph);
-        std::cout << "out-degree : " << degree << std::endl;
 
         if (degree > 0) {
             tie(out_edge_it, out_edge_it_end) = boost::out_edges(vertex, *m_graph);
@@ -96,7 +95,6 @@ void dcore::DepartureHandler::update(dcore::DepartureEvent *subject)
 
             BOOST_FOREACH(dnet::Edge e, (boost::out_edges(vertex, *m_graph))) {
                 edge_weights.push_back(edge_weight_map[e]);
-                std::cout << edge_weight_map[e] << std::endl;
             }
 
             // sort the sorted_edge_weights according to the edge_weights in ascending order
@@ -106,20 +104,13 @@ void dcore::DepartureHandler::update(dcore::DepartureEvent *subject)
             double temp = 0.0;
             double u = gsl_rng_uniform(m_depart_uniform_rng.get());
 
-            std::cout << u << std::endl;
-
             for (boost::uint32_t e = 0; e < degree; ++e) {
                 dnet::Edge edge = edges[sorted_edge_weights[e]];
                 temp += edge_weights[e];
 
-                std::cout << "temp: " << temp << std::endl;
-
                 if (u < temp) {
                     // schedule an internal arrival event
                     boost::int32_t destination = vertex_index_map[target(edges[e], *m_graph)];
-                    std::cout << "v: " << destination << ", arrival: " << entry->arrival
-                              << ", e: " << sorted_edge_weights[e] << ", edge weight: "
-                              << edge_weights[e] << std::endl;
                     dcommon::Entry *new_entry = new dcommon::Entry(
                         entry->arrival,
                         destination,

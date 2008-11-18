@@ -46,25 +46,29 @@ void dcore::EventProcessor::process()
 {
     dcommon::Entry *entry;
 
-    while ((entry = m_queue->dequeue()) != NULL) {
-        // log the event here
-        std::cout << std::setprecision(14) << entry->arrival << ","
-                  << entry->destination << "," << entry->type
-                  << std::endl;
+    try {
+        while ((entry = m_queue->dequeue()) != NULL) {
+            // log the event here
+            std::cout << std::setprecision(14) << entry->arrival << ","
+                      << entry->destination << "," << entry->type
+                      << std::endl;
 
-        switch (entry->type) {
-          case LAST_ARRIVAL_EVENT:
-              // generate new events
-          case ARRIVAL_EVENT:
-              m_arrivalEvent->arrival(entry);
-              break;
-          case DEPARTURE_EVENT:
-              m_departureEvent->departure(entry);
-              break;
-          default:
-              break;
+            switch (entry->type) {
+              case LAST_ARRIVAL_EVENT:
+                  // generate new events
+              case ARRIVAL_EVENT:
+                  m_arrivalEvent->arrival(entry);
+                  break;
+              case DEPARTURE_EVENT:
+                  m_departureEvent->departure(entry);
+                  break;
+              default:
+                  break;
+            }
+
+            delete entry;
         }
-
-        delete entry;
+    } catch (dcommon::QueueException &qe) {
+        std::cout << "Exception: " << qe.what() << std::endl;
     }
 }

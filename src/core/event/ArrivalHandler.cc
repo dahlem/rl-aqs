@@ -17,7 +17,6 @@
 /** @file ArrivalHandler.cc
  * Implementation of a basic arrival handler.
  */
-#include <iostream>
 #include <cstdlib>
 
 #include <gsl/gsl_randist.h>

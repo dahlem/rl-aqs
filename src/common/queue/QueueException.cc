@@ -21,20 +21,21 @@
 #include "QueueException.hh"
 using des::common::QueueException;
 
+#include <iostream>
 
 /**
  * Specification of the valid error strings.
  */
-const char* QueueException::m_errorStrings[NUM_ERRORS] =
+const char* QueueException::m_errorStrings[QueueException::NUM_ERRORS] =
 {
-    "Reset Not Allowed, because the fifo data structure is not empty."
-    "Could not find the rung to complete the enqueue operation."
-    "Requested bucket does not exist."
-    "Requested rung does not exist."
-    "An epoch has not been started with the Ladder structure."
-    "An epoch cannot be created, if another one is not finished yet."
+    "Reset Not Allowed, because the fifo data structure is not empty.",
+    "Could not find the rung to complete the enqueue operation.",
+    "Requested bucket does not exist.",
+    "Requested rung does not exist.",
+    "An epoch has not been started with the Ladder structure.",
+    "An epoch cannot be created, if another one is not finished yet.",
+    "Cannot enqueue past event.",
     "The queue is empty."
-    "Cannot enqueue past event."
 };
 
 QueueException::QueueException(int p_code)

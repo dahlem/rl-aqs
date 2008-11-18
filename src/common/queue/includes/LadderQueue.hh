@@ -109,7 +109,7 @@ public:
     /**
      * @see Queue#dequeue()
      */
-    dcommon::Entry* dequeue();
+    dcommon::Entry* dequeue() throw (dcommon::QueueException);
 
 private:
     dcommon::tTopSP m_top;
