@@ -52,12 +52,13 @@ public:
                    dnet::tGraphSP,
                    dcore::tArrivalEventSP,
                    dcore::tDepartureEventSP,
-                   dio::tResultsSP,
-                   dio::tResultsSP,
                    double);
     ~EventProcessor();
 
     void process();
+    void setUnprocessedResults(dio::tResultsSP);
+    void setProcessedResults(dio::tResultsSP);
+
 
 private:
     void postProcess(dcommon::Entry*) throw (dcommon::QueueException);

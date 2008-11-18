@@ -37,17 +37,28 @@ dcore::EventProcessor::EventProcessor(dcommon::tQueueSP p_queue,
                                       dnet::tGraphSP p_graph,
                                       dcore::tArrivalEventSP p_arrivalEvent,
                                       dcore::tDepartureEventSP p_departureEvent,
-                                      dio::tResultsSP p_unprocessedEvents,
-                                      dio::tResultsSP p_processedEvents,
                                       double p_stopTime)
     : m_queue(p_queue), m_graph(p_graph), m_arrivalEvent(p_arrivalEvent),
-      m_departureEvent(p_departureEvent), m_unprocessedEvents(p_unprocessedEvents),
-      m_processedEvents(p_processedEvents), m_stopTime(p_stopTime)
+      m_departureEvent(p_departureEvent), m_stopTime(p_stopTime)
 {}
 
 
 dcore::EventProcessor::~EventProcessor()
 {}
+
+
+void dcore::EventProcessor::setUnprocessedResults(
+    dio::tResultsSP p_unprocessedEvents)
+{
+    m_unprocessedEvents = p_unprocessedEvents;
+}
+
+
+void dcore::EventProcessor::setProcessedResults(
+    dio::tResultsSP p_processedEvents)
+{
+    m_processedEvents = p_processedEvents;
+}
 
 
 void dcore::EventProcessor::process()
@@ -56,20 +67,24 @@ void dcore::EventProcessor::process()
     std::stringstream s;
 
     try {
-        s << "arrivalTime,destination,type";
-        m_processedEvents->print(s);
+        if (m_processedEvents != NULL) {
+            s << "arrivalTime,destination,type";
+            m_processedEvents->print(s);
+        }
 
         while ((entry = m_queue->dequeue()) != NULL) {
             // if stop time has been reached break out and handle the event below
             if (entry->arrival > m_stopTime) {
                 break;
             } else {
-                s.str("");
-                // log the event
-                s << std::setprecision(14) << entry->arrival << ","
-                  << entry->destination << "," << entry->type;
+                if (m_processedEvents != NULL) {
+                    s.str("");
+                    // log the event
+                    s << std::setprecision(14) << entry->arrival << ","
+                      << entry->destination << "," << entry->type;
 
-                m_processedEvents->print(s);
+                    m_processedEvents->print(s);
+                }
             }
 
             switch (entry->type) {
@@ -99,20 +114,22 @@ void dcore::EventProcessor::postProcess(dcommon::Entry *p_entry)
     throw (dcommon::QueueException)
 {
     dcommon::Entry *entry = p_entry;
-    std::stringstream s;
 
     // record the events left over
-    if (entry != NULL) {
-        s << "arrivalTime,destination,type";
-        m_unprocessedEvents->print(s);
-
-        do {
-            s.str("");
-            s << std::setprecision(14) << entry->arrival << ","
-              << entry->destination << "," << entry->type;
-
+    if (m_unprocessedEvents != NULL) {
+        if (entry != NULL) {
+            std::stringstream s;
+            s << "arrivalTime,destination,type";
             m_unprocessedEvents->print(s);
-            delete entry;
-        } while ((entry = m_queue->dequeue()) != NULL);
+
+            do {
+                s.str("");
+                s << std::setprecision(14) << entry->arrival << ","
+                  << entry->destination << "," << entry->type;
+
+                m_unprocessedEvents->print(s);
+                delete entry;
+            } while ((entry = m_queue->dequeue()) != NULL);
+        }
     }
 }

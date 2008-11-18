@@ -199,10 +199,11 @@ int main(int argc, char *argv[])
 
     dcore::tEventProcessorSP processor(
         new dcore::EventProcessor(queue, graph, arrivalEvent,
-                                  departureEvent, unprocessed_events,
-                                  processed_events, stopTime));
+                                  departureEvent, stopTime));
 
     // process the events
+    processor->setUnprocessedResults(unprocessed_events);
+    processor->setProcessedResults(processed_events);
     processor->process();
 
     return EXIT_SUCCESS;
