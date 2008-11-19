@@ -68,7 +68,7 @@ void dcore::EventProcessor::process()
 
     try {
         if (m_processedEvents != NULL) {
-            s << "arrivalTime,origin,destination,type";
+            s << dcommon::Entry::header();
             m_processedEvents->print(s);
         }
 
@@ -117,7 +117,7 @@ void dcore::EventProcessor::postProcess(dcommon::Entry *p_entry)
     if (m_unprocessedEvents != NULL) {
         if (entry != NULL) {
             std::stringstream s;
-            s << "arrivalTime,origin,destination,type";
+            s << dcommon::Entry::header();
             m_unprocessedEvents->print(s);
 
             do {

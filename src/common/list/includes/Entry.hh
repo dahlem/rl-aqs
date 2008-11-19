@@ -25,8 +25,14 @@
 # include <config.h>
 #endif
 
-#include <iostream>
+#ifndef __STDC_CONSTANT_MACROS
+# define __STDC_CONSTANT_MACROS
+#endif /* __STDC_CONSTANT_MACROS */
 
+#include <iostream>
+#include <string>
+
+#include <boost/cstdint.hpp>
 #include <boost/shared_array.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/intrusive/list.hpp>
@@ -37,6 +43,8 @@ namespace des
 {
     namespace common
     {
+
+static const std::string HEADER = "uid,id,arrivalTime,origin,destination,type";
 
 
 /** @class Entry
@@ -50,24 +58,45 @@ class Entry : public boost::intrusive::list_base_hook<>
 {
 public:
     Entry()
-        : arrival(0.0), destination(-99), origin(-99), type(-99)
+        : id(0), arrival(0.0), destination(-99), origin(-99), type(-99)
         {}
 
     explicit Entry(double a, int d, int o, int t)
         : arrival(a), destination(d), origin(o), type(t)
-        {}
+        {
+            uid++;
+            id = uid;
+        }
+
+    explicit Entry(boost::uintmax_t i, double a, int d, int o, int t)
+        : id(i), arrival(a), destination(d), origin(o), type(t)
+        {
+            uid++;
+        }
+
+    static std::string header()
+        {
+            return HEADER;
+        }
 
     bool operator< (const Entry& rhs) const;
     bool operator< (const Entry& rhs);
+
 
     friend std::ostream& operator <<(std::ostream &p_os, const Entry &p_entry);
     friend std::ostream& operator <<(std::ostream &p_os, Entry &p_entry);
 
 
+    boost::uintmax_t id;
     double arrival;
     int destination;
     int origin;
     int type;
+
+
+private:
+    static boost::uintmax_t uid;
+
 };
 
 typedef boost::intrusive::make_list <Entry>::type EntryList;

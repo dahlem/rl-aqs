@@ -112,9 +112,10 @@ void dcore::DepartureHandler::update(dcore::DepartureEvent *subject)
                     // schedule an internal arrival event
                     boost::int32_t destination = vertex_index_map[target(edges[e], *m_graph)];
                     dcommon::Entry *new_entry = new dcommon::Entry(
+                        entry->id,
                         entry->arrival,
                         destination,
-                        dcore::INTERNAL_EVENT,
+                        entry->origin,
                         dcore::ARRIVAL_EVENT);
 
                     m_queue->push(new_entry);

@@ -39,8 +39,7 @@ const boost::int32_t DEPARTURE_EVENT            = 2;
 /**
  * Declaration of the event source
  */
-const boost::int32_t EXTERNAL_EVENT             = 10;
-const boost::int32_t INTERNAL_EVENT             = 11;
+const boost::int32_t EXTERNAL_EVENT             = -1;
 
 
     }

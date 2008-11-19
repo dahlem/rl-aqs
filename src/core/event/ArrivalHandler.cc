@@ -83,6 +83,7 @@ void dcore::ArrivalHandler::update(dcore::ArrivalEvent *subject)
     }
 
     dcommon::Entry *new_entry = new dcommon::Entry(
+        entry->id,
         departure,
         entry->destination,
         entry->destination,
