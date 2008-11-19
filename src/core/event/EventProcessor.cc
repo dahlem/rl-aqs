@@ -68,7 +68,7 @@ void dcore::EventProcessor::process()
 
     try {
         if (m_processedEvents != NULL) {
-            s << "arrivalTime,destination,type";
+            s << "arrivalTime,origin,destination,type";
             m_processedEvents->print(s);
         }
 
@@ -81,7 +81,7 @@ void dcore::EventProcessor::process()
                     s.str("");
                     // log the event
                     s << std::setprecision(14) << entry->arrival << ","
-                      << entry->destination << "," << entry->type;
+                      << entry->origin << "," << entry->destination << "," << entry->type;
 
                     m_processedEvents->print(s);
                 }
@@ -119,13 +119,13 @@ void dcore::EventProcessor::postProcess(dcommon::Entry *p_entry)
     if (m_unprocessedEvents != NULL) {
         if (entry != NULL) {
             std::stringstream s;
-            s << "arrivalTime,destination,type";
+            s << "arrivalTime,origin,destination,type";
             m_unprocessedEvents->print(s);
 
             do {
                 s.str("");
                 s << std::setprecision(14) << entry->arrival << ","
-                  << entry->destination << "," << entry->type;
+                  << entry->origin << "," << entry->destination << "," << entry->type;
 
                 m_unprocessedEvents->print(s);
                 delete entry;
