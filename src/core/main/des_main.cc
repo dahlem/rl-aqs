@@ -26,10 +26,11 @@
 
 #include <boost/cstdint.hpp>
 #include <boost/graph/adjacency_list.hpp>
-#include <boost/shared_ptr.hpp>
-
+#include <boost/graph/filtered_graph.hpp>
 #include <boost/graph/graphml.hpp>
 #include <boost/graph/graphviz.hpp>
+#include <boost/iterator/filter_iterator.hpp>
+#include <boost/shared_ptr.hpp>
 
 #include <gsl/gsl_randist.h>
 
@@ -170,13 +171,45 @@ int main(int argc, char *argv[])
     double arrival_rate;
 
     // generate events over this graph
-    std::pair <dnet::VertexIterator, dnet::VertexIterator> p;
-    for (p = boost::vertices(*graph); p.first != p.second; ++p.first) {
-        destination = vertex_index_props_map[*p.first];
-        arrival_rate = vertex_arrival_props_map[*p.first];
+    if (desArgs->trace_event) {
+        int count = 0;
 
-        dcore::EventGenerator::generate(
-            queue, arrival_rng, destination, arrival_rate, stopTime);
+        // filter the graph to find the vertex
+        std::pair <dnet::VertexIterator, dnet::VertexIterator> v_iter;
+        v_iter = boost::vertices(*graph);
+
+        typedef boost::filter_iterator<dnet::exists_vertex_index<dnet::VertexIndexMap>, dnet::VertexIterator>
+            FilterIter;
+
+        dnet::exists_vertex_index<dnet::VertexIndexMap>
+            predicate(vertex_index_props_map, desArgs->vertex);
+        FilterIter filter_iter_first(predicate, v_iter.first, v_iter.second);
+        FilterIter filter_iter_last(predicate, v_iter.second, v_iter.second);
+
+        for (; filter_iter_first != filter_iter_last; ++filter_iter_first) {
+            if (count == 0) {
+                // generate a single event
+                destination = vertex_index_props_map[*filter_iter_first];
+                arrival_rate = vertex_arrival_props_map[*filter_iter_first];
+
+                dcore::EventGenerator::generate(
+                    queue, arrival_rng, destination, arrival_rate);
+            } else {
+                std::cout << "Error: Expected a single vertex to be traced!" << std::endl;
+                break;
+            }
+
+            count++;
+        }
+    } else {
+        std::pair <dnet::VertexIterator, dnet::VertexIterator> p;
+        for (p = boost::vertices(*graph); p.first != p.second; ++p.first) {
+            destination = vertex_index_props_map[*p.first];
+            arrival_rate = vertex_arrival_props_map[*p.first];
+
+            dcore::EventGenerator::generate(
+                queue, arrival_rng, destination, arrival_rate, stopTime);
+        }
     }
 
     // instantiate the events & handlers

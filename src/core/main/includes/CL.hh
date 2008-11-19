@@ -48,6 +48,9 @@ const std::string GRAPH = "graph";
 const std::string SEEDS = "seeds";
 const std::string HELP = "help";
 const std::string RESULTS = "results";
+const std::string TRACE = "trace";
+const std::string VERTEX = "vertex";
+const std::string VERS = "version";
 
 
 /** @typedef tOptDescSP
@@ -67,6 +70,9 @@ struct desArgs_t {
     std::string results_dir;        /* directory name for the results */
     std::string events_unprocessed; /* filename for the unprocessed events */
     std::string events_processed;   /* filename for the processed events */
+
+    bool trace_event;               /* trace an event */
+    boost::int32_t vertex;          /* the vertex to trace */
 };
 
 /** @typedef tDesArgsSP

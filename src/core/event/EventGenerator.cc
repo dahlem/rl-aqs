@@ -19,6 +19,8 @@
 # define __STDC_CONSTANT_MACROS
 #endif /* __STDC_CONSTANT_MACROS */
 
+#include <iostream>
+
 #include <boost/cstdint.hpp>
 
 #include <gsl/gsl_randist.h>
@@ -61,6 +63,8 @@ void dcore::EventGenerator::generate(
                 destination,
                 dcore::EXTERNAL_EVENT,
                 dcore::ARRIVAL_EVENT);
+            std::cout << entry->id << std::endl;
+
             p_queue->push(entry);
             cur_arrival -= new_arrival;
         } else {
@@ -70,10 +74,33 @@ void dcore::EventGenerator::generate(
                 destination,
                 dcore::EXTERNAL_EVENT,
                 dcore::LAST_ARRIVAL_EVENT);
+
             p_queue->push(entry);
             break;
         }
     }
 
     cur_arrival = 0;
+}
+
+
+void dcore::EventGenerator::generate(
+    dcommon::tQueueSP p_queue,
+    dsample::tGslRngSP arrival_rng,
+    boost::int32_t destination,
+    double arrival_rate)
+{
+    double cur_arrival, new_arrival;
+
+    cur_arrival = -dsample::Rng::poiss(
+        arrival_rate, gsl_rng_uniform(arrival_rng.get()));
+
+    // enqueue the last arrival event
+    dcommon::Entry *entry = new dcommon::Entry(
+        cur_arrival,
+        destination,
+        dcore::EXTERNAL_EVENT,
+        dcore::ARRIVAL_EVENT);
+
+    p_queue->push(entry);
 }

@@ -19,6 +19,10 @@
  *
  * @author Dominik Dahlem
  */
+#if HAVE_CONFIG_H
+# include <config.h>
+#endif
+
 #ifndef __STDC_CONSTANT_MACROS
 # define __STDC_CONSTANT_MACROS
 #endif /* __STDC_CONSTANT_MACROS */
@@ -44,24 +48,39 @@ using des::core::tDesArgsSP;
 
 CL::CL()
 {
+    opt_desc = tOptDescSP(new po::options_description());
+
     // Declare the supported options.
-    opt_desc = tOptDescSP(new po::options_description("General Configuration"));
-    opt_desc->add_options()
+    po::options_description opt_general("General Configuration");
+    opt_general.add_options()
         (HELP.c_str(), "produce help message")
-        (STOPTIME.c_str(), po::value <boost::uint32_t>(), "set the stop time of the event simulator.")
-        (GENERATIONS.c_str(), po::value <boost::int32_t>(), "set the number of generations for the event simulator (default -1).")
+        (VERS.c_str(), "show the version")
+        ;
+
+    po::options_description opt_app("Application Configuration");
+    opt_app.add_options()
+        (STOPTIME.c_str(), po::value <boost::uint32_t>()->default_value(100), "set the stop time of the event simulator.")
+        (GENERATIONS.c_str(), po::value <boost::int32_t>()->default_value(-1), "set the number of generations for the event simulator.")
         (GRAPH.c_str(), po::value <std::string>(), "set the graph for the event simulator.")
         (SEEDS.c_str(), po::value <std::string>(), "set the seeds for the event simulator.")
-        (RESULTS.c_str(), po::value <std::string>(), "set directory for the results of the event simulator.")
+        (RESULTS.c_str(), po::value <std::string>()->default_value("./results"), "set directory for the results of the event simulator.")
         ;
+
+    po::options_description opt_debug("Debug Configuration");
+    opt_debug.add_options()
+        (TRACE.c_str(), po::value <bool>()->default_value(false), "Set debugging.")
+        (VERTEX.c_str(), po::value <boost::int32_t>(), "The source vertex to trace the event for.")
+        ;
+
+    opt_desc->add(opt_general);
+    opt_desc->add(opt_app);
+    opt_desc->add(opt_debug);
 }
 
 
 int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
 {
     po::variables_map vm;
-
-    std::cout << std::endl << "Parsing the command-line..." << std::endl;
 
     po::store(po::parse_command_line(argc, argv, (*opt_desc.get())), vm);
     po::notify(vm);
@@ -71,11 +90,16 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
         return EXIT_FAILURE;
     }
 
+    if (vm.count(VERS)) {
+        std::cout << argv[0] << " " << PACKAGE_VERSION << std::endl;
+        std::cout << PACKAGE_NAME << std::endl;
+        return EXIT_FAILURE;
+    }
+
     if (vm.count(STOPTIME.c_str())) {
         desArgs->stop_time = vm[STOPTIME.c_str()].as <boost::uint32_t>();
         std::cout << "Stopping time set to " << desArgs->stop_time << "." << std::endl;
     } else {
-        desArgs->stop_time = 100;
         std::cout << "Default stopping time is " << desArgs->stop_time << "." << std::endl;
     }
 
@@ -83,7 +107,6 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
         desArgs->generations = vm[GENERATIONS.c_str()].as <boost::int32_t>();
         std::cout << "Number of generations set to " << desArgs->generations << "." << std::endl;
     } else {
-        desArgs->generations = -1;
         std::cout << "No generations." << std::endl;
     }
 
@@ -118,9 +141,22 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
         std::cout << "Set the results directory "
                   << desArgs->results_dir << "." << std::endl;
     } else {
-        desArgs->results_dir = "./results";
         std::cout << "Set the results directory "
                   << desArgs->results_dir << "." << std::endl;
+    }
+
+    if (vm.count(TRACE.c_str())) {
+        desArgs->trace_event = vm[TRACE.c_str()].as <bool>();
+    }
+
+    if (desArgs->trace_event) {
+        if (vm.count(VERTEX.c_str())) {
+            desArgs->vertex = vm[VERTEX.c_str()].as <boost::int32_t>();
+            std::cout << std::endl << "Trace vertex " << desArgs->vertex << "." << std::endl;
+        } else {
+            std::cout << "A vertex needs to be specified to trace the event." << std::endl;
+            return EXIT_FAILURE;
+        }
     }
 
     std::cout << std::endl;

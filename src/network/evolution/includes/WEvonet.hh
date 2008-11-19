@@ -185,6 +185,11 @@ typedef boost::graph_property_iter_range <Graph, vertex_service_rate_t>::iterato
  */
 typedef boost::graph_property_iter_range <Graph, vertex_arrival_rate_t>::iterator VArrivalIterator;
 
+/** @typedef VIndexIterator
+ * Specifies the iterator for the vertex arrival rates
+ */
+typedef boost::graph_property_iter_range <Graph, boost::vertex_index_t>::iterator VIndexIterator;
+
 /** @typedef OutEdgeIterator
  * Specifies the iterator for the out degree edges
  */
@@ -320,6 +325,26 @@ private:
      * The maximum number of allowed edges for a newly created vertex.
      */
     boost::uint32_t max_edges;
+};
+
+
+template <typename VertexIndexMap>
+struct exists_vertex_index {
+    exists_vertex_index()
+        {}
+
+    exists_vertex_index(VertexIndexMap p_indexMap, int p_index)
+        : m_indexMap(p_indexMap), m_index(p_index)
+        {}
+
+    template <typename Vertex>
+    bool operator()(const Vertex& v) const
+        {
+            return m_index == get(m_indexMap, v);
+        }
+
+    VertexIndexMap m_indexMap;
+    int m_index;
 };
 
 
