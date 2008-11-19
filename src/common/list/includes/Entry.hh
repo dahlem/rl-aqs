@@ -25,6 +25,8 @@
 # include <config.h>
 #endif
 
+#include <iostream>
+
 #include <boost/shared_array.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/intrusive/list.hpp>
@@ -58,6 +60,10 @@ public:
     bool operator< (const Entry& rhs) const;
     bool operator< (const Entry& rhs);
 
+    friend std::ostream& operator <<(std::ostream &p_os, const Entry &p_entry);
+    friend std::ostream& operator <<(std::ostream &p_os, Entry &p_entry);
+
+
     double arrival;
     int destination;
     int origin;
@@ -83,6 +89,7 @@ struct delete_disposer
 
     }
 }
+
 
 
 #endif

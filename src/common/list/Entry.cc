@@ -17,6 +17,8 @@
 /** @file Entry.cc
  * Implementation of the @ref{Entry.hh} declaration.
  */
+#include <iostream>
+
 #include "Entry.hh"
 namespace dcommon = des::common;
 
@@ -30,4 +32,22 @@ bool dcommon::Entry::operator< (const dcommon::Entry& rhs) const
 bool dcommon::Entry::operator< (const dcommon::Entry& rhs)
 {
     return arrival < rhs.arrival;
+}
+
+
+std::ostream& dcommon::operator <<(std::ostream &p_os, const dcommon::Entry &p_entry)
+{
+    p_os << p_entry.arrival << "," << p_entry.destination << ","
+         << p_entry.origin << "," << p_entry.type;
+
+    return p_os;
+}
+
+
+std::ostream& dcommon::operator <<(std::ostream &p_os, dcommon::Entry &p_entry)
+{
+    p_os << p_entry.arrival << "," << p_entry.destination << ","
+         << p_entry.origin << "," << p_entry.type;
+
+    return p_os;
 }

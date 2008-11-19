@@ -80,9 +80,7 @@ void dcore::EventProcessor::process()
                 if (m_processedEvents != NULL) {
                     s.str("");
                     // log the event
-                    s << std::setprecision(14) << entry->arrival << ","
-                      << entry->origin << "," << entry->destination << "," << entry->type;
-
+                    s << std::setprecision(14) << const_cast<const dcommon::Entry&> (*entry);
                     m_processedEvents->print(s);
                 }
             }
@@ -124,9 +122,7 @@ void dcore::EventProcessor::postProcess(dcommon::Entry *p_entry)
 
             do {
                 s.str("");
-                s << std::setprecision(14) << entry->arrival << ","
-                  << entry->origin << "," << entry->destination << "," << entry->type;
-
+                s << std::setprecision(14) << const_cast<const dcommon::Entry&> (*entry);
                 m_unprocessedEvents->print(s);
                 delete entry;
             } while ((entry = m_queue->dequeue()) != NULL);
