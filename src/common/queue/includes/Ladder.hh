@@ -78,7 +78,7 @@ public:
     void pop_front() throw (dcommon::QueueException);
 
     const bool push(dcommon::Entry *p_entry) throw (dcommon::QueueException);
-    dcommon::EntryList* const delist();
+    dcommon::EntryList* const delist() throw (dcommon::QueueException);
 
     /**
      * Insert a list into the ladder structure and intialise the following
@@ -252,7 +252,7 @@ private:
      * @param bool true, if a spawn operation can/should be initiated to
      *             re-distribute the events to a lower rung.
      */
-    void advanceDequeueBucket(bool p_spawn);
+    void advanceDequeueBucket(bool p_spawn) throw (dcommon::QueueException);
 
     /**
      * This operation initialises a new rung, if the <code>MAX_RUNGS</code> value

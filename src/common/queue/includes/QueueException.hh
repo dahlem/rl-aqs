@@ -53,7 +53,8 @@ public:
         EPOCH_EXISTS = 5,
         PAST_EVENT_NOT_ALLOWED = 6,
         QUEUE_EMPTY = 7,
-        NUM_ERRORS = 8
+        ADVANCE_IGNORED_EVENTS = 8,
+        NUM_ERRORS = 9
     };
 
 private:

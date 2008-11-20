@@ -330,7 +330,7 @@ void dcommon::Ladder::push(dcommon::EntryList *p_list, double p_maxTS, double p_
     push(m_lowestRung, p_list);
 }
 
-dcommon::EntryList* const dcommon::Ladder::delist()
+dcommon::EntryList* const dcommon::Ladder::delist() throw (dcommon::QueueException)
 {
     // advance the dequeue bucket
     advanceDequeueBucket(1);
@@ -353,7 +353,7 @@ void dcommon::Ladder::resizeFirstRung(boost::uint32_t p_base)
     m_rungs[0].reset(new dcommon::EntryList[m_BucketsFirstRung]);
 }
 
-void dcommon::Ladder::advanceDequeueBucket(bool p_spawn)
+void dcommon::Ladder::advanceDequeueBucket(bool p_spawn) throw (dcommon::QueueException)
 {
     boost::uint32_t elements = 0;
 
@@ -365,8 +365,11 @@ void dcommon::Ladder::advanceDequeueBucket(bool p_spawn)
     // find next non-empty bucket from lowest rung
     while (true) {
         if (!canAdvance()) {
-            // ddahlem: do we need to throw an exception here, if there are more entries
-            // available??
+            // throw an exception here, if there are more entries available
+            if (getNBC() > 0) {
+                throw dcommon::QueueException(
+                    dcommon::QueueException::ADVANCE_IGNORED_EVENTS);
+            }
             break;
         }
 

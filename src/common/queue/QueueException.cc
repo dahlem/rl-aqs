@@ -35,6 +35,7 @@ const char* QueueException::m_errorStrings[QueueException::NUM_ERRORS] =
     "An epoch cannot be created, if another one is not finished yet.",
     "Cannot enqueue past event.",
     "The queue is empty."
+    "Advanced the dequeue bucket ignoring existing events."
 };
 
 QueueException::QueueException(int p_code)
