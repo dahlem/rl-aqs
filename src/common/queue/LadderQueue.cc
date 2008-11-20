@@ -169,7 +169,6 @@ dcommon::Entry* dcommon::LadderQueue::dequeue() throw (dcommon::QueueException)
                 m_ladder->push(list, max, min);
                 m_top->reset();
                 list = m_ladder->delist();
-
                 m_bottom->push(list);
                 entry = m_bottom->front();
                 m_bottom->pop_front();

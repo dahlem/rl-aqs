@@ -40,7 +40,7 @@ bool dcommon::Entry::operator< (const dcommon::Entry& rhs)
 
 std::ostream& dcommon::operator <<(std::ostream &p_os, const dcommon::Entry &p_entry)
 {
-    p_os << p_entry.uid << "," << p_entry.id << "," << p_entry.arrival << ","
+    p_os << p_entry.id << "," << p_entry.arrival << ","
          << p_entry.origin << "," << p_entry.destination << "," << p_entry.type;
 
     return p_os;
@@ -49,7 +49,7 @@ std::ostream& dcommon::operator <<(std::ostream &p_os, const dcommon::Entry &p_e
 
 std::ostream& dcommon::operator <<(std::ostream &p_os, dcommon::Entry &p_entry)
 {
-    p_os << p_entry.uid << "," << p_entry.id << "," << p_entry.arrival << ","
+    p_os << p_entry.id << "," << p_entry.arrival << ","
          << p_entry.origin << "," << p_entry.destination << "," << p_entry.type;
 
     return p_os;

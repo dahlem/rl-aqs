@@ -283,6 +283,7 @@ void dcommon::Ladder::push(boost::uint32_t p_rung, dcommon::EntryList *p_list)
     }
 }
 
+
 void dcommon::Ladder::pushBack(dcommon::EntryList *p_list)
     throw (dcommon::QueueException)
 {
@@ -295,6 +296,7 @@ void dcommon::Ladder::pushBack(dcommon::EntryList *p_list)
 
     push(m_lowestRung, p_list);
 }
+
 
 void dcommon::Ladder::push(dcommon::EntryList *p_list, double p_maxTS, double p_minTS)
     throw (dcommon::QueueException)
@@ -312,6 +314,11 @@ void dcommon::Ladder::push(dcommon::EntryList *p_list, double p_maxTS, double p_
     m_bucketwidth[0] = bucketwidth(p_maxTS, p_minTS, p_list->size());
     m_RStart[0] = p_minTS;
     m_RCur[0] = p_minTS + getBucketwidth(0); // different in paper
+
+    // reset the current dequeue buckets
+    for (boost::uint32_t i = 0; i < m_NRung; ++i) {
+        m_currentBucket[i] = 0;
+    }
 
     boost::uint32_t buckets = static_cast<boost::uint32_t>(
         (p_maxTS - p_minTS) / m_bucketwidth[0]);
@@ -358,6 +365,8 @@ void dcommon::Ladder::advanceDequeueBucket(bool p_spawn)
     // find next non-empty bucket from lowest rung
     while (true) {
         if (!canAdvance()) {
+            // ddahlem: do we need to throw an exception here, if there are more entries
+            // available??
             break;
         }
 
@@ -424,6 +433,10 @@ bool dcommon::Ladder::spawn(bool p_doEnlist)
             getRCur(m_lowestRung - 1)
             - getBucketwidth(m_lowestRung - 1)
             + getBucketwidth(m_lowestRung);
+
+        // we need to set the current dequeue bucket of the spawned rung to zero
+        m_currentBucket[m_lowestRung] = 0;
+
 
         if (p_doEnlist) {
             // copy the elements from the previous bucket to the next rung

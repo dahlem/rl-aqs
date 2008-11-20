@@ -21,7 +21,6 @@
 #include "QueueException.hh"
 using des::common::QueueException;
 
-#include <iostream>
 
 /**
  * Specification of the valid error strings.
@@ -45,4 +44,9 @@ QueueException::QueueException(int p_code)
 const char* QueueException::what() const throw()
 {
     return m_errorStrings[m_code];
+}
+
+int QueueException::errorCode() const
+{
+    return m_code;
 }

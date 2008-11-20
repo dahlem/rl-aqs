@@ -13,13 +13,13 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
-
+#if HAVE_CONFIG_H
+# include <config.h>
+#endif
 
 #ifndef __STDC_CONSTANT_MACROS
 # define __STDC_CONSTANT_MACROS
 #endif /* __STDC_CONSTANT_MACROS */
-
-#include <iostream>
 
 #include <boost/cstdint.hpp>
 
@@ -63,7 +63,6 @@ void dcore::EventGenerator::generate(
                 destination,
                 dcore::EXTERNAL_EVENT,
                 dcore::ARRIVAL_EVENT);
-            std::cout << entry->id << std::endl;
 
             p_queue->push(entry);
             cur_arrival -= new_arrival;

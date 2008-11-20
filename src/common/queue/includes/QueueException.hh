@@ -42,6 +42,7 @@ public:
     QueueException(int p_code);
 
     const char* what() const throw();
+    int errorCode() const;
 
     enum {
         BAD_RESET = 0,

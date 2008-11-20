@@ -21,7 +21,6 @@
 
 #include <gsl/gsl_randist.h>
 
-
 #include "events.hh"
 #include "ArrivalEvent.hh"
 #include "ArrivalHandler.hh"

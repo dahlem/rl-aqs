@@ -26,7 +26,10 @@
 #include <fstream>
 #include <numeric>
 #include <vector>
-#include <iostream>
+
+#ifdef NDEBUG
+# include <iostream>
+#endif
 
 #include <boost/foreach.hpp>
 #include <boost/graph/adjacency_list.hpp>

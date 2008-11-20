@@ -17,7 +17,10 @@
 /** @file DepartureHandler.cc
  * Implementation of a basic departure handler.
  */
-#include <iostream>
+#if HAVE_CONFIG_H
+# include <config.h>
+#endif
+
 #include <cstdlib>
 #include <vector>
 

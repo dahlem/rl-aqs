@@ -44,7 +44,7 @@ namespace des
     namespace common
     {
 
-static const std::string HEADER = "uid,id,arrivalTime,origin,destination,type";
+static const std::string HEADER = "id,arrivalTime,origin,destination,type";
 
 
 /** @class Entry
