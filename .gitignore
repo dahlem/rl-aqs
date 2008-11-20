@@ -11,3 +11,4 @@ tests/statistics/correlation/StatsCorrelationSuite
 /.Rhistory
 /*.png
 /des*tar*
+/results/

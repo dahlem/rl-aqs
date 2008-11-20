@@ -58,6 +58,14 @@ public:
         dcommon::tQueueSP p_queue,
         dsample::tGslRngSP arrival_rng,
         boost::int32_t destination,
+        double arrival_rate,
+        double start_time,
+        double stop_time);
+
+    static void generate(
+        dcommon::tQueueSP p_queue,
+        dsample::tGslRngSP arrival_rng,
+        boost::int32_t destination,
         double arrival_rate);
 
 };

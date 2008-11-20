@@ -26,7 +26,6 @@
 
 #include <boost/cstdint.hpp>
 #include <boost/graph/adjacency_list.hpp>
-#include <boost/graph/filtered_graph.hpp>
 #include <boost/graph/graphml.hpp>
 #include <boost/graph/graphviz.hpp>
 #include <boost/iterator/filter_iterator.hpp>
@@ -232,7 +231,11 @@ int main(int argc, char *argv[])
 
     dcore::tEventProcessorSP processor(
         new dcore::EventProcessor(queue, graph, arrivalEvent,
-                                  departureEvent, stopTime));
+                                  departureEvent, desArgs->stop_time));
+
+    if (desArgs->generations > 1) {
+        processor->setGenerations(arrival_rng, desArgs->generations);
+    }
 
     // process the events
     processor->setUnprocessedResults(unprocessed_events);

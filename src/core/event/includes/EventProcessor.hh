@@ -20,6 +20,7 @@
 #ifndef __EVENTPROCESSOR_HH__
 #define __EVENTPROCESSOR_HH__
 
+#include <boost/shared_array.hpp>
 #include <boost/shared_ptr.hpp>
 
 #include "WEvonet.hh"
@@ -35,12 +36,16 @@ namespace dcommon = des::common;
 #include "Results.hh"
 namespace dio = des::io;
 
+#include "CRN.hh"
+namespace dsample = des::sampling;
+
 
 namespace des
 {
     namespace core
     {
 
+typedef boost::shared_array <int> tIntSA;
 
 /** @class EventProcessor
  * This class processes the events in the event queue
@@ -59,9 +64,12 @@ public:
     void setUnprocessedResults(dio::tResultsSP);
     void setProcessedResults(dio::tResultsSP);
 
+    void setGenerations(dsample::tGslRngSP, int);
+
 
 private:
     void postProcess(dcommon::Entry*) throw (dcommon::QueueException);
+    void generate(dcommon::Entry *p_entry);
 
 
     dcommon::tQueueSP m_queue;
@@ -72,6 +80,11 @@ private:
     dio::tResultsSP m_processedEvents;
     double m_stopTime;
 
+    // only used if event generations are configured
+    dsample::tGslRngSP m_arrivalRng;
+    tIntSA m_currentGeneration;
+    int m_generations;
+    double m_interval;
 };
 
 typedef boost::shared_ptr <dcore::EventProcessor> tEventProcessorSP;

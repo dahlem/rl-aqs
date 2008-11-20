@@ -38,6 +38,7 @@ namespace dcommon = des::common;
 namespace dcore = des::core;
 
 
+
 void dcore::EventGenerator::generate(
     dcommon::tQueueSP p_queue,
     dsample::tGslRngSP arrival_rng,
@@ -45,10 +46,25 @@ void dcore::EventGenerator::generate(
     double arrival_rate,
     double stop_time)
 {
+    generate(p_queue, arrival_rng, destination,
+             arrival_rate, 0.0, stop_time);
+}
+
+
+void dcore::EventGenerator::generate(
+    dcommon::tQueueSP p_queue,
+    dsample::tGslRngSP arrival_rng,
+    boost::int32_t destination,
+    double arrival_rate,
+    double start_time,
+    double stop_time)
+{
     double cur_arrival, new_arrival;
 
     cur_arrival = -dsample::Rng::poiss(
         arrival_rate, gsl_rng_uniform(arrival_rng.get()));
+
+    cur_arrival += start_time;
 
     // for as long as there is no stopping event
     while (cur_arrival < stop_time) {
@@ -89,7 +105,7 @@ void dcore::EventGenerator::generate(
     boost::int32_t destination,
     double arrival_rate)
 {
-    double cur_arrival, new_arrival;
+    double cur_arrival;
 
     cur_arrival = -dsample::Rng::poiss(
         arrival_rate, gsl_rng_uniform(arrival_rng.get()));
