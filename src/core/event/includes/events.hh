@@ -35,6 +35,8 @@ namespace des {namespace core {
 const boost::int32_t ARRIVAL_EVENT              = 0;
 const boost::int32_t LAST_ARRIVAL_EVENT         = 1;
 const boost::int32_t DEPARTURE_EVENT            = 2;
+const boost::int32_t ACK_EVENT                  = 3;
+const boost::int32_t LEAVE_EVENT                = 4;
 
 /**
  * Declaration of the event source
