@@ -82,6 +82,12 @@ enum vertex_average_delay_in_queue_t { vertex_average_delay_in_queue = 1116 };
 enum vertex_num_events_t { vertex_num_events = 1117 };
 
 
+/** @enum vertex_utilisation_t
+ * This enum extends the vertex properties by a utilisation attribute.
+ */
+enum vertex_utilisation_t { vertex_utilisation = 1118 };
+
+
 // install the vertex service rate property
 namespace boost
 {
@@ -92,6 +98,7 @@ namespace boost
     BOOST_INSTALL_PROPERTY(vertex, number_in_queue);
     BOOST_INSTALL_PROPERTY(vertex, average_delay_in_queue);
     BOOST_INSTALL_PROPERTY(vertex, num_events);
+    BOOST_INSTALL_PROPERTY(vertex, utilisation);
 }
 
 
@@ -133,10 +140,15 @@ typedef boost::property <vertex_time_service_ends_t, float, VertexBusyProperty> 
  */
 typedef boost::property <vertex_num_events_t, int, VertexTimeServiceEndsProperty> VertexNumEventsProperty;
 
+/** @typedef VertexUtilisationProperty
+ * Specifies the property for the utlisation attribute of a vertex
+ */
+typedef boost::property <vertex_utilisation_t, float, VertexNumEventsProperty> VertexUtilisationProperty;
+
 /** @typedef VertexProperties
  * This type definition assembles all the properties for the vertices of the graph
  */
-typedef boost::property <boost::vertex_index_t, int, VertexNumEventsProperty> VertexProperties;
+typedef boost::property <boost::vertex_index_t, int, VertexUtilisationProperty> VertexProperties;
 
 /** @typedef EdgeWeightProperty
  * Specifies the property for the edge weight
@@ -207,6 +219,11 @@ typedef boost::property_map <Graph, vertex_time_service_ends_t>::type VertexTime
  */
 typedef boost::property_map <Graph, vertex_num_events_t>::type VertexNumEventsMap;
 
+/** @typedef VertexUtilisationMap
+ * Specifies the map that stores the vertex utilisation attribute
+ */
+typedef boost::property_map <Graph, vertex_utilisation_t>::type VertexUtilisationMap;
+
 /** @typedef EdgeWeightMap
  * Specifies the edge weight property
  */
@@ -266,6 +283,7 @@ public:
     static const std::string NUMBER_IN_QUEUE;
     static const std::string AVERAGE_DELAY_IN_QUEUE;
     static const std::string NUM_EVENTS;
+    static const std::string UTILISATION;
 
 
     static const boost::uint32_t MAX_EDGES = UINT_MAX;
