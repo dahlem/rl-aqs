@@ -58,7 +58,8 @@ const std::string dnet::WEvonet::NUMBER_IN_QUEUE        = "number_in_queue";
 const std::string dnet::WEvonet::AVERAGE_DELAY_IN_QUEUE = "average_delay_in_queue";
 const std::string dnet::WEvonet::NUM_EVENTS             = "num_events";
 const std::string dnet::WEvonet::UTILISATION            = "utilisation";
-
+const std::string dnet::WEvonet::BDT                    = "Bdt";
+const std::string dnet::WEvonet::LAST_EVENT_TIME        = "last_event_time";
 
 
 dnet::WEvonet::WEvonet(boost::uint32_t p_size, boost::uint32_t p_max_edges,
@@ -93,6 +94,10 @@ dnet::WEvonet::WEvonet(boost::uint32_t p_size, boost::uint32_t p_max_edges,
         = get(vertex_num_events, *g);
     dnet::VertexUtilisationMap vertex_utilisation_map
         = get(vertex_utilisation, *g);
+    dnet::VertexBdtMap vertex_Bdt_map
+        = get(vertex_Bdt, *g);
+    dnet::VertexLastEventTimeMap vertex_last_event_time_map
+        = get(vertex_last_event_time, *g);
 
     // create a small graph upon which the evolution is excercised
     dnet::Vertex v1 = add_vertex(*g);
@@ -105,6 +110,8 @@ dnet::WEvonet::WEvonet(boost::uint32_t p_size, boost::uint32_t p_max_edges,
     vertex_average_delay_in_queue_props_map[v1] = 0.0;
     vertex_num_events_map[v1] = 0;
     vertex_utilisation_map[v1] = 0.0;
+    vertex_Bdt_map[v1] = 0.0;
+    vertex_last_event_time_map[v1] = 0.0;
 
     dnet::Vertex v2 = add_vertex(*g);
     vertex_arrival_props_map[v2] = vertex_arrival_props_map[v1] * 0.5;
@@ -116,6 +123,8 @@ dnet::WEvonet::WEvonet(boost::uint32_t p_size, boost::uint32_t p_max_edges,
     vertex_average_delay_in_queue_props_map[v2] = 0.0;
     vertex_num_events_map[v2] = 0;
     vertex_utilisation_map[v2] = 0.0;
+    vertex_Bdt_map[v2] = 0.0;
+    vertex_last_event_time_map[v2] = 0.0;
 
     dnet::Vertex v3 = add_vertex(*g);
     vertex_arrival_props_map[v3] = vertex_arrival_props_map[v1] * 0.5;
@@ -127,6 +136,8 @@ dnet::WEvonet::WEvonet(boost::uint32_t p_size, boost::uint32_t p_max_edges,
     vertex_average_delay_in_queue_props_map[v3] = 0.0;
     vertex_num_events_map[v3] = 0;
     vertex_utilisation_map[v3] = 0.0;
+    vertex_Bdt_map[v3] = 0.0;
+    vertex_last_event_time_map[v3] = 0.0;
 
     dnet::Edge e1 = (add_edge(v1, v2, *g)).first;
     edge_weight_props_map[e1] = 0.5;
@@ -162,6 +173,10 @@ void dnet::WEvonet::advance(boost::uint32_t p_steps)
         = get(vertex_num_events, *g);
     dnet::VertexUtilisationMap vertex_utilisation_map
         = get(vertex_utilisation, *g);
+    dnet::VertexBdtMap vertex_Bdt_map
+        = get(vertex_Bdt, *g);
+    dnet::VertexLastEventTimeMap vertex_last_event_time_map
+        = get(vertex_last_event_time, *g);
 
     double accum_service_rate;
     size_t vertices;
@@ -208,6 +223,8 @@ void dnet::WEvonet::advance(boost::uint32_t p_steps)
         vertex_average_delay_in_queue_map[v] = 0.0;
         vertex_num_events_map[v] = 0;
         vertex_utilisation_map[v] = 0.0;
+        vertex_Bdt_map[v] = 0.0;
+        vertex_last_event_time_map[v] = 0.0;
 
         // select vertices to connect to
         boost::uint32_t edges = 0;
@@ -434,6 +451,8 @@ boost::dynamic_properties dnet::WEvonet::getProperties(tGraphSP p_graph)
     dp.property(dnet::WEvonet::AVERAGE_DELAY_IN_QUEUE, get(vertex_average_delay_in_queue, *p_graph));
     dp.property(dnet::WEvonet::NUM_EVENTS, get(vertex_num_events, *p_graph));
     dp.property(dnet::WEvonet::UTILISATION, get(vertex_utilisation, *p_graph));
+    dp.property(dnet::WEvonet::BDT, get(vertex_Bdt, *p_graph));
+    dp.property(dnet::WEvonet::LAST_EVENT_TIME, get(vertex_last_event_time, *p_graph));
 
     return dp;
 }

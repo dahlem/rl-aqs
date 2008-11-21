@@ -90,6 +90,18 @@ enum vertex_num_events_t { vertex_num_events = 1117 };
 enum vertex_utilisation_t { vertex_utilisation = 1118 };
 
 
+/** @enum vertex_Bdt_t
+ * This enum extends the vertex properties by a fractional utilisation attribute.
+ */
+enum vertex_Bdt_t { vertex_Bdt = 1119 };
+
+
+/** @enum vertex_last_event_time_t
+ * This enum extends the vertex properties by a last event time attribute.
+ */
+enum vertex_last_event_time_t { vertex_last_event_time = 1119 };
+
+
 // install the vertex service rate property
 namespace boost
 {
@@ -101,6 +113,8 @@ namespace boost
     BOOST_INSTALL_PROPERTY(vertex, average_delay_in_queue);
     BOOST_INSTALL_PROPERTY(vertex, num_events);
     BOOST_INSTALL_PROPERTY(vertex, utilisation);
+    BOOST_INSTALL_PROPERTY(vertex, Bdt);
+    BOOST_INSTALL_PROPERTY(vertex, last_event_time);
 }
 
 
@@ -147,10 +161,20 @@ typedef boost::property <vertex_num_events_t, int, VertexTimeServiceEndsProperty
  */
 typedef boost::property <vertex_utilisation_t, float, VertexNumEventsProperty> VertexUtilisationProperty;
 
+/** @typedef VertexBdtProperty
+ * Specifies the property for the fractional utlisation attribute of a vertex
+ */
+typedef boost::property <vertex_Bdt_t, float, VertexUtilisationProperty> VertexBdtProperty;
+
+/** @typedef VertexLastEventTimeProperty
+ * Specifies the property for the last event time attribute of a vertex
+ */
+typedef boost::property <vertex_last_event_time_t, float, VertexBdtProperty> VertexLastEventTimeProperty;
+
 /** @typedef VertexProperties
  * This type definition assembles all the properties for the vertices of the graph
  */
-typedef boost::property <boost::vertex_index_t, int, VertexUtilisationProperty> VertexProperties;
+typedef boost::property <boost::vertex_index_t, int, VertexLastEventTimeProperty> VertexProperties;
 
 /** @typedef EdgeWeightProperty
  * Specifies the property for the edge weight
@@ -226,6 +250,16 @@ typedef boost::property_map <Graph, vertex_num_events_t>::type VertexNumEventsMa
  */
 typedef boost::property_map <Graph, vertex_utilisation_t>::type VertexUtilisationMap;
 
+/** @typedef VertexBdtMap
+ * Specifies the map that stores the vertex fractional utilisation attribute
+ */
+typedef boost::property_map <Graph, vertex_Bdt_t>::type VertexBdtMap;
+
+/** @typedef VertexLastEventTimeMap
+ * Specifies the map that stores the vertex last event time attribute
+ */
+typedef boost::property_map <Graph, vertex_last_event_time_t>::type VertexLastEventTimeMap;
+
 /** @typedef EdgeWeightMap
  * Specifies the edge weight property
  */
@@ -286,6 +320,8 @@ public:
     static const std::string AVERAGE_DELAY_IN_QUEUE;
     static const std::string NUM_EVENTS;
     static const std::string UTILISATION;
+    static const std::string BDT;
+    static const std::string LAST_EVENT_TIME;
 
 
     static const boost::uint32_t MAX_EDGES = UINT_MAX;
