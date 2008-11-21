@@ -42,12 +42,13 @@ namespace dio = des::io;
 
 dcore::EventProcessor::EventProcessor(dcommon::tQueueSP p_queue,
                                       dnet::tGraphSP p_graph,
+                                      dcore::tAnyEventSP p_anyEvent,
                                       dcore::tArrivalEventSP p_arrivalEvent,
                                       dcore::tDepartureEventSP p_departureEvent,
                                       double p_stopTime)
-    : m_queue(p_queue), m_graph(p_graph), m_arrivalEvent(p_arrivalEvent),
-      m_departureEvent(p_departureEvent), m_stopTime(p_stopTime),
-      m_generations(0)
+    : m_queue(p_queue), m_graph(p_graph), m_anyEvent(p_anyEvent),
+      m_arrivalEvent(p_arrivalEvent), m_departureEvent(p_departureEvent),
+      m_stopTime(p_stopTime), m_generations(0)
 {}
 
 
@@ -62,36 +63,19 @@ void dcore::EventProcessor::setUnprocessedResults(
 }
 
 
-void dcore::EventProcessor::setProcessedResults(
-    dio::tResultsSP p_processedEvents)
-{
-    m_processedEvents = p_processedEvents;
-}
-
-
 void dcore::EventProcessor::process()
 {
     dcommon::Entry *entry = NULL;
     std::stringstream s;
 
     try {
-        if (m_processedEvents != NULL) {
-            s << dcommon::Entry::header();
-            m_processedEvents->print(s);
-        }
-
         while ((entry = m_queue->dequeue()) != NULL) {
 
             // if stop time has been reached break out and handle the event below
             if (entry->getArrival() > m_stopTime) {
                 break;
             } else {
-                if (m_processedEvents != NULL) {
-                    s.str("");
-                    // log the event
-                    s << std::setprecision(14) << const_cast <const dcommon::Entry&> (*entry);
-                    m_processedEvents->print(s);
-                }
+                m_anyEvent->any(entry);
             }
 
             switch (entry->getType()) {

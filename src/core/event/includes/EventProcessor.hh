@@ -26,6 +26,7 @@
 #include "WEvonet.hh"
 namespace dnet = des::network;
 
+#include "AnyEvent.hh"
 #include "ArrivalEvent.hh"
 #include "DepartureEvent.hh"
 namespace dcore = des::core;
@@ -55,6 +56,7 @@ class EventProcessor
 public:
     EventProcessor(dcommon::tQueueSP,
                    dnet::tGraphSP,
+                   dcore::tAnyEventSP,
                    dcore::tArrivalEventSP,
                    dcore::tDepartureEventSP,
                    double);
@@ -62,7 +64,6 @@ public:
 
     void process();
     void setUnprocessedResults(dio::tResultsSP);
-    void setProcessedResults(dio::tResultsSP);
 
     void setGenerations(dsample::tGslRngSP, int);
 
@@ -74,10 +75,12 @@ private:
 
     dcommon::tQueueSP m_queue;
     dnet::tGraphSP m_graph;
+
+    dcore::tAnyEventSP m_anyEvent;
     dcore::tArrivalEventSP m_arrivalEvent;
     dcore::tDepartureEventSP m_departureEvent;
+
     dio::tResultsSP m_unprocessedEvents;
-    dio::tResultsSP m_processedEvents;
     double m_stopTime;
 
     // only used if event generations are configured

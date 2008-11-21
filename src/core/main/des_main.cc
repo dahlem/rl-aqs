@@ -32,14 +32,16 @@
 
 #include <gsl/gsl_randist.h>
 
+#include "AnyEvent.hh"
 #include "ArrivalEvent.hh"
 #include "ArrivalHandler.hh"
+#include "CL.hh"
 #include "DepartureEvent.hh"
 #include "DepartureHandler.hh"
-#include "CL.hh"
 #include "events.hh"
 #include "EventGenerator.hh"
 #include "EventProcessor.hh"
+#include "ProcessedEventsHandler.hh"
 namespace dcore = des::core;
 
 #include "Results.hh"
@@ -198,26 +200,32 @@ int main(int argc, char *argv[])
         }
     }
 
+    dio::tResultsSP processed_events(
+        new dio::Results(desArgs->events_processed, desArgs->results_dir));
+
     // instantiate the events & handlers
+    dcore::tAnyEventSP anyEvent(new dcore::AnyEvent);
     dcore::tArrivalEventSP arrivalEvent(new dcore::ArrivalEvent);
     dcore::tDepartureEventSP departureEvent(new dcore::DepartureEvent);
+
+    dcore::tProcessedEventsHandlerSP processedEventsHandler(
+        new dcore::ProcessedEventsHandler(processed_events));
     dcore::tArrivalHandlerSP arrivalHandler(
         new dcore::ArrivalHandler(queue, graph, service_rng_index));
     dcore::tDepartureHandlerSP departureHandler(
         new dcore::DepartureHandler(queue, graph, depart_uniform_rng_index));
 
     // attach the handlers to the events
+    anyEvent->attach(processedEventsHandler);
     arrivalEvent->attach(arrivalHandler);
     departureEvent->attach(departureHandler);
 
     // instantiate the event processor and set the events
     dio::tResultsSP unprocessed_events(
         new dio::Results(desArgs->events_unprocessed, desArgs->results_dir));
-    dio::tResultsSP processed_events(
-        new dio::Results(desArgs->events_processed, desArgs->results_dir));
 
     dcore::tEventProcessorSP processor(
-        new dcore::EventProcessor(queue, graph, arrivalEvent,
+        new dcore::EventProcessor(queue, graph, anyEvent, arrivalEvent,
                                   departureEvent, desArgs->stop_time));
 
     if (desArgs->generations > 1) {
@@ -226,7 +234,6 @@ int main(int argc, char *argv[])
 
     // process the events
     processor->setUnprocessedResults(unprocessed_events);
-    processor->setProcessedResults(processed_events);
     processor->process();
 
     return EXIT_SUCCESS;
