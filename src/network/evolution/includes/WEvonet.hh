@@ -76,6 +76,12 @@ enum vertex_number_in_queue_t { vertex_number_in_queue = 1115 };
 enum vertex_average_delay_in_queue_t { vertex_average_delay_in_queue = 1116 };
 
 
+/** @enum vertex_num_events_t
+ * This enum extends the vertex properties by a number of events attribute.
+ */
+enum vertex_num_events_t { vertex_num_events = 1117 };
+
+
 // install the vertex service rate property
 namespace boost
 {
@@ -85,6 +91,7 @@ namespace boost
     BOOST_INSTALL_PROPERTY(vertex, time_service_ends);
     BOOST_INSTALL_PROPERTY(vertex, number_in_queue);
     BOOST_INSTALL_PROPERTY(vertex, average_delay_in_queue);
+    BOOST_INSTALL_PROPERTY(vertex, num_events);
 }
 
 
@@ -121,10 +128,15 @@ typedef boost::property <vertex_busy_t, bool, VertexAverageDelayInQueueProperty>
  */
 typedef boost::property <vertex_time_service_ends_t, float, VertexBusyProperty> VertexTimeServiceEndsProperty;
 
+/** @typedef VertexNumEventsProperty
+ * Specifies the property for the number of events attribute of a vertex
+ */
+typedef boost::property <vertex_num_events_t, int, VertexTimeServiceEndsProperty> VertexNumEventsProperty;
+
 /** @typedef VertexProperties
  * This type definition assembles all the properties for the vertices of the graph
  */
-typedef boost::property <boost::vertex_index_t, int, VertexTimeServiceEndsProperty> VertexProperties;
+typedef boost::property <boost::vertex_index_t, int, VertexNumEventsProperty> VertexProperties;
 
 /** @typedef EdgeWeightProperty
  * Specifies the property for the edge weight
@@ -190,6 +202,11 @@ typedef boost::property_map <Graph, vertex_busy_t>::type VertexBusyMap;
  */
 typedef boost::property_map <Graph, vertex_time_service_ends_t>::type VertexTimeServiceEndsMap;
 
+/** @typedef VertexNumEventsMap
+ * Specifies the map that stores the vertex number of events attribute
+ */
+typedef boost::property_map <Graph, vertex_num_events_t>::type VertexNumEventsMap;
+
 /** @typedef EdgeWeightMap
  * Specifies the edge weight property
  */
@@ -248,6 +265,7 @@ public:
     static const std::string TIME_SERVICE_ENDS;
     static const std::string NUMBER_IN_QUEUE;
     static const std::string AVERAGE_DELAY_IN_QUEUE;
+    static const std::string NUM_EVENTS;
 
 
     static const boost::uint32_t MAX_EDGES = UINT_MAX;

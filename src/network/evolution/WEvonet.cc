@@ -58,6 +58,7 @@ const std::string dnet::WEvonet::BUSY                   = "busy";
 const std::string dnet::WEvonet::TIME_SERVICE_ENDS      = "time_service_ends";
 const std::string dnet::WEvonet::NUMBER_IN_QUEUE        = "number_in_queue";
 const std::string dnet::WEvonet::AVERAGE_DELAY_IN_QUEUE = "average_delay_in_queue";
+const std::string dnet::WEvonet::NUM_EVENTS             = "num_events";
 
 
 
@@ -73,6 +74,8 @@ dnet::WEvonet::WEvonet(boost::uint32_t p_size, boost::uint32_t p_max_edges,
     max_edges = p_max_edges;
 
     // get references to the property maps
+    dnet::EdgeWeightMap edge_weight_props_map
+        = get(boost::edge_weight, *g);
     dnet::VertexArrivalRateMap vertex_arrival_props_map
         = get(vertex_arrival_rate, *g);
     dnet::VertexServiceRateMap vertex_service_props_map
@@ -87,8 +90,8 @@ dnet::WEvonet::WEvonet(boost::uint32_t p_size, boost::uint32_t p_max_edges,
         = get(vertex_number_in_queue, *g);
     dnet::VertexAverageDelayInQueueMap vertex_average_delay_in_queue_props_map
         = get(vertex_average_delay_in_queue, *g);
-    dnet::EdgeWeightMap edge_weight_props_map
-        = get(boost::edge_weight, *g);
+    dnet::VertexNumEventsMap vertex_num_events_map
+        = get(vertex_num_events, *g);
 
     // create a small graph upon which the evolution is excercised
     dnet::Vertex v1 = add_vertex(*g);
@@ -99,6 +102,8 @@ dnet::WEvonet::WEvonet(boost::uint32_t p_size, boost::uint32_t p_max_edges,
     vertex_time_service_ends_map[v1] = 0.0;
     vertex_number_in_queue_props_map[v1] = 0;
     vertex_average_delay_in_queue_props_map[v1] = 0.0;
+    vertex_num_events_map[v1] = 0;
+
     dnet::Vertex v2 = add_vertex(*g);
     vertex_arrival_props_map[v2] = vertex_arrival_props_map[v1] * 0.5;
     vertex_service_props_map[v2] = vertex_arrival_props_map[v2];
@@ -107,6 +112,8 @@ dnet::WEvonet::WEvonet(boost::uint32_t p_size, boost::uint32_t p_max_edges,
     vertex_time_service_ends_map[v2] = 0.0;
     vertex_number_in_queue_props_map[v2] = 0;
     vertex_average_delay_in_queue_props_map[v2] = 0.0;
+    vertex_num_events_map[v2] = 0;
+
     dnet::Vertex v3 = add_vertex(*g);
     vertex_arrival_props_map[v3] = vertex_arrival_props_map[v1] * 0.5;
     vertex_service_props_map[v3] = vertex_arrival_props_map[v3];
@@ -115,6 +122,7 @@ dnet::WEvonet::WEvonet(boost::uint32_t p_size, boost::uint32_t p_max_edges,
     vertex_time_service_ends_map[v3] = 0.0;
     vertex_number_in_queue_props_map[v3] = 0;
     vertex_average_delay_in_queue_props_map[v3] = 0.0;
+    vertex_num_events_map[v3] = 0;
 
     dnet::Edge e1 = (add_edge(v1, v2, *g)).first;
     edge_weight_props_map[e1] = 0.5;
@@ -146,6 +154,8 @@ void dnet::WEvonet::advance(boost::uint32_t p_steps)
         = get(vertex_number_in_queue, *g);
     dnet::VertexAverageDelayInQueueMap vertex_average_delay_in_queue_map
         = get(vertex_average_delay_in_queue, *g);
+    dnet::VertexNumEventsMap vertex_num_events_map
+        = get(vertex_num_events, *g);
 
     double accum_service_rate;
     size_t vertices;
@@ -190,6 +200,7 @@ void dnet::WEvonet::advance(boost::uint32_t p_steps)
         vertex_time_service_ends_map[v] = 0.0;
         vertex_number_in_queue_map[v] = 0;
         vertex_average_delay_in_queue_map[v] = 0.0;
+        vertex_num_events_map[v] = 0;
 
         // select vertices to connect to
         boost::uint32_t edges = 0;
@@ -334,6 +345,8 @@ void dnet::WEvonet::print_dot(const std::string& filename)
         get(vertex_number_in_queue, *g);
     dnet::VertexAverageDelayInQueueMap vertex_average_delay_in_queue_map =
         get(vertex_average_delay_in_queue, *g);
+    dnet::VertexNumEventsMap vertex_num_events_map
+        = get(vertex_num_events, *g);
 
     std::ofstream out(filename.c_str(), std::ios::out);
 
@@ -347,6 +360,7 @@ void dnet::WEvonet::print_dot(const std::string& filename)
         dp.property(dnet::WEvonet::TIME_SERVICE_ENDS, vertex_time_service_ends_map);
         dp.property(dnet::WEvonet::NUMBER_IN_QUEUE, vertex_number_in_queue_map);
         dp.property(dnet::WEvonet::AVERAGE_DELAY_IN_QUEUE, vertex_average_delay_in_queue_map);
+        dp.property(dnet::WEvonet::NUM_EVENTS, vertex_num_events_map);
 
         boost::write_graphviz(out, *g, dp);
         out.close();
@@ -372,6 +386,8 @@ void dnet::WEvonet::print_graphml(const std::string& filename)
         get(vertex_number_in_queue, *g);
     dnet::VertexAverageDelayInQueueMap vertex_average_delay_in_queue_map =
         get(vertex_average_delay_in_queue, *g);
+    dnet::VertexNumEventsMap vertex_num_events_map
+        = get(vertex_num_events, *g);
 
     std::ofstream out(filename.c_str(), std::ios::out);
 
@@ -385,6 +401,7 @@ void dnet::WEvonet::print_graphml(const std::string& filename)
         dp.property(dnet::WEvonet::TIME_SERVICE_ENDS, vertex_time_service_ends_map);
         dp.property(dnet::WEvonet::NUMBER_IN_QUEUE, vertex_number_in_queue_map);
         dp.property(dnet::WEvonet::AVERAGE_DELAY_IN_QUEUE, vertex_average_delay_in_queue_map);
+        dp.property(dnet::WEvonet::NUM_EVENTS, vertex_num_events_map);
 
         boost::write_graphml(out, *g, dp, true);
 
@@ -426,6 +443,7 @@ void dnet::WEvonet::read_graphml(tGraphSP p_graph, const std::string& p_filename
         dp.property(dnet::WEvonet::TIME_SERVICE_ENDS, get(vertex_time_service_ends, *p_graph));
         dp.property(dnet::WEvonet::NUMBER_IN_QUEUE, get(vertex_number_in_queue, *p_graph));
         dp.property(dnet::WEvonet::AVERAGE_DELAY_IN_QUEUE, get(vertex_average_delay_in_queue, *p_graph));
+        dp.property(dnet::WEvonet::NUM_EVENTS, get(vertex_num_events, *p_graph));
 
         try {
             boost::read_graphml(in, (*p_graph.get()), dp);
@@ -455,6 +473,7 @@ void dnet::WEvonet::read_dot(tGraphSP p_graph, const std::string& p_filename)
         dp.property(dnet::WEvonet::TIME_SERVICE_ENDS, get(vertex_time_service_ends, *p_graph));
         dp.property(dnet::WEvonet::NUMBER_IN_QUEUE, get(vertex_number_in_queue, *p_graph));
         dp.property(dnet::WEvonet::AVERAGE_DELAY_IN_QUEUE, get(vertex_average_delay_in_queue, *p_graph));
+        dp.property(dnet::WEvonet::NUM_EVENTS, get(vertex_num_events, *p_graph));
 
         try {
             boost::read_graphviz(in, (*p_graph.get()), dp);
