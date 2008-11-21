@@ -71,6 +71,8 @@ private:
     dnet::VertexTimeServiceEndsMap vertex_time_service_ends_map;
     dnet::VertexServiceRateMap vertex_service_map;
     dnet::VertexNumberInQueueMap vertex_number_in_queue_map;
+    dnet::VertexAverageDelayInQueueMap vertex_average_delay_in_queue_map;
+    dnet::VertexNumEventsMap vertex_num_events_map;
 
 };
 

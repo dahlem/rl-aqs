@@ -36,6 +36,9 @@ namespace dnet = des::network;
 #include "CRN.hh"
 namespace dsample = des::sampling;
 
+#include "Stats.hh"
+namespace dstats = des::statistics;
+
 
 dcore::ArrivalHandler::ArrivalHandler(dcommon::tQueueSP p_queue,
     dnet::tGraphSP p_graph, boost::uint32_t p_service_idx)
@@ -46,6 +49,8 @@ dcore::ArrivalHandler::ArrivalHandler(dcommon::tQueueSP p_queue,
     vertex_service_map = get(vertex_service_rate, *m_graph);
     vertex_number_in_queue_map = get(vertex_number_in_queue, *m_graph);
     vertex_time_service_ends_map = get(vertex_time_service_ends, *m_graph);
+    vertex_num_events_map = get(vertex_num_events, *m_graph);
+    vertex_average_delay_in_queue_map = get(vertex_average_delay_in_queue, *m_graph);
 }
 
 
@@ -67,6 +72,9 @@ void dcore::ArrivalHandler::update(dcore::ArrivalEvent *subject)
     service_time = gsl_ran_exponential(m_service_rng.get(),
                                        vertex_service_map[vertex]);
 
+    // increment the number of arrival events seen by this node
+    vertex_num_events_map[vertex]++;
+
     // if the server is busy then re-schedule
     // otherwise schedule the departure
     if (vertex_busy_map[vertex]) {
@@ -82,6 +90,12 @@ void dcore::ArrivalHandler::update(dcore::ArrivalEvent *subject)
         vertex_busy_map[vertex] = true;
         vertex_number_in_queue_map[vertex] = 1;
     }
+
+    // calculate the average delay in the queue
+    vertex_average_delay_in_queue_map[vertex] =
+        dstats::Stats::mean(vertex_num_events_map[vertex],
+                            vertex_average_delay_in_queue_map[vertex],
+                            delay);
 
     dcommon::Entry *new_entry = new dcommon::Entry(
         entry->getId(),
