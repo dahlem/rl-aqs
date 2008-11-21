@@ -31,6 +31,8 @@
 #include <boost/cstdint.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/graphml.hpp>
+#include <boost/graph/graphviz.hpp>
 #include <boost/graph/properties.hpp>
 #include <boost/graph/property_iter_range.hpp>
 
@@ -341,6 +343,8 @@ public:
         throw (dnet::GraphException);
 
 private:
+
+    static boost::dynamic_properties getProperties(tGraphSP p_graph);
 
     /** @fn void assign_edge_weights(Vertex &v)
      * Assign the edge weights to the created edges of the newly created

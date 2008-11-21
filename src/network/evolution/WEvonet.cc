@@ -36,8 +36,6 @@
 #include <boost/foreach.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/breadth_first_search.hpp>
-#include <boost/graph/graphml.hpp>
-#include <boost/graph/graphviz.hpp>
 #include <boost/graph/property_iter_range.hpp>
 #include <boost/pending/indirect_cmp.hpp>
 #include <boost/pending/integer_range.hpp>
@@ -338,41 +336,10 @@ void dnet::WEvonet::print(const std::string& filename, const GraphTypes graphTyp
 
 void dnet::WEvonet::print_dot(const std::string& filename)
 {
-    dnet::EdgeWeightMap edge_weight_props_map
-        = get(boost::edge_weight, *g);
-    dnet::VertexServiceRateMap vertex_service_props_map =
-        get(vertex_service_rate, *g);
-    dnet::VertexArrivalRateMap vertex_arrival_props_map =
-        get(vertex_arrival_rate, *g);
-    dnet::VertexIndexMap vertex_index_props_map
-        = get(boost::vertex_index, *g);
-    dnet::VertexBusyMap vertex_busy_map
-        = get(vertex_busy, *g);
-    dnet::VertexTimeServiceEndsMap vertex_time_service_ends_map =
-        get(vertex_time_service_ends, *g);
-    dnet::VertexNumberInQueueMap vertex_number_in_queue_map =
-        get(vertex_number_in_queue, *g);
-    dnet::VertexAverageDelayInQueueMap vertex_average_delay_in_queue_map =
-        get(vertex_average_delay_in_queue, *g);
-    dnet::VertexNumEventsMap vertex_num_events_map
-        = get(vertex_num_events, *g);
-    dnet::VertexUtilisationMap vertex_utilisation_map
-        = get(vertex_utilisation, *g);
-
     std::ofstream out(filename.c_str(), std::ios::out);
 
     if (out.is_open()) {
-        boost::dynamic_properties dp;
-        dp.property(dnet::WEvonet::EDGE_WEIGHT, edge_weight_props_map);
-        dp.property(dnet::WEvonet::VERTEX_ID, vertex_index_props_map);
-        dp.property(dnet::WEvonet::SERVICE_RATE, vertex_service_props_map);
-        dp.property(dnet::WEvonet::ARRIVAL_RATE, vertex_arrival_props_map);
-        dp.property(dnet::WEvonet::BUSY, vertex_busy_map);
-        dp.property(dnet::WEvonet::TIME_SERVICE_ENDS, vertex_time_service_ends_map);
-        dp.property(dnet::WEvonet::NUMBER_IN_QUEUE, vertex_number_in_queue_map);
-        dp.property(dnet::WEvonet::AVERAGE_DELAY_IN_QUEUE, vertex_average_delay_in_queue_map);
-        dp.property(dnet::WEvonet::NUM_EVENTS, vertex_num_events_map);
-        dp.property(dnet::WEvonet::UTILISATION, vertex_utilisation_map);
+        boost::dynamic_properties dp = getProperties(g);
 
         boost::write_graphviz(out, *g, dp);
         out.close();
@@ -382,41 +349,10 @@ void dnet::WEvonet::print_dot(const std::string& filename)
 
 void dnet::WEvonet::print_graphml(const std::string& filename)
 {
-    dnet::EdgeWeightMap edge_weight_props_map
-        = get(boost::edge_weight, *g);
-    dnet::VertexServiceRateMap vertex_service_props_map =
-        get(vertex_service_rate, *g);
-    dnet::VertexArrivalRateMap vertex_arrival_props_map =
-        get(vertex_arrival_rate, *g);
-    dnet::VertexIndexMap vertex_index_props_map
-        = get(boost::vertex_index, *g);
-    dnet::VertexBusyMap vertex_busy_map
-        = get(vertex_busy, *g);
-    dnet::VertexTimeServiceEndsMap vertex_time_service_ends_map =
-        get(vertex_time_service_ends, *g);
-    dnet::VertexNumberInQueueMap vertex_number_in_queue_map =
-        get(vertex_number_in_queue, *g);
-    dnet::VertexAverageDelayInQueueMap vertex_average_delay_in_queue_map =
-        get(vertex_average_delay_in_queue, *g);
-    dnet::VertexNumEventsMap vertex_num_events_map
-        = get(vertex_num_events, *g);
-    dnet::VertexUtilisationMap vertex_utilisation_map
-        = get(vertex_utilisation, *g);
-
     std::ofstream out(filename.c_str(), std::ios::out);
 
     if (out.is_open()) {
-        boost::dynamic_properties dp;
-        dp.property(dnet::WEvonet::EDGE_WEIGHT, edge_weight_props_map);
-        dp.property(dnet::WEvonet::VERTEX_ID, vertex_index_props_map);
-        dp.property(dnet::WEvonet::SERVICE_RATE, vertex_service_props_map);
-        dp.property(dnet::WEvonet::ARRIVAL_RATE, vertex_arrival_props_map);
-        dp.property(dnet::WEvonet::BUSY, vertex_busy_map);
-        dp.property(dnet::WEvonet::TIME_SERVICE_ENDS, vertex_time_service_ends_map);
-        dp.property(dnet::WEvonet::NUMBER_IN_QUEUE, vertex_number_in_queue_map);
-        dp.property(dnet::WEvonet::AVERAGE_DELAY_IN_QUEUE, vertex_average_delay_in_queue_map);
-        dp.property(dnet::WEvonet::NUM_EVENTS, vertex_num_events_map);
-        dp.property(dnet::WEvonet::UTILISATION, vertex_utilisation_map);
+        boost::dynamic_properties dp = getProperties(g);
 
         boost::write_graphml(out, *g, dp, true);
 
@@ -449,17 +385,7 @@ void dnet::WEvonet::read_graphml(tGraphSP p_graph, const std::string& p_filename
     std::ifstream in(p_filename.c_str(), std::ifstream::in);
 
     if (in.is_open()) {
-        boost::dynamic_properties dp;
-        dp.property(dnet::WEvonet::EDGE_WEIGHT, get(boost::edge_weight, *p_graph));
-        dp.property(dnet::WEvonet::VERTEX_ID, get(boost::vertex_index, *p_graph));
-        dp.property(dnet::WEvonet::SERVICE_RATE, get(vertex_service_rate, *p_graph));
-        dp.property(dnet::WEvonet::ARRIVAL_RATE, get(vertex_arrival_rate, *p_graph));
-        dp.property(dnet::WEvonet::BUSY, get(vertex_busy, *p_graph));
-        dp.property(dnet::WEvonet::TIME_SERVICE_ENDS, get(vertex_time_service_ends, *p_graph));
-        dp.property(dnet::WEvonet::NUMBER_IN_QUEUE, get(vertex_number_in_queue, *p_graph));
-        dp.property(dnet::WEvonet::AVERAGE_DELAY_IN_QUEUE, get(vertex_average_delay_in_queue, *p_graph));
-        dp.property(dnet::WEvonet::NUM_EVENTS, get(vertex_num_events, *p_graph));
-        dp.property(dnet::WEvonet::UTILISATION, get(vertex_utilisation, *p_graph));
+        boost::dynamic_properties dp = getProperties(p_graph);
 
         try {
             boost::read_graphml(in, (*p_graph.get()), dp);
@@ -480,17 +406,7 @@ void dnet::WEvonet::read_dot(tGraphSP p_graph, const std::string& p_filename)
     std::ifstream in(p_filename.c_str(), std::ifstream::in);
 
     if (in.is_open()) {
-        boost::dynamic_properties dp;
-        dp.property(dnet::WEvonet::EDGE_WEIGHT, get(boost::edge_weight, *p_graph));
-        dp.property(dnet::WEvonet::VERTEX_ID, get(boost::vertex_index, *p_graph));
-        dp.property(dnet::WEvonet::SERVICE_RATE, get(vertex_service_rate, *p_graph));
-        dp.property(dnet::WEvonet::ARRIVAL_RATE, get(vertex_arrival_rate, *p_graph));
-        dp.property(dnet::WEvonet::BUSY, get(vertex_busy, *p_graph));
-        dp.property(dnet::WEvonet::TIME_SERVICE_ENDS, get(vertex_time_service_ends, *p_graph));
-        dp.property(dnet::WEvonet::NUMBER_IN_QUEUE, get(vertex_number_in_queue, *p_graph));
-        dp.property(dnet::WEvonet::AVERAGE_DELAY_IN_QUEUE, get(vertex_average_delay_in_queue, *p_graph));
-        dp.property(dnet::WEvonet::NUM_EVENTS, get(vertex_num_events, *p_graph));
-        dp.property(dnet::WEvonet::UTILISATION, get(vertex_utilisation, *p_graph));
+        boost::dynamic_properties dp = getProperties(p_graph);
 
         try {
             boost::read_graphviz(in, (*p_graph.get()), dp);
@@ -502,4 +418,22 @@ void dnet::WEvonet::read_dot(tGraphSP p_graph, const std::string& p_filename)
     } else {
         throw dnet::GraphException(dnet::GraphException::GRAPH_INPUT_ERROR);
     }
+}
+
+
+boost::dynamic_properties dnet::WEvonet::getProperties(tGraphSP p_graph)
+{
+    boost::dynamic_properties dp;
+    dp.property(dnet::WEvonet::EDGE_WEIGHT, get(boost::edge_weight, *p_graph));
+    dp.property(dnet::WEvonet::VERTEX_ID, get(boost::vertex_index, *p_graph));
+    dp.property(dnet::WEvonet::SERVICE_RATE, get(vertex_service_rate, *p_graph));
+    dp.property(dnet::WEvonet::ARRIVAL_RATE, get(vertex_arrival_rate, *p_graph));
+    dp.property(dnet::WEvonet::BUSY, get(vertex_busy, *p_graph));
+    dp.property(dnet::WEvonet::TIME_SERVICE_ENDS, get(vertex_time_service_ends, *p_graph));
+    dp.property(dnet::WEvonet::NUMBER_IN_QUEUE, get(vertex_number_in_queue, *p_graph));
+    dp.property(dnet::WEvonet::AVERAGE_DELAY_IN_QUEUE, get(vertex_average_delay_in_queue, *p_graph));
+    dp.property(dnet::WEvonet::NUM_EVENTS, get(vertex_num_events, *p_graph));
+    dp.property(dnet::WEvonet::UTILISATION, get(vertex_utilisation, *p_graph));
+
+    return dp;
 }
