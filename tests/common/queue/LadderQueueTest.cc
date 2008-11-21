@@ -43,7 +43,7 @@ void LadderQueueTest::tearDown()
 void LadderQueueTest::testEnqueue10()
 {
     for (int i = 10; i > 0; --i) {
-        dcommon::Entry *entry = new dcommon::Entry((double) i, 1, 1, 1);
+        dcommon::Entry *entry = new dcommon::Entry(0.0, (double) i, 1, 1, 1);
         m_ladderqueue->push(entry);
     }
 
@@ -51,7 +51,7 @@ void LadderQueueTest::testEnqueue10()
 
     for (int i = 0; i < 9; ++i) {
         dcommon::Entry *newE = m_ladderqueue->dequeue();
-        CPPUNIT_ASSERT((double) oldE->arrival <= (double) newE->arrival);
+        CPPUNIT_ASSERT((double) oldE->getArrival() <= (double) newE->getArrival());
         delete oldE;
         oldE = newE;
     }
@@ -65,7 +65,7 @@ void LadderQueueTest::testEnqueueVeryLarge()
         uni(generator, uni_dist);
 
     for (int i = 2000000; i > 0; --i) {
-        dcommon::Entry *entry = new dcommon::Entry(uni(), 1, 1, 1);
+        dcommon::Entry *entry = new dcommon::Entry(0.0, uni(), 1, 1, 1);
         m_ladderqueue->push(entry);
     }
 
@@ -73,7 +73,7 @@ void LadderQueueTest::testEnqueueVeryLarge()
 
     for (int i = 0; i < 1999999; ++i) {
         dcommon::Entry *newE = m_ladderqueue->dequeue();
-        CPPUNIT_ASSERT((double) oldE->arrival <= (double) newE->arrival);
+        CPPUNIT_ASSERT((double) oldE->getArrival() <= (double) newE->getArrival());
         delete oldE;
         oldE = newE;
     }
@@ -84,11 +84,11 @@ void LadderQueueTest::testEnqueueVeryLarge()
 void LadderQueueTest::testEnqueueDequeue20()
 {
     for (int i = 10; i > 0; --i) {
-        dcommon::Entry *entry = new dcommon::Entry((double) i, 1, 1, 1);
+        dcommon::Entry *entry = new dcommon::Entry(0.0, (double) i, 1, 1, 1);
         m_ladderqueue->push(entry);
     }
     for (int i = 10; i > 0; --i) {
-        dcommon::Entry *entry = new dcommon::Entry(100.0 + (double) i, 1, 1, 1);
+        dcommon::Entry *entry = new dcommon::Entry(0.0, 100.0 + (double) i, 1, 1, 1);
         m_ladderqueue->push(entry);
     }
 
@@ -96,14 +96,14 @@ void LadderQueueTest::testEnqueueDequeue20()
 
     for (int i = 0; i < 9; ++i) {
         dcommon::Entry *newE = m_ladderqueue->dequeue();
-        CPPUNIT_ASSERT(oldE->arrival <= newE->arrival);
+        CPPUNIT_ASSERT(oldE->getArrival() <= newE->getArrival());
         delete oldE;
         oldE = newE;
     }
 
     for (int i = 1; i < 10; ++i) {
         try {
-            dcommon::Entry *entry = new dcommon::Entry((double) i, 1, 1, 1);
+            dcommon::Entry *entry = new dcommon::Entry(0.0, (double) i, 1, 1, 1);
             m_ladderqueue->push(entry);
             CPPUNIT_FAIL("Expected queue exception!");
         } catch (dcommon::QueueException qe) {
@@ -113,7 +113,7 @@ void LadderQueueTest::testEnqueueDequeue20()
 
     for (int i = 0; i < 10; ++i) {
         dcommon::Entry *newE = m_ladderqueue->dequeue();
-        CPPUNIT_ASSERT(oldE->arrival <= newE->arrival);
+        CPPUNIT_ASSERT(oldE->getArrival() <= newE->getArrival());
         delete oldE;
         oldE = newE;
     }

@@ -38,10 +38,46 @@ bool dcommon::Entry::operator< (const dcommon::Entry& rhs)
 }
 
 
+double dcommon::Entry::getDelay() const
+{
+    return delay;
+}
+
+
+boost::uintmax_t dcommon::Entry::getId() const
+{
+    return id;
+}
+
+
+double dcommon::Entry::getArrival() const
+{
+    return arrival;
+}
+
+
+int dcommon::Entry::getDestination() const
+{
+    return destination;
+}
+
+
+int dcommon::Entry::getOrigin() const
+{
+    return origin;
+}
+
+
+int dcommon::Entry::getType() const
+{
+    return type;
+}
+
+
 std::ostream& dcommon::operator <<(std::ostream &p_os, const dcommon::Entry &p_entry)
 {
-    p_os << p_entry.id << "," << p_entry.arrival << ","
-         << p_entry.origin << "," << p_entry.destination << "," << p_entry.type;
+    p_os << p_entry.getId() << "," << p_entry.getArrival() << "," << p_entry.getDelay() << ","
+         << p_entry.getOrigin() << "," << p_entry.getDestination() << "," << p_entry.getType();
 
     return p_os;
 }
@@ -49,8 +85,8 @@ std::ostream& dcommon::operator <<(std::ostream &p_os, const dcommon::Entry &p_e
 
 std::ostream& dcommon::operator <<(std::ostream &p_os, dcommon::Entry &p_entry)
 {
-    p_os << p_entry.id << "," << p_entry.arrival << ","
-         << p_entry.origin << "," << p_entry.destination << "," << p_entry.type;
+    p_os << p_entry.getId() << "," << p_entry.getArrival() << "," << p_entry.getDelay() << ","
+         << p_entry.getOrigin() << "," << p_entry.getDestination() << "," << p_entry.getType();
 
     return p_os;
 }

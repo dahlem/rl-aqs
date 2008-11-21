@@ -69,7 +69,7 @@ void dcore::DepartureHandler::update(dcore::DepartureEvent *subject)
     dcommon::Entry *entry;
     entry = subject->getEvent();
 
-    dnet::Vertex vertex = boost::vertex(entry->destination, *m_graph);
+    dnet::Vertex vertex = boost::vertex(entry->getDestination(), *m_graph);
     // if the server is busy then re-schedule
     // otherwise schedule the departure
     if (vertex_busy_map[vertex]) {
@@ -115,10 +115,11 @@ void dcore::DepartureHandler::update(dcore::DepartureEvent *subject)
                     // schedule an internal arrival event
                     boost::int32_t destination = vertex_index_map[target(edges[e], *m_graph)];
                     dcommon::Entry *new_entry = new dcommon::Entry(
-                        entry->id,
-                        entry->arrival,
+                        entry->getId(),
+                        entry->getDelay(),
+                        entry->getArrival(),
                         destination,
-                        entry->origin,
+                        entry->getOrigin(),
                         dcore::ARRIVAL_EVENT);
 
                     m_queue->push(new_entry);

@@ -139,8 +139,8 @@ const bool dcommon::Top::push(dcommon::Entry *p_entry) throw (dcommon::QueueExce
     events_in++;
 #endif /* HAVE_LADDERSTATS */
 
-    setMaxTS(p_entry->arrival);
-    setMinTS(p_entry->arrival);
+    setMaxTS(p_entry->getArrival());
+    setMinTS(p_entry->getArrival());
 
     m_fifo->push_back(*p_entry);
     return true;

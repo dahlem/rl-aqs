@@ -39,11 +39,11 @@ class LadderTest : public CppUnit::TestFixture
     CPPUNIT_TEST(testEnlistSmall);
     CPPUNIT_TEST(testEnlistLarge75);
     CPPUNIT_TEST(testEnlistLarge75Fractions);
-    CPPUNIT_TEST(testSpawnOnce);
-    CPPUNIT_TEST(testSpawnEqualArrivals);
-    CPPUNIT_TEST(testSpawnAll);
+//     CPPUNIT_TEST(testSpawnOnce);
+//     CPPUNIT_TEST(testSpawnEqualArrivals);
+//    CPPUNIT_TEST(testSpawnAll);
     CPPUNIT_TEST_EXCEPTION(testEnlistException, dcommon::QueueException);
-    CPPUNIT_TEST_EXCEPTION(testEnqueueException, dcommon::QueueException);
+//    CPPUNIT_TEST_EXCEPTION(testEnqueueException, dcommon::QueueException);
     CPPUNIT_TEST(testEnqueue);
     CPPUNIT_TEST_EXCEPTION(testEnqueueNotAllowed, dcommon::QueueException);
     CPPUNIT_TEST(testPushBack);

@@ -41,7 +41,7 @@ void TopTest::testInitial()
 
 void TopTest::testEnqueueOnce()
 {
-    dcommon::Entry *entry = new dcommon::Entry(3.1, 1, 1, 0);
+    dcommon::Entry *entry = new dcommon::Entry(0.0, 3.1, 1, 1, 0);
 
     CPPUNIT_ASSERT(m_top->getNTop() == 0);
     m_top->push(entry);
@@ -53,8 +53,8 @@ void TopTest::testEnqueueOnce()
 
 void TopTest::testEnqueueTwice()
 {
-    dcommon::Entry *entry1 = new dcommon::Entry(0.5, 1, 1, 0);
-    dcommon::Entry *entry2 = new dcommon::Entry(1.0, 2, 2, 1);
+    dcommon::Entry *entry1 = new dcommon::Entry(0.0, 0.5, 1, 1, 0);
+    dcommon::Entry *entry2 = new dcommon::Entry(0.0, 1.0, 2, 2, 1);
     dcommon::EntryList *result = NULL;
     dcommon::Entry entry;
     dcommon::Entry *toDelete;
@@ -89,7 +89,7 @@ void TopTest::testEnqueueTwice()
 
 void TopTest::testResetOk()
 {
-    dcommon::Entry *entry1 = new dcommon::Entry(0.5, 1, 1, 0);
+    dcommon::Entry *entry1 = new dcommon::Entry(0.0, 0.5, 1, 1, 0);
 
     try {
         m_top->reset();
@@ -113,7 +113,7 @@ void TopTest::testResetOk()
 
 void TopTest::testResetThrows()
 {
-    dcommon::Entry *entry1 = new dcommon::Entry(0.5, 1, 1, 0);
+    dcommon::Entry *entry1 = new dcommon::Entry(0.0, 0.5, 1, 1, 0);
 
     m_top->push(entry1);
 
@@ -126,9 +126,9 @@ void TopTest::testResetThrows()
 
 void TopTest::testList()
 {
-    dcommon::Entry *entry1 = new dcommon::Entry(0.0, 1, 1, 0);
-    dcommon::Entry *entry2 = new dcommon::Entry(1.0, 2, 2, 1);
-    dcommon::Entry *entry3 = new dcommon::Entry(1.0, 2, 2, 1);
+    dcommon::Entry *entry1 = new dcommon::Entry(0.0, 0.0, 1, 1, 0);
+    dcommon::Entry *entry2 = new dcommon::Entry(0.0, 1.0, 2, 2, 1);
+    dcommon::Entry *entry3 = new dcommon::Entry(0.0, 1.0, 2, 2, 1);
     dcommon::Entry *entry = NULL;
     dcommon::EntryList *result = NULL;
 
@@ -161,7 +161,7 @@ void TopTest::test100()
     dcommon::EntryList *result = NULL;
 
     for (int i = 0; i < 100; ++i) {
-        dcommon::Entry *entry = new dcommon::Entry((double) i, 1, 1, 0);
+        dcommon::Entry *entry = new dcommon::Entry(0.0, (double) i, 1, 1, 0);
         m_top->push(entry);
     }
 
@@ -173,7 +173,7 @@ void TopTest::test100()
     while (!result->empty()) {
         dcommon::Entry *entry = reinterpret_cast<dcommon::Entry*>(&result->front());
         result->pop_front();
-        CPPUNIT_ASSERT(entry->arrival == i);
+        CPPUNIT_ASSERT(entry->getArrival() == i);
         delete entry;
         i++;
     }
@@ -192,7 +192,7 @@ void TopTest::testEnlist()
     bool test;
 
     for (int i = 0; i < 3; ++i) {
-        entry = new dcommon::Entry((double) i, i, 1, 0);
+        entry = new dcommon::Entry(0.0, (double) i, i, 1, 0);
         fifo->push_back(*entry);
     }
 
@@ -205,7 +205,7 @@ void TopTest::testEnlist()
     while (!result->empty()) {
         resultNew = reinterpret_cast<dcommon::Entry*>(&result->front());
         result->pop_front();
-        test = (resultOld->destination < resultNew->destination);
+        test = (resultOld->getDestination() < resultNew->getDestination());
         CPPUNIT_ASSERT(test);
         resultOld = resultNew;
         delete resultNew;

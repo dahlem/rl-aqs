@@ -93,7 +93,7 @@ const bool dcommon::LadderQueue::push(dcommon::Entry *p_entry) throw (dcommon::Q
     gettimeofday(&start, NULL);
 #endif /* HAVE_LADDERTIMING */
 
-    if (p_entry->arrival >= m_top->getTopStart()) {
+    if (p_entry->getArrival() >= m_top->getTopStart()) {
         // insert at the tail of top
         m_top->push(p_entry);
     } else {

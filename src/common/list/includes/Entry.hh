@@ -44,7 +44,7 @@ namespace des
     namespace common
     {
 
-static const std::string HEADER = "id,arrivalTime,origin,destination,type";
+static const std::string HEADER = "id,arrivalTime,delay,origin,destination,type";
 
 
 /** @class Entry
@@ -58,18 +58,18 @@ class Entry : public boost::intrusive::list_base_hook<>
 {
 public:
     Entry()
-        : id(0), arrival(0.0), destination(-99), origin(-99), type(-99)
+        : id(0), delay(0.0), arrival(0.0), destination(-99), origin(-99), type(-99)
         {}
 
-    explicit Entry(double a, int d, int o, int t)
-        : arrival(a), destination(d), origin(o), type(t)
+    explicit Entry(double del, double a, int d, int o, int t)
+        : delay(del), arrival(a), destination(d), origin(o), type(t)
         {
             uid++;
             id = uid;
         }
 
-    explicit Entry(boost::uintmax_t i, double a, int d, int o, int t)
-        : id(i), arrival(a), destination(d), origin(o), type(t)
+    explicit Entry(boost::uintmax_t i, double del, double a, int d, int o, int t)
+        : id(i), delay(del), arrival(a), destination(d), origin(o), type(t)
         {
             uid++;
         }
@@ -82,21 +82,27 @@ public:
     bool operator< (const Entry& rhs) const;
     bool operator< (const Entry& rhs);
 
+    double getDelay() const;
+    boost::uintmax_t getId() const;
+    double getArrival() const;
+    int getDestination() const;
+    int getOrigin() const;
+    int getType() const;
+
 
     friend std::ostream& operator <<(std::ostream &p_os, const Entry &p_entry);
     friend std::ostream& operator <<(std::ostream &p_os, Entry &p_entry);
 
 
+
+private:
+    static boost::uintmax_t uid;
     boost::uintmax_t id;
+    double delay;
     double arrival;
     int destination;
     int origin;
     int type;
-
-
-private:
-    static boost::uintmax_t uid;
-
 };
 
 typedef boost::intrusive::make_list <Entry>::type EntryList;

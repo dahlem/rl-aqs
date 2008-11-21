@@ -46,15 +46,15 @@ public:
 
     enum {
         BAD_RESET = 0,
-        RUNG_NOT_FOUND = 1,
-        RUNG_OUT_OF_BOUNDS = 2,
-        BUCKET_OUT_OF_BOUNDS = 3,
-        NO_EPOCH_INIT = 4,
-        EPOCH_EXISTS = 5,
-        PAST_EVENT_NOT_ALLOWED = 6,
-        QUEUE_EMPTY = 7,
-        ADVANCE_IGNORED_EVENTS = 8,
-        NUM_ERRORS = 9
+        RUNG_NOT_FOUND,
+        RUNG_OUT_OF_BOUNDS,
+        BUCKET_OUT_OF_BOUNDS,
+        NO_EPOCH_INIT,
+        EPOCH_EXISTS,
+        PAST_EVENT_NOT_ALLOWED,
+        QUEUE_EMPTY,
+        ADVANCE_IGNORED_EVENTS,
+        NUM_ERRORS
     };
 
 private:

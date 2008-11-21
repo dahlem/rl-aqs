@@ -99,7 +99,7 @@ const bool dcommon::Bottom::push(dcommon::Entry *p_entry) throw (dcommon::QueueE
 {
     bool inserted = false;
 
-    if (p_entry->arrival < m_lastEvent) {
+    if (p_entry->getArrival() < m_lastEvent) {
         throw dcommon::QueueException(
             dcommon::QueueException::PAST_EVENT_NOT_ALLOWED);
     }
@@ -110,7 +110,7 @@ const bool dcommon::Bottom::push(dcommon::Entry *p_entry) throw (dcommon::QueueE
         inserted = true;
     } else {
         // if the last element is already <= the new entry then insert at the back
-        if (m_list->back().arrival <= p_entry->arrival) {
+        if (m_list->back().getArrival() <= p_entry->getArrival()) {
             m_list->push_back(*p_entry);
             inserted = true;
         } else {
@@ -119,7 +119,7 @@ const bool dcommon::Bottom::push(dcommon::Entry *p_entry) throw (dcommon::QueueE
             dcommon::EntryList::reverse_iterator it(m_list->rbegin()), itend(m_list->rend());
 
             for(; it != itend; ++it) {
-                if (it->arrival <= p_entry->arrival) {
+                if (it->getArrival() <= p_entry->getArrival()) {
                     dcommon::EntryList::iterator pos = m_list->s_iterator_to(*it);
                     m_list->insert(pos++, *p_entry);
                     inserted = true;
@@ -188,7 +188,7 @@ void dcommon::Bottom::pop_front() throw (dcommon::QueueException)
 #endif /* HAVE_LADDERSTATS */
 
     // record the last event time stamp
-    m_lastEvent = m_list->front().arrival;
+    m_lastEvent = m_list->front().getArrival();
 
     m_list->pop_front();
 }
@@ -196,7 +196,7 @@ void dcommon::Bottom::pop_front() throw (dcommon::QueueException)
 const double dcommon::Bottom::getMaxTS()
 {
     if (!m_list->empty()) {
-        return m_list->back().arrival;
+        return m_list->back().getArrival();
     }
 
     return m_lastEvent;
@@ -205,7 +205,7 @@ const double dcommon::Bottom::getMaxTS()
 const double dcommon::Bottom::getMinTS()
 {
     if (!m_list->empty()) {
-        return m_list->front().arrival;
+        return m_list->front().getArrival();
     }
 
     return m_lastEvent;

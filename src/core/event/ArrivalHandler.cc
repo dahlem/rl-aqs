@@ -59,9 +59,10 @@ void dcore::ArrivalHandler::update(dcore::ArrivalEvent *subject)
     dnet::Vertex vertex;
     double service_time;
     double departure;
+    double delay = 0.0;
 
     entry = subject->getEvent();
-    vertex = boost::vertex(entry->destination, *m_graph);
+    vertex = boost::vertex(entry->getDestination(), *m_graph);
 
     service_time = gsl_ran_exponential(m_service_rng.get(),
                                        vertex_service_map[vertex]);
@@ -70,11 +71,12 @@ void dcore::ArrivalHandler::update(dcore::ArrivalEvent *subject)
     // otherwise schedule the departure
     if (vertex_busy_map[vertex]) {
         // the new arrival time is that of the time-service-ends
+        delay = vertex_time_service_ends_map[vertex] - entry->getArrival();
         departure = vertex_time_service_ends_map[vertex] + service_time;
         vertex_number_in_queue_map[vertex]++;
     } else {
         // enqueue a departure event into the queue with a stochastic service time
-        departure = entry->arrival + service_time;
+        departure = entry->getArrival() + service_time;
 
         // set the busy flag to true
         vertex_busy_map[vertex] = true;
@@ -82,10 +84,11 @@ void dcore::ArrivalHandler::update(dcore::ArrivalEvent *subject)
     }
 
     dcommon::Entry *new_entry = new dcommon::Entry(
-        entry->id,
+        entry->getId(),
+        entry->getDelay() + delay,
         departure,
-        entry->destination,
-        entry->destination,
+        entry->getDestination(),
+        entry->getDestination(),
         dcore::DEPARTURE_EVENT);
 
     m_queue->push(new_entry);

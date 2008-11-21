@@ -83,7 +83,7 @@ void dcore::EventProcessor::process()
         while ((entry = m_queue->dequeue()) != NULL) {
 
             // if stop time has been reached break out and handle the event below
-            if (entry->arrival > m_stopTime) {
+            if (entry->getArrival() > m_stopTime) {
                 break;
             } else {
                 if (m_processedEvents != NULL) {
@@ -94,7 +94,7 @@ void dcore::EventProcessor::process()
                 }
             }
 
-            switch (entry->type) {
+            switch (entry->getType()) {
               case LAST_ARRIVAL_EVENT:
                   // generate new events
                   generate(entry);
@@ -167,7 +167,7 @@ void dcore::EventProcessor::setGenerations(dsample::tGslRngSP p_arrivalRng,
 void dcore::EventProcessor::generate(dcommon::Entry *p_entry)
 {
     if (m_generations > 1) {
-        int dest = p_entry->destination;
+        int dest = p_entry->getDestination();
 
         // increment the current generation for the destination vertex
         if (m_interval * (m_currentGeneration[dest] + 1) <= m_stopTime) {
@@ -201,7 +201,7 @@ void dcore::EventProcessor::generate(dcommon::Entry *p_entry)
                     // generate the events
                     dcore::EventGenerator::generate(m_queue, m_arrivalRng,
                                                     dest, arrival_rate,
-                                                    p_entry->arrival, stopTime);
+                                                    p_entry->getArrival(), stopTime);
                 } else {
                     std::cout << "Error: Expected a single vertex to be traced!" << std::endl;
                     break;

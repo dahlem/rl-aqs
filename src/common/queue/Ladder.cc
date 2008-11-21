@@ -243,14 +243,14 @@ const bool dcommon::Ladder::push(dcommon::Entry *p_entry) throw (dcommon::QueueE
     boost::uint32_t nRungs = 0;
 
     // find the rung
-    while ((p_entry->arrival < getRCur(nRungs)) && (nRungs <= m_lowestRung)) {
+    while ((p_entry->getArrival() < getRCur(nRungs)) && (nRungs <= m_lowestRung)) {
         nRungs++;
     }
 
     // found
     if (nRungs <= m_lowestRung) {
         // insert into tail of rung x, bucket k
-        m_rungs[nRungs][bucket(p_entry->arrival, nRungs)].push_back(*p_entry);
+        m_rungs[nRungs][bucket(p_entry->getArrival(), nRungs)].push_back(*p_entry);
         updateNEvents(nRungs, 1);
     } else {
         throw dcommon::QueueException(dcommon::QueueException::RUNG_NOT_FOUND);
@@ -277,7 +277,7 @@ void dcommon::Ladder::push(boost::uint32_t p_rung, dcommon::EntryList *p_list)
     while (!p_list->empty()) {
         entry = reinterpret_cast<dcommon::Entry*>(&p_list->front());
         p_list->pop_front();
-        m_rungs[p_rung][bucket(entry->arrival, p_rung)].push_back(*entry);
+        m_rungs[p_rung][bucket(entry->getArrival(), p_rung)].push_back(*entry);
 
         updateNEvents(p_rung, 1);
     }

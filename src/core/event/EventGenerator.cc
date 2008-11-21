@@ -75,6 +75,7 @@ void dcore::EventGenerator::generate(
         if ((cur_arrival - new_arrival) <= stop_time) {
             // enqueue the last arrival event
             dcommon::Entry *entry = new dcommon::Entry(
+                0.0,
                 cur_arrival,
                 destination,
                 dcore::EXTERNAL_EVENT,
@@ -85,6 +86,7 @@ void dcore::EventGenerator::generate(
         } else {
             // enqueue the last arrival event
             dcommon::Entry *entry = new dcommon::Entry(
+                0.0,
                 cur_arrival,
                 destination,
                 dcore::EXTERNAL_EVENT,
@@ -112,6 +114,7 @@ void dcore::EventGenerator::generate(
 
     // enqueue the last arrival event
     dcommon::Entry *entry = new dcommon::Entry(
+        0.0,
         cur_arrival,
         destination,
         dcore::EXTERNAL_EVENT,
