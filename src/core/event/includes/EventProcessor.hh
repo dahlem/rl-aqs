@@ -29,6 +29,7 @@ namespace dnet = des::network;
 #include "AnyEvent.hh"
 #include "ArrivalEvent.hh"
 #include "DepartureEvent.hh"
+#include "PostEvent.hh"
 namespace dcore = des::core;
 
 #include "LadderQueue.hh"
@@ -59,12 +60,11 @@ public:
                    dcore::tAnyEventSP,
                    dcore::tArrivalEventSP,
                    dcore::tDepartureEventSP,
+                   dcore::tPostEventSP,
                    double);
     ~EventProcessor();
 
     void process();
-    void setUnprocessedResults(dio::tResultsSP);
-
     void setGenerations(dsample::tGslRngSP, int);
 
 
@@ -79,8 +79,8 @@ private:
     dcore::tAnyEventSP m_anyEvent;
     dcore::tArrivalEventSP m_arrivalEvent;
     dcore::tDepartureEventSP m_departureEvent;
+    dcore::tPostEventSP m_postEvent;
 
-    dio::tResultsSP m_unprocessedEvents;
     double m_stopTime;
 
     // only used if event generations are configured

@@ -42,6 +42,8 @@
 #include "EventGenerator.hh"
 #include "EventProcessor.hh"
 #include "ProcessedEventsHandler.hh"
+#include "PostEvent.hh"
+#include "UnprocessedEventsHandler.hh"
 namespace dcore = des::core;
 
 #include "Results.hh"
@@ -202,14 +204,19 @@ int main(int argc, char *argv[])
 
     dio::tResultsSP processed_events(
         new dio::Results(desArgs->events_processed, desArgs->results_dir));
+    dio::tResultsSP unprocessed_events(
+        new dio::Results(desArgs->events_unprocessed, desArgs->results_dir));
 
     // instantiate the events & handlers
     dcore::tAnyEventSP anyEvent(new dcore::AnyEvent);
     dcore::tArrivalEventSP arrivalEvent(new dcore::ArrivalEvent);
     dcore::tDepartureEventSP departureEvent(new dcore::DepartureEvent);
+    dcore::tPostEventSP postEvent(new dcore::PostEvent);
 
     dcore::tProcessedEventsHandlerSP processedEventsHandler(
         new dcore::ProcessedEventsHandler(processed_events));
+    dcore::tUnprocessedEventsHandlerSP unprocessedEventsHandler(
+        new dcore::UnprocessedEventsHandler(unprocessed_events, queue));
     dcore::tArrivalHandlerSP arrivalHandler(
         new dcore::ArrivalHandler(queue, graph, service_rng_index));
     dcore::tDepartureHandlerSP departureHandler(
@@ -219,21 +226,19 @@ int main(int argc, char *argv[])
     anyEvent->attach(processedEventsHandler);
     arrivalEvent->attach(arrivalHandler);
     departureEvent->attach(departureHandler);
+    postEvent->attach(unprocessedEventsHandler);
 
     // instantiate the event processor and set the events
-    dio::tResultsSP unprocessed_events(
-        new dio::Results(desArgs->events_unprocessed, desArgs->results_dir));
-
     dcore::tEventProcessorSP processor(
         new dcore::EventProcessor(queue, graph, anyEvent, arrivalEvent,
-                                  departureEvent, desArgs->stop_time));
+                                  departureEvent, postEvent,
+                                  desArgs->stop_time));
 
     if (desArgs->generations > 1) {
         processor->setGenerations(arrival_rng, desArgs->generations);
     }
 
     // process the events
-    processor->setUnprocessedResults(unprocessed_events);
     processor->process();
 
     return EXIT_SUCCESS;

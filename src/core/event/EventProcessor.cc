@@ -45,22 +45,16 @@ dcore::EventProcessor::EventProcessor(dcommon::tQueueSP p_queue,
                                       dcore::tAnyEventSP p_anyEvent,
                                       dcore::tArrivalEventSP p_arrivalEvent,
                                       dcore::tDepartureEventSP p_departureEvent,
+                                      dcore::tPostEventSP p_postEvent,
                                       double p_stopTime)
     : m_queue(p_queue), m_graph(p_graph), m_anyEvent(p_anyEvent),
       m_arrivalEvent(p_arrivalEvent), m_departureEvent(p_departureEvent),
-      m_stopTime(p_stopTime), m_generations(0)
+      m_postEvent(p_postEvent), m_stopTime(p_stopTime), m_generations(0)
 {}
 
 
 dcore::EventProcessor::~EventProcessor()
 {}
-
-
-void dcore::EventProcessor::setUnprocessedResults(
-    dio::tResultsSP p_unprocessedEvents)
-{
-    m_unprocessedEvents = p_unprocessedEvents;
-}
 
 
 void dcore::EventProcessor::process()
@@ -95,36 +89,13 @@ void dcore::EventProcessor::process()
             delete entry;
         }
 
-        postProcess(entry);
+        m_postEvent->post(entry);
         std::cout << "Finished processing events." << std::endl;
     } catch (dcommon::QueueException &qe) {
         if (qe.errorCode() == dcommon::QueueException::QUEUE_EMPTY) {
             std::cout << "Finished processing events." << std::endl;
         } else {
             std::cout << "Exception: " << qe.what() << std::endl;
-        }
-    }
-}
-
-
-void dcore::EventProcessor::postProcess(dcommon::Entry *p_entry)
-    throw (dcommon::QueueException)
-{
-    dcommon::Entry *entry = p_entry;
-
-    // record the events left over
-    if (m_unprocessedEvents != NULL) {
-        if (entry != NULL) {
-            std::stringstream s;
-            s << dcommon::Entry::header();
-            m_unprocessedEvents->print(s);
-
-            do {
-                s.str("");
-                s << std::setprecision(14) << const_cast<const dcommon::Entry&> (*entry);
-                m_unprocessedEvents->print(s);
-                delete entry;
-            } while ((entry = m_queue->dequeue()) != NULL);
         }
     }
 }

@@ -15,7 +15,9 @@ libcoreevent_la_SOURCES =                                                  \
 	EventProcessor.cc                                                  \
 	Event.cc                                                           \
 	AnyEvent.cc                                                        \
+	PostEvent.cc                                                       \
 	ProcessedEventsHandler.cc                                          \
+	UnprocessedEventsHandler.cc                                        \
 	ArrivalEvent.cc                                                    \
 	ArrivalHandler.cc                                                  \
 	DepartureEvent.cc                                                  \
