@@ -20,34 +20,23 @@
 #ifndef __EVENTPROCESSOR_HH__
 #define __EVENTPROCESSOR_HH__
 
-#include <boost/shared_array.hpp>
 #include <boost/shared_ptr.hpp>
-
-#include "WEvonet.hh"
-namespace dnet = des::network;
 
 #include "AnyEvent.hh"
 #include "ArrivalEvent.hh"
 #include "DepartureEvent.hh"
+#include "LastArrivalEvent.hh"
 #include "PostEvent.hh"
 namespace dcore = des::core;
 
 #include "LadderQueue.hh"
 namespace dcommon = des::common;
 
-#include "Results.hh"
-namespace dio = des::io;
-
-#include "CRN.hh"
-namespace dsample = des::sampling;
-
 
 namespace des
 {
     namespace core
     {
-
-typedef boost::shared_array <int> tIntSA;
 
 /** @class EventProcessor
  * This class processes the events in the event queue
@@ -56,38 +45,26 @@ class EventProcessor
 {
 public:
     EventProcessor(dcommon::tQueueSP,
-                   dnet::tGraphSP,
                    dcore::tAnyEventSP,
                    dcore::tArrivalEventSP,
                    dcore::tDepartureEventSP,
                    dcore::tPostEventSP,
+                   dcore::tLastArrivalEventSP,
                    double);
     ~EventProcessor();
 
     void process();
-    void setGenerations(dsample::tGslRngSP, int);
 
 
 private:
-    void postProcess(dcommon::Entry*) throw (dcommon::QueueException);
-    void generate(dcommon::Entry *p_entry);
-
-
     dcommon::tQueueSP m_queue;
-    dnet::tGraphSP m_graph;
-
     dcore::tAnyEventSP m_anyEvent;
     dcore::tArrivalEventSP m_arrivalEvent;
     dcore::tDepartureEventSP m_departureEvent;
     dcore::tPostEventSP m_postEvent;
+    dcore::tLastArrivalEventSP m_lastArrivalEvent;
 
     double m_stopTime;
-
-    // only used if event generations are configured
-    dsample::tGslRngSP m_arrivalRng;
-    tIntSA m_currentGeneration;
-    int m_generations;
-    double m_interval;
 };
 
 typedef boost::shared_ptr <dcore::EventProcessor> tEventProcessorSP;

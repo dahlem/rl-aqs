@@ -49,8 +49,6 @@ void dcore::UnprocessedEventsHandler::update(dcore::PostEvent *subject)
     // record the events left over
     if (entry != NULL) {
         std::stringstream s;
-        s << dcommon::Entry::header();
-        m_unprocessedEvents->print(s);
 
         do {
             s.str("");

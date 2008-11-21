@@ -19,14 +19,10 @@
 #endif /* __STDC_CONSTANT_MACROS */
 
 #include <iostream>
-#include <iomanip>
-#include <string>
 #include <utility>
 
 #include <boost/cstdint.hpp>
 #include <boost/graph/adjacency_list.hpp>
-#include <boost/graph/graphml.hpp>
-#include <boost/graph/graphviz.hpp>
 #include <boost/iterator/filter_iterator.hpp>
 #include <boost/shared_ptr.hpp>
 
@@ -41,8 +37,10 @@
 #include "events.hh"
 #include "EventGenerator.hh"
 #include "EventProcessor.hh"
-#include "ProcessedEventsHandler.hh"
+#include "GenerateEventHandler.hh"
+#include "LastArrivalEvent.hh"
 #include "PostEvent.hh"
+#include "ProcessedEventsHandler.hh"
 #include "UnprocessedEventsHandler.hh"
 namespace dcore = des::core;
 
@@ -212,6 +210,7 @@ int main(int argc, char *argv[])
     dcore::tArrivalEventSP arrivalEvent(new dcore::ArrivalEvent);
     dcore::tDepartureEventSP departureEvent(new dcore::DepartureEvent);
     dcore::tPostEventSP postEvent(new dcore::PostEvent);
+    dcore::tLastArrivalEventSP lastArrivalEvent(new dcore::LastArrivalEvent);
 
     dcore::tProcessedEventsHandlerSP processedEventsHandler(
         new dcore::ProcessedEventsHandler(processed_events));
@@ -222,6 +221,14 @@ int main(int argc, char *argv[])
     dcore::tDepartureHandlerSP departureHandler(
         new dcore::DepartureHandler(queue, graph, depart_uniform_rng_index));
 
+    // we only need to register an event generation handler, if there are > 1 phases
+    if (desArgs->generations > 1) {
+        dcore::tGenerateEventHandlerSP generateEventHandler(
+            new dcore::GenerateEventHandler(
+                graph, arrival_rng, desArgs->generations, queue, desArgs->stop_time));
+        lastArrivalEvent->attach(generateEventHandler);
+    }
+
     // attach the handlers to the events
     anyEvent->attach(processedEventsHandler);
     arrivalEvent->attach(arrivalHandler);
@@ -230,13 +237,9 @@ int main(int argc, char *argv[])
 
     // instantiate the event processor and set the events
     dcore::tEventProcessorSP processor(
-        new dcore::EventProcessor(queue, graph, anyEvent, arrivalEvent,
-                                  departureEvent, postEvent,
+        new dcore::EventProcessor(queue, anyEvent, arrivalEvent,
+                                  departureEvent, postEvent, lastArrivalEvent,
                                   desArgs->stop_time));
-
-    if (desArgs->generations > 1) {
-        processor->setGenerations(arrival_rng, desArgs->generations);
-    }
 
     // process the events
     processor->process();
