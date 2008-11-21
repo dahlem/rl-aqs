@@ -11,6 +11,7 @@
 noinst_LTLIBRARIES = libnetevo.la
 
 libnetevo_la_SOURCES =                                                \
+	GraphException.cc                                             \
 	WEvonet.cc
 
 libnetevo_la_CPPFLAGS =                                               \
@@ -18,6 +19,7 @@ libnetevo_la_CPPFLAGS =                                               \
 	$(BOOST_CPPFLAGS)
 
 libnetevo_la_LIBADD =                                                 \
+	-lboost_graph                                                 \
 	$(BOOST_LDFLAGS)
 
 include_HEADERS = includes

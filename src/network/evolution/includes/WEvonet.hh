@@ -36,6 +36,9 @@
 
 #include <gsl/gsl_rng.h>
 
+#include "GraphException.hh"
+namespace dnet = des::network;
+
 
 /** @enum vertex_service_rate_t
  * This enum extends the vertex properties by a service_rate attribute.
@@ -62,9 +65,15 @@ enum vertex_time_service_ends_t { vertex_time_service_ends = 1114 };
 
 
 /** @enum vertex_number_in_queue_t
- * This enum extends the vertex properties by a time service ends attribute.
+ * This enum extends the vertex properties by a time in queue attribute.
  */
 enum vertex_number_in_queue_t { vertex_number_in_queue = 1115 };
+
+
+/** @enum vertex_average_delay_in_queue_t
+ * This enum extends the vertex properties by a average delay in queue attribute.
+ */
+enum vertex_average_delay_in_queue_t { vertex_average_delay_in_queue = 1116 };
 
 
 // install the vertex service rate property
@@ -75,6 +84,7 @@ namespace boost
     BOOST_INSTALL_PROPERTY(vertex, busy);
     BOOST_INSTALL_PROPERTY(vertex, time_service_ends);
     BOOST_INSTALL_PROPERTY(vertex, number_in_queue);
+    BOOST_INSTALL_PROPERTY(vertex, average_delay_in_queue);
 }
 
 
@@ -92,14 +102,19 @@ typedef boost::property <vertex_service_rate_t, float> VertexServiceRateProperty
 typedef boost::property <vertex_arrival_rate_t, float, VertexServiceRateProperty> VertexArrivalRateProperty;
 
 /** @typedef VertexArrivalRateProperty
- * Specifies the property for the vertex arrival rate
+ * Specifies the property for the vertex number in queue
  */
 typedef boost::property <vertex_number_in_queue_t, int, VertexArrivalRateProperty> VertexNumberInQueueProperty;
+
+/** @typedef VertexAverageDelayInQueueProperty
+ * Specifies the property for the vertex average delay in queue
+ */
+typedef boost::property <vertex_average_delay_in_queue_t, float, VertexNumberInQueueProperty> VertexAverageDelayInQueueProperty;
 
 /** @typedef VertexBusyProperty
  * Specifies the property for the vertex busy flag
  */
-typedef boost::property <vertex_busy_t, bool, VertexNumberInQueueProperty> VertexBusyProperty;
+typedef boost::property <vertex_busy_t, bool, VertexAverageDelayInQueueProperty> VertexBusyProperty;
 
 /** @typedef VertexTimeServiceEndsProperty
  * Specifies the property for the time service ends attribute of a vertex
@@ -140,10 +155,15 @@ typedef boost::graph_traits <Graph>::vertex_descriptor Vertex;
  */
 typedef boost::graph_traits <Graph>::edge_descriptor Edge;
 
-/** @typedef VertexServiceRateMap
+/** @typedef VertexNumberInQueueMap
  * Specifies the map that stores the vertex service rate property
  */
 typedef boost::property_map <Graph, vertex_number_in_queue_t>::type VertexNumberInQueueMap;
+
+/** @typedef VertexAverageDelayInQueueMap
+ * Specifies the map that stores the vertex average delay in queue property
+ */
+typedef boost::property_map <Graph, vertex_average_delay_in_queue_t>::type VertexAverageDelayInQueueMap;
 
 /** @typedef VertexServiceRateMap
  * Specifies the map that stores the vertex service rate property
@@ -220,6 +240,16 @@ typedef boost::shared_ptr <gsl_rng> tGslRngSP;
 class WEvonet
 {
 public:
+    static const std::string EDGE_WEIGHT;
+    static const std::string VERTEX_ID;
+    static const std::string SERVICE_RATE;
+    static const std::string ARRIVAL_RATE;
+    static const std::string BUSY;
+    static const std::string TIME_SERVICE_ENDS;
+    static const std::string NUMBER_IN_QUEUE;
+    static const std::string AVERAGE_DELAY_IN_QUEUE;
+
+
     static const boost::uint32_t MAX_EDGES = UINT_MAX;
 
     /** @enum GraphTypes
@@ -264,6 +294,16 @@ public:
      */
     void print(const std::string& filename, const GraphTypes graphType);
 
+    /** @fn void read(tGraphSP, std::string) throw (dnet::GraphException)
+     * Read a graph from a file and store it into the first parameter.
+     *
+     * @param tGraphSP the graph object
+     * @param const std::string& the filename to read the graph from
+     * @param const GraphTypes the graph type selected for the input
+     */
+    static void read(tGraphSP, const std::string&, const GraphTypes)
+        throw (dnet::GraphException);
+
 private:
 
     /** @fn void assign_edge_weights(Vertex &v)
@@ -298,6 +338,24 @@ private:
      */
     void print_graphml(const std::string& filename);
 
+    /** @fn void read_dot(tGraphSP, const std::string& filename)
+     * Read the graph using the graphviz interface of BGL from a file
+     *
+     * @param tGraphSP the graph object to store the graph
+     * @param const std::string& the filename to be printed into
+     */
+    static void read_dot(tGraphSP, const std::string& filename)
+        throw (dnet::GraphException);
+
+    /** @fn void read_graphml(tGraphSP, const std::string& filename)
+     * Read the graph from a graphml format
+     *
+     * @param tGraphSP the graph object to store the graph
+     * @param const std::string& the filename to be printed into
+     */
+    static void read_graphml(tGraphSP, const std::string& filename)
+        throw (dnet::GraphException);
+
     /**
      * The random number generator to determine how many edges should be
      * created originating from the newly created vertex.
@@ -328,6 +386,10 @@ private:
 };
 
 
+/** @struct exists_vertex_index
+ * This is a struct defining a predicate function to filter the graph, where the subset of the
+ * original graph only contains a vertex matching a specified index.
+ */
 template <typename VertexIndexMap>
 struct exists_vertex_index {
     exists_vertex_index()

@@ -18,7 +18,6 @@
 # define __STDC_CONSTANT_MACROS
 #endif /* __STDC_CONSTANT_MACROS */
 
-#include <fstream>
 #include <iostream>
 #include <iomanip>
 #include <string>
@@ -55,6 +54,7 @@ namespace dsample = des::sampling;
 namespace dcommon = des::common;
 
 #include "WEvonet.hh"
+#include "GraphException.hh"
 namespace dnet = des::network;
 
 
@@ -75,22 +75,9 @@ int main(int argc, char *argv[])
 
     if (desArgs->graph_filename != "") {
         // read the graph
-        std::ifstream in((desArgs->graph_filename).c_str(), std::ifstream::in);
-
-        if (in.is_open()) {
-            boost::dynamic_properties dp;
-            dp.property("id", get(boost::vertex_index, *graph));
-            dp.property("weight", get(boost::edge_weight, *graph));
-            dp.property("service_rate", get(vertex_service_rate, *graph));
-            dp.property("arrival_rate", get(vertex_arrival_rate, *graph));
-            dp.property("busy", get(vertex_busy, *graph));
-            dp.property("time_service_ends", get(vertex_time_service_ends, *graph));
-            dp.property("number_in_queue", get(vertex_number_in_queue, *graph));
-
-            boost::read_graphml(in, (*graph.get()), dp);
-
-            in.close();
-        } else {
+        try {
+            dnet::WEvonet::read(graph, desArgs->graph_filename, dnet::WEvonet::GRAPHML);
+        } catch (dnet::GraphException &ge) {
             std::cerr << "Error: Cannot open graph file " << desArgs->graph_filename
                       << "!" << std::endl;
         }

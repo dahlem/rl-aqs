@@ -31,6 +31,8 @@
 # include <iostream>
 #endif
 
+#include <fstream>
+
 #include <boost/foreach.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/breadth_first_search.hpp>
@@ -48,6 +50,16 @@
 namespace dnet = des::network;
 
 
+const std::string dnet::WEvonet::EDGE_WEIGHT            = "weight";
+const std::string dnet::WEvonet::VERTEX_ID              = "id";
+const std::string dnet::WEvonet::SERVICE_RATE           = "service_rate";
+const std::string dnet::WEvonet::ARRIVAL_RATE           = "arrival_rate";
+const std::string dnet::WEvonet::BUSY                   = "busy";
+const std::string dnet::WEvonet::TIME_SERVICE_ENDS      = "time_service_ends";
+const std::string dnet::WEvonet::NUMBER_IN_QUEUE        = "number_in_queue";
+const std::string dnet::WEvonet::AVERAGE_DELAY_IN_QUEUE = "average_delay_in_queue";
+
+
 
 dnet::WEvonet::WEvonet(boost::uint32_t p_size, boost::uint32_t p_max_edges,
                  tGslRngSP p_edge_rng, tGslRngSP p_uniform_rng, tGslRngSP p_vertex_arrival_rng)
@@ -61,13 +73,22 @@ dnet::WEvonet::WEvonet(boost::uint32_t p_size, boost::uint32_t p_max_edges,
     max_edges = p_max_edges;
 
     // get references to the property maps
-    dnet::VertexArrivalRateMap vertex_arrival_props_map = get(vertex_arrival_rate, *g);
-    dnet::VertexServiceRateMap vertex_service_props_map = get(vertex_service_rate, *g);
-    dnet::VertexBusyMap vertex_busy_map = get(vertex_busy, *g);
-    dnet::VertexTimeServiceEndsMap vertex_time_service_ends_map = get(vertex_time_service_ends, *g);
-    dnet::VertexIndexMap vertex_index_props_map = get(boost::vertex_index, *g);
-    dnet::VertexNumberInQueueMap vertex_number_in_queue_props_map = get(vertex_number_in_queue, *g);
-    dnet::EdgeWeightMap edge_weight_props_map = get(boost::edge_weight, *g);
+    dnet::VertexArrivalRateMap vertex_arrival_props_map
+        = get(vertex_arrival_rate, *g);
+    dnet::VertexServiceRateMap vertex_service_props_map
+        = get(vertex_service_rate, *g);
+    dnet::VertexBusyMap vertex_busy_map
+        = get(vertex_busy, *g);
+    dnet::VertexTimeServiceEndsMap vertex_time_service_ends_map
+        = get(vertex_time_service_ends, *g);
+    dnet::VertexIndexMap vertex_index_props_map
+        = get(boost::vertex_index, *g);
+    dnet::VertexNumberInQueueMap vertex_number_in_queue_props_map
+        = get(vertex_number_in_queue, *g);
+    dnet::VertexAverageDelayInQueueMap vertex_average_delay_in_queue_props_map
+        = get(vertex_average_delay_in_queue, *g);
+    dnet::EdgeWeightMap edge_weight_props_map
+        = get(boost::edge_weight, *g);
 
     // create a small graph upon which the evolution is excercised
     dnet::Vertex v1 = add_vertex(*g);
@@ -77,6 +98,7 @@ dnet::WEvonet::WEvonet(boost::uint32_t p_size, boost::uint32_t p_max_edges,
     vertex_busy_map[v1] = false;
     vertex_time_service_ends_map[v1] = 0.0;
     vertex_number_in_queue_props_map[v1] = 0;
+    vertex_average_delay_in_queue_props_map[v1] = 0.0;
     dnet::Vertex v2 = add_vertex(*g);
     vertex_arrival_props_map[v2] = vertex_arrival_props_map[v1] * 0.5;
     vertex_service_props_map[v2] = vertex_arrival_props_map[v2];
@@ -84,6 +106,7 @@ dnet::WEvonet::WEvonet(boost::uint32_t p_size, boost::uint32_t p_max_edges,
     vertex_busy_map[v2] = false;
     vertex_time_service_ends_map[v2] = 0.0;
     vertex_number_in_queue_props_map[v2] = 0;
+    vertex_average_delay_in_queue_props_map[v2] = 0.0;
     dnet::Vertex v3 = add_vertex(*g);
     vertex_arrival_props_map[v3] = vertex_arrival_props_map[v1] * 0.5;
     vertex_service_props_map[v3] = vertex_arrival_props_map[v3];
@@ -91,6 +114,7 @@ dnet::WEvonet::WEvonet(boost::uint32_t p_size, boost::uint32_t p_max_edges,
     vertex_busy_map[v3] = false;
     vertex_time_service_ends_map[v3] = 0.0;
     vertex_number_in_queue_props_map[v3] = 0;
+    vertex_average_delay_in_queue_props_map[v3] = 0.0;
 
     dnet::Edge e1 = (add_edge(v1, v2, *g)).first;
     edge_weight_props_map[e1] = 0.5;
@@ -108,12 +132,20 @@ dnet::WEvonet::~WEvonet()
 void dnet::WEvonet::advance(boost::uint32_t p_steps)
 {
     dnet::VServiceIterator service_it, service_it_end;
-    dnet::VertexArrivalRateMap vertex_arrival_props_map = get(vertex_arrival_rate, *g);
-    dnet::VertexServiceRateMap vertex_service_props_map = get(vertex_service_rate, *g);
-    dnet::VertexIndexMap vertex_index_props_map = get(boost::vertex_index, *g);
-    dnet::VertexBusyMap vertex_busy_map = get(vertex_busy, *g);
-    dnet::VertexTimeServiceEndsMap vertex_time_service_ends_map = get(vertex_time_service_ends, *g);
-    dnet::VertexNumberInQueueMap vertex_number_in_queue_map = get(vertex_number_in_queue, *g);
+    dnet::VertexArrivalRateMap vertex_arrival_props_map
+        = get(vertex_arrival_rate, *g);
+    dnet::VertexServiceRateMap vertex_service_props_map
+        = get(vertex_service_rate, *g);
+    dnet::VertexIndexMap vertex_index_props_map
+        = get(boost::vertex_index, *g);
+    dnet::VertexBusyMap vertex_busy_map
+        = get(vertex_busy, *g);
+    dnet::VertexTimeServiceEndsMap vertex_time_service_ends_map
+        = get(vertex_time_service_ends, *g);
+    dnet::VertexNumberInQueueMap vertex_number_in_queue_map
+        = get(vertex_number_in_queue, *g);
+    dnet::VertexAverageDelayInQueueMap vertex_average_delay_in_queue_map
+        = get(vertex_average_delay_in_queue, *g);
 
     double accum_service_rate;
     size_t vertices;
@@ -157,6 +189,7 @@ void dnet::WEvonet::advance(boost::uint32_t p_steps)
         vertex_busy_map[v] = false;
         vertex_time_service_ends_map[v] = 0.0;
         vertex_number_in_queue_map[v] = 0;
+        vertex_average_delay_in_queue_map[v] = 0.0;
 
         // select vertices to connect to
         boost::uint32_t edges = 0;
@@ -285,29 +318,35 @@ void dnet::WEvonet::print(const std::string& filename, const GraphTypes graphTyp
 
 void dnet::WEvonet::print_dot(const std::string& filename)
 {
+    dnet::EdgeWeightMap edge_weight_props_map
+        = get(boost::edge_weight, *g);
     dnet::VertexServiceRateMap vertex_service_props_map =
         get(vertex_service_rate, *g);
     dnet::VertexArrivalRateMap vertex_arrival_props_map =
         get(vertex_arrival_rate, *g);
-    dnet::VertexIndexMap vertex_index_props_map = get(boost::vertex_index, *g);
-    dnet::EdgeWeightMap edge_weight_props_map = get(boost::edge_weight, *g);
-    dnet::VertexBusyMap vertex_busy_map = get(vertex_busy, *g);
+    dnet::VertexIndexMap vertex_index_props_map
+        = get(boost::vertex_index, *g);
+    dnet::VertexBusyMap vertex_busy_map
+        = get(vertex_busy, *g);
     dnet::VertexTimeServiceEndsMap vertex_time_service_ends_map =
         get(vertex_time_service_ends, *g);
     dnet::VertexNumberInQueueMap vertex_number_in_queue_map =
         get(vertex_number_in_queue, *g);
+    dnet::VertexAverageDelayInQueueMap vertex_average_delay_in_queue_map =
+        get(vertex_average_delay_in_queue, *g);
 
     std::ofstream out(filename.c_str(), std::ios::out);
 
     if (out.is_open()) {
         boost::dynamic_properties dp;
-        dp.property("node_id", vertex_index_props_map);
-        dp.property("weight", edge_weight_props_map);
-        dp.property("service_rate", vertex_service_props_map);
-        dp.property("arrival_rate", vertex_arrival_props_map);
-        dp.property("busy", vertex_busy_map);
-        dp.property("time_service_ends", vertex_time_service_ends_map);
-        dp.property("number_in_queue", vertex_number_in_queue_map);
+        dp.property(dnet::WEvonet::EDGE_WEIGHT, edge_weight_props_map);
+        dp.property(dnet::WEvonet::VERTEX_ID, vertex_index_props_map);
+        dp.property(dnet::WEvonet::SERVICE_RATE, vertex_service_props_map);
+        dp.property(dnet::WEvonet::ARRIVAL_RATE, vertex_arrival_props_map);
+        dp.property(dnet::WEvonet::BUSY, vertex_busy_map);
+        dp.property(dnet::WEvonet::TIME_SERVICE_ENDS, vertex_time_service_ends_map);
+        dp.property(dnet::WEvonet::NUMBER_IN_QUEUE, vertex_number_in_queue_map);
+        dp.property(dnet::WEvonet::AVERAGE_DELAY_IN_QUEUE, vertex_average_delay_in_queue_map);
 
         boost::write_graphviz(out, *g, dp);
         out.close();
@@ -317,32 +356,114 @@ void dnet::WEvonet::print_dot(const std::string& filename)
 
 void dnet::WEvonet::print_graphml(const std::string& filename)
 {
+    dnet::EdgeWeightMap edge_weight_props_map
+        = get(boost::edge_weight, *g);
     dnet::VertexServiceRateMap vertex_service_props_map =
         get(vertex_service_rate, *g);
     dnet::VertexArrivalRateMap vertex_arrival_props_map =
         get(vertex_arrival_rate, *g);
-    dnet::VertexIndexMap vertex_index_props_map = get(boost::vertex_index, *g);
-    dnet::EdgeWeightMap edge_weight_props_map = get(boost::edge_weight, *g);
-    dnet::VertexBusyMap vertex_busy_map = get(vertex_busy, *g);
+    dnet::VertexIndexMap vertex_index_props_map
+        = get(boost::vertex_index, *g);
+    dnet::VertexBusyMap vertex_busy_map
+        = get(vertex_busy, *g);
     dnet::VertexTimeServiceEndsMap vertex_time_service_ends_map =
         get(vertex_time_service_ends, *g);
     dnet::VertexNumberInQueueMap vertex_number_in_queue_map =
         get(vertex_number_in_queue, *g);
+    dnet::VertexAverageDelayInQueueMap vertex_average_delay_in_queue_map =
+        get(vertex_average_delay_in_queue, *g);
 
     std::ofstream out(filename.c_str(), std::ios::out);
 
     if (out.is_open()) {
         boost::dynamic_properties dp;
-        dp.property("id", vertex_index_props_map);
-        dp.property("weight", edge_weight_props_map);
-        dp.property("service_rate", vertex_service_props_map);
-        dp.property("arrival_rate", vertex_arrival_props_map);
-        dp.property("busy", vertex_busy_map);
-        dp.property("time_service_ends", vertex_time_service_ends_map);
-        dp.property("number_in_queue", vertex_number_in_queue_map);
+        dp.property(dnet::WEvonet::EDGE_WEIGHT, edge_weight_props_map);
+        dp.property(dnet::WEvonet::VERTEX_ID, vertex_index_props_map);
+        dp.property(dnet::WEvonet::SERVICE_RATE, vertex_service_props_map);
+        dp.property(dnet::WEvonet::ARRIVAL_RATE, vertex_arrival_props_map);
+        dp.property(dnet::WEvonet::BUSY, vertex_busy_map);
+        dp.property(dnet::WEvonet::TIME_SERVICE_ENDS, vertex_time_service_ends_map);
+        dp.property(dnet::WEvonet::NUMBER_IN_QUEUE, vertex_number_in_queue_map);
+        dp.property(dnet::WEvonet::AVERAGE_DELAY_IN_QUEUE, vertex_average_delay_in_queue_map);
 
         boost::write_graphml(out, *g, dp, true);
 
         out.close();
+    }
+}
+
+
+void dnet::WEvonet::read(tGraphSP p_graph, const std::string& p_filename,
+                                const GraphTypes p_graphType)
+    throw (dnet::GraphException)
+{
+    switch (p_graphType) {
+      case GRAPHVIZ:
+          read_dot(p_graph, p_filename);
+          break;
+      case GRAPHML:
+          read_graphml(p_graph, p_filename);
+          break;
+      default:
+          read_graphml(p_graph, p_filename);
+          break;
+    }
+}
+
+
+void dnet::WEvonet::read_graphml(tGraphSP p_graph, const std::string& p_filename)
+    throw (dnet::GraphException)
+{
+    std::ifstream in(p_filename.c_str(), std::ifstream::in);
+
+    if (in.is_open()) {
+        boost::dynamic_properties dp;
+        dp.property(dnet::WEvonet::EDGE_WEIGHT, get(boost::edge_weight, *p_graph));
+        dp.property(dnet::WEvonet::VERTEX_ID, get(boost::vertex_index, *p_graph));
+        dp.property(dnet::WEvonet::SERVICE_RATE, get(vertex_service_rate, *p_graph));
+        dp.property(dnet::WEvonet::ARRIVAL_RATE, get(vertex_arrival_rate, *p_graph));
+        dp.property(dnet::WEvonet::BUSY, get(vertex_busy, *p_graph));
+        dp.property(dnet::WEvonet::TIME_SERVICE_ENDS, get(vertex_time_service_ends, *p_graph));
+        dp.property(dnet::WEvonet::NUMBER_IN_QUEUE, get(vertex_number_in_queue, *p_graph));
+        dp.property(dnet::WEvonet::AVERAGE_DELAY_IN_QUEUE, get(vertex_average_delay_in_queue, *p_graph));
+
+        try {
+            boost::read_graphml(in, (*p_graph.get()), dp);
+        } catch (...) {
+            throw dnet::GraphException(dnet::GraphException::GRAPH_READ_ERROR);
+        }
+
+        in.close();
+    } else {
+        throw dnet::GraphException(dnet::GraphException::GRAPH_INPUT_ERROR);
+    }
+}
+
+
+void dnet::WEvonet::read_dot(tGraphSP p_graph, const std::string& p_filename)
+    throw (dnet::GraphException)
+{
+    std::ifstream in(p_filename.c_str(), std::ifstream::in);
+
+    if (in.is_open()) {
+        boost::dynamic_properties dp;
+        dp.property(dnet::WEvonet::EDGE_WEIGHT, get(boost::edge_weight, *p_graph));
+        dp.property(dnet::WEvonet::VERTEX_ID, get(boost::vertex_index, *p_graph));
+        dp.property(dnet::WEvonet::SERVICE_RATE, get(vertex_service_rate, *p_graph));
+        dp.property(dnet::WEvonet::ARRIVAL_RATE, get(vertex_arrival_rate, *p_graph));
+        dp.property(dnet::WEvonet::BUSY, get(vertex_busy, *p_graph));
+        dp.property(dnet::WEvonet::TIME_SERVICE_ENDS, get(vertex_time_service_ends, *p_graph));
+        dp.property(dnet::WEvonet::NUMBER_IN_QUEUE, get(vertex_number_in_queue, *p_graph));
+        dp.property(dnet::WEvonet::AVERAGE_DELAY_IN_QUEUE, get(vertex_average_delay_in_queue, *p_graph));
+
+        try {
+            boost::read_graphviz(in, (*p_graph.get()), dp);
+        } catch (...) {
+            throw dnet::GraphException(dnet::GraphException::GRAPH_READ_ERROR);
+        }
+
+        in.close();
+    } else {
+        throw dnet::GraphException(dnet::GraphException::GRAPH_INPUT_ERROR);
     }
 }
