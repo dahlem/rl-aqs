@@ -27,6 +27,7 @@ libcoreevent_la_SOURCES =                                                  \
 	NumEventsHandler.cc                                                \
 	LastEventHandler.cc                                                \
 	UtilisationHandler.cc                                              \
+	ExpectedAverageEventInQueueHandler.cc                              \
 	DepartureHandler.cc
 
 libcoreevent_la_CPPFLAGS =                                                 \

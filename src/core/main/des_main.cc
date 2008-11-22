@@ -36,6 +36,7 @@
 #include "events.hh"
 #include "EventGenerator.hh"
 #include "EventProcessor.hh"
+#include "ExpectedAverageEventInQueueHandler.hh"
 #include "GenerateEventHandler.hh"
 #include "LastArrivalEvent.hh"
 #include "LastEventHandler.hh"
@@ -230,6 +231,8 @@ int main(int argc, char *argv[])
         new dcore::LastEventHandler(graph));
     dcore::tUtilisationHandlerSP utilisationHandler(
         new dcore::UtilisationHandler(graph));
+    dcore::tExpectedAverageEventInQueueHandlerSP expectedAverageEventInQueueHandler(
+        new dcore::ExpectedAverageEventInQueueHandler(graph));
 
     // we only need to register an event generation handler, if there are > 1 phases
     if (desArgs->generations > 1) {
@@ -242,11 +245,16 @@ int main(int argc, char *argv[])
     // attach the handlers to the events
     // the order of the handlers is important
     preAnyEvent->attach(processedEventsHandler);
+
     arrivalEvent->attach(numEventsHandler);
     arrivalEvent->attach(arrivalHandler);
+
     departureEvent->attach(departureHandler);
+
     postAnyEvent->attach(utilisationHandler);
+    postAnyEvent->attach(expectedAverageEventInQueueHandler);
     postAnyEvent->attach(lastEventHandler);
+
     postEvent->attach(unprocessedEventsHandler);
 
     // instantiate the event processor and set the events

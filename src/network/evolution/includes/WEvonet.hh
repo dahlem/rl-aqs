@@ -84,22 +84,34 @@ enum vertex_average_delay_in_queue_t { vertex_average_delay_in_queue = 1116 };
 enum vertex_num_events_t { vertex_num_events = 1117 };
 
 
-/** @enum vertex_utilisation_t
- * This enum extends the vertex properties by a utilisation attribute.
- */
-enum vertex_utilisation_t { vertex_utilisation = 1118 };
-
-
 /** @enum vertex_Bdt_t
  * This enum extends the vertex properties by a fractional utilisation attribute.
  */
-enum vertex_Bdt_t { vertex_Bdt = 1119 };
+enum vertex_Bdt_t { vertex_Bdt = 1118 };
+
+
+/** @enum vertex_Qdt_t
+ * This enum extends the vertex properties by a fractional expected number of events in queue attribute.
+ */
+enum vertex_Qdt_t { vertex_Qdt = 1119 };
+
+
+/** @enum vertex_utilisation_t
+ * This enum extends the vertex properties by a utilisation attribute.
+ */
+enum vertex_utilisation_t { vertex_utilisation = 1120 };
+
+
+/** @enum vertex_utilisation_t
+ * This enum extends the vertex properties by a expected average number of events in queue attribute.
+ */
+enum vertex_expected_average_number_event_t { vertex_expected_average_number_event = 1121 };
 
 
 /** @enum vertex_last_event_time_t
  * This enum extends the vertex properties by a last event time attribute.
  */
-enum vertex_last_event_time_t { vertex_last_event_time = 1119 };
+enum vertex_last_event_time_t { vertex_last_event_time = 1122 };
 
 
 // install the vertex service rate property
@@ -112,8 +124,10 @@ namespace boost
     BOOST_INSTALL_PROPERTY(vertex, number_in_queue);
     BOOST_INSTALL_PROPERTY(vertex, average_delay_in_queue);
     BOOST_INSTALL_PROPERTY(vertex, num_events);
-    BOOST_INSTALL_PROPERTY(vertex, utilisation);
     BOOST_INSTALL_PROPERTY(vertex, Bdt);
+    BOOST_INSTALL_PROPERTY(vertex, Qdt);
+    BOOST_INSTALL_PROPERTY(vertex, utilisation);
+    BOOST_INSTALL_PROPERTY(vertex, expected_average_number_event);
     BOOST_INSTALL_PROPERTY(vertex, last_event_time);
 }
 
@@ -166,10 +180,20 @@ typedef boost::property <vertex_utilisation_t, float, VertexNumEventsProperty> V
  */
 typedef boost::property <vertex_Bdt_t, float, VertexUtilisationProperty> VertexBdtProperty;
 
+/** @typedef VertexQdtProperty
+ * Specifies the property for the fractional expected number of events in queue attribute of a vertex
+ */
+typedef boost::property <vertex_Qdt_t, float, VertexBdtProperty> VertexQdtProperty;
+
+/** @typedef VertexExpectedAverageNumberEventProperty
+ * Specifies the property for the expected average number of events in queue attribute of a vertex
+ */
+typedef boost::property <vertex_expected_average_number_event_t, float, VertexQdtProperty> VertexExpectedAverageNumberEventProperty;
+
 /** @typedef VertexLastEventTimeProperty
  * Specifies the property for the last event time attribute of a vertex
  */
-typedef boost::property <vertex_last_event_time_t, float, VertexBdtProperty> VertexLastEventTimeProperty;
+typedef boost::property <vertex_last_event_time_t, float, VertexExpectedAverageNumberEventProperty> VertexLastEventTimeProperty;
 
 /** @typedef VertexProperties
  * This type definition assembles all the properties for the vertices of the graph
@@ -255,6 +279,16 @@ typedef boost::property_map <Graph, vertex_utilisation_t>::type VertexUtilisatio
  */
 typedef boost::property_map <Graph, vertex_Bdt_t>::type VertexBdtMap;
 
+/** @typedef VertexQdtMap
+ * Specifies the map that stores the vertex fractional expected number of events in the queue attribute
+ */
+typedef boost::property_map <Graph, vertex_Qdt_t>::type VertexQdtMap;
+
+/** @typedef VertexLastEventTimeMap
+ * Specifies the map that stores the vertex expected average number events attribute
+ */
+typedef boost::property_map <Graph, vertex_expected_average_number_event_t>::type VertexExpectedAverageNumberEventMap;
+
 /** @typedef VertexLastEventTimeMap
  * Specifies the map that stores the vertex last event time attribute
  */
@@ -321,7 +355,9 @@ public:
     static const std::string NUM_EVENTS;
     static const std::string UTILISATION;
     static const std::string BDT;
+    static const std::string QDT;
     static const std::string LAST_EVENT_TIME;
+    static const std::string EXPECTED_AVERAGE_NUMBER_EVENT;
 
 
     static const boost::uint32_t MAX_EDGES = UINT_MAX;
