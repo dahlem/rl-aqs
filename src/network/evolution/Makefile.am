@@ -12,6 +12,7 @@ noinst_LTLIBRARIES = libnetevo.la
 
 libnetevo_la_SOURCES =                                                \
 	GraphException.cc                                             \
+	GraphUtil.cc                                                  \
 	WEvonet.cc
 
 libnetevo_la_CPPFLAGS =                                               \

@@ -39,9 +39,15 @@ const boost::int32_t ACK_EVENT                  = 3;
 const boost::int32_t LEAVE_EVENT                = 4;
 
 /**
+ * Declaration of admin events
+ */
+const boost::int32_t LOG_GRAPH_EVENT            = 5;
+
+/**
  * Declaration of the event source
  */
 const boost::int32_t EXTERNAL_EVENT             = -1;
+const boost::int32_t ADMIN_EVENT                = -2;
 
 
     }

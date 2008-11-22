@@ -23,10 +23,6 @@
 #include <string>
 #include <ostream>
 
-#include <boost/iostreams/device/file.hpp>
-#include <boost/iostreams/stream.hpp>
-namespace bio = boost::iostreams;
-
 #include <boost/filesystem.hpp>
 namespace fs = boost::filesystem;
 

@@ -404,16 +404,6 @@ public:
      */
     void print(const std::string& filename, const GraphTypes graphType);
 
-    /** @fn void read(tGraphSP, std::string) throw (dnet::GraphException)
-     * Read a graph from a file and store it into the first parameter.
-     *
-     * @param tGraphSP the graph object
-     * @param const std::string& the filename to read the graph from
-     * @param const GraphTypes the graph type selected for the input
-     */
-    static void read(tGraphSP, const std::string&, const GraphTypes)
-        throw (dnet::GraphException);
-
 private:
 
     static boost::dynamic_properties getProperties(tGraphSP p_graph);
@@ -449,24 +439,6 @@ private:
      * @param const std::string& the filename to be printed into
      */
     void print_graphml(const std::string& filename);
-
-    /** @fn void read_dot(tGraphSP, const std::string& filename)
-     * Read the graph using the graphviz interface of BGL from a file
-     *
-     * @param tGraphSP the graph object to store the graph
-     * @param const std::string& the filename to be printed into
-     */
-    static void read_dot(tGraphSP, const std::string& filename)
-        throw (dnet::GraphException);
-
-    /** @fn void read_graphml(tGraphSP, const std::string& filename)
-     * Read the graph from a graphml format
-     *
-     * @param tGraphSP the graph object to store the graph
-     * @param const std::string& the filename to be printed into
-     */
-    static void read_graphml(tGraphSP, const std::string& filename)
-        throw (dnet::GraphException);
 
     /**
      * The random number generator to determine how many edges should be

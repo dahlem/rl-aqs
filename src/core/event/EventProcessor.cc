@@ -30,6 +30,7 @@ namespace dcommon = des::common;
 
 
 dcore::EventProcessor::EventProcessor(dcommon::tQueueSP p_queue,
+                                      dcore::tAdminEventSP p_adminEvent,
                                       dcore::tPreAnyEventSP p_preAnyEvent,
                                       dcore::tPostAnyEventSP p_postAnyEvent,
                                       dcore::tArrivalEventSP p_arrivalEvent,
@@ -37,10 +38,10 @@ dcore::EventProcessor::EventProcessor(dcommon::tQueueSP p_queue,
                                       dcore::tPostEventSP p_postEvent,
                                       dcore::tLastArrivalEventSP p_lastArrivalEvent,
                                       double p_stopTime)
-    : m_queue(p_queue), m_preAnyEvent(p_preAnyEvent), m_postAnyEvent(p_postAnyEvent),
-      m_arrivalEvent(p_arrivalEvent), m_departureEvent(p_departureEvent),
-      m_postEvent(p_postEvent), m_lastArrivalEvent(p_lastArrivalEvent),
-      m_stopTime(p_stopTime)
+    : m_queue(p_queue), m_adminEvent(p_adminEvent), m_preAnyEvent(p_preAnyEvent),
+      m_postAnyEvent(p_postAnyEvent), m_arrivalEvent(p_arrivalEvent),
+      m_departureEvent(p_departureEvent), m_postEvent(p_postEvent),
+      m_lastArrivalEvent(p_lastArrivalEvent), m_stopTime(p_stopTime)
 {}
 
 
@@ -54,31 +55,36 @@ void dcore::EventProcessor::process()
 
     try {
         while ((entry = m_queue->dequeue()) != NULL) {
-
-            // if stop time has been reached break out and handle the event below
-            if (entry->getArrival() > m_stopTime) {
-                break;
+            // if it is a admin event, then handle it
+            if (entry->getType() == LOG_GRAPH_EVENT) {
+                m_adminEvent->admin(entry);
             } else {
-                m_preAnyEvent->preAny(entry);
+
+                // if stop time has been reached break out and handle the event below
+                if (entry->getArrival() > m_stopTime) {
+                    break;
+                } else {
+                    m_preAnyEvent->preAny(entry);
+                }
+
+                switch (entry->getType()) {
+                  case LAST_ARRIVAL_EVENT:
+                      // generate new events
+                      m_lastArrivalEvent->lastArrival(entry);
+                  case ARRIVAL_EVENT:
+                      m_arrivalEvent->arrival(entry);
+                      break;
+                  case DEPARTURE_EVENT:
+                      m_departureEvent->departure(entry);
+                      break;
+                  default:
+                      break;
+                }
+
+                m_postAnyEvent->postAny(entry);
+
+                delete entry;
             }
-
-            switch (entry->getType()) {
-              case LAST_ARRIVAL_EVENT:
-                  // generate new events
-                  m_lastArrivalEvent->lastArrival(entry);
-              case ARRIVAL_EVENT:
-                  m_arrivalEvent->arrival(entry);
-                  break;
-              case DEPARTURE_EVENT:
-                  m_departureEvent->departure(entry);
-                  break;
-              default:
-                  break;
-            }
-
-            m_postAnyEvent->postAny(entry);
-
-            delete entry;
         }
 
         m_postEvent->post(entry);

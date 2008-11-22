@@ -28,6 +28,7 @@
 
 #include <gsl/gsl_randist.h>
 
+#include "AdminEvent.hh"
 #include "ArrivalEvent.hh"
 #include "ArrivalHandler.hh"
 #include "CL.hh"
@@ -40,6 +41,7 @@
 #include "GenerateEventHandler.hh"
 #include "LastArrivalEvent.hh"
 #include "LastEventHandler.hh"
+#include "LogGraphHandler.hh"
 #include "NumEventsHandler.hh"
 #include "PostEvent.hh"
 #include "PreAnyEvent.hh"
@@ -61,6 +63,7 @@ namespace dcommon = des::common;
 
 #include "WEvonet.hh"
 #include "GraphException.hh"
+#include "GraphUtil.hh"
 namespace dnet = des::network;
 
 
@@ -82,7 +85,7 @@ int main(int argc, char *argv[])
     if (desArgs->graph_filename != "") {
         // read the graph
         try {
-            dnet::WEvonet::read(graph, desArgs->graph_filename, dnet::WEvonet::GRAPHML);
+            dnet::GraphUtil::read(graph, desArgs->graph_filename, dnet::WEvonet::GRAPHML);
         } catch (dnet::GraphException &ge) {
             std::cerr << "Error: Cannot open graph file " << desArgs->graph_filename
                       << "!" << std::endl;
@@ -202,6 +205,9 @@ int main(int argc, char *argv[])
             dcore::EventGenerator::generate(
                 queue, arrival_rng, destination, arrival_rate, stopTime);
         }
+
+        dcore::EventGenerator::generateLogGraph(
+            queue, 3.0, desArgs->stop_time);
     }
 
     dio::tResultsSP processed_events(
@@ -210,12 +216,16 @@ int main(int argc, char *argv[])
         new dio::Results(desArgs->events_unprocessed, desArgs->results_dir));
 
     // instantiate the events & handlers
+    dcore::tAdminEventSP adminEvent(new dcore::AdminEvent);
     dcore::tPreAnyEventSP preAnyEvent(new dcore::PreAnyEvent);
     dcore::tPostAnyEventSP postAnyEvent(new dcore::PostAnyEvent);
     dcore::tArrivalEventSP arrivalEvent(new dcore::ArrivalEvent);
     dcore::tDepartureEventSP departureEvent(new dcore::DepartureEvent);
     dcore::tPostEventSP postEvent(new dcore::PostEvent);
     dcore::tLastArrivalEventSP lastArrivalEvent(new dcore::LastArrivalEvent);
+
+    dcore::tLogGraphHandlerSP logGraphHandler(
+        new dcore::LogGraphHandler(desArgs->results_dir, graph));
 
     dcore::tProcessedEventsHandlerSP processedEventsHandler(
         new dcore::ProcessedEventsHandler(processed_events));
@@ -244,6 +254,8 @@ int main(int argc, char *argv[])
 
     // attach the handlers to the events
     // the order of the handlers is important
+    adminEvent->attach(logGraphHandler);
+
     preAnyEvent->attach(processedEventsHandler);
 
     arrivalEvent->attach(numEventsHandler);
@@ -259,7 +271,7 @@ int main(int argc, char *argv[])
 
     // instantiate the event processor and set the events
     dcore::tEventProcessorSP processor(
-        new dcore::EventProcessor(queue, preAnyEvent, postAnyEvent, arrivalEvent,
+        new dcore::EventProcessor(queue, adminEvent, preAnyEvent, postAnyEvent, arrivalEvent,
                                   departureEvent, postEvent, lastArrivalEvent,
                                   desArgs->stop_time));
 

@@ -68,6 +68,11 @@ public:
         boost::int32_t destination,
         double arrival_rate);
 
+    static void generateLogGraph(
+        dcommon::tQueueSP p_queue,
+        double rate,
+        double stop_time);
+
 };
 
     }

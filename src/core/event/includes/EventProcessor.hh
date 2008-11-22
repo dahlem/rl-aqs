@@ -22,6 +22,7 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include "AdminEvent.hh"
 #include "PreAnyEvent.hh"
 #include "PostAnyEvent.hh"
 #include "ArrivalEvent.hh"
@@ -46,6 +47,7 @@ class EventProcessor
 {
 public:
     EventProcessor(dcommon::tQueueSP,
+                   dcore::tAdminEventSP,
                    dcore::tPreAnyEventSP,
                    dcore::tPostAnyEventSP,
                    dcore::tArrivalEventSP,
@@ -60,6 +62,7 @@ public:
 
 private:
     dcommon::tQueueSP m_queue;
+    dcore::tAdminEventSP m_adminEvent;
     dcore::tPreAnyEventSP m_preAnyEvent;
     dcore::tPostAnyEventSP m_postAnyEvent;
     dcore::tArrivalEventSP m_arrivalEvent;

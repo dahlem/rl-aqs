@@ -122,3 +122,23 @@ void dcore::EventGenerator::generate(
 
     p_queue->push(entry);
 }
+
+
+void dcore::EventGenerator::generateLogGraph(
+    dcommon::tQueueSP p_queue,
+    double rate,
+    double stop_time)
+{
+    double time = 0.0;
+
+    for (; time <= stop_time; time += rate) {
+        dcommon::Entry *entry = new dcommon::Entry(
+            0.0,
+            time,
+            -99,
+            dcore::ADMIN_EVENT,
+            dcore::LOG_GRAPH_EVENT);
+
+        p_queue->push(entry);
+    }
+}

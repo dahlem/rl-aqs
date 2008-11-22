@@ -35,6 +35,7 @@ namespace po = boost::program_options;
 #include "Seeds.hh"
 namespace dsample = des::sampling;
 
+#include "GraphUtil.hh"
 #include "WEvonet.hh"
 using des::network::WEvonet;
 

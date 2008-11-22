@@ -396,66 +396,6 @@ void dnet::WEvonet::print_graphml(const std::string& filename)
 }
 
 
-void dnet::WEvonet::read(tGraphSP p_graph, const std::string& p_filename,
-                                const GraphTypes p_graphType)
-    throw (dnet::GraphException)
-{
-    switch (p_graphType) {
-      case GRAPHVIZ:
-          read_dot(p_graph, p_filename);
-          break;
-      case GRAPHML:
-          read_graphml(p_graph, p_filename);
-          break;
-      default:
-          read_graphml(p_graph, p_filename);
-          break;
-    }
-}
-
-
-void dnet::WEvonet::read_graphml(tGraphSP p_graph, const std::string& p_filename)
-    throw (dnet::GraphException)
-{
-    std::ifstream in(p_filename.c_str(), std::ifstream::in);
-
-    if (in.is_open()) {
-        boost::dynamic_properties dp = getProperties(p_graph);
-
-        try {
-            boost::read_graphml(in, (*p_graph.get()), dp);
-        } catch (...) {
-            throw dnet::GraphException(dnet::GraphException::GRAPH_READ_ERROR);
-        }
-
-        in.close();
-    } else {
-        throw dnet::GraphException(dnet::GraphException::GRAPH_INPUT_ERROR);
-    }
-}
-
-
-void dnet::WEvonet::read_dot(tGraphSP p_graph, const std::string& p_filename)
-    throw (dnet::GraphException)
-{
-    std::ifstream in(p_filename.c_str(), std::ifstream::in);
-
-    if (in.is_open()) {
-        boost::dynamic_properties dp = getProperties(p_graph);
-
-        try {
-            boost::read_graphviz(in, (*p_graph.get()), dp);
-        } catch (...) {
-            throw dnet::GraphException(dnet::GraphException::GRAPH_READ_ERROR);
-        }
-
-        in.close();
-    } else {
-        throw dnet::GraphException(dnet::GraphException::GRAPH_INPUT_ERROR);
-    }
-}
-
-
 boost::dynamic_properties dnet::WEvonet::getProperties(tGraphSP p_graph)
 {
     boost::dynamic_properties dp;
