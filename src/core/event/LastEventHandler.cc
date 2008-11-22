@@ -45,5 +45,8 @@ void dcore::LastEventHandler::update(dcore::PostAnyEvent *subject)
     dnet::Vertex vertex = boost::vertex(entry->getDestination(), *m_graph);
 
     // update the last event time
-    vertex_last_event_time_map[vertex] = entry->getArrival();
+    if ((entry->getType() == LAST_ARRIVAL_EVENT) ||
+        (entry->getType() == ARRIVAL_EVENT)) {
+        vertex_last_event_time_map[vertex] = entry->getArrival();
+    }
 }
