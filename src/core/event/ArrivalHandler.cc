@@ -72,9 +72,6 @@ void dcore::ArrivalHandler::update(dcore::ArrivalEvent *subject)
     service_time = gsl_ran_exponential(m_service_rng.get(),
                                        vertex_service_map[vertex]);
 
-    // increment the number of arrival events seen by this node
-    vertex_num_events_map[vertex]++;
-
     // if the server is busy then re-schedule
     // otherwise schedule the departure
     if (vertex_busy_map[vertex]) {

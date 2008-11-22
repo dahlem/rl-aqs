@@ -39,6 +39,7 @@
 #include "EventProcessor.hh"
 #include "GenerateEventHandler.hh"
 #include "LastArrivalEvent.hh"
+#include "NumEventsHandler.hh"
 #include "PostEvent.hh"
 #include "ProcessedEventsHandler.hh"
 #include "UnprocessedEventsHandler.hh"
@@ -220,6 +221,8 @@ int main(int argc, char *argv[])
         new dcore::ArrivalHandler(queue, graph, service_rng_index));
     dcore::tDepartureHandlerSP departureHandler(
         new dcore::DepartureHandler(queue, graph, depart_uniform_rng_index));
+    dcore::tNumEventsHandlerSP numEventsHandler(
+        new dcore::NumEventsHandler(graph));
 
     // we only need to register an event generation handler, if there are > 1 phases
     if (desArgs->generations > 1) {
@@ -231,6 +234,9 @@ int main(int argc, char *argv[])
 
     // attach the handlers to the events
     anyEvent->attach(processedEventsHandler);
+
+    // the order of the handlers is important
+    arrivalEvent->attach(numEventsHandler);
     arrivalEvent->attach(arrivalHandler);
     departureEvent->attach(departureHandler);
     postEvent->attach(unprocessedEventsHandler);

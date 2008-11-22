@@ -23,6 +23,7 @@ libcoreevent_la_SOURCES =                                                  \
 	ArrivalEvent.cc                                                    \
 	ArrivalHandler.cc                                                  \
 	DepartureEvent.cc                                                  \
+	NumEventsHandler.cc                                                \
 	DepartureHandler.cc
 
 libcoreevent_la_CPPFLAGS =                                                 \
