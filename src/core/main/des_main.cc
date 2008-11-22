@@ -28,7 +28,6 @@
 
 #include <gsl/gsl_randist.h>
 
-#include "AnyEvent.hh"
 #include "ArrivalEvent.hh"
 #include "ArrivalHandler.hh"
 #include "CL.hh"
@@ -39,8 +38,10 @@
 #include "EventProcessor.hh"
 #include "GenerateEventHandler.hh"
 #include "LastArrivalEvent.hh"
+#include "LastEventHandler.hh"
 #include "NumEventsHandler.hh"
 #include "PostEvent.hh"
+#include "PreAnyEvent.hh"
 #include "ProcessedEventsHandler.hh"
 #include "UnprocessedEventsHandler.hh"
 namespace dcore = des::core;
@@ -207,7 +208,8 @@ int main(int argc, char *argv[])
         new dio::Results(desArgs->events_unprocessed, desArgs->results_dir));
 
     // instantiate the events & handlers
-    dcore::tAnyEventSP anyEvent(new dcore::AnyEvent);
+    dcore::tPreAnyEventSP preAnyEvent(new dcore::PreAnyEvent);
+    dcore::tPostAnyEventSP postAnyEvent(new dcore::PostAnyEvent);
     dcore::tArrivalEventSP arrivalEvent(new dcore::ArrivalEvent);
     dcore::tDepartureEventSP departureEvent(new dcore::DepartureEvent);
     dcore::tPostEventSP postEvent(new dcore::PostEvent);
@@ -223,6 +225,8 @@ int main(int argc, char *argv[])
         new dcore::DepartureHandler(queue, graph, depart_uniform_rng_index));
     dcore::tNumEventsHandlerSP numEventsHandler(
         new dcore::NumEventsHandler(graph));
+    dcore::tLastEventHandlerSP lastEventHandler(
+        new dcore::LastEventHandler(graph));
 
     // we only need to register an event generation handler, if there are > 1 phases
     if (desArgs->generations > 1) {
@@ -233,17 +237,17 @@ int main(int argc, char *argv[])
     }
 
     // attach the handlers to the events
-    anyEvent->attach(processedEventsHandler);
-
     // the order of the handlers is important
+    preAnyEvent->attach(processedEventsHandler);
     arrivalEvent->attach(numEventsHandler);
     arrivalEvent->attach(arrivalHandler);
     departureEvent->attach(departureHandler);
+    postAnyEvent->attach(lastEventHandler);
     postEvent->attach(unprocessedEventsHandler);
 
     // instantiate the event processor and set the events
     dcore::tEventProcessorSP processor(
-        new dcore::EventProcessor(queue, anyEvent, arrivalEvent,
+        new dcore::EventProcessor(queue, preAnyEvent, postAnyEvent, arrivalEvent,
                                   departureEvent, postEvent, lastArrivalEvent,
                                   desArgs->stop_time));
 

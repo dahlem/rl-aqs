@@ -14,7 +14,8 @@ libcoreevent_la_SOURCES =                                                  \
 	EventGenerator.cc                                                  \
 	EventProcessor.cc                                                  \
 	Event.cc                                                           \
-	AnyEvent.cc                                                        \
+	PreAnyEvent.cc                                                     \
+	PostAnyEvent.cc                                                    \
 	PostEvent.cc                                                       \
 	LastArrivalEvent.cc                                                \
 	ProcessedEventsHandler.cc                                          \
@@ -24,6 +25,7 @@ libcoreevent_la_SOURCES =                                                  \
 	ArrivalHandler.cc                                                  \
 	DepartureEvent.cc                                                  \
 	NumEventsHandler.cc                                                \
+	LastEventHandler.cc                                                \
 	DepartureHandler.cc
 
 libcoreevent_la_CPPFLAGS =                                                 \

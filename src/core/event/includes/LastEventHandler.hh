@@ -14,24 +14,24 @@
 // along with this program	  ; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-/** @file ProcessedEventHandler.hh
- * This header file specifies the processedEvent handler subject.
+/** @file LastEventHandler.hh
+ * This header file specifies the lastEvent handler subject.
  */
 
-#ifndef __PROCESSEDEVENTHANDLER_HH__
-#define __PROCESSEDEVENTHANDLER_HH__
+#ifndef __LASTEVENTHANDLER_HH__
+#define __LASTEVENTHANDLER_HH__
 
 #include <boost/shared_ptr.hpp>
 
 
-#include "PreAnyEvent.hh"
+#include "PostAnyEvent.hh"
 namespace dcore = des::core;
 
 #include "Observer.hh"
 namespace design = des::design;
 
-#include "Results.hh"
-namespace dio = des::io;
+#include "WEvonet.hh"
+namespace dnet = des::network;
 
 
 namespace des
@@ -40,31 +40,34 @@ namespace des
     {
 
 
-/** @class ProcessedEventHandler
- * The class @code{ProcessedEventHandler} handles processedEvent events in the DES.
+/** @class LastEventHandler
+ * The class @code{LastEventHandler} handles lastEvent events in the DES.
  */
-class ProcessedEventsHandler : public design::Observer<dcore::PreAnyEvent>
+class LastEventHandler : public design::Observer<dcore::PostAnyEvent>
 {
 public:
-    ProcessedEventsHandler(dio::tResultsSP);
-    ~ProcessedEventsHandler();
+    LastEventHandler(dnet::tGraphSP p_graph);
+    ~LastEventHandler();
 
-    void update(dcore::PreAnyEvent *subject);
+    void update(dcore::PostAnyEvent *subject);
 
 private:
-    dio::tResultsSP m_processedEvents;
+    dnet::tGraphSP m_graph;
+
+    // derived fields
+    dnet::VertexLastEventTimeMap vertex_last_event_time_map;
 
 };
 
 
-/** @typedef tProcessedEventHandlerSP
- * a type definition of the shared pointer of the processedEvent handler
+/** @typedef tLastEventHandlerSP
+ * a type definition of the shared pointer of the lastEvent handler
  */
-typedef boost::shared_ptr <ProcessedEventsHandler> tProcessedEventsHandlerSP;
+typedef boost::shared_ptr <LastEventHandler> tLastEventHandlerSP;
 
 
     }
 }
 
 
-#endif /* __PROCESSEDEVENTHANDLER_HH__ */
+#endif /* __LASTEVENTHANDLER_HH__ */

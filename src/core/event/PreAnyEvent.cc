@@ -3,10 +3,10 @@
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation	 ; either version 2 of the License, or
-// (at your option) any later version.
+// (at your option) preAny later version.
 //
 // This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY	; without even the implied warranty of
+// but WITHOUT PREANY WARRANTY	; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
@@ -14,26 +14,26 @@
 // along with this program	  ; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-/** @file AnyEvent.cc
- * Implementation of a basic any event subject.
+/** @file PreAnyEvent.cc
+ * Implementation of a basic preAny event subject.
  */
 
-#include "AnyEvent.hh"
+#include "PreAnyEvent.hh"
 namespace dcore = des::core;
 
 #include "Entry.hh"
 namespace dcommon = des::common;
 
 
-dcore::AnyEvent::AnyEvent()
+dcore::PreAnyEvent::PreAnyEvent()
 {}
 
 
-dcore::AnyEvent::~AnyEvent()
+dcore::PreAnyEvent::~PreAnyEvent()
 {}
 
 
-void dcore::AnyEvent::any(dcommon::Entry *event)
+void dcore::PreAnyEvent::preAny(dcommon::Entry *event)
 {
     m_event = event;
     notify();

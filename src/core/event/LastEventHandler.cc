@@ -14,43 +14,36 @@
 // along with this program	  ; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-/** @file ProcessedEventHandler.cc
- * Implementation of a basic processedEvent handler.
+/** @file LastEventHandler.cc
+ * Implementation of a basic lastEvent handler.
  */
-#include <iomanip>
-#include <string>
-
-#include "PreAnyEvent.hh"
-#include "ProcessedEventsHandler.hh"
+#include "events.hh"
+#include "LastEventHandler.hh"
 namespace dcore = des::core;
 
 #include "Entry.hh"
 namespace dcommon = des::common;
 
+#include "WEvonet.hh"
+namespace dnet = des::network;
 
 
-dcore::ProcessedEventsHandler::ProcessedEventsHandler(dio::tResultsSP p_processedEvents)
-    : m_processedEvents(p_processedEvents)
+dcore::LastEventHandler::LastEventHandler(dnet::tGraphSP p_graph)
+    : m_graph(p_graph)
 {
-    std::stringstream s;
-    s << dcommon::Entry::header();
-    m_processedEvents->print(s);
+    vertex_last_event_time_map = get(vertex_last_event_time, *m_graph);
 }
 
 
-dcore::ProcessedEventsHandler::~ProcessedEventsHandler()
+dcore::LastEventHandler::~LastEventHandler()
 {}
 
 
-void dcore::ProcessedEventsHandler::update(dcore::PreAnyEvent *subject)
+void dcore::LastEventHandler::update(dcore::PostAnyEvent *subject)
 {
-    std::stringstream s;
-    dcommon::Entry *entry;
+    dcommon::Entry *entry = subject->getEvent();
+    dnet::Vertex vertex = boost::vertex(entry->getDestination(), *m_graph);
 
-    entry = subject->getEvent();
-
-    // log the event
-    s.str("");
-    s << std::setprecision(14) << const_cast <const dcommon::Entry&> (*entry);
-    m_processedEvents->print(s);
+    // update the last event time
+    vertex_last_event_time_map[vertex] = entry->getArrival();
 }

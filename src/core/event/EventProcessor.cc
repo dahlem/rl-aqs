@@ -30,15 +30,17 @@ namespace dcommon = des::common;
 
 
 dcore::EventProcessor::EventProcessor(dcommon::tQueueSP p_queue,
-                                      dcore::tAnyEventSP p_anyEvent,
+                                      dcore::tPreAnyEventSP p_preAnyEvent,
+                                      dcore::tPostAnyEventSP p_postAnyEvent,
                                       dcore::tArrivalEventSP p_arrivalEvent,
                                       dcore::tDepartureEventSP p_departureEvent,
                                       dcore::tPostEventSP p_postEvent,
                                       dcore::tLastArrivalEventSP p_lastArrivalEvent,
                                       double p_stopTime)
-    : m_queue(p_queue), m_anyEvent(p_anyEvent), m_arrivalEvent(p_arrivalEvent),
-      m_departureEvent(p_departureEvent), m_postEvent(p_postEvent),
-      m_lastArrivalEvent(p_lastArrivalEvent), m_stopTime(p_stopTime)
+    : m_queue(p_queue), m_preAnyEvent(p_preAnyEvent), m_postAnyEvent(p_postAnyEvent),
+      m_arrivalEvent(p_arrivalEvent), m_departureEvent(p_departureEvent),
+      m_postEvent(p_postEvent), m_lastArrivalEvent(p_lastArrivalEvent),
+      m_stopTime(p_stopTime)
 {}
 
 
@@ -57,7 +59,7 @@ void dcore::EventProcessor::process()
             if (entry->getArrival() > m_stopTime) {
                 break;
             } else {
-                m_anyEvent->any(entry);
+                m_preAnyEvent->preAny(entry);
             }
 
             switch (entry->getType()) {
@@ -73,6 +75,8 @@ void dcore::EventProcessor::process()
               default:
                   break;
             }
+
+            m_postAnyEvent->postAny(entry);
 
             delete entry;
         }

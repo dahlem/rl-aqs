@@ -3,10 +3,10 @@
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation	 ; either version 2 of the License, or
-// (at your option) any later version.
+// (at your option) preAny later version.
 //
 // This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY	; without even the implied warranty of
+// but WITHOUT PREANY WARRANTY	; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
@@ -14,12 +14,12 @@
 // along with this program	  ; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-/** @file AnyEvent.hh
- * This header file specifies the any event subject.
+/** @file PreAnyEvent.hh
+ * This header file specifies the preAny event subject.
  */
 
-#ifndef __ANYEVENT_HH__
-#define __ANYEVENT_HH__
+#ifndef __PREANYEVENT_HH__
+#define __PREANYEVENT_HH__
 
 #include <boost/shared_ptr.hpp>
 
@@ -39,25 +39,25 @@ namespace des
     namespace core
     {
 
-/** @class AnyEvent
- * The class @code{AnyEvent} signals an any event in the DES.
+/** @class PreAnyEvent
+ * The class @code{PreAnyEvent} signals an preAny event in the DES.
  */
-class AnyEvent : public dcore::Event, public design::Subject<AnyEvent>
+class PreAnyEvent : public dcore::Event, public design::Subject<PreAnyEvent>
 {
 public:
-    AnyEvent();
-    ~AnyEvent();
+    PreAnyEvent();
+    ~PreAnyEvent();
 
-    void any(dcommon::Entry *event);
+    void preAny(dcommon::Entry *event);
 };
 
-/** @typedef tAnyEventSP
- * a type definition of a shared pointer to an any event
+/** @typedef tPreAnyEventSP
+ * a type definition of a shared pointer to an preAny event
  */
-typedef boost::shared_ptr <AnyEvent> tAnyEventSP;
+typedef boost::shared_ptr <PreAnyEvent> tPreAnyEventSP;
 
     }
 }
 
 
-#endif /* __ANYEVENT_HH__ */
+#endif /* __PREANYEVENT_HH__ */
