@@ -46,7 +46,8 @@ void dcore::LastEventHandler::update(dcore::PostAnyEvent *subject)
 
     // update the last event time
     if ((entry->getType() == LAST_ARRIVAL_EVENT) ||
-        (entry->getType() == ARRIVAL_EVENT)) {
+        (entry->getType() == ARRIVAL_EVENT) ||
+        (entry->getType() == DEPARTURE_EVENT)) {
         vertex_last_event_time_map[vertex] = entry->getArrival();
     }
 }
