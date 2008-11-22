@@ -26,6 +26,7 @@ libcoreevent_la_SOURCES =                                                  \
 	DepartureEvent.cc                                                  \
 	NumEventsHandler.cc                                                \
 	LastEventHandler.cc                                                \
+	UtilisationHandler.cc                                              \
 	DepartureHandler.cc
 
 libcoreevent_la_CPPFLAGS =                                                 \

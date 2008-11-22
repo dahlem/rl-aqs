@@ -44,6 +44,7 @@
 #include "PreAnyEvent.hh"
 #include "ProcessedEventsHandler.hh"
 #include "UnprocessedEventsHandler.hh"
+#include "UtilisationHandler.hh"
 namespace dcore = des::core;
 
 #include "Results.hh"
@@ -227,6 +228,8 @@ int main(int argc, char *argv[])
         new dcore::NumEventsHandler(graph));
     dcore::tLastEventHandlerSP lastEventHandler(
         new dcore::LastEventHandler(graph));
+    dcore::tUtilisationHandlerSP utilisationHandler(
+        new dcore::UtilisationHandler(graph));
 
     // we only need to register an event generation handler, if there are > 1 phases
     if (desArgs->generations > 1) {
@@ -242,6 +245,7 @@ int main(int argc, char *argv[])
     arrivalEvent->attach(numEventsHandler);
     arrivalEvent->attach(arrivalHandler);
     departureEvent->attach(departureHandler);
+    postAnyEvent->attach(utilisationHandler);
     postAnyEvent->attach(lastEventHandler);
     postEvent->attach(unprocessedEventsHandler);
 
