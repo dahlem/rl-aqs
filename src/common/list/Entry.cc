@@ -17,8 +17,6 @@
 /** @file Entry.cc
  * Implementation of the @ref{Entry.hh} declaration.
  */
-#include <iostream>
-
 #include "Entry.hh"
 namespace dcommon = des::common;
 
@@ -26,15 +24,99 @@ namespace dcommon = des::common;
 boost::uintmax_t dcommon::Entry::uid = 0;
 
 
+dcommon::Entry::Entry(double del, double a, int d, int o, int t)
+    : delay(del), arrival(a), destination(d), origin(o), type(t)
+{
+    uid++;
+    id = uid;
+    gid = uid;
+    event_path = StackIntSP(new StackInt());
+}
+
+
+dcommon::Entry::Entry(const Entry &p_entry)
+    : boost::intrusive::list_base_hook<>(p_entry)
+{
+    uid++;
+    gid = uid;
+    id = p_entry.getId();
+    delay = p_entry.getDelay();
+    arrival = p_entry.getArrival();
+    destination = p_entry.getDestination();
+    origin = p_entry.getOrigin();
+    type = p_entry.getType();
+    event_path = p_entry.getEventPath();
+}
+
+
 bool dcommon::Entry::operator< (const dcommon::Entry& rhs) const
 {
-    return arrival < rhs.arrival;
+    if (arrival == rhs.arrival) {
+        return gid < rhs.gid;
+    } else {
+        return arrival < rhs.arrival;
+    }
 }
 
 
 bool dcommon::Entry::operator< (const dcommon::Entry& rhs)
 {
-    return arrival < rhs.arrival;
+    if (arrival == rhs.arrival) {
+        return gid < rhs.gid;
+    } else {
+        return arrival < rhs.arrival;
+    }
+}
+
+
+void dcommon::Entry::delayed(double p_delay, double p_newArrival, boost::int32_t p_type)
+{
+    // update the delay
+    delay += p_delay;
+
+    // reschedule the arrival
+    arrival = p_newArrival;
+
+    type = p_type;
+    origin = destination;
+}
+
+
+void dcommon::Entry::service(double p_departure, boost::int32_t p_type)
+{
+    // set the departure time
+    arrival = p_departure;
+
+    // set the departure event type
+    type = p_type;
+
+    origin = destination;
+}
+
+void dcommon::Entry::depart(boost::int32_t p_destination, boost::int32_t p_type)
+{
+    destination = p_destination;
+
+    type = p_type;
+}
+
+
+void dcommon::Entry::acknowledge(boost::int32_t p_origin,
+                                 boost::int32_t p_destination,
+                                 boost::int32_t p_type)
+{
+    destination = p_destination;
+    origin = p_origin;
+
+    type = p_type;
+}
+
+
+void dcommon::Entry::leave(boost::int32_t p_destination, boost::int32_t p_type)
+{
+    destination = p_destination;
+
+    type = p_type;
 }
 
 
@@ -43,50 +125,45 @@ double dcommon::Entry::getDelay() const
     return delay;
 }
 
-
 boost::uintmax_t dcommon::Entry::getId() const
 {
     return id;
 }
-
 
 double dcommon::Entry::getArrival() const
 {
     return arrival;
 }
 
-
 int dcommon::Entry::getDestination() const
 {
     return destination;
 }
-
 
 int dcommon::Entry::getOrigin() const
 {
     return origin;
 }
 
-
 int dcommon::Entry::getType() const
 {
     return type;
 }
 
-
-std::ostream& dcommon::operator <<(std::ostream &p_os, const dcommon::Entry &p_entry)
+void dcommon::Entry::push(int origin)
 {
-    p_os << p_entry.getId() << "," << p_entry.getArrival() << "," << p_entry.getDelay() << ","
-         << p_entry.getOrigin() << "," << p_entry.getDestination() << "," << p_entry.getType();
-
-    return p_os;
+    event_path->push(origin);
 }
 
-
-std::ostream& dcommon::operator <<(std::ostream &p_os, dcommon::Entry &p_entry)
+int dcommon::Entry::pop()
 {
-    p_os << p_entry.getId() << "," << p_entry.getArrival() << "," << p_entry.getDelay() << ","
-         << p_entry.getOrigin() << "," << p_entry.getDestination() << "," << p_entry.getType();
+    int dest = event_path->top();
+    event_path->pop();
 
-    return p_os;
+    return dest;
+}
+
+dcommon::StackIntSP dcommon::Entry::getEventPath() const
+{
+    return event_path;
 }

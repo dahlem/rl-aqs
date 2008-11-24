@@ -51,6 +51,8 @@ const std::string RESULTS = "results";
 const std::string TRACE = "trace";
 const std::string VERTEX = "vertex";
 const std::string VERS = "version";
+const std::string LOG_GRAPH_RATE = "graph_generation";
+const std::string LOG_EVENTS = "log_events";
 
 
 /** @typedef tOptDescSP
@@ -72,7 +74,9 @@ struct desArgs_t {
     std::string events_processed;   /* filename for the processed events */
 
     bool trace_event;               /* trace an event */
+    bool log_events;                /* log the events */
     boost::int32_t vertex;          /* the vertex to trace */
+    boost::int32_t graph_rate;      /* the rate to generate graphs at */
 };
 
 /** @typedef tDesArgsSP

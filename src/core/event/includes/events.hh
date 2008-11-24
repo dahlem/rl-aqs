@@ -32,16 +32,17 @@ namespace des {namespace core {
 /**
  * Declaration of the event types
  */
-const boost::int32_t ARRIVAL_EVENT              = 0;
-const boost::int32_t LAST_ARRIVAL_EVENT         = 1;
-const boost::int32_t DEPARTURE_EVENT            = 2;
-const boost::int32_t ACK_EVENT                  = 3;
-const boost::int32_t LEAVE_EVENT                = 4;
+const boost::int32_t LAST_ARRIVAL_EVENT         = 0;
+const boost::int32_t ARRIVAL_EVENT              = 1;
+const boost::int32_t RESCHEDULED_EVENT          = 2;
+const boost::int32_t DEPARTURE_EVENT            = 3;
+const boost::int32_t ACK_EVENT                  = 4;
+const boost::int32_t LEAVE_EVENT                = 5;
 
 /**
  * Declaration of admin events
  */
-const boost::int32_t LOG_GRAPH_EVENT            = 5;
+const boost::int32_t LOG_GRAPH_EVENT            = 6;
 
 /**
  * Declaration of the event source

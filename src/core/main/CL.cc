@@ -64,6 +64,8 @@ CL::CL()
         (GRAPH.c_str(), po::value <std::string>(), "set the graph for the event simulator.")
         (SEEDS.c_str(), po::value <std::string>(), "set the seeds for the event simulator.")
         (RESULTS.c_str(), po::value <std::string>()->default_value("./results"), "set directory for the results of the event simulator.")
+        (LOG_GRAPH_RATE.c_str(), po::value <boost::int32_t>()->default_value(0), "set the graph generation rate.")
+        (LOG_EVENTS.c_str(), po::value <bool>()->default_value(true), "log the events.")
         ;
 
     po::options_description opt_debug("Debug Configuration");
@@ -138,12 +140,21 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
 
     if (vm.count(RESULTS.c_str())) {
         desArgs->results_dir = vm[RESULTS.c_str()].as <std::string>();
-        std::cout << "Set the results directory "
-                  << desArgs->results_dir << "." << std::endl;
-    } else {
-        std::cout << "Set the results directory "
-                  << desArgs->results_dir << "." << std::endl;
     }
+    std::cout << "Set the results directory "
+              << desArgs->results_dir << "." << std::endl;
+
+    if (vm.count(LOG_GRAPH_RATE.c_str())) {
+        desArgs->graph_rate = vm[LOG_GRAPH_RATE.c_str()].as <boost::int32_t>();
+    }
+    std::cout << "Set the graph generation rate to "
+              << desArgs->graph_rate << "." << std::endl;
+
+    if (vm.count(LOG_EVENTS.c_str())) {
+        desArgs->log_events = vm[LOG_EVENTS.c_str()].as <bool>();
+    }
+    std::cout << "Log the events "
+              << desArgs->log_events << "." << std::endl;
 
     if (vm.count(TRACE.c_str())) {
         desArgs->trace_event = vm[TRACE.c_str()].as <bool>();

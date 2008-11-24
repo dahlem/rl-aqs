@@ -45,12 +45,13 @@ dcore::UtilisationHandler::~UtilisationHandler()
 void dcore::UtilisationHandler::update(dcore::PostAnyEvent *subject)
 {
     dcommon::Entry *entry = subject->getEvent();
-    dnet::Vertex vertex = boost::vertex(entry->getDestination(), *m_graph);
 
     // update the last event time
     if ((entry->getType() == LAST_ARRIVAL_EVENT) ||
         (entry->getType() == ARRIVAL_EVENT) ||
         (entry->getType() == DEPARTURE_EVENT)) {
+
+        dnet::Vertex vertex = boost::vertex(entry->getDestination(), *m_graph);
         double b_i = 0.0;
 
         if (vertex_busy_map[vertex]) {

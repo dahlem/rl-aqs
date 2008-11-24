@@ -70,65 +70,94 @@ void dcore::DepartureHandler::update(dcore::DepartureEvent *subject)
     entry = subject->getEvent();
 
     dnet::Vertex vertex = boost::vertex(entry->getDestination(), *m_graph);
+
     // if the server is busy then re-schedule
     // otherwise schedule the departure
-    if (vertex_busy_map[vertex]) {
+    if (vertex_number_in_queue_map[vertex] > 0) {
         vertex_number_in_queue_map[vertex]--;
+    }
 
-        if (vertex_number_in_queue_map[vertex] == 0) {
-            vertex_busy_map[vertex] = false;
+    if (vertex_number_in_queue_map[vertex] == 0) {
+        vertex_busy_map[vertex] = false;
+    }
+
+    dnet::Graph::degree_size_type degree =
+        boost::out_degree(vertex, *m_graph);
+
+    if (degree > 0) {
+        tie(out_edge_it, out_edge_it_end) = boost::out_edges(vertex, *m_graph);
+
+        std::vector <dnet::Edge> edges(degree);
+        std::vector <float> edge_weights;
+        std::vector <int> sorted_edge_weights(degree);
+        boost::integer_range <int> range(0, degree);
+
+        // copy the edges into a vector
+        std::copy(out_edge_it, out_edge_it_end, edges.begin());
+
+        // copy the index range into the service_rate_order vector
+        std::copy(range.begin(), range.end(), sorted_edge_weights.begin());
+
+        BOOST_FOREACH(dnet::Edge e, (boost::out_edges(vertex, *m_graph))) {
+            edge_weights.push_back(edge_weight_map[e]);
         }
 
-        dnet::Graph::degree_size_type degree =
-            boost::out_degree(vertex, *m_graph);
+        // sort the sorted_edge_weights according to the edge_weights in ascending order
+        std::sort(sorted_edge_weights.begin(), sorted_edge_weights.end(),
+                  boost::indirect_cmp <float*, std::greater <float> >(&edge_weights[0]));
 
-        if (degree > 0) {
-            tie(out_edge_it, out_edge_it_end) = boost::out_edges(vertex, *m_graph);
+        double temp = 0.0;
+        double u = gsl_rng_uniform(m_depart_uniform_rng.get());
 
-            std::vector <dnet::Edge> edges(degree);
-            std::vector <float> edge_weights;
-            std::vector <int> sorted_edge_weights(degree);
-            boost::integer_range <int> range(0, degree);
+        for (boost::uint32_t e = 0; e < degree; ++e) {
+            dnet::Edge edge = edges[sorted_edge_weights[e]];
+            temp += edge_weights[e];
 
-            // copy the edges into a vector
-            std::copy(out_edge_it, out_edge_it_end, edges.begin());
+            if (u < temp) {
+                // schedule an internal arrival event
+                boost::int32_t destination = vertex_index_map[target(edges[e], *m_graph)];
+                dcommon::Entry *new_entry = new dcommon::Entry(
+                    const_cast <const dcommon::Entry&> (*entry));
 
-            // copy the index range into the service_rate_order vector
-            std::copy(range.begin(), range.end(), sorted_edge_weights.begin());
+                new_entry->depart(destination, dcore::ARRIVAL_EVENT);
+                new_entry->push(new_entry->getOrigin());
+                m_queue->push(new_entry);
 
-            BOOST_FOREACH(dnet::Edge e, (boost::out_edges(vertex, *m_graph))) {
-                edge_weights.push_back(edge_weight_map[e]);
-            }
-
-            // sort the sorted_edge_weights according to the edge_weights in ascending order
-            std::sort(sorted_edge_weights.begin(), sorted_edge_weights.end(),
-                      boost::indirect_cmp <float*, std::greater <float> >(&edge_weights[0]));
-
-            double temp = 0.0;
-            double u = gsl_rng_uniform(m_depart_uniform_rng.get());
-
-            for (boost::uint32_t e = 0; e < degree; ++e) {
-                dnet::Edge edge = edges[sorted_edge_weights[e]];
-                temp += edge_weights[e];
-
-                if (u < temp) {
-                    // schedule an internal arrival event
-                    boost::int32_t destination = vertex_index_map[target(edges[e], *m_graph)];
-                    dcommon::Entry *new_entry = new dcommon::Entry(
-                        entry->getId(),
-                        entry->getDelay(),
-                        entry->getArrival(),
-                        destination,
-                        entry->getOrigin(),
-                        dcore::ARRIVAL_EVENT);
-
-                    m_queue->push(new_entry);
-
-                    break;
-                }
+                break;
             }
         }
     } else {
-        std::cout << "departure not busy!!!" << std::endl;
+        dcommon::StackIntSP eventPath = entry->getEventPath();
+
+        if (eventPath->empty()) {
+            // schedule leave event
+            dcommon::Entry *new_entry = new dcommon::Entry(
+                const_cast <const dcommon::Entry&> (*entry));
+
+            new_entry->leave(dcore::EXTERNAL_EVENT, dcore::LEAVE_EVENT);
+            m_queue->push(new_entry);
+        } else {
+            // schedule ack events
+            boost::int32_t origin = entry->getDestination();
+
+            while (!eventPath->empty()) {
+                boost::int32_t destination = eventPath->top();
+                dcommon::Entry *new_entry = new dcommon::Entry(
+                    const_cast <const dcommon::Entry&> (*entry));
+
+                new_entry->acknowledge(origin, destination, dcore::ACK_EVENT);
+                m_queue->push(new_entry);
+                eventPath->pop();
+
+                if (eventPath->empty()) {
+                    dcommon::Entry *entry_leave = new dcommon::Entry(
+                        const_cast <const dcommon::Entry&> (*new_entry));
+
+                    entry_leave->leave(dcore::EXTERNAL_EVENT, dcore::LEAVE_EVENT);
+                    m_queue->push(entry_leave);
+                }
+                origin = destination;
+            }
+        }
     }
 }

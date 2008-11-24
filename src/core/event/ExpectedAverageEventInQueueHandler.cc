@@ -45,13 +45,13 @@ dcore::ExpectedAverageEventInQueueHandler::~ExpectedAverageEventInQueueHandler()
 void dcore::ExpectedAverageEventInQueueHandler::update(dcore::PostAnyEvent *subject)
 {
     dcommon::Entry *entry = subject->getEvent();
-    dnet::Vertex vertex = boost::vertex(entry->getDestination(), *m_graph);
 
     // update the last event time
     if ((entry->getType() == LAST_ARRIVAL_EVENT) ||
         (entry->getType() == ARRIVAL_EVENT) ||
         (entry->getType() == DEPARTURE_EVENT)) {
 
+        dnet::Vertex vertex = boost::vertex(entry->getDestination(), *m_graph);
         double q_i = entry->getArrival() - vertex_last_event_time_map[vertex];
         q_i *= vertex_number_in_queue_map[vertex];
 

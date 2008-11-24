@@ -30,6 +30,7 @@
 #endif /* __STDC_CONSTANT_MACROS */
 
 #include <iostream>
+#include <stack>
 #include <string>
 
 #include <boost/cstdint.hpp>
@@ -44,7 +45,11 @@ namespace des
     namespace common
     {
 
-static const std::string HEADER = "id,arrivalTime,delay,origin,destination,type";
+typedef std::stack <int> StackInt;
+typedef boost::shared_ptr <StackInt> StackIntSP;
+
+
+static const std::string HEADER = "uid,id,arrivalTime,delay,origin,destination,type,eventPathSize";
 
 
 /** @class Entry
@@ -57,22 +62,9 @@ static const std::string HEADER = "id,arrivalTime,delay,origin,destination,type"
 class Entry : public boost::intrusive::list_base_hook<>
 {
 public:
-    Entry()
-        : id(0), delay(0.0), arrival(0.0), destination(-99), origin(-99), type(-99)
-        {}
+    explicit Entry(double del, double a, int d, int o, int t);
 
-    explicit Entry(double del, double a, int d, int o, int t)
-        : delay(del), arrival(a), destination(d), origin(o), type(t)
-        {
-            uid++;
-            id = uid;
-        }
-
-    explicit Entry(boost::uintmax_t i, double del, double a, int d, int o, int t)
-        : id(i), delay(del), arrival(a), destination(d), origin(o), type(t)
-        {
-            uid++;
-        }
+    explicit Entry(const Entry &p_entry);
 
     static std::string header()
         {
@@ -82,20 +74,45 @@ public:
     bool operator< (const Entry& rhs) const;
     bool operator< (const Entry& rhs);
 
+    void delayed(double, double, boost::int32_t);
+    void service(double, boost::int32_t);
+    void depart(boost::int32_t, boost::int32_t);
+    void acknowledge(boost::int32_t, boost::int32_t, boost::int32_t);
+    void leave(boost::int32_t, boost::int32_t);
+
     double getDelay() const;
+
     boost::uintmax_t getId() const;
+
     double getArrival() const;
+
     int getDestination() const;
+
     int getOrigin() const;
+
     int getType() const;
 
+    StackIntSP getEventPath() const;
 
-    friend std::ostream& operator <<(std::ostream &p_os, const Entry &p_entry);
-    friend std::ostream& operator <<(std::ostream &p_os, Entry &p_entry);
+    void push(int);
+    int pop();
+
+    friend std::ostream& operator <<(std::ostream &p_os, const Entry &p_entry)
+        {
+            p_os << p_entry.gid << "," << p_entry.id << "," << p_entry.arrival << ","
+                 << p_entry.delay << "," << p_entry.origin << "," << p_entry.destination << ","
+                 << p_entry.type << "," << p_entry.event_path->size();
+
+            return p_os;
+        }
 
 
 
 private:
+    Entry()
+        {}
+
+
     static boost::uintmax_t uid;
     boost::uintmax_t id;
     double delay;
@@ -103,6 +120,9 @@ private:
     int destination;
     int origin;
     int type;
+    StackIntSP event_path;
+    boost::uintmax_t gid;
+
 };
 
 typedef boost::intrusive::make_list <Entry>::type EntryList;

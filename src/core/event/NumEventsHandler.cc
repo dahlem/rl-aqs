@@ -45,5 +45,8 @@ void dcore::NumEventsHandler::update(dcore::ArrivalEvent *subject)
     dnet::Vertex vertex = boost::vertex(entry->getDestination(), *m_graph);
 
     // increment the number of numEvents events seen by this node
-    vertex_num_events_map[vertex]++;
+    if ((entry->getType() == LAST_ARRIVAL_EVENT) ||
+        (entry->getType() == ARRIVAL_EVENT)) {
+        vertex_num_events_map[vertex]++;
+    }
 }

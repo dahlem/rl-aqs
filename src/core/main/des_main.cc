@@ -197,6 +197,8 @@ int main(int argc, char *argv[])
             count++;
         }
     } else {
+        double graphGenRate = desArgs->stop_time;
+
         std::pair <dnet::VertexIterator, dnet::VertexIterator> p;
         for (p = boost::vertices(*graph); p.first != p.second; ++p.first) {
             destination = vertex_index_props_map[*p.first];
@@ -206,14 +208,13 @@ int main(int argc, char *argv[])
                 queue, arrival_rng, destination, arrival_rate, stopTime);
         }
 
-        dcore::EventGenerator::generateLogGraph(
-            queue, 3.0, desArgs->stop_time);
-    }
+        if (desArgs->graph_rate > 1) {
+            graphGenRate = desArgs->stop_time / desArgs->graph_rate;
+        }
 
-    dio::tResultsSP processed_events(
-        new dio::Results(desArgs->events_processed, desArgs->results_dir));
-    dio::tResultsSP unprocessed_events(
-        new dio::Results(desArgs->events_unprocessed, desArgs->results_dir));
+        dcore::EventGenerator::generateLogGraph(
+            queue, graphGenRate, desArgs->stop_time);
+    }
 
     // instantiate the events & handlers
     dcore::tAdminEventSP adminEvent(new dcore::AdminEvent);
@@ -227,10 +228,6 @@ int main(int argc, char *argv[])
     dcore::tLogGraphHandlerSP logGraphHandler(
         new dcore::LogGraphHandler(desArgs->results_dir, graph));
 
-    dcore::tProcessedEventsHandlerSP processedEventsHandler(
-        new dcore::ProcessedEventsHandler(processed_events));
-    dcore::tUnprocessedEventsHandlerSP unprocessedEventsHandler(
-        new dcore::UnprocessedEventsHandler(unprocessed_events, queue));
     dcore::tArrivalHandlerSP arrivalHandler(
         new dcore::ArrivalHandler(queue, graph, service_rng_index));
     dcore::tDepartureHandlerSP departureHandler(
@@ -256,7 +253,21 @@ int main(int argc, char *argv[])
     // the order of the handlers is important
     adminEvent->attach(logGraphHandler);
 
-    preAnyEvent->attach(processedEventsHandler);
+    // only register the logging handlers, if they are configured.
+    if (desArgs->log_events) {
+        dio::tResultsSP processed_events(
+            new dio::Results(desArgs->events_processed, desArgs->results_dir));
+        dio::tResultsSP unprocessed_events(
+            new dio::Results(desArgs->events_unprocessed, desArgs->results_dir));
+
+        dcore::tProcessedEventsHandlerSP processedEventsHandler(
+            new dcore::ProcessedEventsHandler(processed_events));
+        dcore::tUnprocessedEventsHandlerSP unprocessedEventsHandler(
+            new dcore::UnprocessedEventsHandler(unprocessed_events, queue));
+
+        preAnyEvent->attach(processedEventsHandler);
+        postEvent->attach(unprocessedEventsHandler);
+    }
 
     arrivalEvent->attach(numEventsHandler);
     arrivalEvent->attach(arrivalHandler);
@@ -266,8 +277,6 @@ int main(int argc, char *argv[])
     postAnyEvent->attach(utilisationHandler);
     postAnyEvent->attach(expectedAverageEventInQueueHandler);
     postAnyEvent->attach(lastEventHandler);
-
-    postEvent->attach(unprocessedEventsHandler);
 
     // instantiate the event processor and set the events
     dcore::tEventProcessorSP processor(

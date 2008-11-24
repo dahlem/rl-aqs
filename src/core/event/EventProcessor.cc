@@ -72,10 +72,15 @@ void dcore::EventProcessor::process()
                       // generate new events
                       m_lastArrivalEvent->lastArrival(entry);
                   case ARRIVAL_EVENT:
+                  case RESCHEDULED_EVENT:
                       m_arrivalEvent->arrival(entry);
                       break;
                   case DEPARTURE_EVENT:
                       m_departureEvent->departure(entry);
+                      break;
+                  case ACK_EVENT:
+                      break;
+                  case LEAVE_EVENT:
                       break;
                   default:
                       break;
@@ -95,6 +100,12 @@ void dcore::EventProcessor::process()
             std::cout << "Finished processing events." << std::endl;
         } else {
             std::cout << "Exception: " << qe.what() << std::endl;
+
+            if (entry != NULL) {
+                std::cout << "Event: "
+                          << const_cast <const dcommon::Entry&> (*entry)
+                          << std::endl;
+            }
         }
     }
 }

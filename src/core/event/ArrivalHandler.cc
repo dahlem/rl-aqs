@@ -68,9 +68,11 @@ void dcore::ArrivalHandler::update(dcore::ArrivalEvent *subject)
 
     entry = subject->getEvent();
     vertex = boost::vertex(entry->getDestination(), *m_graph);
-
     service_time = gsl_ran_exponential(m_service_rng.get(),
                                        vertex_service_map[vertex]);
+
+    dcommon::Entry *new_entry = new dcommon::Entry(
+        const_cast <const dcommon::Entry&> (*entry));
 
     // if the server is busy then re-schedule
     // otherwise schedule the departure
@@ -79,13 +81,18 @@ void dcore::ArrivalHandler::update(dcore::ArrivalEvent *subject)
         delay = vertex_time_service_ends_map[vertex] - entry->getArrival();
         departure = vertex_time_service_ends_map[vertex] + service_time;
         vertex_number_in_queue_map[vertex]++;
+
+        // delay the event
+        new_entry->delayed(delay, departure, dcore::DEPARTURE_EVENT);
     } else {
         // enqueue a departure event into the queue with a stochastic service time
         departure = entry->getArrival() + service_time;
 
         // set the busy flag to true
         vertex_busy_map[vertex] = true;
-        vertex_number_in_queue_map[vertex] = 1;
+
+        // service the event
+        new_entry->service(departure, dcore::DEPARTURE_EVENT);
     }
 
     // calculate the average delay in the queue
@@ -94,14 +101,6 @@ void dcore::ArrivalHandler::update(dcore::ArrivalEvent *subject)
                             vertex_average_delay_in_queue_map[vertex],
                             delay);
 
-    dcommon::Entry *new_entry = new dcommon::Entry(
-        entry->getId(),
-        entry->getDelay() + delay,
-        departure,
-        entry->getDestination(),
-        entry->getDestination(),
-        dcore::DEPARTURE_EVENT);
-
-    m_queue->push(new_entry);
     vertex_time_service_ends_map[vertex] = departure;
+    m_queue->push(new_entry);
 }
