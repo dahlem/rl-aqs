@@ -22,6 +22,7 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include "AckEvent.hh"
 #include "AdminEvent.hh"
 #include "PreAnyEvent.hh"
 #include "PostAnyEvent.hh"
@@ -54,6 +55,7 @@ public:
                    dcore::tDepartureEventSP,
                    dcore::tPostEventSP,
                    dcore::tLastArrivalEventSP,
+                   dcore::tAckEventSP,
                    double);
     ~EventProcessor();
 
@@ -69,6 +71,7 @@ private:
     dcore::tDepartureEventSP m_departureEvent;
     dcore::tPostEventSP m_postEvent;
     dcore::tLastArrivalEventSP m_lastArrivalEvent;
+    dcore::tAckEventSP m_ackEvent;
 
     double m_stopTime;
 };

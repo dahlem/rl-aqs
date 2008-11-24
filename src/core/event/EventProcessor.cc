@@ -37,11 +37,13 @@ dcore::EventProcessor::EventProcessor(dcommon::tQueueSP p_queue,
                                       dcore::tDepartureEventSP p_departureEvent,
                                       dcore::tPostEventSP p_postEvent,
                                       dcore::tLastArrivalEventSP p_lastArrivalEvent,
+                                      dcore::tAckEventSP p_ackEvent,
                                       double p_stopTime)
     : m_queue(p_queue), m_adminEvent(p_adminEvent), m_preAnyEvent(p_preAnyEvent),
       m_postAnyEvent(p_postAnyEvent), m_arrivalEvent(p_arrivalEvent),
       m_departureEvent(p_departureEvent), m_postEvent(p_postEvent),
-      m_lastArrivalEvent(p_lastArrivalEvent), m_stopTime(p_stopTime)
+      m_lastArrivalEvent(p_lastArrivalEvent), m_ackEvent(p_ackEvent),
+      m_stopTime(p_stopTime)
 {}
 
 
@@ -79,6 +81,7 @@ void dcore::EventProcessor::process()
                       m_departureEvent->departure(entry);
                       break;
                   case ACK_EVENT:
+                      m_ackEvent->ack(entry);
                       break;
                   case LEAVE_EVENT:
                       break;

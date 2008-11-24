@@ -28,6 +28,8 @@
 
 #include <gsl/gsl_randist.h>
 
+#include "AckEvent.hh"
+#include "AckHandler.hh"
 #include "AdminEvent.hh"
 #include "ArrivalEvent.hh"
 #include "ArrivalHandler.hh"
@@ -224,6 +226,7 @@ int main(int argc, char *argv[])
     dcore::tDepartureEventSP departureEvent(new dcore::DepartureEvent);
     dcore::tPostEventSP postEvent(new dcore::PostEvent);
     dcore::tLastArrivalEventSP lastArrivalEvent(new dcore::LastArrivalEvent);
+    dcore::tAckEventSP ackEvent(new dcore::AckEvent);
 
     dcore::tLogGraphHandlerSP logGraphHandler(
         new dcore::LogGraphHandler(desArgs->results_dir, graph));
@@ -240,6 +243,8 @@ int main(int argc, char *argv[])
         new dcore::UtilisationHandler(graph));
     dcore::tExpectedAverageEventInQueueHandlerSP expectedAverageEventInQueueHandler(
         new dcore::ExpectedAverageEventInQueueHandler(graph));
+    dcore::tAckHandlerSP ackHandler(
+        new dcore::AckHandler(queue));
 
     // we only need to register an event generation handler, if there are > 1 phases
     if (desArgs->generations > 1) {
@@ -274,6 +279,8 @@ int main(int argc, char *argv[])
 
     departureEvent->attach(departureHandler);
 
+    ackEvent->attach(ackHandler);
+
     postAnyEvent->attach(utilisationHandler);
     postAnyEvent->attach(expectedAverageEventInQueueHandler);
     postAnyEvent->attach(lastEventHandler);
@@ -281,7 +288,7 @@ int main(int argc, char *argv[])
     // instantiate the event processor and set the events
     dcore::tEventProcessorSP processor(
         new dcore::EventProcessor(queue, adminEvent, preAnyEvent, postAnyEvent, arrivalEvent,
-                                  departureEvent, postEvent, lastArrivalEvent,
+                                  departureEvent, postEvent, lastArrivalEvent, ackEvent,
                                   desArgs->stop_time));
 
     // process the events

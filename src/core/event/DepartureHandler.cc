@@ -66,9 +66,7 @@ dcore::DepartureHandler::~DepartureHandler()
 void dcore::DepartureHandler::update(dcore::DepartureEvent *subject)
 {
     dnet::OutEdgeIterator out_edge_it, out_edge_it_end;
-    dcommon::Entry *entry;
-    entry = subject->getEvent();
-
+    dcommon::Entry *entry = subject->getEvent();
     dnet::Vertex vertex = boost::vertex(entry->getDestination(), *m_graph);
 
     // if the server is busy then re-schedule
@@ -139,24 +137,20 @@ void dcore::DepartureHandler::update(dcore::DepartureEvent *subject)
         } else {
             // schedule ack events
             boost::int32_t origin = entry->getDestination();
+            boost::int32_t destination = eventPath->top();
+            dcommon::Entry *new_entry = new dcommon::Entry(
+                const_cast <const dcommon::Entry&> (*entry));
 
-            while (!eventPath->empty()) {
-                boost::int32_t destination = eventPath->top();
-                dcommon::Entry *new_entry = new dcommon::Entry(
-                    const_cast <const dcommon::Entry&> (*entry));
+            new_entry->acknowledge(origin, destination, dcore::ACK_EVENT);
+            m_queue->push(new_entry);
+            eventPath->pop();
 
-                new_entry->acknowledge(origin, destination, dcore::ACK_EVENT);
-                m_queue->push(new_entry);
-                eventPath->pop();
+            if (eventPath->empty()) {
+                dcommon::Entry *entry_leave = new dcommon::Entry(
+                    const_cast <const dcommon::Entry&> (*new_entry));
 
-                if (eventPath->empty()) {
-                    dcommon::Entry *entry_leave = new dcommon::Entry(
-                        const_cast <const dcommon::Entry&> (*new_entry));
-
-                    entry_leave->leave(dcore::EXTERNAL_EVENT, dcore::LEAVE_EVENT);
-                    m_queue->push(entry_leave);
-                }
-                origin = destination;
+                entry_leave->leave(dcore::EXTERNAL_EVENT, dcore::LEAVE_EVENT);
+                m_queue->push(entry_leave);
             }
         }
     }
