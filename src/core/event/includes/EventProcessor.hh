@@ -24,12 +24,13 @@
 
 #include "AckEvent.hh"
 #include "AdminEvent.hh"
-#include "PreAnyEvent.hh"
-#include "PostAnyEvent.hh"
 #include "ArrivalEvent.hh"
 #include "DepartureEvent.hh"
 #include "LastArrivalEvent.hh"
+#include "LeaveEvent.hh"
+#include "PostAnyEvent.hh"
 #include "PostEvent.hh"
+#include "PreAnyEvent.hh"
 namespace dcore = des::core;
 
 #include "LadderQueue.hh"
@@ -56,6 +57,7 @@ public:
                    dcore::tPostEventSP,
                    dcore::tLastArrivalEventSP,
                    dcore::tAckEventSP,
+                   dcore::tLeaveEventSP,
                    double);
     ~EventProcessor();
 
@@ -72,6 +74,7 @@ private:
     dcore::tPostEventSP m_postEvent;
     dcore::tLastArrivalEventSP m_lastArrivalEvent;
     dcore::tAckEventSP m_ackEvent;
+    dcore::tLeaveEventSP m_leaveEvent;
 
     double m_stopTime;
 };

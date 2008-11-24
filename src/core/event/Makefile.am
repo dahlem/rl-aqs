@@ -13,6 +13,8 @@ noinst_LTLIBRARIES = libcoreevent.la
 libcoreevent_la_SOURCES =                                                  \
 	AckEvent.cc                                                        \
 	AckHandler.cc                                                      \
+	LeaveEvent.cc                                                      \
+	LeaveHandler.cc                                                    \
 	AdminEvent.cc                                                      \
 	EventGenerator.cc                                                  \
 	EventProcessor.cc                                                  \

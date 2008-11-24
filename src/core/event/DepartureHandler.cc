@@ -144,14 +144,6 @@ void dcore::DepartureHandler::update(dcore::DepartureEvent *subject)
             new_entry->acknowledge(origin, destination, dcore::ACK_EVENT);
             m_queue->push(new_entry);
             eventPath->pop();
-
-            if (eventPath->empty()) {
-                dcommon::Entry *entry_leave = new dcommon::Entry(
-                    const_cast <const dcommon::Entry&> (*new_entry));
-
-                entry_leave->leave(dcore::EXTERNAL_EVENT, dcore::LEAVE_EVENT);
-                m_queue->push(entry_leave);
-            }
         }
     }
 }

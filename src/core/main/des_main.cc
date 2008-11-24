@@ -227,6 +227,7 @@ int main(int argc, char *argv[])
     dcore::tPostEventSP postEvent(new dcore::PostEvent);
     dcore::tLastArrivalEventSP lastArrivalEvent(new dcore::LastArrivalEvent);
     dcore::tAckEventSP ackEvent(new dcore::AckEvent);
+    dcore::tLeaveEventSP leaveEvent(new dcore::LeaveEvent);
 
     dcore::tLogGraphHandlerSP logGraphHandler(
         new dcore::LogGraphHandler(desArgs->results_dir, graph));
@@ -289,7 +290,7 @@ int main(int argc, char *argv[])
     dcore::tEventProcessorSP processor(
         new dcore::EventProcessor(queue, adminEvent, preAnyEvent, postAnyEvent, arrivalEvent,
                                   departureEvent, postEvent, lastArrivalEvent, ackEvent,
-                                  desArgs->stop_time));
+                                  leaveEvent, desArgs->stop_time));
 
     // process the events
     processor->process();

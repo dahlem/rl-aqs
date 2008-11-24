@@ -38,12 +38,13 @@ dcore::EventProcessor::EventProcessor(dcommon::tQueueSP p_queue,
                                       dcore::tPostEventSP p_postEvent,
                                       dcore::tLastArrivalEventSP p_lastArrivalEvent,
                                       dcore::tAckEventSP p_ackEvent,
+                                      dcore::tLeaveEventSP p_leaveEvent,
                                       double p_stopTime)
     : m_queue(p_queue), m_adminEvent(p_adminEvent), m_preAnyEvent(p_preAnyEvent),
       m_postAnyEvent(p_postAnyEvent), m_arrivalEvent(p_arrivalEvent),
       m_departureEvent(p_departureEvent), m_postEvent(p_postEvent),
       m_lastArrivalEvent(p_lastArrivalEvent), m_ackEvent(p_ackEvent),
-      m_stopTime(p_stopTime)
+      m_leaveEvent(p_leaveEvent), m_stopTime(p_stopTime)
 {}
 
 
@@ -84,6 +85,7 @@ void dcore::EventProcessor::process()
                       m_ackEvent->ack(entry);
                       break;
                   case LEAVE_EVENT:
+                      m_leaveEvent->leave(entry);
                       break;
                   default:
                       break;
@@ -105,7 +107,7 @@ void dcore::EventProcessor::process()
             std::cout << "Exception: " << qe.what() << std::endl;
 
             if (entry != NULL) {
-                std::cout << "Event: "
+                std::cout << "Event Processed: "
                           << const_cast <const dcommon::Entry&> (*entry)
                           << std::endl;
             }

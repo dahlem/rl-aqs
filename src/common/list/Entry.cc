@@ -114,6 +114,7 @@ void dcommon::Entry::acknowledge(boost::int32_t p_origin,
 
 void dcommon::Entry::leave(boost::int32_t p_destination, boost::int32_t p_type)
 {
+    origin = destination;
     destination = p_destination;
 
     type = p_type;
