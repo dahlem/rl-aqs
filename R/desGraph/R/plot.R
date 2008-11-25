@@ -42,3 +42,137 @@ des.graph.arrival.plot <- function(graph, filename, ps=TRUE) {
     dev.off()
   }
 }
+
+des.graph.arrival.hist.plot <- function(graph, filename, ps=TRUE) {
+  if (ps) {
+    postscript(eval.dir(filename), onefile=FALSE)
+  }
+
+  arrivalT <- get.vertex.attribute(graph, "arrival_rate");
+  meanT <- mean(arrivalT)
+  df <- data.frame(arrivalTimes=arrivalT)
+  
+  p <- ggplot(df, aes(x=arrivalTimes)) 
+  p <- p + geom_histogram(aes(y= ..density..))
+  p <- p + geom_density(aes(y= ..density..), kernel="gaussian", adjust=2, fill=NA, colour="black")
+  p <- p + geom_vline(intercept=meanT, colour="red")
+  p <- p + scale_y_continuous("")
+  p <- p + scale_x_continuous("Arrival Rates")
+  p <- p + opts(title="Histogram of Vertex Poisson Arrival Rates")
+  p <- p + theme_bw()
+  print(p)
+
+  if (ps) {
+    dev.off()
+  }
+}
+
+
+des.graph.utilisation.plot <- function(graph, filename, ps=TRUE) {
+  if (ps) {
+    postscript(filename, onefile=FALSE)
+  }
+
+  utilisations <- get.vertex.attribute(graph, "utilisation");
+  meanU <- mean(utilisations)
+  df <- data.frame(utilisation=utilisations)
+  
+  p <- ggplot(df, aes(x=utilisation)) 
+  p <- p + geom_histogram(aes(y= ..density..))
+  p <- p + geom_density(aes(y= ..density..), kernel="gaussian", adjust=2, fill=NA, colour="black")
+  p <- p + geom_vline(intercept=meanU, colour="red")
+  p <- p + scale_y_continuous("")
+  p <- p + scale_x_continuous("Utilisation")
+  p <- p + opts(title="Histogram of Vertex Utilisation")
+  p <- p + theme_bw()
+  print(p)
+
+  if (ps) {
+    dev.off()
+  }
+}
+
+
+des.graph.utilisation.evo.plot <- function(prefix, graphs, stopTime, filename, ps=TRUE) {
+  if (ps) {
+    postscript(filename, onefile=FALSE)
+  }
+
+  interval <- stopTime / (graphs - 1);
+  df <- data.frame(time=rep(0, graphs), meanUtil=rep(0, graphs));
+
+  df$time = seq(0, (graphs - 1)) * interval;
+  
+  for (i in seq(0, graphs - 1)) {
+    graph <- read.graph(paste(prefix, "/graph", i, ".gml", sep=""), format="graphml")
+    utilisations <- get.vertex.attribute(graph, "utilisation");
+    df$meanUtil[i + 1] <- mean(utilisations)
+  }
+  
+  p <- ggplot(df, aes(x=time, y=meanUtil))
+  p <- p + layer(geom = "line")
+  p <- p + scale_y_continuous("Mean Utilisation")
+  p <- p + scale_x_continuous("Time")
+  p <- p + opts(title="Evolution of Mean System Utilisation")
+  p <- p + theme_bw()
+  print(p)
+
+  if (ps) {
+    dev.off()
+  }
+}
+
+
+des.graph.average.delay.in.queue.plot <- function(graph, filename, ps=TRUE) {
+  if (ps) {
+    postscript(filename, onefile=FALSE)
+  }
+
+  averageDelayInQueue <- get.vertex.attribute(graph, "average_delay_in_queue");
+  meanD <- mean(averageDelayInQueue)
+  df <- data.frame(averageDelay=averageDelayInQueue)
+  
+  p <- ggplot(df, aes(x=averageDelay)) 
+  p <- p + geom_histogram(aes(y= ..density..))
+  p <- p + geom_density(aes(y= ..density..), kernel="gaussian", adjust=2, fill=NA, colour="black")
+  p <- p + geom_vline(intercept=meanD, colour="red")
+  p <- p + scale_y_continuous("")
+  p <- p + scale_x_continuous("Average Delay in Queue")
+  p <- p + opts(title="Histogram of Vertex Average Delay in Queue")
+  p <- p + theme_bw()
+  print(p)
+
+  if (ps) {
+    dev.off()
+  }
+}
+
+
+des.graph.average.delay.in.queue.evo.plot <- function(prefix, graphs, stopTime, filename, ps=TRUE) {
+  if (ps) {
+    postscript(filename, onefile=FALSE)
+  }
+
+  interval <- stopTime / (graphs - 1);
+  df <- data.frame(time=rep(0, graphs), averageDelay=rep(0, graphs));
+
+  df$time = seq(0, (graphs - 1)) * interval;
+  
+  for (i in seq(0, graphs - 1)) {
+    graph <- read.graph(paste(prefix, "/graph", i, ".gml", sep=""), format="graphml")
+    averageDelay <- get.vertex.attribute(graph, "average_delay_in_queue");
+    df$averageDelay[i + 1] <- mean(averageDelay)
+  }
+  
+  p <- ggplot(df, aes(x=time, y=averageDelay))
+  p <- p + layer(geom = "line")
+  p <- p + scale_y_continuous("Average Delay")
+  p <- p + scale_x_continuous("Time")
+  p <- p + opts(title="Evolution of Average Delay in Queue in the System")
+  p <- p + theme_bw()
+  print(p)
+
+  if (ps) {
+    dev.off()
+  }
+}
