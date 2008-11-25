@@ -373,6 +373,7 @@ public:
      *
      * @param boost::uint32_t the size of the network
      * @param boost::uint32_t the maximum number of edges
+     * @param double the fixed edge weights (-1, if not fixed)
      * @param tGslRngSP the GSL random number to draw the number of edges a new
      *        vertex is linked up to
      * @param tGslRngSP the GSL random number to draw a uniform number to decide
@@ -380,7 +381,7 @@ public:
      * @param tGslRngSP the GSL random number to draw a uniform number for the vertex
      *        arrival rate.
      */
-    WEvonet(boost::uint32_t p_size, boost::uint32_t p_max_edges,
+    WEvonet(boost::uint32_t p_size, boost::uint32_t p_max_edges, double p_edge_weight,
             tGslRngSP p_edge_rng, tGslRngSP p_uniform_rng, tGslRngSP p_vertex_arrival_rng);
 
     /**
@@ -467,6 +468,12 @@ private:
      * The maximum number of allowed edges for a newly created vertex.
      */
     boost::uint32_t max_edges;
+
+    /**
+     * Value with which to fix the edge weights
+     */
+    double fixed_edge_weight;
+
 };
 
 

@@ -64,7 +64,7 @@ const std::string dnet::WEvonet::LAST_EVENT_TIME                = "last_event_ti
 const std::string dnet::WEvonet::EXPECTED_AVERAGE_NUMBER_EVENT  = "expected_average_number_event";
 
 
-dnet::WEvonet::WEvonet(boost::uint32_t p_size, boost::uint32_t p_max_edges,
+dnet::WEvonet::WEvonet(boost::uint32_t p_size, boost::uint32_t p_max_edges, double p_edge_weight,
                  tGslRngSP p_edge_rng, tGslRngSP p_uniform_rng, tGslRngSP p_vertex_arrival_rng)
 {
     // create the graph
@@ -72,6 +72,7 @@ dnet::WEvonet::WEvonet(boost::uint32_t p_size, boost::uint32_t p_max_edges,
     num_edges_rng = p_edge_rng;
     uniform_rng = p_uniform_rng;
     vertex_arrival_rng = p_vertex_arrival_rng;
+    fixed_edge_weight = p_edge_weight;
 
     max_edges = p_max_edges;
 
@@ -122,7 +123,12 @@ dnet::WEvonet::WEvonet(boost::uint32_t p_size, boost::uint32_t p_max_edges,
     vertex_expected_average_number_event_map[v1] = 0.0;
 
     dnet::Vertex v2 = add_vertex(*g);
-    vertex_arrival_props_map[v2] = vertex_arrival_props_map[v1] * 0.5;
+
+    if (fixed_edge_weight > 0) {
+        vertex_arrival_props_map[v2] = vertex_arrival_props_map[v1] * fixed_edge_weight;
+    } else {
+        vertex_arrival_props_map[v2] = vertex_arrival_props_map[v1] * 0.5;
+    }
     vertex_service_props_map[v2] = vertex_arrival_props_map[v2];
     vertex_index_props_map[v2] = 1;
     vertex_busy_map[v2] = false;
@@ -137,7 +143,11 @@ dnet::WEvonet::WEvonet(boost::uint32_t p_size, boost::uint32_t p_max_edges,
     vertex_expected_average_number_event_map[v2] = 0.0;
 
     dnet::Vertex v3 = add_vertex(*g);
-    vertex_arrival_props_map[v3] = vertex_arrival_props_map[v1] * 0.5;
+    if (fixed_edge_weight > 0) {
+        vertex_arrival_props_map[v3] = vertex_arrival_props_map[v1] * fixed_edge_weight;
+    } else {
+        vertex_arrival_props_map[v3] = vertex_arrival_props_map[v1] * 0.5;
+    }
     vertex_service_props_map[v3] = vertex_arrival_props_map[v3];
     vertex_index_props_map[v3] = 2;
     vertex_busy_map[v3] = false;
@@ -309,7 +319,7 @@ void dnet::WEvonet::balance_vertex_strength(Vertex &v)
         dnet::VertexIndexMap, IterStrDiffMap>
         vis_enduced_strength(vertex_arrival_props_map, edge_weight_props_map,
                              vertex_index_props_map, strength_diff_map,
-                             strength_diff_apply_map);
+                             strength_diff_apply_map, fixed_edge_weight);
 
     // 1. determine the enduced differences in vertex strength
     boost::epidemic_visit(*g,

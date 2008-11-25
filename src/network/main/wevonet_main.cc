@@ -46,6 +46,7 @@ const std::string SIZE = "size";
 const std::string MAX_EDGES = "max_edges";
 const std::string FILENAME = "filename";
 const std::string FORMAT = "format";
+const std::string WEIGHT_FIXED = "weight";
 
 
 
@@ -54,6 +55,8 @@ int main(int argc, char *argv[])
     int net_size;
     int max_edges;
     int format, format_temp;
+    double edge_fixed;
+
     dsample::tGslRngSP r1, r2, r3;
     std::string filename;
     std::string seeds_file;
@@ -67,6 +70,7 @@ int main(int argc, char *argv[])
         (FILENAME.c_str(), po::value<std::string>(), "set the filename for the graph output")
         (SEEDS.c_str(), po::value <std::string>(), "set the seeds for the event simulator.")
         (FORMAT.c_str(), po::value <int>(), "set the output format (1=dot, 2=graphML).")
+        (WEIGHT_FIXED.c_str(), po::value <double>()->default_value(-1.0), "fix the edge weights (-1=dont't fix).")
         ;
 
     po::variables_map vm;
@@ -132,6 +136,11 @@ int main(int argc, char *argv[])
             return EXIT_FAILURE;
         }
     }
+    if (vm.count(WEIGHT_FIXED.c_str())) {
+        edge_fixed = vm[WEIGHT_FIXED.c_str()].as <double>();
+    }
+    std::cout << "Fix the edge weight at "
+              << edge_fixed << "." << std::endl;
 
     boost::int32_t arrival_rng_index;
     boost::int32_t seeds_rng_index;
@@ -182,7 +191,7 @@ int main(int argc, char *argv[])
     // use the WEvonet class
     std::cout << "Generating Graph..." << std::endl;
 
-    WEvonet net(net_size, max_edges, r1, r2, r3);
+    WEvonet net(net_size, max_edges, edge_fixed, r1, r2, r3);
 
     if (format == WEvonet::GRAPHVIZ) {
         net.print(filename, WEvonet::GRAPHVIZ);
