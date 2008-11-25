@@ -69,7 +69,7 @@ void dcore::ArrivalHandler::update(dcore::ArrivalEvent *subject)
     entry = subject->getEvent();
     vertex = boost::vertex(entry->getDestination(), *m_graph);
     service_time = gsl_ran_exponential(m_service_rng.get(),
-                                       vertex_service_map[vertex]);
+                                       1 / vertex_service_map[vertex]);
 
     dcommon::Entry *new_entry = new dcommon::Entry(
         const_cast <const dcommon::Entry&> (*entry));

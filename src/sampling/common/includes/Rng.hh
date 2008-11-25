@@ -43,8 +43,9 @@ public:
      */
     static void uniform(const gsl_rng *p_rng, gsl_matrix *p_mat);
 
-    /** @fn uniform(const gsl_rng *p_rng, gsl_matrix *p_mat)
-     * sample from the poiss distribution
+    /** @fn double poiss(const double lambda, const double u)
+     * sample from the poiss distribution. The algorith is taken from
+     * Sheldon Ross, "Simulation" (4th Ed.) page 82
      *
      * @param const double lambda value of the poisson distribution
      * @param const double the uniform variate

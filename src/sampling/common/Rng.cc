@@ -42,5 +42,5 @@ void Rng::uniform(const gsl_rng *p_rng, gsl_matrix *p_mat)
 
 double Rng::poiss(const double lambda, const double u)
 {
-    return (0.5 * lambda * log(u));
+    return ((1 / lambda) * log(u));
 }
