@@ -13,6 +13,15 @@
 ## Keywords: analysis, discrete-event simulation, events, delay, path size
 ## Created: 25.10.2008
 
+des.plot.performance <- function() {
+  events <- des.customer.read("events_processed.dat");
+  des.plot.hist.customer.delay(events);
+  des.plot.hist.node.emanating.delay(events);
+  des.plot.hist.node.emanating.pathLength(events);
+  des.plot.sys.mean.delay(events);
+  des.plot.sys.mean.pathLength(events);
+}
+
 welford.mean <- function (n, x_bar, x) {
   d <- x - x_bar;
   x_bar_new <- x_bar + d / n;
@@ -114,7 +123,7 @@ des.plot.sys.mean.delay <- function(events, ps=TRUE) {
 }
 
 
-des.plot.sys.mean.delay <- function(events, ps=TRUE) {
+des.plot.sys.mean.pathLength <- function(events, ps=TRUE) {
   if (ps) {
     postscript("mean-system-pathLength-evolution.eps", onefile=FALSE)
   }
@@ -169,7 +178,7 @@ des.system.meanDelay <- function(events) {
                    meanDelay=rep(0,length(completedEvents$delay)));
 
   df$time = completedEvents$arrivalTime;
-  df$meanDelay[1] <- completedEvent$delay[1];
+  df$meanDelay[1] <- completedEvents$delay[1];
   
   for (i in seq(2, length(completedEvents$delay))) {
     df$meanDelay[i] <- welford.mean(i,

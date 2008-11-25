@@ -43,9 +43,19 @@ des.graph.arrival.plot <- function(graph, filename, ps=TRUE) {
   }
 }
 
-des.graph.arrival.hist.plot <- function(graph, filename, ps=TRUE) {
+des.graph.plots <- function(simEndGraph, graphs, prefix, stopTime) {
+  graph = read.graph(simEndGraph, format="graphml")
+  
+  des.graph.arrival.hist.plot(graph)
+  des.graph.utilisation.plot(graph)
+  des.graph.utilisation.evo.plot(prefix, graphs, stopTime)
+  des.graph.average.delay.in.queue.plot(graph)
+  des.graph.average.delay.in.queue.evo.plot(prefix, graphs, stopTime)
+}
+
+des.graph.arrival.hist.plot <- function(graph, ps=TRUE) {
   if (ps) {
-    postscript(eval.dir(filename), onefile=FALSE)
+    postscript("graph-arrival-hist-plot.eps", onefile=FALSE)
   }
 
   arrivalT <- get.vertex.attribute(graph, "arrival_rate");
@@ -68,9 +78,9 @@ des.graph.arrival.hist.plot <- function(graph, filename, ps=TRUE) {
 }
 
 
-des.graph.utilisation.plot <- function(graph, filename, ps=TRUE) {
+des.graph.utilisation.plot <- function(graph, ps=TRUE) {
   if (ps) {
-    postscript(filename, onefile=FALSE)
+    postscript("graph-utilisation-hist-plot.eps", onefile=FALSE)
   }
 
   utilisations <- get.vertex.attribute(graph, "utilisation");
@@ -93,9 +103,9 @@ des.graph.utilisation.plot <- function(graph, filename, ps=TRUE) {
 }
 
 
-des.graph.utilisation.evo.plot <- function(prefix, graphs, stopTime, filename, ps=TRUE) {
+des.graph.utilisation.evo.plot <- function(prefix, graphs, stopTime, ps=TRUE) {
   if (ps) {
-    postscript(filename, onefile=FALSE)
+    postscript("graph-utilisation-evo-plot.eps", onefile=FALSE)
   }
 
   interval <- stopTime / (graphs - 1);
@@ -123,9 +133,9 @@ des.graph.utilisation.evo.plot <- function(prefix, graphs, stopTime, filename, p
 }
 
 
-des.graph.average.delay.in.queue.plot <- function(graph, filename, ps=TRUE) {
+des.graph.average.delay.in.queue.plot <- function(graph, ps=TRUE) {
   if (ps) {
-    postscript(filename, onefile=FALSE)
+    postscript("graph-average-delay-in-queue-hist-plot.eps", onefile=FALSE)
   }
 
   averageDelayInQueue <- get.vertex.attribute(graph, "average_delay_in_queue");
@@ -148,9 +158,9 @@ des.graph.average.delay.in.queue.plot <- function(graph, filename, ps=TRUE) {
 }
 
 
-des.graph.average.delay.in.queue.evo.plot <- function(prefix, graphs, stopTime, filename, ps=TRUE) {
+des.graph.average.delay.in.queue.evo.plot <- function(prefix, graphs, stopTime, ps=TRUE) {
   if (ps) {
-    postscript(filename, onefile=FALSE)
+    postscript("graph-average-delay-in-queue-evo-plot.eps", onefile=FALSE)
   }
 
   interval <- stopTime / (graphs - 1);
