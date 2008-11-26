@@ -133,6 +133,70 @@ des.graph.utilisation.evo.plot <- function(prefix, graphs, stopTime, ps=TRUE) {
 }
 
 
+des.graph.utilisation.customers.evo.plot <- function(prefix, graphs, stopTime, ps=TRUE) {
+  if (ps) {
+    postscript("graph-utilisation-vs-customers-evo-plot.eps", onefile=FALSE)
+  }
+
+  interval <- stopTime / (graphs - 1);
+  df <- data.frame(time=rep(0, graphs), meanUtil=rep(0, graphs), expectedAverageNumEvents=rep(0, graphs));
+
+  df$time = seq(0, (graphs - 1)) * interval;
+  
+  for (i in seq(0, graphs - 1)) {
+    graph <- read.graph(paste(prefix, "/graph", i, ".gml", sep=""), format="graphml")
+    utilisations <- get.vertex.attribute(graph, "utilisation");
+    expectAveNumEvents <- get.vertex.attribute(graph, "expected_average_number_event");
+    df$meanUtil[i + 1] <- mean(utilisations)
+    df$expectedAverageNumEvents[i + 1] <- mean(expectAveNumEvents)
+  }
+  
+  p <- ggplot(df, aes(x=meanUtil, y=expectedAverageNumEvents))
+  p <- p + layer(geom = "line")
+  p <- p + scale_y_continuous("Expected Average Number of Events in Queue")
+  p <- p + scale_x_continuous("Mean Utilisation")
+  p <- p + opts(title="Expected Average Number of Events vs. Utilisation")
+  p <- p + theme_bw()
+  print(p)
+
+  if (ps) {
+    dev.off()
+  }
+}
+
+
+des.graph.delay.customers.evo.plot <- function(prefix, graphs, stopTime, ps=TRUE) {
+  if (ps) {
+    postscript("graph-delay-vs-customers-evo-plot.eps", onefile=FALSE)
+  }
+
+  interval <- stopTime / (graphs - 1);
+  df <- data.frame(time=rep(0, graphs), meanUtil=rep(0, graphs), meanDelay=rep(0, graphs));
+
+  df$time = seq(0, (graphs - 1)) * interval;
+  
+  for (i in seq(0, graphs - 1)) {
+    graph <- read.graph(paste(prefix, "/graph", i, ".gml", sep=""), format="graphml")
+    utilisations <- get.vertex.attribute(graph, "utilisation");
+    meanDelays <- get.vertex.attribute(graph, "average_delay_in_queue");
+    df$meanUtil[i + 1] <- mean(utilisations)
+    df$meanDelay[i + 1] <- mean(meanDelays)
+  }
+  
+  p <- ggplot(df, aes(x=meanUtil, y=meanDelay))
+  p <- p + layer(geom = "line")
+  p <- p + scale_y_continuous("Mean Delay")
+  p <- p + scale_x_continuous("Mean Utilisation")
+  p <- p + opts(title="Mean Delay vs. Utilisation")
+  p <- p + theme_bw()
+  print(p)
+
+  if (ps) {
+    dev.off()
+  }
+}
+
+
 des.graph.average.delay.in.queue.plot <- function(graph, ps=TRUE) {
   if (ps) {
     postscript("graph-average-delay-in-queue-hist-plot.eps", onefile=FALSE)
