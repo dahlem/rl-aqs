@@ -8,11 +8,11 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-SUBDIRS = common sampling statistics utils
+noinst_LTLIBRARIES = libutils_vector.la
 
-if BOOST_SUPPORT
-  SUBDIRS += date
-endif
+libutils_vector_la_SOURCES = Vector.cc
 
-include $(top_srcdir)/mk/valgrind-recursive.am
-include $(top_srcdir)/mk/gcov-recursive.am
+libutils_vector_la_CPPFLAGS = -I./includes
+
+
+include_HEADERS = includes
