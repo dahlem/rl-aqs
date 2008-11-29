@@ -11,6 +11,7 @@
 bin_PROGRAMS = nnet_gaussian
 
 nnet_gaussian_SOURCES =                                               \
+	CL.cc                                                         \
 	nnet_gaussian.cc
 
 nnet_gaussian_CPPFLAGS =                                              \
@@ -23,6 +24,7 @@ nnet_gaussian_CPPFLAGS =                                              \
 
 nnet_gaussian_LDADD =                                                 \
 	$(BOOST_LDFLAGS)                                              \
+	$(BOOST_PROGRAM_OPTIONS_LIB)                                  \
 	$(top_srcdir)/src/sampling/crn/libsamplingcrn.la              \
 	$(top_srcdir)/src/sampling/common/libsamplingcommon.la        \
 	-lgsl                                                         \

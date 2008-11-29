@@ -25,6 +25,7 @@
 #include <cstring>
 
 #include <boost/cstdint.hpp>
+#include <boost/shared_array.hpp>
 
 
 typedef boost::shared_array <double> DoubleSA;
