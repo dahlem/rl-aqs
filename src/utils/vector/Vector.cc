@@ -14,7 +14,8 @@
 #include "Vector.hh"
 namespace dutil = des::utils;
 
-double dutil::Vector::dotproduct(int p_n, double *p_vec1, double *p_vec2)
+
+double dutil::Vector::dotproduct(int p_n, DoubleSA p_vec1, DoubleSA p_vec2)
 {
     int k, m, i = 0;
     double sum = 0.0;

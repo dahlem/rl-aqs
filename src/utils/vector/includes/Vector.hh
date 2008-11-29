@@ -15,10 +15,17 @@
 #define VECTOR_HH
 
 
+#include <boost/shared_array.hpp>
+
+
+typedef boost::shared_array <double> DoubleSA;
+
+
 namespace des
 {
     namespace utils
     {
+
 
 
 /**
@@ -33,10 +40,10 @@ public:
      * This function calculates the dotproduct given two vectors.
      *
      * @param int the length of the vectors
-     * @param double* the left vector
-     * @param double* the right vector
+     * @param DoubleSA the left vector
+     * @param DoubleSA the right vector
      */
-    static double dotproduct(int, double*, double*);
+    static double dotproduct(int, DoubleSA, DoubleSA);
 
 private:
 

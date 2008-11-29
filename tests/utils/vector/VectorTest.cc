@@ -19,7 +19,6 @@ namespace dutils = des::utils;
 CPPUNIT_TEST_SUITE_REGISTRATION(VectorTest);
 
 
-
 void VectorTest::test1D()
 {
     double vec1[1] = {1};

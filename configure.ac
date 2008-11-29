@@ -166,39 +166,40 @@ AC_CONFIG_FILES([
    doc/Makefile
    m4/Makefile
    R/Makefile
+   R/analysis/Makefile
+   R/analysis/assortativity-analysis.R
    R/desGraph/Makefile
    R/desGraph/DESCRIPTION
    R/desSim/Makefile
    R/desSim/DESCRIPTION
-   R/analysis/Makefile
-   R/analysis/assortativity-analysis.R
    src/Makefile
+   src/common/Makefile
+   src/common/list/Makefile
+   src/common/queue/Makefile
+   src/core/Makefile
+   src/core/mgmt/Makefile
+   src/core/event/Makefile
+   src/core/main/Makefile
    src/date/Makefile
-   src/io/Makefile
    src/design/Makefile
    src/design/pattern/Makefile
+   src/io/Makefile
+   src/network/Makefile
+   src/network/evolution/Makefile
+   src/network/main/Makefile
+   src/nnet/Makefile
    src/sampling/Makefile
    src/sampling/common/Makefile
    src/sampling/crn/Makefile
    src/sampling/lhs/Makefile
    src/sampling/qrn/Makefile
-   src/utils/Makefile
-   src/utils/numbers/Makefile
-   src/utils/vector/Makefile
-   src/common/Makefile
-   src/common/list/Makefile
-   src/common/queue/Makefile
    src/statistics/Makefile
    src/statistics/analysis/Makefile
    src/statistics/common/Makefile
    src/statistics/correlation/Makefile
-   src/network/Makefile
-   src/network/evolution/Makefile
-   src/network/main/Makefile
-   src/core/Makefile
-   src/core/mgmt/Makefile
-   src/core/event/Makefile
-   src/core/main/Makefile
+   src/utils/Makefile
+   src/utils/numbers/Makefile
+   src/utils/vector/Makefile
    tests/Makefile
    tests/common/Makefile
    tests/common/queue/Makefile
@@ -208,11 +209,11 @@ AC_CONFIG_FILES([
    tests/sampling/crn/Makefile	
    tests/sampling/lhs/Makefile	
    tests/sampling/qrn/Makefile
-   tests/utils/Makefile
-   tests/utils/vector/Makefile
    tests/statistics/Makefile
    tests/statistics/analysis/Makefile
    tests/statistics/correlation/Makefile
+   tests/utils/Makefile
+   tests/utils/vector/Makefile
 ])
 
 
