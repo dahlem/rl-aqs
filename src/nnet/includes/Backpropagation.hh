@@ -41,7 +41,7 @@ namespace nnet
 #define MOMENTUM        0.9
 
 
-template <class NeuralNetwork, class Activation>
+template <class NeuralNetwork, class Activation, class ActivationOutput = Activation>
 class Backpropagation
 {
 public:
@@ -62,7 +62,7 @@ public:
 
     inline double getOutputGradient(double p_target, double p_output)
         {
-            return Activation::deriv(p_output) * (p_target - p_output);
+            return ActivationOutput::deriv(p_output) * (p_target - p_output);
         }
 
     double getHiddenGradient(boost::uint16_t j)
@@ -141,14 +141,12 @@ private:
             for (boost::uint16_t i = 0; i <= m_nnet->getNumInputs(); ++i) {
                 for (boost::uint16_t j = 0; j < m_nnet->getNumHidden(); ++j) {
                     m_nnet->addWeightInputHidden(i, j, m_deltaInputHidden[i][j]);
-                    m_deltaInputHidden[i][j] = 0.0;
                 }
             }
 
             for (boost::uint16_t j = 0; j <= m_nnet->getNumHidden(); ++j) {
                 for (boost::uint16_t k = 0; k < m_nnet->getNumOutputs(); ++k) {
                     m_nnet->addWeightHiddenOutput(j, k, m_deltaHiddenOutput[j][k]);
-                    m_deltaHiddenOutput[j][k] = 0.0;
                 }
             }
         }

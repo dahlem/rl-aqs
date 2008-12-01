@@ -24,6 +24,7 @@
 
 #include <cmath>
 #include <cstring>
+#include <iostream>
 
 #include <boost/cstdint.hpp>
 #include <boost/shared_array.hpp>
@@ -43,7 +44,7 @@ namespace des
 namespace nnet
 {
 
-template <class Activation, class Objective>
+template <class Activation, class Objective, class ActivationOutput = Activation>
 class FeedforwardNetwork
 {
 public:
@@ -121,10 +122,10 @@ public:
                 for (boost::uint16_t j = 0; j <= m_num_hidden; ++j) {
                     m_output_neurons[k] += m_hidden_neurons[j] * m_weights_hiddenOutput[j][k];
                 }
-                m_output_neurons[k] = Activation::activate(m_output_neurons[k]);
+                m_output_neurons[k] = ActivationOutput::activate(m_output_neurons[k]);
             }
 
-            DoubleSA output = DoubleSA(new double[m_num_outputs + 1]);
+            DoubleSA output = DoubleSA(new double[m_num_outputs]);
             for (boost::uint16_t k = 0; k < m_num_outputs; ++k) {
                 output[k] = m_output_neurons[k];
             }
@@ -142,25 +143,31 @@ public:
         }
 
     inline
-    double getInputNeuron(boost::uint16_t i)
+    double getInputNeuron(boost::uint16_t i) const
         {
             return m_input_neurons[i];
         }
 
     inline
-    double getHiddenNeuron(boost::uint16_t j)
+    double getHiddenNeuron(boost::uint16_t j) const
         {
             return m_hidden_neurons[j];
         }
 
     inline
-    double getOutputNeuron(boost::uint16_t k)
+    double getOutputNeuron(boost::uint16_t k) const
         {
             return m_output_neurons[k];
         }
 
     inline
-    double getWeightHiddenOutput(boost::uint16_t j, boost::uint16_t k)
+    double getWeightInputHidden(boost::uint16_t i, boost::uint16_t j) const
+        {
+            return m_weights_inputHidden[i][j];
+        }
+
+    inline
+    double getWeightHiddenOutput(boost::uint16_t j, boost::uint16_t k) const
         {
             return m_weights_hiddenOutput[j][k];
         }
@@ -178,23 +185,55 @@ public:
         }
 
     inline
-    boost::uint16_t getNumInputs()
+    boost::uint16_t getNumInputs() const
         {
             return m_num_inputs;
         }
 
     inline
-    boost::uint16_t getNumHidden()
+    boost::uint16_t getNumHidden() const
         {
             return m_num_hidden;
         }
 
     inline
-    boost::uint16_t getNumOutputs()
+    boost::uint16_t getNumOutputs() const
         {
             return m_num_outputs;
         }
 
+    friend std::ostream& operator <<(std::ostream &p_os, const FeedforwardNetwork <Activation, Objective, ActivationOutput> &p_nnet)
+        {
+            p_os << "** Hidden Layer **" << std::endl;
+
+            for (boost::uint16_t j = 0; j < p_nnet.getNumHidden();  ++j) {
+                p_os << j << ". Neuron Value : " << p_nnet.getHiddenNeuron(j) << std::endl;
+
+                for (boost::uint16_t i = 0; i < p_nnet.getNumInputs(); ++i) {
+                    p_os << "\t" << i << ". input value : " << p_nnet.getInputNeuron(i)
+                         << " - weight : " << p_nnet.getWeightInputHidden(i, j) << std::endl;
+                }
+                p_os << "\t" "Bias value : " << p_nnet.getInputNeuron(p_nnet.getNumInputs())
+                     << " - weight : " << p_nnet.getWeightInputHidden(p_nnet.getNumInputs(), j) << std::endl;
+            }
+
+            p_os << "** Output Layer **" << std::endl;
+
+            for (boost::uint16_t k = 0; k < p_nnet.getNumOutputs();  ++k) {
+                p_os << k << ". Neuron Value : " << p_nnet.getOutputNeuron(k) << std::endl;
+
+                for (boost::uint16_t j = 0; j < p_nnet.getNumHidden(); ++j) {
+                    p_os << "\t" << j << ". input value : " << p_nnet.getHiddenNeuron(j)
+                         << " - weight : " << p_nnet.getWeightHiddenOutput(j, k) << std::endl;
+                }
+                p_os << "\t" << "Bias value : " << p_nnet.getHiddenNeuron(p_nnet.getNumHidden())
+                     << " - weight : " << p_nnet.getWeightHiddenOutput(p_nnet.getNumHidden(), k) << std::endl;
+            }
+
+            p_os << std::endl;
+
+            return p_os;
+        }
 
 private:
     boost::uint16_t m_num_inputs;
