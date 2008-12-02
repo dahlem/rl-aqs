@@ -251,9 +251,6 @@ private:
     DoubleSM m_weights_hiddenOutput;
 };
 
-
-typedef boost::shared_ptr <FeedforwardNetwork <class Activation, class Objective> > FFNetworkSP;
-
 }
 }
 
