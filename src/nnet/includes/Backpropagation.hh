@@ -85,7 +85,6 @@ public:
                 sum += m_nnet->getWeightHiddenOutput(j, k) * m_deltaOutput[k];
             }
 
-//             return Activation::deriv(m_nnet->getHiddenNeuron(j)) * sum;
             return Activation::deriv(net) * sum;
         }
 

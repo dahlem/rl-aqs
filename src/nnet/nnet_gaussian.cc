@@ -35,11 +35,15 @@ namespace dsample = des::sampling;
 #include "HTangent.hh"
 #include "Logistic.hh"
 #include "MSE.hh"
+#include "Statistics.hh"
 namespace dnnet = des::nnet;
 
 
-typedef dnnet::FeedforwardNetwork <dnnet::HTangent, dnnet::MSE, dnnet::Identity> FFNet;
+typedef dnnet::FeedforwardNetwork <dnnet::HTangent, dnnet::Identity> FFNet;
 typedef boost::shared_ptr <FFNet> FFNetSP;
+
+typedef dnnet::Statistics <FFNetSP, dnnet::MSE> FFNetStats;
+typedef boost::shared_ptr <FFNetStats> FFNetStatsSP;
 
 typedef dnnet::Backpropagation <FFNetSP, dnnet::HTangent, dnnet::Identity> BackProp;
 typedef boost::shared_ptr <BackProp> BackPropSP;
@@ -54,17 +58,24 @@ double gaussian(double x)
 
 void printSample(FFNetSP p_net, dnnet::tNnetArgsSP p_netArgs)
 {
+    FFNetStatsSP stats = FFNetStatsSP(new FFNetStats(p_net));
     std::ofstream out(p_netArgs->filename.c_str(), std::ios::out);
 
     if (out.is_open()) {
+        double result;
         double step = 6.0 / 600;
         double start = -3.0;
         DoubleSA input = DoubleSA(new double[1]);
+        DoubleSA target = DoubleSA(new double[1]);
 
-        out << "x,y,z" << std::endl;
+        out << "x,y,error" << std::endl;
         for (boost::uint16_t i = 0; i <= 600; ++i) {
             input[0] = start + i * step;
-            out << input[0] << "," << p_net->present(input)[0] << "," << gaussian(input[0]) << std::endl;
+            result = p_net->present(input)[0];
+
+            target[0] = gaussian(input[0]);
+            out << input[0] << "," << result
+                << "," << stats->error(target) << std::endl;
         }
 
         out.close();

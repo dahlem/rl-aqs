@@ -44,7 +44,7 @@ namespace des
 namespace nnet
 {
 
-template <class Activation, class Objective, class ActivationOutput = Activation>
+template <class Activation, class ActivationOutput = Activation>
 class FeedforwardNetwork
 {
 public:
@@ -134,13 +134,14 @@ public:
             return output;
         }
 
-    inline
-    double error(DoubleSA p_targets)
+    DoubleSA getOutputNeurons()
         {
-            return  Objective::error(p_targets,
-                                     m_output_neurons,
-                                     m_num_outputs);
+            DoubleSA output = DoubleSA(new double[m_num_outputs]);
+            for (boost::uint16_t k = 0; k < m_num_outputs; ++k) {
+                output[k] = m_output_neurons[k];
+            }
 
+            return output;
         }
 
     inline
@@ -203,7 +204,9 @@ public:
             return m_num_outputs;
         }
 
-    friend std::ostream& operator <<(std::ostream &p_os, const FeedforwardNetwork <Activation, Objective, ActivationOutput> &p_nnet)
+    friend std::ostream& operator <<(
+        std::ostream &p_os,
+        const FeedforwardNetwork <Activation, ActivationOutput> &p_nnet)
         {
             p_os << "** Hidden Layer **" << std::endl;
 
