@@ -42,10 +42,13 @@ namespace dnnet = des::nnet;
 typedef dnnet::FeedforwardNetwork <dnnet::HTangent, dnnet::Identity> FFNet;
 typedef boost::shared_ptr <FFNet> FFNetSP;
 
-typedef dnnet::Statistics <FFNetSP, dnnet::MSE> FFNetStats;
+typedef dnnet::MSE <FFNetSP, dnnet::HTangent, dnnet::Identity> ObjMse;
+typedef boost::shared_ptr <ObjMse> ObjMseSP;
+
+typedef dnnet::Statistics <FFNetSP, ObjMse> FFNetStats;
 typedef boost::shared_ptr <FFNetStats> FFNetStatsSP;
 
-typedef dnnet::Backpropagation <FFNetSP, dnnet::HTangent, dnnet::MSE, dnnet::Identity> BackProp;
+typedef dnnet::Backpropagation <FFNetSP, ObjMseSP> BackProp;
 typedef boost::shared_ptr <BackProp> BackPropSP;
 
 
@@ -104,8 +107,9 @@ int main(int argc, char *argv[])
     dsample::CRN::getInstance().log(seed, "uniform weight assignment seed");
 
     FFNetSP net = FFNetSP(new FFNet(1, 4, 1, uniform_rng_index));
+    ObjMseSP mse = ObjMseSP(new ObjMse(net));
     BackPropSP backprop = BackPropSP(
-        new BackProp(net, nnetArgs->learning_rate, nnetArgs->momentum, 1e-6));
+        new BackProp(net, mse, nnetArgs->learning_rate, nnetArgs->momentum, 1e-6));
 
     // training
     // validation in the range of [-2.5; 2.5]

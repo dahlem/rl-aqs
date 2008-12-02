@@ -204,6 +204,14 @@ public:
             return m_num_outputs;
         }
 
+    inline
+    boost::uint16_t getNumFree() const
+        {
+            return m_num_hidden + m_num_outputs
+                + m_num_inputs * m_num_hidden
+                + m_num_hidden * m_num_outputs;
+        }
+
     friend std::ostream& operator <<(
         std::ostream &p_os,
         const FeedforwardNetwork <Activation, ActivationOutput> &p_nnet)

@@ -41,21 +41,23 @@ namespace nnet
 #define MOMENTUM        0.9
 #define ERRTOL          1e-6
 
+
 template <class NeuralNetwork,
-          class Activation,
-          class Objective,
-          class ActivationOutput = Activation>
+          class Objective>
 class Backpropagation
 {
 public:
-    Backpropagation(NeuralNetwork p_nnet)
-        : m_nnet(p_nnet), m_learningRate(LEARNING_RATE), m_momentum(MOMENTUM), m_errtol(ERRTOL)
+    Backpropagation(NeuralNetwork p_nnet, Objective p_objective)
+        : m_nnet(p_nnet), m_objective(p_objective),
+          m_learningRate(LEARNING_RATE), m_momentum(MOMENTUM), m_errtol(ERRTOL)
         {
             init();
         }
 
-    Backpropagation(NeuralNetwork p_nnet, double p_learningRate, double p_momentum, double p_errtol)
-        : m_nnet(p_nnet), m_learningRate(p_learningRate), m_momentum(p_momentum), m_errtol(p_errtol)
+    Backpropagation(NeuralNetwork p_nnet, Objective p_objective,
+                    double p_learningRate, double p_momentum, double p_errtol)
+        : m_nnet(p_nnet), m_objective(p_objective),
+          m_learningRate(p_learningRate), m_momentum(p_momentum), m_errtol(p_errtol)
         {
             init();
         }
@@ -63,60 +65,28 @@ public:
     ~Backpropagation()
         {}
 
-    inline double getOutputDelta(double p_target, boost::uint16_t p_k)
-        {
-            double output = m_nnet->getOutputNeuron(p_k);
-            double net = 0.0;
-
-            for (boost::uint16_t j = 0; j <= m_nnet->getNumHidden(); ++j) {
-                net += m_nnet->getWeightHiddenOutput(j, p_k) * m_nnet->getHiddenNeuron(j);
-            }
-
-            return ActivationOutput::deriv(net) * (p_target - output);
-        }
-
-    double getHiddenDelta(boost::uint16_t j)
-        {
-            double sum = 0.0;
-            double net = 0.0;
-
-            for (boost::uint16_t i = 0; i <= m_nnet->getNumInputs(); ++i) {
-                net += m_nnet->getWeightInputHidden(i, j) * m_nnet->getInputNeuron(i);
-            }
-
-            for (boost::uint16_t k = 0; k < m_nnet->getNumOutputs(); ++k) {
-                sum += m_nnet->getWeightHiddenOutput(j, k) * m_deltaOutput[k];
-            }
-
-            return Activation::deriv(net) * sum;
-        }
-
     void train(DoubleSA p_targets)
         {
             // don't start the training if the error is small enough
-            if (Objective::error(p_targets, m_nnet->getOutputNeurons(), m_nnet->getNumOutputs())
+            if (m_objective->error(p_targets, m_nnet->getOutputNeurons(), m_nnet->getNumOutputs())
                 < m_errtol) {
                 return;
             }
 
-            for (boost::uint16_t k = 0; k < m_nnet->getNumOutputs(); ++k) {
-                m_deltaOutput[k] = getOutputDelta(p_targets[k], k);
+            m_objective->calc_gradient(p_targets);
 
+            for (boost::uint16_t k = 0; k < m_nnet->getNumOutputs(); ++k) {
                 for (boost::uint16_t j = 0; j <= m_nnet->getNumHidden(); ++j) {
-                    m_gradientHiddenOutput[j][k] = m_deltaOutput[k] * m_nnet->getHiddenNeuron(j);
                     m_correctionsHiddenOutput[j][k] =
-                        m_learningRate * m_gradientHiddenOutput[j][k]
+                        m_learningRate * m_objective->getGradientHiddenOutput(j, k)
                         + m_momentum * m_correctionsHiddenOutput[j][k];
                 }
             }
 
             for (boost::uint16_t j = 0; j < m_nnet->getNumHidden(); ++j) {
-                m_deltaHidden[j] = getHiddenDelta(j);
-
                 for (boost::uint16_t i = 0; i <= m_nnet->getNumInputs(); ++i) {
-                    m_gradientInputHidden[i][j] = m_deltaHidden[j] * m_nnet->getInputNeuron(i);
                     m_correctionsInputHidden[i][j] =
-                        m_learningRate * m_gradientInputHidden[i][j]
+                        m_learningRate * m_objective->getGradientInputHidden(i, j)
                         + m_momentum * m_correctionsInputHidden[i][j];
                 }
             }
@@ -131,25 +101,6 @@ private:
 
     void init()
         {
-            // initialise the gradients
-            m_gradientInputHidden = DoubleSM(new DoubleSA[m_nnet->getNumInputs() + 1]);
-            for (boost::uint16_t i = 0; i <= m_nnet->getNumInputs(); ++i) {
-                m_gradientInputHidden[i] = DoubleSA(new double[m_nnet->getNumHidden()]);
-
-                for (boost::uint16_t j = 0; j < m_nnet->getNumHidden(); ++j) {
-                    m_gradientInputHidden[i][j] = 0.0;
-                }
-            }
-
-            m_gradientHiddenOutput = DoubleSM(new DoubleSA[m_nnet->getNumHidden() + 1]);
-            for (boost::uint16_t i = 0; i <= m_nnet->getNumHidden(); ++i) {
-                m_gradientHiddenOutput[i] = DoubleSA(new double[m_nnet->getNumOutputs()]);
-
-                for (boost::uint16_t j = 0; j < m_nnet->getNumOutputs(); ++j) {
-                    m_gradientHiddenOutput[i][j] = 0.0;
-                }
-            }
-
             // initialise the corrections
             m_correctionsInputHidden = DoubleSM(new DoubleSA[m_nnet->getNumInputs() + 1]);
             for (boost::uint16_t i = 0; i <= m_nnet->getNumInputs(); ++i) {
@@ -168,13 +119,6 @@ private:
                     m_correctionsHiddenOutput[i][j] = 0.0;
                 }
             }
-
-            // initialise the deltas
-            m_deltaHidden = DoubleSA(new double[m_nnet->getNumHidden() + 1]);
-            memset(m_deltaHidden.get(), 0, (m_nnet->getNumHidden() + 1) * sizeof(double));
-
-            m_deltaOutput = DoubleSA(new double[m_nnet->getNumOutputs() + 1]);
-            memset(m_deltaOutput.get(), 0, (m_nnet->getNumOutputs() + 1) * sizeof(double));
         }
 
     void updateWeights()
@@ -194,19 +138,14 @@ private:
 
 
     NeuralNetwork m_nnet;
+    Objective m_objective;
 
     double m_learningRate;
     double m_momentum;
     double m_errtol;
 
-    DoubleSM m_gradientInputHidden;
-    DoubleSM m_gradientHiddenOutput;
-
     DoubleSM m_correctionsInputHidden;
     DoubleSM m_correctionsHiddenOutput;
-
-    DoubleSA m_deltaHidden;
-    DoubleSA m_deltaOutput;
 
 };
 
