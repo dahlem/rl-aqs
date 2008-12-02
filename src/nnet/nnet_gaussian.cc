@@ -45,7 +45,7 @@ typedef boost::shared_ptr <FFNet> FFNetSP;
 typedef dnnet::Statistics <FFNetSP, dnnet::MSE> FFNetStats;
 typedef boost::shared_ptr <FFNetStats> FFNetStatsSP;
 
-typedef dnnet::Backpropagation <FFNetSP, dnnet::HTangent, dnnet::Identity> BackProp;
+typedef dnnet::Backpropagation <FFNetSP, dnnet::HTangent, dnnet::MSE, dnnet::Identity> BackProp;
 typedef boost::shared_ptr <BackProp> BackPropSP;
 
 
@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
 
     FFNetSP net = FFNetSP(new FFNet(1, 4, 1, uniform_rng_index));
     BackPropSP backprop = BackPropSP(
-        new BackProp(net, nnetArgs->learning_rate, nnetArgs->momentum));
+        new BackProp(net, nnetArgs->learning_rate, nnetArgs->momentum, 1e-6));
 
     // training
     // validation in the range of [-2.5; 2.5]

@@ -39,20 +39,23 @@ namespace nnet
 
 #define LEARNING_RATE   0.001
 #define MOMENTUM        0.9
+#define ERRTOL          1e-6
 
-
-template <class NeuralNetwork, class Activation, class ActivationOutput = Activation>
+template <class NeuralNetwork,
+          class Activation,
+          class Objective,
+          class ActivationOutput = Activation>
 class Backpropagation
 {
 public:
     Backpropagation(NeuralNetwork p_nnet)
-        : m_nnet(p_nnet), m_learningRate(LEARNING_RATE), m_momentum(MOMENTUM)
+        : m_nnet(p_nnet), m_learningRate(LEARNING_RATE), m_momentum(MOMENTUM), m_errtol(ERRTOL)
         {
             init();
         }
 
-    Backpropagation(NeuralNetwork p_nnet, double p_learningRate, double p_momentum)
-        : m_nnet(p_nnet), m_learningRate(p_learningRate), m_momentum(p_momentum)
+    Backpropagation(NeuralNetwork p_nnet, double p_learningRate, double p_momentum, double p_errtol)
+        : m_nnet(p_nnet), m_learningRate(p_learningRate), m_momentum(p_momentum), m_errtol(p_errtol)
         {
             init();
         }
@@ -90,6 +93,12 @@ public:
 
     void train(DoubleSA p_targets)
         {
+            // don't start the training if the error is small enough
+            if (Objective::error(p_targets, m_nnet->getOutputNeurons(), m_nnet->getNumOutputs())
+                < m_errtol) {
+                return;
+            }
+
             for (boost::uint16_t k = 0; k < m_nnet->getNumOutputs(); ++k) {
                 m_deltaOutput[k] = getOutputDelta(p_targets[k], k);
 
@@ -188,6 +197,7 @@ private:
 
     double m_learningRate;
     double m_momentum;
+    double m_errtol;
 
     DoubleSM m_gradientInputHidden;
     DoubleSM m_gradientHiddenOutput;
