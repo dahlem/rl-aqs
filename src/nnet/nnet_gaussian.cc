@@ -18,7 +18,7 @@
 
 #include <cmath>
 #include <cstring>
-#include <iostream>
+#include <fstream>
 
 #include <boost/cstdint.hpp>
 #include <boost/shared_ptr.hpp>
@@ -38,15 +38,37 @@ namespace dsample = des::sampling;
 namespace dnnet = des::nnet;
 
 
-typedef dnnet::FeedforwardNetwork <dnnet::Logistic, dnnet::MSE, dnnet::Identity> FFNet;
+typedef dnnet::FeedforwardNetwork <dnnet::HTangent, dnnet::MSE, dnnet::Identity> FFNet;
 typedef boost::shared_ptr <FFNet> FFNetSP;
 
-typedef dnnet::Backpropagation <FFNetSP, dnnet::Logistic, dnnet::Identity> BackProp;
+typedef dnnet::Backpropagation <FFNetSP, dnnet::HTangent, dnnet::Identity> BackProp;
 typedef boost::shared_ptr <BackProp> BackPropSP;
+
+
 
 double gaussian(double x)
 {
     return exp(- x * x);
+}
+
+
+void printSample(FFNetSP p_net, dnnet::tNnetArgsSP p_netArgs)
+{
+    std::ofstream out(p_netArgs->filename.c_str(), std::ios::out);
+
+    if (out.is_open()) {
+        double step = 6.0 / 600;
+        double start = -3.0;
+        DoubleSA input = DoubleSA(new double[1]);
+
+        out << "x,y,z" << std::endl;
+        for (boost::uint16_t i = 0; i <= 600; ++i) {
+            input[0] = start + i * step;
+            out << input[0] << "," << p_net->present(input)[0] << "," << gaussian(input[0]) << std::endl;
+        }
+
+        out.close();
+    }
 }
 
 
@@ -70,35 +92,29 @@ int main(int argc, char *argv[])
     uniform_rng_index = dsample::CRN::getInstance().init(seed);
     dsample::CRN::getInstance().log(seed, "uniform weight assignment seed");
 
-    FFNetSP net = FFNetSP(new FFNet(1, 2, 1, uniform_rng_index));
+    FFNetSP net = FFNetSP(new FFNet(1, 4, 1, uniform_rng_index));
     BackPropSP backprop = BackPropSP(
         new BackProp(net, nnetArgs->learning_rate, nnetArgs->momentum));
 
     // training
     // validation in the range of [-2.5; 2.5]
-    double step = 5.0 * 0.2;
+    double step = 5.0 * 0.5;
     double start = -2.5;
     DoubleSA data = DoubleSA(new double[1]);
     DoubleSA target = DoubleSA(new double[1]);
-    for (boost::uint16_t i = 0; i <= 50; ++i) {
-        data[0] = start + i * step;
-        target[0] = gaussian(data[0]);
 
-        std::cout << const_cast <const FFNet&> (*(net.get())) << std::endl;
-        net->present(data);
-        backprop->train(target);
+    for (boost::uint16_t l = 0; l < nnetArgs->iterations; ++l) {
+        for (boost::uint16_t i = 0; i <= 10; ++i) {
+            data[0] = start + i * step;
+            target[0] = gaussian(data[0]);
+
+            net->present(data);
+            backprop->train(target);
+        }
     }
 
     // validation in the range of [-2.5; 2.5]
-    step = 5.0 * 0.01;
-    start = -2.5;
-    DoubleSA input = DoubleSA(new double[1]);
-
-    std::cout << "x,y" << std::endl;
-    for (boost::uint16_t i = 0; i <= 100; ++i) {
-        input[0] = start + i * step;
-        std::cout << input[0] << "," << net->present(input)[0] << std::endl;
-    }
+    printSample(net, nnetArgs);
 
     return EXIT_SUCCESS;
 }

@@ -10,8 +10,6 @@
 #ifndef __IDENTITY_HH__
 #define __IDENTITY_HH__
 
-#include <cmath>
-
 namespace des { namespace nnet {
 
 
@@ -23,16 +21,19 @@ namespace des { namespace nnet {
 class Identity
 {
 public:
+    inline
     static double activate(double x)
         {
             return x;
         }
 
+    inline
     static double deriv(double x)
         {
             return 1.0;
         }
 
+    inline
     static double deriv2nd(double x)
         {
             return 0.0;

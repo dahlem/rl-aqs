@@ -45,6 +45,8 @@ namespace des { namespace nnet {
 const std::string HELP = "help";
 const std::string CL_LEARNING_RATE = "learning_rate";
 const std::string CL_MOMENTUM = "momentum";
+const std::string CL_SAMPLE_ITER = "iterations";
+const std::string CL_RESULT_FILE = "filename";
 
 
 /** @typedef tOptDescSP
@@ -59,6 +61,8 @@ typedef boost::shared_ptr <po::options_description> tOptDescSP;
 struct nnetArgs_t {
     double learning_rate;   /* learning rate for the NN */
     double momentum;        /* momentum for the NN */
+    int iterations;         /* sample iterations */
+    std::string filename;   /* filename for the results */
 };
 
 /** @typedef tDesArgsSP

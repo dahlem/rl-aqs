@@ -23,16 +23,19 @@ namespace des { namespace nnet {
 class Logistic
 {
 public:
+    inline
     static double activate(double x)
         {
             return 1 / (1 + exp(-x));
         }
 
+    inline
     static double deriv(double x)
         {
             return activate(x) * (1 - activate(x));
         }
 
+    inline
     static double deriv2nd(double x)
         {
             return 0.0;

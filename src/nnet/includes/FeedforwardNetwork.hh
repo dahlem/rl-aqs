@@ -56,11 +56,11 @@ public:
             // initialise the neurons
             m_input_neurons = DoubleSA(new double[m_num_inputs + 1]);
             memset(m_input_neurons.get(), 0, (m_num_inputs + 1) * sizeof(double));
-            m_input_neurons[m_num_inputs] = -1;
+            m_input_neurons[m_num_inputs] = 1;
 
             m_hidden_neurons = DoubleSA(new double[m_num_hidden + 1]);
             memset(m_hidden_neurons.get(), 0, (m_num_hidden + 1) * sizeof(double));
-            m_hidden_neurons[m_num_hidden] = -1;
+            m_hidden_neurons[m_num_hidden] = 1;
 
             m_output_neurons = DoubleSA(new double[m_num_outputs]);
             memset(m_output_neurons.get(), 0, m_num_outputs * sizeof(double));
@@ -69,8 +69,8 @@ public:
             dsample::tGslRngSP uniform_rng = dsample::CRN::getInstance().get(p_uniform_idx - 1);
 
             // [-range_*;+range_*]
-            double range_hidden = 1 / sqrt(static_cast<double> (m_num_inputs));
-            double range_output = 1 / sqrt(static_cast<double> (m_num_hidden));
+            double range_hidden = 1 / sqrt(static_cast<double> (m_num_inputs + 1));
+            double range_output = 1 / sqrt(static_cast<double> (m_num_hidden + 1));
 
             m_weights_inputHidden = DoubleSM(new DoubleSA[m_num_inputs + 1]);
             for (boost::uint16_t i = 0; i <= m_num_inputs; ++i) {
@@ -111,6 +111,7 @@ public:
                 for (boost::uint16_t i = 0; i <= m_num_inputs; ++i) {
                     m_hidden_neurons[j] += m_input_neurons[i] * m_weights_inputHidden[i][j];
                 }
+
                 m_hidden_neurons[j] = Activation::activate(m_hidden_neurons[j]);
             }
 

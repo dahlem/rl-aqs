@@ -23,11 +23,13 @@ namespace des { namespace nnet {
 class HTangent
 {
 public:
+    inline
     static double activate(double x)
         {
             return tanh(0.5 * x);
         }
 
+    inline
     static double deriv(double x)
         {
             double temp = (1 / cosh(x));
@@ -35,6 +37,7 @@ public:
             return temp * temp;
         }
 
+    inline
     static double deriv2nd(double x)
         {
             double temp = (1 / cosh(x));

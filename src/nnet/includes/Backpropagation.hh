@@ -60,42 +60,56 @@ public:
     ~Backpropagation()
         {}
 
-    inline double getOutputGradient(double p_target, double p_output)
+    inline double getOutputDelta(double p_target, boost::uint16_t p_k)
         {
-            return ActivationOutput::deriv(p_output) * (p_target - p_output);
-        }
+            double output = m_nnet->getOutputNeuron(p_k);
+            double net = 0.0;
 
-    double getHiddenGradient(boost::uint16_t j)
-        {
-            double sum = 0.0;
-
-            for (boost::uint16_t k = 0; k < m_nnet->getNumOutputs(); ++k) {
-                sum += m_nnet->getWeightHiddenOutput(j, k) * m_gradientOutput[k];
+            for (boost::uint16_t j = 0; j <= m_nnet->getNumHidden(); ++j) {
+                net += m_nnet->getWeightHiddenOutput(j, p_k) * m_nnet->getHiddenNeuron(j);
             }
 
-            return Activation::deriv(m_nnet->getHiddenNeuron(j)) * sum;
+            return ActivationOutput::deriv(net) * (p_target - output);
+        }
+
+    double getHiddenDelta(boost::uint16_t j)
+        {
+            double sum = 0.0;
+            double net = 0.0;
+
+            for (boost::uint16_t i = 0; i <= m_nnet->getNumInputs(); ++i) {
+                net += m_nnet->getWeightInputHidden(i, j) * m_nnet->getInputNeuron(i);
+            }
+
+            for (boost::uint16_t k = 0; k < m_nnet->getNumOutputs(); ++k) {
+                sum += m_nnet->getWeightHiddenOutput(j, k) * m_deltaOutput[k];
+            }
+
+//             return Activation::deriv(m_nnet->getHiddenNeuron(j)) * sum;
+            return Activation::deriv(net) * sum;
         }
 
     void train(DoubleSA p_targets)
         {
             for (boost::uint16_t k = 0; k < m_nnet->getNumOutputs(); ++k) {
-                m_gradientOutput[k] = getOutputGradient(
-                    p_targets[k], m_nnet->getOutputNeuron(k));
+                m_deltaOutput[k] = getOutputDelta(p_targets[k], k);
 
                 for (boost::uint16_t j = 0; j <= m_nnet->getNumHidden(); ++j) {
-                    m_deltaHiddenOutput[j][k] =
-                        m_learningRate * m_nnet->getHiddenNeuron(j) * m_gradientOutput[k]
-                        + m_momentum * m_deltaHiddenOutput[j][k];
+                    m_gradientHiddenOutput[j][k] = m_deltaOutput[k] * m_nnet->getHiddenNeuron(j);
+                    m_correctionsHiddenOutput[j][k] =
+                        m_learningRate * m_gradientHiddenOutput[j][k]
+                        + m_momentum * m_correctionsHiddenOutput[j][k];
                 }
             }
 
             for (boost::uint16_t j = 0; j < m_nnet->getNumHidden(); ++j) {
-                m_gradientHidden[j] = getHiddenGradient(j);
+                m_deltaHidden[j] = getHiddenDelta(j);
 
                 for (boost::uint16_t i = 0; i <= m_nnet->getNumInputs(); ++i) {
-                    m_deltaInputHidden[i][j] =
-                        m_learningRate * m_nnet->getInputNeuron(i) * m_gradientHidden[j]
-                        + m_momentum * m_deltaInputHidden[i][j];
+                    m_gradientInputHidden[i][j] = m_deltaHidden[j] * m_nnet->getInputNeuron(i);
+                    m_correctionsInputHidden[i][j] =
+                        m_learningRate * m_gradientInputHidden[i][j]
+                        + m_momentum * m_correctionsInputHidden[i][j];
                 }
             }
 
@@ -109,44 +123,63 @@ private:
 
     void init()
         {
-            // initialise the deltas
-            m_deltaInputHidden = DoubleSM(new DoubleSA[m_nnet->getNumInputs() + 1]);
+            // initialise the gradients
+            m_gradientInputHidden = DoubleSM(new DoubleSA[m_nnet->getNumInputs() + 1]);
             for (boost::uint16_t i = 0; i <= m_nnet->getNumInputs(); ++i) {
-                m_deltaInputHidden[i] = DoubleSA(new double[m_nnet->getNumHidden()]);
+                m_gradientInputHidden[i] = DoubleSA(new double[m_nnet->getNumHidden()]);
 
                 for (boost::uint16_t j = 0; j < m_nnet->getNumHidden(); ++j) {
-                    m_deltaInputHidden[i][j] = 0.0;
+                    m_gradientInputHidden[i][j] = 0.0;
                 }
             }
 
-            m_deltaHiddenOutput = DoubleSM(new DoubleSA[m_nnet->getNumHidden() + 1]);
+            m_gradientHiddenOutput = DoubleSM(new DoubleSA[m_nnet->getNumHidden() + 1]);
             for (boost::uint16_t i = 0; i <= m_nnet->getNumHidden(); ++i) {
-                m_deltaHiddenOutput[i] = DoubleSA(new double[m_nnet->getNumOutputs()]);
+                m_gradientHiddenOutput[i] = DoubleSA(new double[m_nnet->getNumOutputs()]);
 
                 for (boost::uint16_t j = 0; j < m_nnet->getNumOutputs(); ++j) {
-                    m_deltaHiddenOutput[i][j] = 0.0;
+                    m_gradientHiddenOutput[i][j] = 0.0;
                 }
             }
 
-            // initialise the gradients
-            m_gradientHidden = DoubleSA(new double[m_nnet->getNumHidden() + 1]);
-            memset(m_gradientHidden.get(), 0, (m_nnet->getNumHidden() + 1) * sizeof(double));
+            // initialise the corrections
+            m_correctionsInputHidden = DoubleSM(new DoubleSA[m_nnet->getNumInputs() + 1]);
+            for (boost::uint16_t i = 0; i <= m_nnet->getNumInputs(); ++i) {
+                m_correctionsInputHidden[i] = DoubleSA(new double[m_nnet->getNumHidden()]);
 
-            m_gradientOutput = DoubleSA(new double[m_nnet->getNumOutputs() + 1]);
-            memset(m_gradientOutput.get(), 0, (m_nnet->getNumOutputs() + 1) * sizeof(double));
+                for (boost::uint16_t j = 0; j < m_nnet->getNumHidden(); ++j) {
+                    m_correctionsInputHidden[i][j] = 0.0;
+                }
+            }
+
+            m_correctionsHiddenOutput = DoubleSM(new DoubleSA[m_nnet->getNumHidden() + 1]);
+            for (boost::uint16_t i = 0; i <= m_nnet->getNumHidden(); ++i) {
+                m_correctionsHiddenOutput[i] = DoubleSA(new double[m_nnet->getNumOutputs()]);
+
+                for (boost::uint16_t j = 0; j < m_nnet->getNumOutputs(); ++j) {
+                    m_correctionsHiddenOutput[i][j] = 0.0;
+                }
+            }
+
+            // initialise the deltas
+            m_deltaHidden = DoubleSA(new double[m_nnet->getNumHidden() + 1]);
+            memset(m_deltaHidden.get(), 0, (m_nnet->getNumHidden() + 1) * sizeof(double));
+
+            m_deltaOutput = DoubleSA(new double[m_nnet->getNumOutputs() + 1]);
+            memset(m_deltaOutput.get(), 0, (m_nnet->getNumOutputs() + 1) * sizeof(double));
         }
 
     void updateWeights()
         {
             for (boost::uint16_t i = 0; i <= m_nnet->getNumInputs(); ++i) {
                 for (boost::uint16_t j = 0; j < m_nnet->getNumHidden(); ++j) {
-                    m_nnet->addWeightInputHidden(i, j, m_deltaInputHidden[i][j]);
+                    m_nnet->addWeightInputHidden(i, j, m_correctionsInputHidden[i][j]);
                 }
             }
 
             for (boost::uint16_t j = 0; j <= m_nnet->getNumHidden(); ++j) {
                 for (boost::uint16_t k = 0; k < m_nnet->getNumOutputs(); ++k) {
-                    m_nnet->addWeightHiddenOutput(j, k, m_deltaHiddenOutput[j][k]);
+                    m_nnet->addWeightHiddenOutput(j, k, m_correctionsHiddenOutput[j][k]);
                 }
             }
         }
@@ -157,11 +190,14 @@ private:
     double m_learningRate;
     double m_momentum;
 
-    DoubleSM m_deltaInputHidden;
-    DoubleSM m_deltaHiddenOutput;
+    DoubleSM m_gradientInputHidden;
+    DoubleSM m_gradientHiddenOutput;
 
-    DoubleSA m_gradientHidden;
-    DoubleSA m_gradientOutput;
+    DoubleSM m_correctionsInputHidden;
+    DoubleSM m_correctionsHiddenOutput;
+
+    DoubleSA m_deltaHidden;
+    DoubleSA m_deltaOutput;
 
 };
 
