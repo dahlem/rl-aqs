@@ -69,8 +69,8 @@ public:
             dsample::tGslRngSP uniform_rng = dsample::CRN::getInstance().get(p_uniform_idx - 1);
 
             // [-range_*;+range_*]
-            double range_hidden = 1 / sqrt(static_cast<double> (m_num_inputs + 1));
-            double range_output = 1 / sqrt(static_cast<double> (m_num_hidden + 1));
+            double range_hidden = 1 / sqrt(static_cast<double> (m_num_inputs));
+            double range_output = 1 / sqrt(static_cast<double> (m_num_hidden));
 
             m_weights_inputHidden = DoubleSM(new DoubleSA[m_num_inputs + 1]);
             for (boost::uint16_t i = 0; i <= m_num_inputs; ++i) {
