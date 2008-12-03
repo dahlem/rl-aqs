@@ -90,6 +90,25 @@ void printSample(FFNetSP p_net, dnnet::tNnetArgsSP p_netArgs)
 }
 
 
+void printData(DoubleSA data)
+{
+    std::ofstream out("dataPoints.dat", std::ios::out);
+
+    double step = 0.5;
+    double start = -2.5;
+
+    if (out.is_open()) {
+        out << "x,y" << std::endl;
+        for (boost::uint16_t i = 0; i <= 10; ++i) {
+            data[0] = start + i * step;
+            out << data[0] << "," << gaussian(data[0]) << std::endl;
+        }
+
+        out.close();
+    }
+}
+
+
 int main(int argc, char *argv[])
 {
     dnnet::tNnetArgsSP nnetArgs(new dnnet::nnetArgs_t);
@@ -115,10 +134,12 @@ int main(int argc, char *argv[])
 
     // training
     // validation in the range of [-2.5; 2.5]
-    double step = 5.0 * 0.5;
+    double step = 0.5;
     double start = -2.5;
     DoubleSA data = DoubleSA(new double[1]);
     DoubleSA target = DoubleSA(new double[1]);
+
+    printData(data);
 
     if (nnetArgs->cg) {
         ConjGradSP conjgrad = ConjGradSP(
