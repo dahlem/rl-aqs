@@ -55,10 +55,18 @@ CL::CL()
 
     po::options_description opt_app("Application Configuration");
     opt_app.add_options()
-        (CL_LEARNING_RATE.c_str(), po::value <double>()->default_value(0.001), "set the learning rate for the Neural Network Backpropagation.")
-        (CL_MOMENTUM.c_str(), po::value <double>()->default_value(0.9), "set the momentum for the Neural Network Backpropagation.")
-        (CL_SAMPLE_ITER.c_str(), po::value <int>()->default_value(100), "set the sample iterations for the Neural Network Backpropagation.")
-        (CL_RESULT_FILE.c_str(), po::value <std::string>()->default_value("out.dat"), "set the filename for the sample results of the learned network.")
+        (CL_LEARNING_RATE.c_str(), po::value <double>()->default_value(0.001),
+         "set the learning rate for the Neural Network Backpropagation.")
+        (CL_MOMENTUM.c_str(), po::value <double>()->default_value(0.9),
+         "set the momentum for the Neural Network Backpropagation.")
+        (CL_SAMPLE_ITER.c_str(), po::value <boost::uint16_t>()->default_value(100),
+         "set the conjugate gradient iterations for the Neural Network Backpropagation.")
+        (CL_EPOCHS.c_str(), po::value <boost::uint16_t>()->default_value(100),
+         "set the epochs for the Neural Network Backpropagation.")
+        (CL_RESULT_FILE.c_str(), po::value <std::string>()->default_value("out.dat"),
+         "set the filename for the sample results of the learned network.")
+        (CL_CG.c_str(), po::value <bool>()->default_value(true),
+         "indicate whether the conjugate gradient training method should be used.")
         ;
 
     opt_desc->add(opt_general);
@@ -92,10 +100,22 @@ int CL::parse(int argc, char *argv[], tNnetArgsSP nnetArgs)
               << nnetArgs->momentum << "." << std::endl;
 
     if (vm.count(CL_SAMPLE_ITER.c_str())) {
-        nnetArgs->iterations = vm[CL_SAMPLE_ITER.c_str()].as <int>();
+        nnetArgs->iterations = vm[CL_SAMPLE_ITER.c_str()].as <boost::uint16_t>();
     }
     std::cout << "Iterations: "
               << nnetArgs->iterations << "." << std::endl;
+
+    if (vm.count(CL_EPOCHS.c_str())) {
+        nnetArgs->epochs = vm[CL_EPOCHS.c_str()].as <boost::uint16_t>();
+    }
+    std::cout << "Epochs: "
+              << nnetArgs->epochs << "." << std::endl;
+
+    if (vm.count(CL_CG.c_str())) {
+        nnetArgs->cg = vm[CL_CG.c_str()].as <bool>();
+    }
+    std::cout << "Conjugate Gradient: "
+              << nnetArgs->cg << "." << std::endl;
 
     if (vm.count(CL_RESULT_FILE.c_str())) {
         nnetArgs->filename = vm[CL_RESULT_FILE.c_str()].as<std::string>();

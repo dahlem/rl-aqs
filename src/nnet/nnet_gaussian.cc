@@ -30,6 +30,7 @@ namespace dsample = des::sampling;
 
 #include "Backpropagation.hh"
 #include "CL.hh"
+#include "ConjugateGradient.hh"
 #include "FeedforwardNetwork.hh"
 #include "Identity.hh"
 #include "HTangent.hh"
@@ -50,6 +51,9 @@ typedef boost::shared_ptr <FFNetStats> FFNetStatsSP;
 
 typedef dnnet::Backpropagation <FFNetSP, ObjMseSP> BackProp;
 typedef boost::shared_ptr <BackProp> BackPropSP;
+
+typedef dnnet::ConjugateGradient <FFNetSP, ObjMseSP> ConjGrad;
+typedef boost::shared_ptr <ConjGrad> ConjGradSP;
 
 
 
@@ -108,8 +112,6 @@ int main(int argc, char *argv[])
 
     FFNetSP net = FFNetSP(new FFNet(1, 4, 1, uniform_rng_index));
     ObjMseSP mse = ObjMseSP(new ObjMse(net));
-    BackPropSP backprop = BackPropSP(
-        new BackProp(net, mse, nnetArgs->learning_rate, nnetArgs->momentum, 1e-6));
 
     // training
     // validation in the range of [-2.5; 2.5]
@@ -118,13 +120,31 @@ int main(int argc, char *argv[])
     DoubleSA data = DoubleSA(new double[1]);
     DoubleSA target = DoubleSA(new double[1]);
 
-    for (boost::uint16_t l = 0; l < nnetArgs->iterations; ++l) {
-        for (boost::uint16_t i = 0; i <= 10; ++i) {
-            data[0] = start + i * step;
-            target[0] = gaussian(data[0]);
+    if (nnetArgs->cg) {
+        ConjGradSP conjgrad = ConjGradSP(
+            new ConjGrad(net, mse, nnetArgs->learning_rate, 1e-6, nnetArgs->iterations));
 
-            net->present(data);
-            backprop->train(target);
+        for (boost::uint16_t l = 0; l < nnetArgs->epochs; ++l) {
+            for (boost::uint16_t i = 0; i <= 10; ++i) {
+                data[0] = start + i * step;
+                target[0] = gaussian(data[0]);
+
+                net->present(data);
+                conjgrad->train(target);
+            }
+        }
+    } else {
+        BackPropSP backprop = BackPropSP(
+            new BackProp(net, mse, nnetArgs->learning_rate, nnetArgs->momentum, 1e-6));
+
+        for (boost::uint16_t l = 0; l < nnetArgs->epochs; ++l) {
+            for (boost::uint16_t i = 0; i <= 10; ++i) {
+                data[0] = start + i * step;
+                target[0] = gaussian(data[0]);
+
+                net->present(data);
+                backprop->train(target);
+            }
         }
     }
 

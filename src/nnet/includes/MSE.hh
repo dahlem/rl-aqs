@@ -56,6 +56,54 @@ public:
     ~MSE()
         {}
 
+    double potentialError(DoubleSA p_weights, DoubleSA p_targets)
+        {
+            DoubleSA origWeights = m_nnet->getWeights();
+
+            // set the potential weights
+            boost::uint16_t index = 0;
+
+            for (boost::uint16_t j = 0; j < m_nnet->getNumHidden(); ++j) {
+                for (boost::uint16_t i = 0; i <= m_nnet->getNumInputs(); ++i) {
+                    m_nnet->setWeightInputHidden(i, j, p_weights[index]);
+                    index++;
+                }
+            }
+
+            for (boost::uint16_t k = 0; k < m_nnet->getNumOutputs(); ++k) {
+                for (boost::uint16_t j = 0; j <= m_nnet->getNumHidden(); ++j) {
+                    m_nnet->setWeightHiddenOutput(j, k, p_weights[index]);
+                    index++;
+                }
+            }
+
+            // present the old input to the network to get new output values
+            DoubleSA origInputs = m_nnet->getInputNeurons();
+            DoubleSA newOutputs = m_nnet->present(origInputs);
+
+            // calc the error
+            double error = MSE::error(p_targets, newOutputs, m_nnet->getNumOutputs());
+
+            // reset the weights to the old values
+            index = 0;
+
+            for (boost::uint16_t j = 0; j < m_nnet->getNumHidden(); ++j) {
+                for (boost::uint16_t i = 0; i <= m_nnet->getNumInputs(); ++i) {
+                    m_nnet->setWeightInputHidden(i, j, origWeights[index]);
+                    index++;
+                }
+            }
+
+            for (boost::uint16_t k = 0; k < m_nnet->getNumOutputs(); ++k) {
+                for (boost::uint16_t j = 0; j <= m_nnet->getNumHidden(); ++j) {
+                    m_nnet->setWeightHiddenOutput(j, k, origWeights[index]);
+                    index++;
+                }
+            }
+
+            return error;
+        }
+
     static double error(DoubleSA p_targets, DoubleSA p_outputs, boost::uint16_t p_size)
         {
             double d, sum = 0.0;
@@ -97,6 +145,29 @@ public:
     double getGradientInputHidden(boost::uint16_t i, boost::uint16_t j)
         {
             return m_gradientInputHidden[i][j];
+        }
+
+    DoubleSA getGradient()
+        {
+            boost::uint16_t index = 0;
+
+            DoubleSA gradient = DoubleSA(new double[m_nnet->getNumFree()]);
+
+            for (boost::uint16_t j = 0; j < m_nnet->getNumHidden(); ++j) {
+                for (boost::uint16_t i = 0; i <= m_nnet->getNumInputs(); ++i) {
+                    gradient[index] = m_gradientInputHidden[i][j];
+                    index++;
+                }
+            }
+
+            for (boost::uint16_t k = 0; k < m_nnet->getNumOutputs(); ++k) {
+                for (boost::uint16_t j = 0; j <= m_nnet->getNumHidden(); ++j) {
+                    gradient[index] = m_gradientHiddenOutput[j][k];
+                    index++;
+                }
+            }
+
+            return gradient;
         }
 
 

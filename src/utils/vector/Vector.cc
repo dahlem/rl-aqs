@@ -43,3 +43,30 @@ double dutil::Vector::dotproduct(int p_n, DoubleSA p_vec1, DoubleSA p_vec2)
 
     return sum;
 }
+
+
+void dutil::Vector::mult(int p_n, DoubleSA p_vec, double p_scalar)
+{
+    int k, m, i = 0;
+
+    k = p_n / 4;
+    m = p_n % 4;
+
+    for (i = 0; i < k; i += 4) {
+        p_vec[i] = p_vec[i] * p_scalar;
+        p_vec[i + 1] = p_vec[i + 1] * p_scalar;
+        p_vec[i + 2] = p_vec[i + 2] * p_scalar;
+        p_vec[i + 3] = p_vec[i + 3] * p_scalar;
+    }
+
+    switch (m) {
+      case 3:
+          p_vec[i] = p_vec[i] * p_scalar;
+          ++i;
+      case 2:
+          p_vec[i] = p_vec[i] * p_scalar;
+          ++i;
+      case 1:
+          p_vec[i] = p_vec[i] * p_scalar;
+    }
+}

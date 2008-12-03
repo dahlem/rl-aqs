@@ -47,6 +47,8 @@ const std::string CL_LEARNING_RATE = "learning_rate";
 const std::string CL_MOMENTUM = "momentum";
 const std::string CL_SAMPLE_ITER = "iterations";
 const std::string CL_RESULT_FILE = "filename";
+const std::string CL_EPOCHS = "epochs";
+const std::string CL_CG = "cg";
 
 
 /** @typedef tOptDescSP
@@ -59,10 +61,12 @@ typedef boost::shared_ptr <po::options_description> tOptDescSP;
  * structure specifying the command line variables.
  */
 struct nnetArgs_t {
-    double learning_rate;   /* learning rate for the NN */
-    double momentum;        /* momentum for the NN */
-    int iterations;         /* sample iterations */
-    std::string filename;   /* filename for the results */
+    double learning_rate;           /* learning rate for the NN */
+    double momentum;                /* momentum for the NN */
+    boost::uint16_t iterations;     /* conjugate gradient iterations */
+    boost::uint16_t epochs;         /* epochs */
+    std::string filename;           /* filename for the results */
+    bool cg;                        /* indicate whether the cg method should be used */
 };
 
 /** @typedef tDesArgsSP

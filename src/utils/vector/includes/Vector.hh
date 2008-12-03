@@ -45,6 +45,16 @@ public:
      */
     static double dotproduct(int, DoubleSA, DoubleSA);
 
+
+    /** @ double mult(int, DoubleSA, double)
+     * Multiply a scalar component-wise.
+     *
+     * @param int the length of the vectors
+     * @param DoubleSA the left vector
+     * @param double the scalar to multiply the vector with
+     */
+    static void mult(int, DoubleSA, double);
+
 private:
 
     Vector()

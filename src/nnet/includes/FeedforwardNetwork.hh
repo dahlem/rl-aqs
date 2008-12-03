@@ -144,6 +144,39 @@ public:
             return output;
         }
 
+    DoubleSA getInputNeurons()
+        {
+            DoubleSA input = DoubleSA(new double[m_num_inputs]);
+            for (boost::uint16_t i = 0; i < m_num_inputs; ++i) {
+                input[i] = m_input_neurons[i];
+            }
+
+            return input;
+        }
+
+    DoubleSA getWeights()
+        {
+            boost::uint16_t index = 0;
+
+            DoubleSA weights = DoubleSA(new double[getNumFree()]);
+
+            for (boost::uint16_t j = 0; j < m_num_hidden; ++j) {
+                for (boost::uint16_t i = 0; i <= m_num_inputs; ++i) {
+                    weights[index] = m_weights_inputHidden[i][j];
+                    index++;
+                }
+            }
+
+            for (boost::uint16_t k = 0; k < m_num_outputs; ++k) {
+                for (boost::uint16_t j = 0; j <= m_num_hidden; ++j) {
+                    weights[index] = m_weights_hiddenOutput[j][k];
+                    index++;
+                }
+            }
+
+            return weights;
+        }
+
     inline
     double getInputNeuron(boost::uint16_t i) const
         {
@@ -184,6 +217,18 @@ public:
     void addWeightHiddenOutput(boost::uint16_t j, boost::uint16_t k, double p_delta)
         {
             m_weights_hiddenOutput[j][k] += p_delta;
+        }
+
+    inline
+    void setWeightInputHidden(boost::uint16_t i, boost::uint16_t j, double p_weight)
+        {
+            m_weights_inputHidden[i][j] = p_weight;
+        }
+
+    inline
+    void setWeightHiddenOutput(boost::uint16_t j, boost::uint16_t k, double p_weight)
+        {
+            m_weights_hiddenOutput[j][k] = p_weight;
         }
 
     inline

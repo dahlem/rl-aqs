@@ -16,6 +16,7 @@ nnet_gaussian_SOURCES =                                               \
 
 nnet_gaussian_CPPFLAGS =                                              \
 	$(BOOST_CPPFLAGS)                                             \
+	-I$(top_srcdir)/src/utils/vector/includes                     \
 	-I$(top_srcdir)/src/sampling/crn/includes                     \
 	-I$(top_srcdir)/src/design/pattern/includes                   \
 	-I$(top_srcdir)/src/sampling/common/includes                  \
@@ -26,6 +27,7 @@ nnet_gaussian_LDADD =                                                 \
 	$(BOOST_LDFLAGS)                                              \
 	$(BOOST_PROGRAM_OPTIONS_LIB)                                  \
 	$(top_srcdir)/src/sampling/crn/libsamplingcrn.la              \
+	$(top_srcdir)/src/utils/vector/libutils_vector.la             \
 	$(top_srcdir)/src/sampling/common/libsamplingcommon.la        \
 	-lgsl                                                         \
 	-lm
