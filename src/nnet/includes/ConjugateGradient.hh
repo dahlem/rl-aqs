@@ -417,21 +417,6 @@ private:
                 }
             }
 
-//             double minimumError = p_error;
-//             double optimalTrainRate = p_trainingRate;
-
-//             if(fa <= minimumError) {
-//                 optimalTrainRate = a;
-//             } else if(fb <= minimumError) {
-//                 optimalTrainRate = b;
-//             } else if(fv <= minimumError) {
-//                 optimalTrainRate = v;
-//             } else if(fw <= minimumError) {
-//                 optimalTrainRate = w;
-//             } else if(fx <= minimumError) {
-//                 optimalTrainRate = x;
-//             }
-
             return x;
         }
 
