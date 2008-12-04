@@ -22,6 +22,7 @@
 #include "CL.hh"
 #include "Simulation.hh"
 #include "SimulationCI.hh"
+#include "SimulationLHS.hh"
 namespace dcore = des::core;
 
 
