@@ -12,6 +12,7 @@ bin_PROGRAMS = des_main
 
 des_main_SOURCES =                                                    \
 	CL.cc                                                         \
+	Simulation.cc                                                 \
 	des_main.cc
 
 des_main_CPPFLAGS =                                                   \

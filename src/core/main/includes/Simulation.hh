@@ -14,12 +14,21 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
+/** @file Simulation.hh
+ * This header declares the simulation method, so that it can be considered a
+ * black-box simulation by the main method.
+ *
+ * @author Dominik Dahlem
+ */
+#ifndef __DES_CORE_SIMULATION_HH__
+#define __DES_CORE_SIMULATION_HH__
+
 #if HAVE_CONFIG_H
 # include <config.h>
 #endif
 
 #include "CL.hh"
-#include "Simulation.hh"
+
 
 
 namespace des
@@ -27,23 +36,50 @@ namespace des
 namespace core
 {
 
-
-int main(int argc, char *argv[])
+/** @struct sim_output
+ * Specifies the output variables of the simulation
+ */
+struct sim_output
 {
-    tDesArgsSP desArgs(new desArgs_t);
-    CL cl;
+    sim_output()
+        {}
+
+};
 
 
-    if (cl.parse(argc, argv, desArgs)) {
-        return EXIT_SUCCESS;
-    }
+/** @class Simulation
+ * Class encapsulating the logic to start the discrete event simulator.
+ */
+class Simulation
+{
+public:
 
-    Simulation::simulate(desArgs);
+    /** @fn static sim_output simulate()
+     * start the simulation
+     *
+     * @return the simulation output variables
+     */
+    static sim_output simulate(tDesArgsSP);
 
-    return EXIT_SUCCESS;
+private:
+    Simulation()
+        {}
+
+    Simulation(const Simulation&)
+        {}
+
+    ~Simulation()
+        {}
+
+    void operator=(const Simulation&)
+        {}
+
+};
+
+
+}
 }
 
 
 
-}
-}
+#endif /* __DES_CORE_SIMULATION_HH__ */
