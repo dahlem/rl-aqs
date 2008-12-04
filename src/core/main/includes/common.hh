@@ -14,67 +14,37 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-/** @file Simulation.hh
- * This header declares the simulation method, so that it can be considered a
- * black-box simulation by the main method.
+/** @file common.hh
+ * This header declares common structures for the discrete event simulator.
  *
  * @author Dominik Dahlem
  */
-#ifndef __DES_CORE_SIMULATION_HH__
-#define __DES_CORE_SIMULATION_HH__
+#ifndef __DES_CORE_COMMON_HH__
+#define __DES_CORE_COMMON_HH__
 
 #if HAVE_CONFIG_H
 # include <config.h>
 #endif
-
-#include <boost/shared_ptr.hpp>
-
-#include "common.hh"
-#include "CL.hh"
-
-
 
 namespace des
 {
 namespace core
 {
 
-
-
-/** @class Simulation
- * Class encapsulating the logic to start the discrete event simulator.
+/** @struct sim_output
+ * Specifies the output variables of the simulation
  */
-class Simulation
+struct sim_output
 {
-public:
-    Simulation()
-        {}
-
-    ~Simulation()
-        {}
-
-    /** @fn sim_output simulate()
-     * start the simulation
-     *
-     * @return the simulation output variables
-     */
-    sim_output simulate(tDesArgsSP);
-
-private:
-
-    Simulation(const Simulation&)
-        {}
-
-    void operator=(const Simulation&)
+    sim_output()
         {}
 
 };
 
-typedef boost::shared_ptr <Simulation> SimSP;
 
 }
 }
 
 
 
-#endif /* __DES_CORE_SIMULATION_HH__ */
+#endif /* __DES_CORE_COMMON_HH__ */

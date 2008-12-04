@@ -18,32 +18,31 @@
 # include <config.h>
 #endif
 
+#include "common.hh"
 #include "CL.hh"
 #include "Simulation.hh"
+#include "SimulationCI.hh"
+namespace dcore = des::core;
 
 
-namespace des
-{
-namespace core
-{
+typedef dcore::SimulationCI <dcore::SimSP> SimCI;
+typedef boost::shared_ptr <SimCI> SimCISP;
 
 
 int main(int argc, char *argv[])
 {
-    tDesArgsSP desArgs(new desArgs_t);
-    CL cl;
+    dcore::tDesArgsSP desArgs(new dcore::desArgs_t);
+    dcore::SimSP sim(new dcore::Simulation());
+    SimCISP sim_ci(new SimCI(sim));
+
+    dcore::CL cl;
 
 
     if (cl.parse(argc, argv, desArgs)) {
         return EXIT_SUCCESS;
     }
 
-    Simulation::simulate(desArgs);
+   sim_ci->simulate(desArgs);
 
-    return EXIT_SUCCESS;
-}
-
-
-
-}
+   return EXIT_SUCCESS;
 }

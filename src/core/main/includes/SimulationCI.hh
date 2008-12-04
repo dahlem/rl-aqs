@@ -14,14 +14,14 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-/** @file Simulation.hh
+/** @file SimulationCI.hh
  * This header declares the simulation method, so that it can be considered a
  * black-box simulation by the main method.
  *
  * @author Dominik Dahlem
  */
-#ifndef __DES_CORE_SIMULATION_HH__
-#define __DES_CORE_SIMULATION_HH__
+#ifndef __DES_CORE_SIMULATIONCI_HH__
+#define __DES_CORE_SIMULATIONCI_HH__
 
 #if HAVE_CONFIG_H
 # include <config.h>
@@ -40,41 +40,47 @@ namespace core
 {
 
 
-
-/** @class Simulation
+/** @class SimulationCI
  * Class encapsulating the logic to start the discrete event simulator.
  */
-class Simulation
+template <class DecoratedSim>
+class SimulationCI
 {
 public:
-    Simulation()
+    SimulationCI(DecoratedSim p_dsim)
+        : m_dsim(p_dsim)
         {}
 
-    ~Simulation()
+    ~SimulationCI()
         {}
 
-    /** @fn sim_output simulate()
-     * start the simulation
+    /** @fn static sim_output simulate()
+     * Conduct the simulation to be within a given confidence interval.
      *
      * @return the simulation output variables
      */
-    sim_output simulate(tDesArgsSP);
+    sim_output simulate(tDesArgsSP p_desArgs)
+        {
+            return m_dsim->simulate(p_desArgs);
+        }
+    
 
 private:
 
-    Simulation(const Simulation&)
+    SimulationCI(const SimulationCI&)
         {}
 
-    void operator=(const Simulation&)
+    void operator=(const SimulationCI&)
         {}
 
+
+    DecoratedSim m_dsim;
 };
 
-typedef boost::shared_ptr <Simulation> SimSP;
 
 }
 }
 
 
 
-#endif /* __DES_CORE_SIMULATION_HH__ */
+#endif /* __DES_CORE_SIMULATIONCI_HH__ */
