@@ -1,4 +1,4 @@
-# Copyright (C) 2007 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+# Copyright (C) 2007, 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 #  
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without 
@@ -10,19 +10,23 @@
 
 noinst_LTLIBRARIES = libsamplingcrn.la
 
-libsamplingcrn_la_SOURCES = CRN.cc
+libsamplingcrn_la_SOURCES =                                           \
+	CRN.cc                                                        \
+	Seeds.cc
 
 
 libsamplingcrn_la_CPPFLAGS =                                          \
+	$(BOOST_CPPFLAGS)                                             \
 	-I$(top_srcdir)/src/sampling/crn/includes                     \
 	-I$(top_srcdir)/src/design/pattern/includes                   \
 	-I$(top_srcdir)/src/sampling/common/includes
 
 
-LDADD =                                                               \
+libsamplingcrn_la_LIBADD =                                            \
+	$(BOOST_LDFLAGS)                                              \
 	-lgsl                                                         \
-	-lm
+	-lm                                                           \
+	$(top_srcdir)/src/sampling/common/libsamplingcommon.la
 
-LIBADD = ../common/libsamplingcommon.la
 
 include_HEADERS = includes

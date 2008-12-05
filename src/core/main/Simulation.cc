@@ -53,6 +53,7 @@
 #include "PostEvent.hh"
 #include "PreAnyEvent.hh"
 #include "ProcessedEventsHandler.hh"
+#include "Report.hh"
 #include "Simulation.hh"
 #include "UnprocessedEventsHandler.hh"
 #include "UtilisationHandler.hh"
@@ -81,7 +82,6 @@ namespace core
 
 sim_output Simulation::simulate(tDesArgsSP desArgs)
 {
-    sim_output output;
     dnet::tGraphSP graph(new dnet::Graph);
     dcommon::tQueueSP queue(new dcommon::LadderQueue);
 
@@ -101,51 +101,22 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
     boost::int32_t arrival_rng_index;
     boost::int32_t service_rng_index;
     boost::int32_t depart_uniform_rng_index;
-    boost::int32_t seeds_rng_index;
     boost::uint32_t seed = 0;
 
-    if (desArgs->seeds_filename != "") {
-        // read the seeds
-        dsample::Seeds::getInstance().init(desArgs->seeds_filename.c_str());
+    // init the crn for the arrival events
+    seed = dsample::Seeds::getInstance().getSeed();
+    arrival_rng_index = dsample::CRN::getInstance().init(seed);
+    dsample::CRN::getInstance().log(seed, "arrival events");
 
-        // init the crn for the arrival events
-        seed = dsample::Seeds::getInstance().getSeed();
-        arrival_rng_index = dsample::CRN::getInstance().init(seed);
-        dsample::CRN::getInstance().log(seed, "arrival events");
+    // init the crn for the service events
+    seed = dsample::Seeds::getInstance().getSeed();
+    service_rng_index = dsample::CRN::getInstance().init(seed);
+    dsample::CRN::getInstance().log(seed, "service events");
 
-        // init the crn for the service events
-        seed = dsample::Seeds::getInstance().getSeed();
-        service_rng_index = dsample::CRN::getInstance().init(seed);
-        dsample::CRN::getInstance().log(seed, "service events");
-
-        // init the crn for the departure uniform rv
-        seed = dsample::Seeds::getInstance().getSeed();
-        depart_uniform_rng_index = dsample::CRN::getInstance().init(seed);
-        dsample::CRN::getInstance().log(seed, "departure uniform");
-    } else {
-        // generate the seeds
-        std::cout << "Use random number to generate seeds." << std::endl;
-
-        // 1. init the random number generator for the seeds
-        seeds_rng_index = dsample::CRN::getInstance().init(gsl_rng_default_seed);
-        dsample::CRN::getInstance().log(gsl_rng_default_seed, "seeds");
-
-        // 2. init the crn for the arrival events
-        dsample::tGslRngSP seeds_rng = dsample::CRN::getInstance().get(seeds_rng_index - 1);
-        seed = gsl_rng_uniform_int(seeds_rng.get(), gsl_rng_max(seeds_rng.get()));
-        arrival_rng_index = dsample::CRN::getInstance().init(seed);
-        dsample::CRN::getInstance().log(seed, "arrival events");
-
-        // 3. init the crn for the service events
-        seed = gsl_rng_uniform_int(seeds_rng.get(), gsl_rng_max(seeds_rng.get()));
-        service_rng_index = dsample::CRN::getInstance().init(seed);
-        dsample::CRN::getInstance().log(seed, "service events");
-
-        // 4. init the crn for the departure uniform rv
-        seed = gsl_rng_uniform_int(seeds_rng.get(), gsl_rng_max(seeds_rng.get()));
-        depart_uniform_rng_index = dsample::CRN::getInstance().init(seed);
-        dsample::CRN::getInstance().log(seed, "departure uniform");
-    }
+    // init the crn for the departure uniform rv
+    seed = dsample::Seeds::getInstance().getSeed();
+    depart_uniform_rng_index = dsample::CRN::getInstance().init(seed);
+    dsample::CRN::getInstance().log(seed, "departure uniform");
 
     dsample::tGslRngSP arrival_rng = dsample::CRN::getInstance().get(arrival_rng_index - 1);
 
@@ -295,6 +266,8 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
 
     // process the events
     processor->process();
+
+    sim_output output = Report::accumResults(graph);
 
     return output;
 }

@@ -32,6 +32,10 @@
 #include "common.hh"
 #include "CL.hh"
 
+#include "CI.hh"
+#include "OnlineStats.hh"
+namespace dstats = des::statistics;
+
 
 
 namespace des
@@ -47,8 +51,8 @@ template <class DecoratedSim>
 class SimulationCI
 {
 public:
-    SimulationCI(DecoratedSim p_dsim)
-        : m_dsim(p_dsim)
+    SimulationCI(DecoratedSim p_dsim, double p_alpha, double p_error)
+        : m_dsim(p_dsim), m_alpha(p_alpha), m_error(p_error)
         {}
 
     ~SimulationCI()
@@ -61,9 +65,31 @@ public:
      */
     sim_output simulate(tDesArgsSP p_desArgs)
         {
-            return m_dsim->simulate(p_desArgs);
+            sim_output output, result;
+            dstats::OnlineStats avgDelay;
+            dstats::OnlineStats avgNumEvents;
+
+            do {
+                output = m_dsim->simulate(p_desArgs);
+                avgDelay.push(output.system_average_delay);
+                avgNumEvents.push(output.system_expected_average_num_in_queue);
+            } while (dstats::CI::isConfidentWithPrecision(
+                         avgDelay.mean(),
+                         avgDelay.variance(),
+                         avgDelay.getNumValues(), m_alpha, m_error)
+                     && dstats::CI::isConfidentWithPrecision(
+                         avgNumEvents.mean(),
+                         avgNumEvents.variance(),
+                         avgNumEvents.getNumValues(), m_alpha, m_error));
+
+            result.mean_system_average_delay = avgDelay.mean();
+            result.sd_system_average_delay = avgDelay.standardDeviation();
+            result.mean_system_expected_average_num_in_queue = avgNumEvents.mean();
+            result.sd_system_expected_average_num_in_queue = avgNumEvents.standardDeviation();
+
+            return result;
         }
-    
+
 
 private:
 
@@ -75,6 +101,9 @@ private:
 
 
     DecoratedSim m_dsim;
+    double m_alpha;
+    double m_error;
+
 };
 
 

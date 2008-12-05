@@ -18,12 +18,17 @@
 # include <config.h>
 #endif
 
+#include <iostream>
+
 #include "common.hh"
 #include "CL.hh"
 #include "Simulation.hh"
 #include "SimulationCI.hh"
 #include "SimulationLHS.hh"
 namespace dcore = des::core;
+
+#include "Seeds.hh"
+namespace dsample = des::sampling;
 
 
 typedef dcore::SimulationCI <dcore::SimSP> SimCI;
@@ -33,9 +38,6 @@ typedef boost::shared_ptr <SimCI> SimCISP;
 int main(int argc, char *argv[])
 {
     dcore::tDesArgsSP desArgs(new dcore::desArgs_t);
-    dcore::SimSP sim(new dcore::Simulation());
-    SimCISP sim_ci(new SimCI(sim));
-
     dcore::CL cl;
 
 
@@ -43,7 +45,23 @@ int main(int argc, char *argv[])
         return EXIT_SUCCESS;
     }
 
-   sim_ci->simulate(desArgs);
+    if (desArgs->seeds_filename != "") {
+        // read the seeds
+        dsample::Seeds::getInstance().init(desArgs->seeds_filename.c_str());
+    } else {
+        // generate the seeds
+        std::cout << "Use random number to generate seeds." << std::endl;
+        dsample::Seeds::getInstance().init();
+    }
 
-   return EXIT_SUCCESS;
+    if (desArgs->confidence) {
+        dcore::SimSP sim(new dcore::Simulation());
+        SimCISP sim_ci(new SimCI(sim, 0.95, 0.1));
+        sim_ci->simulate(desArgs);
+    } else {
+        dcore::SimSP sim(new dcore::Simulation());
+        sim->simulate(desArgs);
+    }
+
+    return EXIT_SUCCESS;
 }

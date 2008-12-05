@@ -10,36 +10,39 @@
 
 bin_PROGRAMS = des_main
 
-des_main_SOURCES =                                                    \
-	CL.cc                                                         \
-	Simulation.cc                                                 \
+des_main_SOURCES =                                                       \
+	CL.cc                                                            \
+	Simulation.cc                                                    \
+	Report.cc                                                        \
 	des_main.cc
 
-des_main_CPPFLAGS =                                                   \
-	$(BOOST_CPPFLAGS)                                             \
-	-I./includes                                                  \
-	-I$(top_srcdir)/src/core/event/includes                       \
-	-I$(top_srcdir)/src/network/evolution/includes                \
-	-I$(top_srcdir)/src/sampling/crn/includes                     \
-	-I$(top_srcdir)/src/design/pattern/includes                   \
-	-I$(top_srcdir)/src/sampling/common/includes                  \
-	-I$(top_srcdir)/src/common/queue/includes                     \
-	-I$(top_srcdir)/src/io/includes                               \
+des_main_CPPFLAGS =                                                      \
+	$(BOOST_CPPFLAGS)                                                \
+	-I./includes                                                     \
+	-I$(top_srcdir)/src/core/event/includes                          \
+	-I$(top_srcdir)/src/network/evolution/includes                   \
+	-I$(top_srcdir)/src/sampling/crn/includes                        \
+	-I$(top_srcdir)/src/design/pattern/includes                      \
+	-I$(top_srcdir)/src/sampling/common/includes                     \
+	-I$(top_srcdir)/src/common/queue/includes                        \
+	-I$(top_srcdir)/src/io/includes                                  \
+	-I$(top_srcdir)/src/statistics/analysis/includes                 \
 	-I$(top_srcdir)/src/common/list/includes
 
 
-des_main_LDADD =                                                      \
-	$(BOOST_LDFLAGS)                                              \
-	$(BOOST_PROGRAM_OPTIONS_LIB)                                  \
-	$(BOOST_FILESYSTEM_LIB)                                       \
-	$(BOOST_SYSTEM_LIB)                                           \
-	-lboost_graph                                                 \
-	-lgsl                                                         \
-	-lm                                                           \
-	$(top_srcdir)/src/sampling/crn/libsamplingcrn.la              \
-	$(top_srcdir)/src/sampling/common/libsamplingcommon.la        \
-	$(top_srcdir)/src/common/queue/libcommonqueue.la              \
-	$(top_srcdir)/src/common/list/libcommonlist.la                \
+des_main_LDADD =                                                         \
+	$(BOOST_LDFLAGS)                                                 \
+	$(BOOST_PROGRAM_OPTIONS_LIB)                                     \
+	$(BOOST_FILESYSTEM_LIB)                                          \
+	$(BOOST_SYSTEM_LIB)                                              \
+	-lboost_graph                                                    \
+	-lgsl                                                            \
+	-lm                                                              \
+	$(top_srcdir)/src/sampling/crn/libsamplingcrn.la                 \
+	$(top_srcdir)/src/statistics/analysis/libstatisticsanalysis.la   \
+	$(top_srcdir)/src/sampling/common/libsamplingcommon.la           \
+	$(top_srcdir)/src/common/queue/libcommonqueue.la                 \
+	$(top_srcdir)/src/common/list/libcommonlist.la                   \
 	$(top_srcdir)/src/core/event/libcoreevent.la
 
 

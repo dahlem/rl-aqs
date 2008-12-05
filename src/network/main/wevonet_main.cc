@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
     int net_size;
     int max_edges;
     int format, format_temp;
-    double edge_fixed;
+    double edge_fixed = -1.0;
 
     dsample::tGslRngSP r1, r2, r3;
     std::string filename;

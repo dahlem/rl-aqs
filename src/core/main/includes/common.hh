@@ -36,7 +36,23 @@ namespace core
  */
 struct sim_output
 {
+    // single simulation output
+    double system_average_delay;
+    double system_expected_average_num_in_queue;
+
+    // average simulation output
+    double mean_system_average_delay;
+    double mean_system_expected_average_num_in_queue;
+    double sd_system_average_delay;
+    double sd_system_expected_average_num_in_queue;
+
     sim_output()
+        : system_average_delay(0.0),
+          system_expected_average_num_in_queue(0.0),
+          mean_system_average_delay(0.0),
+          mean_system_expected_average_num_in_queue(0.0),
+          sd_system_average_delay(0.0),
+          sd_system_expected_average_num_in_queue(0.0)
         {}
 
 };

@@ -8,17 +8,25 @@
 // WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 // implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-#ifndef SEEDS_HH
-#define SEEDS_HH
+#ifndef __DES_SAMPLING_SEEDS_HH__
+#define __DES_SAMPLING_SEEDS_HH__
+
+#ifndef __STDC_CONSTANT_MACROS
+# define __STDC_CONSTANT_MACROS
+#endif /* __STDC_CONSTANT_MACROS */
 
 
 #include <fstream>
-using std::ifstream;
 
-#include "SamplingException.hh"
+#include <boost/cstdint.hpp>
+
+#include <gsl/gsl_randist.h>
 
 #include "Singleton.hh"
-using des::design::Singleton;
+namespace ddesign = des::design;
+
+#include "CRN.hh"
+#include "SamplingException.hh"
 
 
 namespace des
@@ -32,7 +40,7 @@ namespace des
  *
  * @author <a href="mailto:Dominik.Dahlem@cs.tcd.ie">Dominik Dahlem</a>
  */
-class Seeds : public Singleton <Seeds>
+class Seeds : public ddesign::Singleton <Seeds>
 {
 public:
     Seeds();
@@ -47,6 +55,7 @@ public:
      *                           cannot be opened.
      */
     void init(const char *p_file) throw (SamplingException);
+    void init() throw (SamplingException);
 
     /**
      * Retrieve the next seed from the seeds file.
@@ -55,12 +64,17 @@ public:
      * @throws SamplingException thrown, if no seeds are available any more or
      *                           the file has not been opened.
      */
-    const unsigned long getSeed() throw (SamplingException);
+    const boost::uint32_t getSeed() throw (SamplingException);
 
 private:
     Seeds(const Singleton<Seeds> &);
 
-    ifstream is;
+    std::ifstream is;
+    tGslRngSP seeds_rng;
+
+    int seed;
+    bool fromStream;
+    bool isInitialised;
 
 };
 

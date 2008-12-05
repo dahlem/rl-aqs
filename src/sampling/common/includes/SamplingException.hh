@@ -1,9 +1,9 @@
-// Copyright (C) 2007 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
-//  
+// Copyright (C) 2007, 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+//
 // This file is free software; as a special exception the author gives
-// unlimited permission to copy and/or distribute it, with or without 
+// unlimited permission to copy and/or distribute it, with or without
 // modifications, as long as this notice is preserved.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 // implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
@@ -20,7 +20,7 @@ namespace des
 {
     namespace sampling
     {
-        
+
 
 /**
  * This exception specifies errors that may occur during sampling operations.
@@ -33,12 +33,14 @@ public:
     SamplingException(int p_code);
 
     const char* what() const throw();
-    
+    int errorCode() const;
+
     enum Errors {
-        UNKNOWN_INDEX,
+        UNKNOWN_INDEX = 0,
         NO_SEEDS,
         NO_SEEDS_FILE,
         NOT_INITIALISED,
+        ALREADY_INITIALISED,
         NOT_A_NUMBER,
         DIM_DONT_MATCH,
         SAMPLE_SIZE_TOO_SMALL,

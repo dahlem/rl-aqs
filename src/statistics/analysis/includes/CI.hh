@@ -72,7 +72,6 @@ public:
         double p_alpha,
         double p_error);
 
-private:
     /** @fn bool isConfidentWithPrecision(const double p_mean, const double p_sv, const int p_size, double p_alpha, double p_error)
      *
      * This method calculates the confidence interval with an adjusted relative
@@ -98,6 +97,8 @@ private:
     static bool isConfidentWithPrecision(
         const double p_mean, const double p_sv,
         const int p_size, double p_alpha, double p_error);
+
+private:
 
     CI()
         {}

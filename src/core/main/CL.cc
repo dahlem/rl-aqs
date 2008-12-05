@@ -66,6 +66,7 @@ CL::CL()
         (RESULTS.c_str(), po::value <std::string>()->default_value("./results"), "set directory for the results of the event simulator.")
         (LOG_GRAPH_RATE.c_str(), po::value <boost::int32_t>()->default_value(0), "set the graph generation rate.")
         (LOG_EVENTS.c_str(), po::value <bool>()->default_value(true), "log the events.")
+        (WITH_CI.c_str(), po::value <bool>()->default_value(false), "run simulation with confidence.")
         ;
 
     po::options_description opt_debug("Debug Configuration");
@@ -169,6 +170,11 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
             return EXIT_FAILURE;
         }
     }
+
+    if (vm.count(WITH_CI.c_str())) {
+        desArgs->confidence = vm[WITH_CI.c_str()].as <bool>();
+    }
+    std::cout << "Confidence Interval enabled: " << desArgs->confidence << std::endl;
 
     std::cout << std::endl;
     std::cout << "Output Files:" << std::endl;

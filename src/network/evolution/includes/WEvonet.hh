@@ -314,6 +314,16 @@ typedef boost::graph_property_iter_range <Graph, vertex_arrival_rate_t>::iterato
  */
 typedef boost::graph_property_iter_range <Graph, boost::vertex_index_t>::iterator VIndexIterator;
 
+/** @typedef VExpectedAverageNumEventsIterator
+ * Specifies the iterator for the vertex expected average number of events in queue
+ */
+typedef boost::graph_property_iter_range <Graph, vertex_expected_average_number_event_t>::iterator VExpectedAverageNumEventsIterator;
+
+/** @typedef VAverageDelayQueueIterator
+ * Specifies the iterator for the vertex average delay in queue
+ */
+typedef boost::graph_property_iter_range <Graph, vertex_average_delay_in_queue_t>::iterator VAverageDelayQueueIterator;
+
 /** @typedef OutEdgeIterator
  * Specifies the iterator for the out degree edges
  */

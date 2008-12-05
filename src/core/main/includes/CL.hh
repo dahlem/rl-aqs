@@ -53,6 +53,7 @@ const std::string VERTEX = "vertex";
 const std::string VERS = "version";
 const std::string LOG_GRAPH_RATE = "graph_generation";
 const std::string LOG_EVENTS = "log_events";
+const std::string WITH_CI = "confidence";
 
 
 /** @typedef tOptDescSP
@@ -73,6 +74,7 @@ struct desArgs_t {
     std::string events_unprocessed; /* filename for the unprocessed events */
     std::string events_processed;   /* filename for the processed events */
 
+    bool confidence;                /* run experiments within a confidence band */
     bool trace_event;               /* trace an event */
     bool log_events;                /* log the events */
     boost::int32_t vertex;          /* the vertex to trace */

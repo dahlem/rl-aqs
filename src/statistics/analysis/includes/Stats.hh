@@ -55,6 +55,7 @@ public:
      */
     static double ssd(int p_n, double p_xbar, double p_sd, double p_x);
 
+
 private:
     Stats()
         {}

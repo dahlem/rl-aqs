@@ -12,11 +12,15 @@ noinst_LTLIBRARIES = libstatisticsanalysis.la
 
 libstatisticsanalysis_la_SOURCES =                                    \
 	CI.cc                                                         \
+	OnlineStats.cc                                                \
 	Stats.cc
 
-libstatisticsanalysis_la_CPPFLAGS = -I./includes
+libstatisticsanalysis_la_CPPFLAGS =                                   \
+	$(BOOST_CPPFLAGS)                                             \
+	-I./includes
 
 libstatisticsanalysis_la_LIBADD =                                     \
+	$(BOOST_LDFLAGS)                                              \
 	-lgsl                                                         \
 	-lgslcblas                                                    \
 	-lm
