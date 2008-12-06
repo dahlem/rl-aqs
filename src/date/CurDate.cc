@@ -19,19 +19,23 @@
  * date_time package internally to retrieve and parse the local date.
  */
 #include <sstream>
-using std::stringstream;
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 namespace po_time = boost::posix_time;
 
 #include "CurDate.hh"
-using des::date::CurDate;
+
+
+namespace des
+{
+namespace date
+{
 
 
 CurDate::CurDate()
 {
     po_time::ptime now = po_time::second_clock::local_time();
-    stringstream ss;
+    std::stringstream ss;
 
     po_time::time_facet* timefacet = new po_time::time_facet();
     ss.imbue(std::locale(std::locale::classic(), timefacet));
@@ -49,4 +53,8 @@ CurDate::~CurDate()
 string CurDate::get() const
 {
     return m_cur_date;
+}
+
+
+}
 }

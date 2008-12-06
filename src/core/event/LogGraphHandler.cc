@@ -20,10 +20,6 @@
 #include <boost/filesystem.hpp>
 namespace fs = boost::filesystem;
 
-#include "CurDate.hh"
-using des::date::CurDate;
-using des::date::CurDateSingleton;
-
 #include "Entry.hh"
 namespace dcommon = des::common;
 
@@ -39,33 +35,15 @@ dcore::LogGraphHandler::LogGraphHandler(std::string p_baseResultDir, dnet::tGrap
     : m_baseResultDir(p_baseResultDir), m_graph(p_graph)
 {
     std::stringstream path_str;
-    std::string today;
 
-    CurDate singleton = CurDateSingleton::getInstance();
-    today = singleton.get();
-
-    // create the base results dir if necessary
-    if (!fs::exists(m_baseResultDir)) {
-        fs::create_directory(m_baseResultDir);
-    }
-
-    path_str << m_baseResultDir << "/" << today;
-    
-    // create directory if it doesn't already exist
-    fs::path results_path(path_str.str());
-
-    if (!fs::exists(results_path)) {
-        fs::create_directory(results_path);
-    }
-
-    path_str << "/graphs/";
+    path_str << m_baseResultDir << "/" << "graphs";
     m_resultDir = path_str.str();
-    
+
     // create directory if it doesn't already exist
     fs::path graphs_path(m_resultDir);
 
     if (!fs::exists(graphs_path)) {
-        fs::create_directory(graphs_path);
+        fs::create_directories(graphs_path);
     }
 
     counter = 0;
@@ -82,6 +60,6 @@ void dcore::LogGraphHandler::update(dcore::AdminEvent *subject)
 
     file_str << m_resultDir << "/" << "graph" << counter << ".gml";
     dnet::GraphUtil::print(m_graph, file_str.str(), dnet::WEvonet::GRAPHML);
-    
+
     counter++;
 }

@@ -61,7 +61,15 @@ int OnlineStats::getNumValues() const
 
 double OnlineStats::mean() const
 {
-    return (m_n > 0) ? m_newM : 0.0;
+    double mean = 0.0;
+
+    if (m_n > 1) {
+        mean = m_newM;
+    } else if (m_n == 1) {
+        mean = m_oldM;
+    }
+
+    return mean;
 }
 
 double OnlineStats::variance() const

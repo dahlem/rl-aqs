@@ -39,7 +39,6 @@ libcoreevent_la_SOURCES =                                                  \
 libcoreevent_la_CPPFLAGS =                                                 \
 	$(BOOST_CPPFLAGS)                                                  \
 	-I./includes                                                       \
-	-I$(top_srcdir)/src/date/includes                                  \
 	-I$(top_srcdir)/src/design/pattern/includes                        \
 	-I$(top_srcdir)/src/statistics/analysis/includes                   \
 	-I$(top_srcdir)/src/sampling/crn/includes                          \
@@ -55,7 +54,6 @@ libcoreevent_la_LIBADD =                                                   \
 	$(BOOST_SYSTEM_LIB)                                                \
 	-lgsl                                                              \
 	-lm                                                                \
-	$(top_srcdir)/src/date/libdesdate.la                               \
 	$(top_srcdir)/src/io/libdesio.la                                   \
 	$(top_srcdir)/src/sampling/common/libsamplingcommon.la             \
 	$(top_srcdir)/src/statistics/analysis/libstatisticsanalysis.la     \

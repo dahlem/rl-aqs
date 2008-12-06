@@ -24,6 +24,7 @@
 #endif /* __STDC_CONSTANT_MACROS */
 
 #include <iostream>
+#include <sstream>
 #include <utility>
 
 #include <boost/cstdint.hpp>
@@ -190,6 +191,11 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
             queue, graphGenRate, desArgs->stop_time);
     }
 
+    // configure the results directory
+    std::stringstream baseDir;
+    baseDir << desArgs->results_dir << "/" << desArgs->sim_num << "/" << desArgs->rep_num;
+    std::string resultsBaseDir = baseDir.str();
+
     // instantiate the events & handlers
     tAdminEventSP adminEvent(new AdminEvent);
     tPreAnyEventSP preAnyEvent(new PreAnyEvent);
@@ -202,7 +208,7 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
     tLeaveEventSP leaveEvent(new LeaveEvent);
 
     tLogGraphHandlerSP logGraphHandler(
-        new LogGraphHandler(desArgs->results_dir, graph));
+        new LogGraphHandler(resultsBaseDir, graph));
 
     tArrivalHandlerSP arrivalHandler(
         new ArrivalHandler(queue, graph, service_rng_index));
@@ -234,9 +240,9 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
     // only register the logging handlers, if they are configured.
     if (desArgs->log_events) {
         dio::tResultsSP processed_events(
-            new dio::Results(desArgs->events_processed, desArgs->results_dir));
+            new dio::Results(desArgs->events_processed, resultsBaseDir));
         dio::tResultsSP unprocessed_events(
-            new dio::Results(desArgs->events_unprocessed, desArgs->results_dir));
+            new dio::Results(desArgs->events_unprocessed, resultsBaseDir));
 
         tProcessedEventsHandlerSP processedEventsHandler(
             new ProcessedEventsHandler(processed_events));

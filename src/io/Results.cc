@@ -26,10 +26,6 @@
 #include <boost/filesystem.hpp>
 namespace fs = boost::filesystem;
 
-#include "CurDate.hh"
-using des::date::CurDate;
-using des::date::CurDateSingleton;
-
 #include "Results.hh"
 using des::io::Results;
 
@@ -39,24 +35,13 @@ Results::Results(std::string &filename, std::string &dir)
     std::stringstream path_str;
     std::string today;
 
-    CurDate singleton = CurDateSingleton::getInstance();
-    today = singleton.get();
 
     // create the results directory
     if (!fs::exists(dir)) {
-        fs::create_directory(dir);
+        fs::create_directories(dir);
     }
 
-    path_str << dir << "/" << today << "/";
-
-    // create directory if it doesn't already exist
-    fs::path results_path(path_str.str());
-
-    if (!fs::exists(results_path)) {
-        fs::create_directory(results_path);
-    }
-
-    path_str << filename;
+    path_str << dir << "/" << filename;
 
     // create a buffer
     buf = tStrBufSP(new str_buf(path_str.str()));

@@ -19,6 +19,7 @@
 #endif
 
 #include <iostream>
+#include <sstream>
 
 #include "common.hh"
 #include "CL.hh"
@@ -26,6 +27,9 @@
 #include "SimulationCI.hh"
 #include "SimulationLHS.hh"
 namespace dcore = des::core;
+
+#include "CurDate.hh"
+namespace ddate = des::date;
 
 #include "Seeds.hh"
 namespace dsample = des::sampling;
@@ -44,6 +48,15 @@ int main(int argc, char *argv[])
     if (cl.parse(argc, argv, desArgs)) {
         return EXIT_SUCCESS;
     }
+
+    // set the basedir for the results
+    std::stringstream baseDir;
+    baseDir << desArgs->results_dir << "/";
+    baseDir << ddate::CurDateSingleton::getInstance().get();
+    desArgs->results_dir = baseDir.str();
+
+    desArgs->sim_num = 1;
+    desArgs->rep_num = 1;
 
     if (desArgs->seeds_filename != "") {
         // read the seeds

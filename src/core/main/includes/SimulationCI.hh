@@ -27,6 +27,10 @@
 # include <config.h>
 #endif
 
+#include <iostream>
+#include <sstream>
+#include <string>
+
 #include <boost/shared_ptr.hpp>
 
 #include "common.hh"
@@ -36,6 +40,8 @@
 #include "OnlineStats.hh"
 namespace dstats = des::statistics;
 
+#include "Results.hh"
+namespace dio = des::io;
 
 
 namespace des
@@ -66,15 +72,34 @@ public:
      */
     sim_output simulate(tDesArgsSP p_desArgs)
         {
+            std::stringstream outDir, csv_line;
+            outDir << p_desArgs->results_dir << "/" << p_desArgs->sim_num;
+
+            std::string dir = outDir.str();
+            std::string file = "replica_results.dat";
+
+            dio::tResultsSP replica_output(
+                new dio::Results(file, dir));
+
             sim_output output, result;
             dstats::OnlineStats avgDelay;
             dstats::OnlineStats avgNumEvents;
 
+            csv_line << "sim_num,rep_num,systemDelay,systemAvgNumEvents,meanDelay,varDelay,meanAvgNumEvents,varAvgNumEvents";
+            replica_output->print(csv_line);
+
             // start 2 experiments
             for (boost::uint16_t i = 0; i < m_initialExp; ++i) {
+                csv_line.str("");
+                p_desArgs->rep_num = i + 1;
                 output = m_dsim->simulate(p_desArgs);
                 avgDelay.push(output.system_average_delay);
                 avgNumEvents.push(output.system_expected_average_num_in_queue);
+                csv_line << p_desArgs->sim_num << "," << p_desArgs->rep_num << ","
+                         << output.system_average_delay << "," << output.system_expected_average_num_in_queue
+                         << "," << avgDelay.mean() << "," << avgDelay.variance() << ","
+                         << avgNumEvents.mean() << "," << avgNumEvents.variance();
+                replica_output->print(csv_line);
             }
 
             while (dstats::CI::isConfidentWithPrecision(
@@ -86,9 +111,15 @@ public:
                          avgNumEvents.variance(),
                          avgNumEvents.getNumValues(), m_alpha, m_error))
             {
+                csv_line.str("");
                 output = m_dsim->simulate(p_desArgs);
                 avgDelay.push(output.system_average_delay);
                 avgNumEvents.push(output.system_expected_average_num_in_queue);
+                csv_line << p_desArgs->sim_num << "," << p_desArgs->rep_num << ","
+                         << output.system_average_delay << "," << output.system_expected_average_num_in_queue
+                         << "," << avgDelay.mean() << "," << avgDelay.variance() << ","
+                         << avgNumEvents.mean() << "," << avgNumEvents.variance();
+                replica_output->print(csv_line);
             }
 
             result.mean_system_average_delay = avgDelay.mean();

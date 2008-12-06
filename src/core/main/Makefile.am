@@ -27,6 +27,7 @@ des_main_CPPFLAGS =                                                      \
 	-I$(top_srcdir)/src/common/queue/includes                        \
 	-I$(top_srcdir)/src/io/includes                                  \
 	-I$(top_srcdir)/src/statistics/analysis/includes                 \
+	-I$(top_srcdir)/src/date/includes                                \
 	-I$(top_srcdir)/src/common/list/includes
 
 
@@ -38,6 +39,7 @@ des_main_LDADD =                                                         \
 	-lboost_graph                                                    \
 	-lgsl                                                            \
 	-lm                                                              \
+	$(top_srcdir)/src/date/libdesdate.la                             \
 	$(top_srcdir)/src/sampling/crn/libsamplingcrn.la                 \
 	$(top_srcdir)/src/statistics/analysis/libstatisticsanalysis.la   \
 	$(top_srcdir)/src/sampling/common/libsamplingcommon.la           \

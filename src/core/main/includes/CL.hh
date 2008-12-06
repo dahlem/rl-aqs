@@ -85,6 +85,9 @@ struct desArgs_t {
     double alpha;                   /* 100(1 - alpha) confidence interval for the experiments */
     double error;                   /* error threshold for the ci calculations */
     boost::uint16_t replications;   /* initial replications required */
+
+    boost::uint16_t sim_num;        /* simulation number */
+    boost::uint16_t rep_num;        /* replication number */
 };
 
 /** @typedef tDesArgsSP
