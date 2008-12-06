@@ -9,7 +9,6 @@
 // implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 #include <cstddef>
-#include <iostream>
 #include <string>
 
 #include <boost/lexical_cast.hpp>
@@ -24,10 +23,12 @@ namespace sampling
 
 
 Seeds::Seeds()
-{}
+{
+}
 
 Seeds::Seeds(const Singleton<Seeds> &)
-{}
+{
+}
 
 Seeds::~Seeds()
 {

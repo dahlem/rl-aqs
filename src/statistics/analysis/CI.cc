@@ -55,6 +55,11 @@ bool CI::isConfidentWithPrecision(
     const double p_mean, const double p_sv,
     const int p_size, double p_alpha, double p_error)
 {
+    // we need at least two samples
+    if (p_size < 2) {
+        return false;
+    }
+
     double df = p_size - 1;
     double nu = 1 - (p_alpha / 2);
     double relAdjError = p_error / (1 + p_error);
@@ -62,7 +67,7 @@ bool CI::isConfidentWithPrecision(
     double ciHalfLength = 0.0;
 
     if (gsl_isnan(p_sv)) {
-        return 1;
+        return true;
     }
 
     ciHalfLength = t * sqrt(p_sv / p_size);

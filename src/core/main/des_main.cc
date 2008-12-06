@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
 
     if (desArgs->confidence) {
         dcore::SimSP sim(new dcore::Simulation());
-        SimCISP sim_ci(new SimCI(sim, 0.95, 0.1));
+        SimCISP sim_ci(new SimCI(sim, 0.05, 0.1, 2));
         sim_ci->simulate(desArgs);
     } else {
         dcore::SimSP sim(new dcore::Simulation());
