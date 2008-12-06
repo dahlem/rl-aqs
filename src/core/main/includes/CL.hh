@@ -64,30 +64,40 @@ const std::string ERROR = "error";
  */
 typedef boost::shared_ptr <po::options_description> tOptDescSP;
 
+static const std::string ARGS_HEADER = "stop_time,generations,confidence,alpha,error,replications";
 
 /** @struct
  * structure specifying the command line variables.
  */
 struct desArgs_t {
-    boost::uint32_t stop_time;      /* stopping time of the DES */
-    boost::int32_t generations;     /* number of generations for the event simulation */
     std::string graph_filename;     /* filename for the graph */
     std::string seeds_filename;     /* filename for the seeds */
     std::string results_dir;        /* directory name for the results */
     std::string events_unprocessed; /* filename for the unprocessed events */
     std::string events_processed;   /* filename for the processed events */
-
-    bool confidence;                /* run experiments within a confidence band */
     bool trace_event;               /* trace an event */
     bool log_events;                /* log the events */
     boost::int32_t vertex;          /* the vertex to trace */
     boost::int32_t graph_rate;      /* the rate to generate graphs at */
+
+    boost::uint32_t stop_time;      /* stopping time of the DES */
+    boost::int32_t generations;     /* number of generations for the event simulation */
+    bool confidence;                /* run experiments within a confidence band */
     double alpha;                   /* 100(1 - alpha) confidence interval for the experiments */
     double error;                   /* error threshold for the ci calculations */
     boost::uint16_t replications;   /* initial replications required */
 
     boost::uint16_t sim_num;        /* simulation number */
     boost::uint16_t rep_num;        /* replication number */
+
+    friend std::ostream& operator <<(std::ostream &p_os, const desArgs_t &desArgs)
+        {
+            p_os << desArgs.stop_time << "," << desArgs.generations << ","
+                 << desArgs.confidence << "," << desArgs.alpha << "," << desArgs.error
+                 << "," << desArgs.replications << std::endl;
+
+            return p_os;
+        }
 };
 
 /** @typedef tDesArgsSP

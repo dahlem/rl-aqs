@@ -34,6 +34,9 @@ namespace ddate = des::date;
 #include "Seeds.hh"
 namespace dsample = des::sampling;
 
+#include "Results.hh"
+namespace dio = des::io;
+
 
 typedef dcore::SimulationCI <dcore::SimSP> SimCI;
 typedef boost::shared_ptr <SimCI> SimCISP;
@@ -66,6 +69,22 @@ int main(int argc, char *argv[])
         std::cout << "Use random number to generate seeds." << std::endl;
         dsample::Seeds::getInstance().init();
     }
+
+    // ddahlem: can/should be moved to the simulationlhs class
+    std::stringstream outDir, csv_line;
+    outDir << desArgs->results_dir << "/";
+
+    std::string dir = outDir.str();
+    std::string file = "simulations.dat";
+
+    dio::tResultsSP sim_output(
+        new dio::Results(file, dir));
+
+    csv_line << "sim_num," << dcore::ARGS_HEADER;
+    sim_output->print(csv_line);
+    csv_line.str("");
+    csv_line << desArgs->sim_num << "," << const_cast <const dcore::desArgs_t&> (*desArgs);
+    sim_output->print(csv_line);
 
     if (desArgs->confidence) {
         dcore::SimSP sim(new dcore::Simulation());
