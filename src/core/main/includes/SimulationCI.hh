@@ -28,7 +28,6 @@
 #endif
 
 #include <boost/shared_ptr.hpp>
-#include <iostream>
 
 #include "common.hh"
 #include "CL.hh"

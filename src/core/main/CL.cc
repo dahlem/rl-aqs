@@ -57,16 +57,23 @@ CL::CL()
         (VERS.c_str(), "show the version")
         ;
 
-    po::options_description opt_app("Application Configuration");
+    po::options_description opt_app("I/O Configuration");
     opt_app.add_options()
-        (STOPTIME.c_str(), po::value <boost::uint32_t>()->default_value(100), "set the stop time of the event simulator.")
-        (GENERATIONS.c_str(), po::value <boost::int32_t>()->default_value(-1), "set the number of generations for the event simulator.")
         (GRAPH.c_str(), po::value <std::string>(), "set the graph for the event simulator.")
         (SEEDS.c_str(), po::value <std::string>(), "set the seeds for the event simulator.")
         (RESULTS.c_str(), po::value <std::string>()->default_value("./results"), "set directory for the results of the event simulator.")
         (LOG_GRAPH_RATE.c_str(), po::value <boost::int32_t>()->default_value(0), "set the graph generation rate.")
         (LOG_EVENTS.c_str(), po::value <bool>()->default_value(true), "log the events.")
-        (WITH_CI.c_str(), po::value <bool>()->default_value(false), "run simulation with confidence.")
+        ;
+
+    po::options_description opt_des("Simulation Configuration");
+    opt_des.add_options()
+        (STOPTIME.c_str(), po::value <boost::uint32_t>()->default_value(100), "set the stop time of the event simulator.")
+        (GENERATIONS.c_str(), po::value <boost::int32_t>()->default_value(-1), "set the number of generations for the event simulator.")
+        (WITH_CI.c_str(), po::value <bool>()->default_value(false), "Obtain a specified experiment precision.")
+        (REPLICATIONS.c_str(), po::value <boost::uint16_t>()->default_value(2), "Initial number of replications.")
+        (ALPHA.c_str(), po::value <double>()->default_value(0.05), "100(1-alpha) percent confidence interval.")
+        (ERROR.c_str(), po::value <double>()->default_value(0.1), "Relative error threshold for the CI calculations.")
         ;
 
     po::options_description opt_debug("Debug Configuration");
@@ -77,6 +84,7 @@ CL::CL()
 
     opt_desc->add(opt_general);
     opt_desc->add(opt_app);
+    opt_desc->add(opt_des);
     opt_desc->add(opt_debug);
 }
 
@@ -97,20 +105,6 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
         std::cout << argv[0] << " " << PACKAGE_VERSION << std::endl;
         std::cout << PACKAGE_NAME << std::endl;
         return EXIT_FAILURE;
-    }
-
-    if (vm.count(STOPTIME.c_str())) {
-        desArgs->stop_time = vm[STOPTIME.c_str()].as <boost::uint32_t>();
-        std::cout << "Stopping time set to " << desArgs->stop_time << "." << std::endl;
-    } else {
-        std::cout << "Default stopping time is " << desArgs->stop_time << "." << std::endl;
-    }
-
-    if (vm.count(GENERATIONS.c_str())) {
-        desArgs->generations = vm[GENERATIONS.c_str()].as <boost::int32_t>();
-        std::cout << "Number of generations set to " << desArgs->generations << "." << std::endl;
-    } else {
-        std::cout << "No generations." << std::endl;
     }
 
     if (vm.count(GRAPH.c_str())) {
@@ -157,6 +151,40 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
     std::cout << "Log the events "
               << desArgs->log_events << "." << std::endl;
 
+    if (vm.count(STOPTIME.c_str())) {
+        desArgs->stop_time = vm[STOPTIME.c_str()].as <boost::uint32_t>();
+        std::cout << "Stopping time set to " << desArgs->stop_time << "." << std::endl;
+    } else {
+        std::cout << "Default stopping time is " << desArgs->stop_time << "." << std::endl;
+    }
+
+    if (vm.count(GENERATIONS.c_str())) {
+        desArgs->generations = vm[GENERATIONS.c_str()].as <boost::int32_t>();
+        std::cout << "Number of generations set to " << desArgs->generations << "." << std::endl;
+    } else {
+        std::cout << "No generations." << std::endl;
+    }
+
+    if (vm.count(WITH_CI.c_str())) {
+        desArgs->confidence = vm[WITH_CI.c_str()].as <bool>();
+    }
+    std::cout << "Confidence Interval enabled: " << desArgs->confidence << std::endl;
+
+    if (vm.count(REPLICATIONS.c_str())) {
+        desArgs->replications = vm[REPLICATIONS.c_str()].as <boost::uint16_t>();
+    }
+    std::cout << "Number of replications: " << desArgs->replications << std::endl;
+
+    if (vm.count(ALPHA.c_str())) {
+        desArgs->alpha = vm[ALPHA.c_str()].as <double>();
+    }
+    std::cout << "Confidence interval (in %): " << 100 * (1 - desArgs->alpha) << std::endl;
+
+    if (vm.count(ERROR.c_str())) {
+        desArgs->error = vm[ERROR.c_str()].as <double>();
+    }
+    std::cout << "Reliative error (in %): " << 100 * (desArgs->error) << std::endl;
+
     if (vm.count(TRACE.c_str())) {
         desArgs->trace_event = vm[TRACE.c_str()].as <bool>();
     }
@@ -170,11 +198,6 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
             return EXIT_FAILURE;
         }
     }
-
-    if (vm.count(WITH_CI.c_str())) {
-        desArgs->confidence = vm[WITH_CI.c_str()].as <bool>();
-    }
-    std::cout << "Confidence Interval enabled: " << desArgs->confidence << std::endl;
 
     std::cout << std::endl;
     std::cout << "Output Files:" << std::endl;

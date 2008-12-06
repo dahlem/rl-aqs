@@ -54,6 +54,9 @@ const std::string VERS = "version";
 const std::string LOG_GRAPH_RATE = "graph_generation";
 const std::string LOG_EVENTS = "log_events";
 const std::string WITH_CI = "confidence";
+const std::string REPLICATIONS = "replications";
+const std::string ALPHA = "alpha";
+const std::string ERROR = "error";
 
 
 /** @typedef tOptDescSP
@@ -79,6 +82,9 @@ struct desArgs_t {
     bool log_events;                /* log the events */
     boost::int32_t vertex;          /* the vertex to trace */
     boost::int32_t graph_rate;      /* the rate to generate graphs at */
+    double alpha;                   /* 100(1 - alpha) confidence interval for the experiments */
+    double error;                   /* error threshold for the ci calculations */
+    boost::uint16_t replications;   /* initial replications required */
 };
 
 /** @typedef tDesArgsSP
