@@ -10,8 +10,8 @@ do
     do
 	mkdir -p ${OUT_DIR}
 	filename=${OUT_DIR}/${n}_${d}.gml
-	echo "./src/network/main/wevonet_main --weight 1 --seeds seeds.dat--size $n --max_edges $d --filename $filename"
-	./src/network/main/wevonet_main --weight 1 --seeds seeds.dat--size $n --max_edges $d --filename $filename
+	echo "./src/network/main/wevonet_main --weight 1 --seeds seeds.dat --size $n --max_edges $d --filename $filename"
+	./src/network/main/wevonet_main --weight 1 --seeds seeds.dat --size $n --max_edges $d --filename $filename
     done
 done
 
