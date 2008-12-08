@@ -102,11 +102,11 @@ public:
                 replica_output->print(csv_line);
             }
 
-            while (dstats::CI::isConfidentWithPrecision(
+            while (!dstats::CI::isConfidentWithPrecision(
                          avgDelay.mean(),
                          avgDelay.variance(),
                          avgDelay.getNumValues(), m_alpha, m_error)
-                     && dstats::CI::isConfidentWithPrecision(
+                     && !dstats::CI::isConfidentWithPrecision(
                          avgNumEvents.mean(),
                          avgNumEvents.variance(),
                          avgNumEvents.getNumValues(), m_alpha, m_error))
