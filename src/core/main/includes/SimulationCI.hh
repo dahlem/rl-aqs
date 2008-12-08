@@ -89,9 +89,8 @@ public:
             replica_output->print(csv_line);
 
             // start 2 experiments
-            for (boost::uint16_t i = 0; i < m_initialExp; ++i) {
+            for (p_desArgs->rep_num = 1; p_desArgs->rep_num < m_initialExp; ++p_desArgs->rep_num) {
                 csv_line.str("");
-                p_desArgs->rep_num = i + 1;
                 output = m_dsim->simulate(p_desArgs);
                 avgDelay.push(output.system_average_delay);
                 avgNumEvents.push(output.system_expected_average_num_in_queue);
@@ -120,6 +119,7 @@ public:
                          << "," << avgDelay.mean() << "," << avgDelay.variance() << ","
                          << avgNumEvents.mean() << "," << avgNumEvents.variance();
                 replica_output->print(csv_line);
+                (p_desArgs->rep_num)++;
             }
 
             result.mean_system_average_delay = avgDelay.mean();
