@@ -10,7 +10,7 @@
 
 AC_PREREQ(2.61)
 AC_INIT([Discrete Event Simulation for Service Interaction],
-        [1.5],
+        [1.6],
         [Dominik Dahlem Dominik.Dahlem@cs.tcd.ie], 
         [des])
 
@@ -76,10 +76,10 @@ AC_ARG_ENABLE(debug, AS_HELP_STRING(
 		     [enable debug @<:@default=no@:>@]), 
 		     [DEBUGGING=$enableval], [DEBUGGING=no])
 if test "x$DEBUGGING" = xyes; then
-  AC_DEFINE(NDEBUG, 1, [define debugging, if enabled])
-  AC_DEFINE(BOOST_DISABLE_ASSERTS, 0, [define boost asserts, if enabled])
+  AC_DEFINE(BOOST_DISABLE_ASSERTS, 0, [disable boost asserts, if enabled])
 else
-  AC_DEFINE(BOOST_DISABLE_ASSERTS, 1, [define boost asserts, if enabled])
+  AC_DEFINE(NDEBUG, 1, [define debugging, if disabled])
+  AC_DEFINE(BOOST_DISABLE_ASSERTS, 1, [disable boost asserts, if enabled])
 fi
 
 # cppunit library check
@@ -177,7 +177,6 @@ AC_CONFIG_FILES([
    src/common/list/Makefile
    src/common/queue/Makefile
    src/core/Makefile
-   src/core/mgmt/Makefile
    src/core/event/Makefile
    src/core/main/Makefile
    src/date/Makefile

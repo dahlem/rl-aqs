@@ -27,10 +27,30 @@
 # include <config.h>
 #endif
 
+#ifndef __STDC_CONSTANT_MACROS
+# define __STDC_CONSTANT_MACROS
+#endif /* __STDC_CONSTANT_MACROS */
+
+#include <sstream>
+#include <string>
+
+#include <boost/cstdint.hpp>
 #include <boost/shared_ptr.hpp>
+
+#include <gsl/gsl_rng.h>
+#include <gsl/gsl_matrix.h>
+#include <gsl/gsl_vector.h>
 
 #include "common.hh"
 #include "CL.hh"
+
+#include "Results.hh"
+namespace dio = des::io;
+
+#include "CRN.hh"
+#include "Seeds.hh"
+#include "LHS.hh"
+namespace dsample = des::sampling;
 
 
 
@@ -61,9 +81,62 @@ public:
      */
     sim_output simulate(tDesArgsSP p_desArgs)
         {
-            return m_dsim->simulate(p_desArgs);
+            sim_output output;
+
+            // 1. perform lhs
+            gsl_vector *min, *max;
+            gsl_matrix *sample;
+
+            // init the crn for the arrival events
+            boost::uint32_t seed = dsample::Seeds::getInstance().getSeed();
+            boost::int32_t rng_index = dsample::CRN::getInstance().init(seed);
+            dsample::CRN::getInstance().log(seed, "LHS permutation");
+            dsample::tGslRngSP rng
+                = dsample::CRN::getInstance().get(rng_index - 1);
+
+            min = gsl_vector_calloc(1);
+            max = gsl_vector_calloc(1);
+            gsl_vector_set(min, 0, p_desArgs->min_stop_time);
+            gsl_vector_set(max, 0, p_desArgs->max_stop_time);
+
+            dsample::LHS::sample(rng.get(), min, max, p_desArgs->simulations, &sample);
+
+            // 2. print header into log-file
+            std::stringstream outDir, csv_line;
+            outDir << p_desArgs->results_dir << "/";
+
+            std::string dir = outDir.str();
+            std::string file = "simulations.dat";
+
+            dio::tResultsSP sim_output(
+                new dio::Results(file, dir));
+
+            csv_line << "sim_num," << ARGS_HEADER << ",actual_reps";
+            sim_output->print(csv_line);
+
+            // 3. run experiment
+            for (boost::uint16_t i = 0; i < p_desArgs->simulations; ++i) {
+                p_desArgs->sim_num = i + 1;
+
+                // set the i-th experiment conditions
+                p_desArgs->stop_time = gsl_matrix_get(sample, i, 0);
+
+                output = m_dsim->simulate(p_desArgs);
+
+                csv_line.str("");
+                csv_line << p_desArgs->sim_num << "," << const_cast <const desArgs_t&> (*p_desArgs)
+                         << "," << output.replications;
+                sim_output->print(csv_line);
+            }
+
+            // 4. free gsl stuff
+            gsl_vector_free(min);
+            gsl_vector_free(max);
+            gsl_matrix_free(sample);
+
+            return output;
         }
-    
+
 
 private:
 

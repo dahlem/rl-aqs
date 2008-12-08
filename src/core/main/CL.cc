@@ -42,8 +42,12 @@ namespace fs = boost::filesystem;
 namespace po = boost::program_options;
 
 #include "CL.hh"
-using des::core::CL;
-using des::core::tDesArgsSP;
+
+
+namespace des
+{
+namespace core
+{
 
 
 CL::CL()
@@ -68,12 +72,24 @@ CL::CL()
 
     po::options_description opt_des("Simulation Configuration");
     opt_des.add_options()
-        (STOPTIME.c_str(), po::value <boost::uint32_t>()->default_value(100), "set the stop time of the event simulator.")
+        (STOPTIME.c_str(), po::value <double>()->default_value(100.0), "set the stop time of the event simulator.")
         (GENERATIONS.c_str(), po::value <boost::int32_t>()->default_value(-1), "set the number of generations for the event simulator.")
+        ;
+
+    po::options_description opt_ci("Confidence Interval Configuration");
+    opt_ci.add_options()
         (WITH_CI.c_str(), po::value <bool>()->default_value(false), "Obtain a specified experiment precision.")
         (REPLICATIONS.c_str(), po::value <boost::uint16_t>()->default_value(2), "Initial number of replications.")
         (ALPHA.c_str(), po::value <double>()->default_value(0.05), "100(1-alpha) percent confidence interval.")
         (ERROR.c_str(), po::value <double>()->default_value(0.1), "Relative error threshold for the CI calculations.")
+        ;
+
+    po::options_description opt_lhs("Latin Hypercube Configuration");
+    opt_lhs.add_options()
+        (WITH_LHS.c_str(), po::value <bool>()->default_value(false), "Perform LHS sampling for the experiments.")
+        (SIMULATIONS.c_str(), po::value <boost::uint32_t>()->default_value(7), "set the number of simulations to run.")
+        (MINSTOPTIME.c_str(), po::value <double>()->default_value(10.0), "set the min. stop time of the event simulator.")
+        (MAXSTOPTIME.c_str(), po::value <double>()->default_value(100.0), "set the max. stop time of the event simulator.")
         ;
 
     po::options_description opt_debug("Debug Configuration");
@@ -85,6 +101,8 @@ CL::CL()
     opt_desc->add(opt_general);
     opt_desc->add(opt_app);
     opt_desc->add(opt_des);
+    opt_desc->add(opt_ci);
+    opt_desc->add(opt_lhs);
     opt_desc->add(opt_debug);
 }
 
@@ -152,11 +170,19 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
               << desArgs->log_events << "." << std::endl;
 
     if (vm.count(STOPTIME.c_str())) {
-        desArgs->stop_time = vm[STOPTIME.c_str()].as <boost::uint32_t>();
-        std::cout << "Stopping time set to " << desArgs->stop_time << "." << std::endl;
-    } else {
-        std::cout << "Default stopping time is " << desArgs->stop_time << "." << std::endl;
+        desArgs->stop_time = vm[STOPTIME.c_str()].as <double>();
     }
+    std::cout << "Stopping time set to " << desArgs->stop_time << "." << std::endl;
+
+    if (vm.count(MINSTOPTIME.c_str())) {
+        desArgs->min_stop_time = vm[MINSTOPTIME.c_str()].as <double>();
+    }
+    std::cout << "Minimum stopping time set to " << desArgs->min_stop_time << "." << std::endl;
+
+    if (vm.count(MAXSTOPTIME.c_str())) {
+        desArgs->max_stop_time = vm[MAXSTOPTIME.c_str()].as <double>();
+    }
+    std::cout << "Maximum stopping time set to " << desArgs->max_stop_time << "." << std::endl;
 
     if (vm.count(GENERATIONS.c_str())) {
         desArgs->generations = vm[GENERATIONS.c_str()].as <boost::int32_t>();
@@ -189,6 +215,16 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
         desArgs->trace_event = vm[TRACE.c_str()].as <bool>();
     }
 
+    if (vm.count(WITH_LHS.c_str())) {
+        desArgs->lhs = vm[WITH_LHS.c_str()].as <bool>();
+    }
+    std::cout << "LHS enabled: " << desArgs->lhs << std::endl;
+
+    if (vm.count(SIMULATIONS.c_str())) {
+        desArgs->simulations = vm[SIMULATIONS.c_str()].as <boost::uint32_t>();
+    }
+    std::cout << "Number of simulations set to " << desArgs->simulations << "." << std::endl;
+
     if (desArgs->trace_event) {
         if (vm.count(VERTEX.c_str())) {
             desArgs->vertex = vm[VERTEX.c_str()].as <boost::int32_t>();
@@ -210,5 +246,20 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
 
     std::cout << "******************************" << std::endl << std::endl;
 
+    verify(desArgs);
+
     return EXIT_SUCCESS;
+}
+
+void CL::verify(tDesArgsSP desArgs)
+{
+    // switch on replication management via specified confidence bands
+    if (desArgs->lhs) {
+        desArgs->confidence = true;
+        std::cout << "Switch on replication management via specified confidence bands." << std::endl;
+    }
+}
+
+
+}
 }

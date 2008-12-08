@@ -86,6 +86,9 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
     dnet::tGraphSP graph(new dnet::Graph);
     dcommon::tQueueSP queue(new dcommon::LadderQueue);
 
+    std::cout << "Simulation: " << desArgs->sim_num << ", Replication: "
+              << desArgs->rep_num << std::endl;
+
     if (desArgs->graph_filename != "") {
         // read the graph
         try {
@@ -271,9 +274,10 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
                            leaveEvent, desArgs->stop_time));
 
     // process the events
-    processor->process();
-
-    sim_output output = Report::accumResults(graph);
+    sim_output output;
+    if (processor->process()) {
+        output = Report::accumResults(graph);
+    }
 
     return output;
 }

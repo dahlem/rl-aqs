@@ -1,6 +1,6 @@
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
-/* define boost asserts, if enabled */
+/* disable boost asserts, if enabled */
 #undef BOOST_DISABLE_ASSERTS
 
 /* buggy for-loops */
@@ -93,7 +93,7 @@
 /* Define to 1 if the system has the type `_Bool'. */
 #undef HAVE__BOOL
 
-/* define debugging, if enabled */
+/* define debugging, if disabled */
 #undef NDEBUG
 
 /* Name of package */

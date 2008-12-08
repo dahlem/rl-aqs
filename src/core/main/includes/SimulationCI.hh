@@ -127,6 +127,12 @@ public:
             result.mean_system_expected_average_num_in_queue = avgNumEvents.mean();
             result.sd_system_expected_average_num_in_queue = avgNumEvents.standardDeviation();
 
+            if (p_desArgs->rep_num > m_initialExp) {
+                result.replications = p_desArgs->rep_num - 1;
+            } else {
+                result.replications = p_desArgs->rep_num;
+            }
+
             return result;
         }
 

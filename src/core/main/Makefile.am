@@ -22,6 +22,7 @@ des_main_CPPFLAGS =                                                      \
 	-I$(top_srcdir)/src/core/event/includes                          \
 	-I$(top_srcdir)/src/network/evolution/includes                   \
 	-I$(top_srcdir)/src/sampling/crn/includes                        \
+	-I$(top_srcdir)/src/sampling/lhs/includes                        \
 	-I$(top_srcdir)/src/design/pattern/includes                      \
 	-I$(top_srcdir)/src/sampling/common/includes                     \
 	-I$(top_srcdir)/src/common/queue/includes                        \
@@ -36,11 +37,12 @@ des_main_LDADD =                                                         \
 	$(BOOST_PROGRAM_OPTIONS_LIB)                                     \
 	$(BOOST_FILESYSTEM_LIB)                                          \
 	$(BOOST_SYSTEM_LIB)                                              \
+	$(GSL_LIBS)                                                      \
 	-lboost_graph                                                    \
-	-lgsl                                                            \
 	-lm                                                              \
 	$(top_srcdir)/src/date/libdesdate.la                             \
 	$(top_srcdir)/src/sampling/crn/libsamplingcrn.la                 \
+	$(top_srcdir)/src/sampling/lhs/libsamplinglhs.la                 \
 	$(top_srcdir)/src/statistics/analysis/libstatisticsanalysis.la   \
 	$(top_srcdir)/src/sampling/common/libsamplingcommon.la           \
 	$(top_srcdir)/src/common/queue/libcommonqueue.la                 \

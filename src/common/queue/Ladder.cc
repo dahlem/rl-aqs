@@ -350,7 +350,7 @@ void dcommon::Ladder::resizeFirstRung(boost::uint32_t p_base)
 {
     // resize the rung size
     m_BucketsFirstRung = 2 * p_base;
-    m_rungs[0].reset(new dcommon::EntryList[m_BucketsFirstRung]);
+    m_rungs[0] = dcommon::EntryListSA(new dcommon::EntryList[m_BucketsFirstRung]);
 }
 
 void dcommon::Ladder::advanceDequeueBucket(bool p_spawn) throw (dcommon::QueueException)
@@ -366,11 +366,16 @@ void dcommon::Ladder::advanceDequeueBucket(bool p_spawn) throw (dcommon::QueueEx
     while (true) {
         if (!canAdvance()) {
             // throw an exception here, if there are more entries available
-            if (getNBC() > 0) {
+            if (m_events[m_lowestRung] > 0) {
                 throw dcommon::QueueException(
                     dcommon::QueueException::ADVANCE_IGNORED_EVENTS);
+            } else {
+                if (m_lowestRung > 0) {
+                    m_lowestRung--;
+                } else {
+                    break;
+                }
             }
-            break;
         }
 
         // how many elements are in this bucket?
@@ -400,10 +405,10 @@ bool dcommon::Ladder::canAdvance()
         if (m_currentBucket[m_lowestRung] == (m_BucketsFirstRung - 1)) {
             advance = false;
         }
-    } else if (m_lowestRung < m_NRung) {
-        if (m_currentBucket[m_lowestRung] == m_Thres) {
-            advance = false;
-        }
+   } else if (m_lowestRung < m_NRung) {
+        if (m_currentBucket[m_lowestRung] == (m_Thres - 1)) {
+           advance = false;
+       }
     }
 
     return advance;
@@ -482,7 +487,7 @@ void dcommon::Ladder::createRung()
         events[i] = m_events[i];
     }
 
-    m_events.reset(events);
+    m_events = dcommon::tIntSA(events);
 
     // resize the currentBucket data structure
     boost::uint32_t *currentBucket = new boost::uint32_t[m_NRung];
@@ -491,7 +496,7 @@ void dcommon::Ladder::createRung()
         currentBucket[i] = m_currentBucket[i];
     }
 
-    m_currentBucket.reset(currentBucket);
+    m_currentBucket = dcommon::tIntSA(currentBucket);
 
     // resize the bucketwidth data structure
     double *bucketwidth = new double[m_NRung];
@@ -500,7 +505,7 @@ void dcommon::Ladder::createRung()
         bucketwidth[i] = m_bucketwidth[i];
     }
 
-    m_bucketwidth.reset(bucketwidth);
+    m_bucketwidth = dcommon::tDoubleSA(bucketwidth);
 
     // resize the rcur data structure
     double *rcur = new double[m_NRung];
@@ -509,7 +514,7 @@ void dcommon::Ladder::createRung()
         rcur[i] = m_RCur[i];
     }
 
-    m_RCur.reset(rcur);
+    m_RCur = dcommon::tDoubleSA(rcur);
 
     // resize the rstart data structure
     double *rstart = new double[m_NRung];
@@ -518,5 +523,5 @@ void dcommon::Ladder::createRung()
         rstart[i] = m_RStart[i];
     }
 
-    m_RStart.reset(rstart);
+    m_RStart = dcommon::tDoubleSA(rstart);
 }

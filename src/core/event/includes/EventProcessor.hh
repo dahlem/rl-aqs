@@ -20,6 +20,10 @@
 #ifndef __EVENTPROCESSOR_HH__
 #define __EVENTPROCESSOR_HH__
 
+#if HAVE_CONFIG_H
+# include <config.h>
+#endif
+
 #include <boost/shared_ptr.hpp>
 
 #include "AckEvent.hh"
@@ -61,7 +65,7 @@ public:
                    double);
     ~EventProcessor();
 
-    void process();
+    bool process();
 
 
 private:

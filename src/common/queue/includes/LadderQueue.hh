@@ -111,10 +111,21 @@ public:
      */
     dcommon::Entry* dequeue() throw (dcommon::QueueException);
 
+#ifndef NDEBUG
+    boost::uint32_t getInEvents();
+    boost::uint32_t getOutEvents();
+#endif /* NDEBUG */
+
+
 private:
     dcommon::tTopSP m_top;
     dcommon::tLadderSP m_ladder;
     dcommon::tBottomSP m_bottom;
+
+#ifndef NDEBUG
+    boost::uint32_t in_events;
+    boost::uint32_t out_events;
+#endif /* NDEBUG */
 
 #ifdef HAVE_LADDERTIMING
     tOstreamSP osEn;

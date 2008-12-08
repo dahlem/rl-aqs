@@ -21,6 +21,10 @@
 # include <config.h>
 #endif
 
+#ifndef __STDC_CONSTANT_MACROS
+# define __STDC_CONSTANT_MACROS
+#endif /* __STDC_CONSTANT_MACROS */
+
 #if HAVE_LADDERTIMING
 # include <ctime>
 # include <iostream>
@@ -34,24 +38,25 @@ namespace bio = boost::iostreams;
 # include <boost/shared_ptr.hpp>
 #endif
 
-#ifndef __STDC_CONSTANT_MACROS
-# define __STDC_CONSTANT_MACROS
-#endif /* __STDC_CONSTANT_MACROS */
-
 #include <cstddef>
 
 #include <boost/cstdint.hpp>
 
 #include "LadderQueue.hh"
-namespace dcommon = des::common;
 
 
-
-dcommon::LadderQueue::LadderQueue()
+namespace des
 {
-    m_top = dcommon::tTopSP(new dcommon::Top());
-    m_ladder = dcommon::tLadderSP(new dcommon::Ladder());
-    m_bottom = dcommon::tBottomSP(new dcommon::Bottom());
+namespace common
+{
+
+
+
+LadderQueue::LadderQueue()
+{
+    m_top = tTopSP(new Top());
+    m_ladder = tLadderSP(new Ladder());
+    m_bottom = tBottomSP(new Bottom());
 
 #ifdef HAVE_LADDERTIMING
     std::string enqueue = "./ladder-enqueue-timing.txt";
@@ -67,16 +72,21 @@ dcommon::LadderQueue::LadderQueue()
     (*osEn.get()) << "Time"  << std::endl;
     (*osDe.get()) << "Time"  << std::endl;
 #endif /* HAVE_LADDERTIMING */
+
+#ifndef NDEBUG
+    in_events = 0;
+    out_events = 0;
+#endif /* NDEBUG */
 }
 
 
-dcommon::LadderQueue::~LadderQueue()
+LadderQueue::~LadderQueue()
 {
 }
 
 
 #ifdef HAVE_LADDERSTATS
-void dcommon::LadderQueue::record()
+void LadderQueue::record()
 {
     m_top->record();
     m_ladder->record();
@@ -85,7 +95,7 @@ void dcommon::LadderQueue::record()
 #endif /* HAVE_LADDERSTATS */
 
 
-const bool dcommon::LadderQueue::push(dcommon::Entry *p_entry) throw (dcommon::QueueException)
+const bool LadderQueue::push(Entry *p_entry) throw (QueueException)
 {
 #ifdef HAVE_LADDERTIMING
     struct timeval start, finish;
@@ -99,7 +109,7 @@ const bool dcommon::LadderQueue::push(dcommon::Entry *p_entry) throw (dcommon::Q
     } else {
         try {
             m_ladder->push(p_entry);
-        } catch (dcommon::QueueException qe) {
+        } catch (QueueException qe) {
             m_bottom->push(p_entry);
             if (m_bottom->size() > m_ladder->getThres()) {
                 // check whether ladder is empty
@@ -108,10 +118,10 @@ const bool dcommon::LadderQueue::push(dcommon::Entry *p_entry) throw (dcommon::Q
                     double max = m_bottom->getMaxTS();
                     double min = m_bottom->getMinTS();
 
-                    dcommon::EntryList *list = m_bottom->list();
+                    EntryList *list = m_bottom->list();
                     m_ladder->push(list, max, min);
                 } else {
-                    dcommon::EntryList *list = m_bottom->list();
+                    EntryList *list = m_bottom->list();
                     m_ladder->pushBack(list);
                 }
             }
@@ -127,11 +137,15 @@ const bool dcommon::LadderQueue::push(dcommon::Entry *p_entry) throw (dcommon::Q
     (*osEn.get()) << time_delta  << std::endl;
 #endif /* HAVE_LADDERTIMING */
 
+#ifndef NDEBUG
+    in_events++;
+#endif /* NDEBUG */
+
     return true;
 }
 
 
-dcommon::Entry* dcommon::LadderQueue::dequeue() throw (dcommon::QueueException)
+Entry* LadderQueue::dequeue() throw (QueueException)
 {
 #ifdef HAVE_LADDERTIMING
     struct timeval start, finish;
@@ -139,8 +153,8 @@ dcommon::Entry* dcommon::LadderQueue::dequeue() throw (dcommon::QueueException)
     gettimeofday(&start, NULL);
 #endif /* HAVE_LADDERTIMING */
 
-    dcommon::Entry *entry = NULL;
-    dcommon::EntryList *list = NULL;
+    Entry *entry = NULL;
+    EntryList *list = NULL;
 
     if (m_bottom->size() > 0) {
         // bottom serves the dequeue operation
@@ -185,5 +199,29 @@ dcommon::Entry* dcommon::LadderQueue::dequeue() throw (dcommon::QueueException)
     (*osDe.get()) << time_delta  << std::endl;
 #endif /* HAVE_LADDERTIMING */
 
+#ifndef NDEBUG
+    if (entry != NULL) {
+        out_events++;
+    }
+#endif /* NDEBUG */
+
     return entry;
+}
+
+
+#ifndef NDEBUG
+boost::uint32_t LadderQueue::getInEvents()
+{
+    return in_events;
+}
+
+boost::uint32_t LadderQueue::getOutEvents()
+{
+    return out_events;
+}
+
+#endif /* NDEBUG */
+
+
+}
 }

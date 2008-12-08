@@ -41,12 +41,14 @@ namespace dio = des::io;
 typedef dcore::SimulationCI <dcore::SimSP> SimCI;
 typedef boost::shared_ptr <SimCI> SimCISP;
 
+typedef dcore::SimulationLHS <SimCISP> SimLHS;
+typedef boost::shared_ptr <SimLHS> SimLHSSP;
+
 
 int main(int argc, char *argv[])
 {
     dcore::tDesArgsSP desArgs(new dcore::desArgs_t);
     dcore::CL cl;
-
 
     if (cl.parse(argc, argv, desArgs)) {
         return EXIT_SUCCESS;
@@ -70,30 +72,40 @@ int main(int argc, char *argv[])
         dsample::Seeds::getInstance().init();
     }
 
-    // ddahlem: can/should be moved to the simulationlhs class
-    std::stringstream outDir, csv_line;
-    outDir << desArgs->results_dir << "/";
-
-    std::string dir = outDir.str();
-    std::string file = "simulations.dat";
-
-    dio::tResultsSP sim_output(
-        new dio::Results(file, dir));
-
-    csv_line << "sim_num," << dcore::ARGS_HEADER;
-    sim_output->print(csv_line);
-    csv_line.str("");
-    csv_line << desArgs->sim_num << "," << const_cast <const dcore::desArgs_t&> (*desArgs);
-    sim_output->print(csv_line);
-
-    if (desArgs->confidence) {
+    dcore::sim_output output;
+    if (desArgs->lhs && desArgs->confidence) {
         dcore::SimSP sim(new dcore::Simulation());
         SimCISP sim_ci(
             new SimCI(sim, desArgs->alpha, desArgs->error, desArgs->replications));
-        sim_ci->simulate(desArgs);
+        SimLHSSP sim_lhs(new SimLHS(sim_ci));
+        output = sim_lhs->simulate(desArgs);
+    } else if (desArgs->confidence) {
+        dcore::SimSP sim(new dcore::Simulation());
+        SimCISP sim_ci(
+            new SimCI(sim, desArgs->alpha, desArgs->error, desArgs->replications));
+        output = sim_ci->simulate(desArgs);
     } else {
         dcore::SimSP sim(new dcore::Simulation());
-        sim->simulate(desArgs);
+        output = sim->simulate(desArgs);
+    }
+
+    if (!desArgs->lhs) {
+        std::stringstream outDir, csv_line;
+        outDir << desArgs->results_dir << "/";
+
+        std::string dir = outDir.str();
+        std::string file = "simulations.dat";
+
+        dio::tResultsSP sim_results(
+            new dio::Results(file, dir));
+
+        csv_line << "sim_num," << dcore::ARGS_HEADER << ",actual_reps";
+        sim_results->print(csv_line);
+
+        csv_line.str("");
+        csv_line << desArgs->sim_num << "," << const_cast <const dcore::desArgs_t&> (*desArgs)
+                 << "," << output.replications;
+        sim_results->print(csv_line);
     }
 
     return EXIT_SUCCESS;

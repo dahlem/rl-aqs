@@ -17,28 +17,39 @@
 /** @file EventProcessor.hh
  * Implementation of the event processor interface.
  */
-#include <iostream>
+#if HAVE_CONFIG_H
+# include <config.h>
+#endif
 
-#include "events.hh"
-#include "EventProcessor.hh"
-namespace dcore = des::core;
+#include <cassert>
+#include <iostream>
 
 #include "Entry.hh"
 #include "LadderQueue.hh"
 namespace dcommon = des::common;
 
+#include "events.hh"
+#include "EventProcessor.hh"
 
 
-dcore::EventProcessor::EventProcessor(dcommon::tQueueSP p_queue,
-                                      dcore::tAdminEventSP p_adminEvent,
-                                      dcore::tPreAnyEventSP p_preAnyEvent,
-                                      dcore::tPostAnyEventSP p_postAnyEvent,
-                                      dcore::tArrivalEventSP p_arrivalEvent,
-                                      dcore::tDepartureEventSP p_departureEvent,
-                                      dcore::tPostEventSP p_postEvent,
-                                      dcore::tLastArrivalEventSP p_lastArrivalEvent,
-                                      dcore::tAckEventSP p_ackEvent,
-                                      dcore::tLeaveEventSP p_leaveEvent,
+
+namespace des
+{
+namespace core
+{
+
+
+
+EventProcessor::EventProcessor(dcommon::tQueueSP p_queue,
+                                      tAdminEventSP p_adminEvent,
+                                      tPreAnyEventSP p_preAnyEvent,
+                                      tPostAnyEventSP p_postAnyEvent,
+                                      tArrivalEventSP p_arrivalEvent,
+                                      tDepartureEventSP p_departureEvent,
+                                      tPostEventSP p_postEvent,
+                                      tLastArrivalEventSP p_lastArrivalEvent,
+                                      tAckEventSP p_ackEvent,
+                                      tLeaveEventSP p_leaveEvent,
                                       double p_stopTime)
     : m_queue(p_queue), m_adminEvent(p_adminEvent), m_preAnyEvent(p_preAnyEvent),
       m_postAnyEvent(p_postAnyEvent), m_arrivalEvent(p_arrivalEvent),
@@ -48,11 +59,11 @@ dcore::EventProcessor::EventProcessor(dcommon::tQueueSP p_queue,
 {}
 
 
-dcore::EventProcessor::~EventProcessor()
+EventProcessor::~EventProcessor()
 {}
 
 
-void dcore::EventProcessor::process()
+bool EventProcessor::process()
 {
     dcommon::Entry *entry = NULL;
 
@@ -111,6 +122,21 @@ void dcore::EventProcessor::process()
                           << const_cast <const dcommon::Entry&> (*entry)
                           << std::endl;
             }
+
+            return false;
         }
     }
+
+#ifndef NDEBUG
+    std::cout << m_queue->getInEvents() << ", " << m_queue->getOutEvents() << std::endl;
+    assert(m_queue->getInEvents() == m_queue->getOutEvents());
+#endif /* NDEBUG */
+
+
+    return true;
+}
+
+
+
+}
 }

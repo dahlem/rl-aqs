@@ -27,7 +27,7 @@
 #include <numeric>
 #include <vector>
 
-#ifdef NDEBUG
+#ifndef NDEBUG
 # include <iostream>
 #endif
 
@@ -340,7 +340,7 @@ void dnet::WEvonet::balance_vertex_strength(Vertex &v)
                                       vertex_index_props_map,
                                       color_vec[0])));
 
-#ifdef NDEBUG
+#ifndef NDEBUG
     std::pair <dnet::VertexIterator, dnet::VertexIterator> p;
 
     for (p = boost::vertices(*g); p.first != p.second; ++p.first) {

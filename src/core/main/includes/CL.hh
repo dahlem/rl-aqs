@@ -20,8 +20,8 @@
  *
  * @author Dominik Dahlem
  */
-#ifndef __CL_HH__
-#define __CL_HH__
+#ifndef __DES_CORE_CL_HH__
+#define __DES_CORE_CL_HH__
 
 #ifndef __STDC_CONSTANT_MACROS
 # define __STDC_CONSTANT_MACROS
@@ -43,6 +43,8 @@ namespace des { namespace core {
  * const variables specifying the allowed options.
  */
 const std::string STOPTIME = "stop_time";
+const std::string MINSTOPTIME = "min_stop_time";
+const std::string MAXSTOPTIME = "max_stop_time";
 const std::string GENERATIONS = "generations";
 const std::string GRAPH = "graph";
 const std::string SEEDS = "seeds";
@@ -54,7 +56,9 @@ const std::string VERS = "version";
 const std::string LOG_GRAPH_RATE = "graph_generation";
 const std::string LOG_EVENTS = "log_events";
 const std::string WITH_CI = "confidence";
+const std::string WITH_LHS = "lhs";
 const std::string REPLICATIONS = "replications";
+const std::string SIMULATIONS = "simulations";
 const std::string ALPHA = "alpha";
 const std::string ERROR = "error";
 
@@ -64,7 +68,7 @@ const std::string ERROR = "error";
  */
 typedef boost::shared_ptr <po::options_description> tOptDescSP;
 
-static const std::string ARGS_HEADER = "stop_time,generations,confidence,alpha,error,replications";
+static const std::string ARGS_HEADER = "stop_time,generations,confidence,alpha,error,initial_reps";
 
 /** @struct
  * structure specifying the command line variables.
@@ -80,12 +84,16 @@ struct desArgs_t {
     boost::int32_t vertex;          /* the vertex to trace */
     boost::int32_t graph_rate;      /* the rate to generate graphs at */
 
-    boost::uint32_t stop_time;      /* stopping time of the DES */
+    double stop_time;               /* stopping time of the DES */
+    double min_stop_time;           /* min. stopping time of the DES */
+    double max_stop_time;           /* max. stopping time of the DES */
     boost::int32_t generations;     /* number of generations for the event simulation */
     bool confidence;                /* run experiments within a confidence band */
+    bool lhs;                       /* run experiments with lhs sampling */
     double alpha;                   /* 100(1 - alpha) confidence interval for the experiments */
     double error;                   /* error threshold for the ci calculations */
     boost::uint16_t replications;   /* initial replications required */
+    boost::uint16_t simulations;    /* initial number of simulations */
 
     boost::uint16_t sim_num;        /* simulation number */
     boost::uint16_t rep_num;        /* replication number */
@@ -94,7 +102,7 @@ struct desArgs_t {
         {
             p_os << desArgs.stop_time << "," << desArgs.generations << ","
                  << desArgs.confidence << "," << desArgs.alpha << "," << desArgs.error
-                 << "," << desArgs.replications << std::endl;
+                 << "," << desArgs.replications;
 
             return p_os;
         }
@@ -128,6 +136,14 @@ public:
      *        message was requested.
      */
     int parse(int argc, char *argv[], tDesArgsSP desArgs);
+
+    /** @fn verify(tDesArgsSP)
+     * Verify the command-line parameters
+     *
+     * @param tDesArgsSP a shared pointer to the structure of the command-line
+     *        arguments.
+     */
+    void verify(tDesArgsSP desArgs);
 
 private:
 

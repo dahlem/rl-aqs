@@ -26,6 +26,13 @@
 # include <config.h>
 #endif
 
+#ifndef __STDC_CONSTANT_MACROS
+# define __STDC_CONSTANT_MACROS
+#endif /* __STDC_CONSTANT_MACROS */
+
+#include <boost/cstdint.hpp>
+
+
 namespace des
 {
 namespace core
@@ -46,13 +53,17 @@ struct sim_output
     double sd_system_average_delay;
     double sd_system_expected_average_num_in_queue;
 
+    // number of replications
+    boost::uint16_t replications;
+
     sim_output()
         : system_average_delay(0.0),
           system_expected_average_num_in_queue(0.0),
           mean_system_average_delay(0.0),
           mean_system_expected_average_num_in_queue(0.0),
           sd_system_average_delay(0.0),
-          sd_system_expected_average_num_in_queue(0.0)
+          sd_system_expected_average_num_in_queue(0.0),
+          replications(1)
         {}
 
 };
