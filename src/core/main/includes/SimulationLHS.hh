@@ -92,7 +92,7 @@ public:
             boost::int32_t rng_index = dsample::CRN::getInstance().init(seed);
             dsample::CRN::getInstance().log(seed, "LHS permutation");
             dsample::tGslRngSP rng
-                = dsample::CRN::getInstance().get(rng_index - 1);
+                = dsample::CRN::getInstance().get(rng_index);
 
             min = gsl_vector_calloc(1);
             max = gsl_vector_calloc(1);

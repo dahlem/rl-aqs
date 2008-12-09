@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
     dsample::CRN::getInstance().log(gsl_rng_default_seed, "seeds");
 
     // init the crn for the uniform weight assignment
-    dsample::tGslRngSP seeds_rng = dsample::CRN::getInstance().get(seeds_rng_index - 1);
+    dsample::tGslRngSP seeds_rng = dsample::CRN::getInstance().get(seeds_rng_index);
     seed = gsl_rng_uniform_int(seeds_rng.get(), gsl_rng_max(seeds_rng.get()));
     uniform_rng_index = dsample::CRN::getInstance().init(seed);
     dsample::CRN::getInstance().log(seed, "uniform weight assignment seed");

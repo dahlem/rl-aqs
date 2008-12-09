@@ -26,6 +26,7 @@
 #endif /* __STDC_CONSTANT_MACROS */
 
 #include <boost/cstdint.hpp>
+#include <boost/shared_array.hpp>
 #include <boost/shared_ptr.hpp>
 
 
@@ -47,9 +48,10 @@ namespace dsample = des::sampling;
 
 namespace des
 {
-    namespace core
-    {
+namespace core
+{
 
+typedef boost::shared_array <boost::int32_t> Int32SA;
 
 /** @class ArrivalHandler
  * The class @code{ArrivalHandler} handles arrival events in the DES.
@@ -57,7 +59,7 @@ namespace des
 class ArrivalHandler : public design::Observer<dcore::ArrivalEvent>
 {
 public:
-    ArrivalHandler(dcommon::tQueueSP p_queue, dnet::tGraphSP p_graph, boost::uint32_t p_service_idx);
+    ArrivalHandler(dcommon::tQueueSP p_queue, dnet::tGraphSP p_graph,  Int32SA p_service_ids);
     ~ArrivalHandler();
 
     void update(dcore::ArrivalEvent *subject);
@@ -65,8 +67,8 @@ public:
 private:
     dcommon::tQueueSP m_queue;
     dnet::tGraphSP m_graph;
-    boost::uint32_t m_service_idx;
-    dsample::tGslRngSP m_service_rng;
+    Int32SA m_service_ids;
+
     dnet::VertexBusyMap vertex_busy_map;
     dnet::VertexTimeServiceEndsMap vertex_time_service_ends_map;
     dnet::VertexServiceRateMap vertex_service_map;
@@ -83,7 +85,7 @@ private:
 typedef boost::shared_ptr <ArrivalHandler> tArrivalHandlerSP;
 
 
-    }
+}
 }
 
 

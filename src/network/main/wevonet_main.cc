@@ -170,7 +170,7 @@ int main(int argc, char *argv[])
         seeds_rng_index = dsample::CRN::getInstance().init(gsl_rng_default_seed);
         dsample::CRN::getInstance().log(gsl_rng_default_seed, "seeds");
 
-        dsample::tGslRngSP seeds_rng = dsample::CRN::getInstance().get(seeds_rng_index - 1);
+        dsample::tGslRngSP seeds_rng = dsample::CRN::getInstance().get(seeds_rng_index);
 
         // 2. init the crn for the arrival events
         seed = gsl_rng_uniform_int(seeds_rng.get(), gsl_rng_max(seeds_rng.get()));
@@ -184,9 +184,9 @@ int main(int argc, char *argv[])
         dsample::CRN::getInstance().log(seed, "number of edges");
     }
 
-    r1 = dsample::CRN::getInstance().get(num_edges_rng_index - 1);
-    r2 = dsample::CRN::getInstance().get(uniform_rng_index - 1);
-    r3 = dsample::CRN::getInstance().get(arrival_rng_index - 1);
+    r1 = dsample::CRN::getInstance().get(num_edges_rng_index);
+    r2 = dsample::CRN::getInstance().get(uniform_rng_index);
+    r3 = dsample::CRN::getInstance().get(arrival_rng_index);
 
     // use the WEvonet class
     std::cout << "Generating Graph..." << std::endl;

@@ -41,10 +41,9 @@ namespace dstats = des::statistics;
 
 
 dcore::ArrivalHandler::ArrivalHandler(dcommon::tQueueSP p_queue,
-    dnet::tGraphSP p_graph, boost::uint32_t p_service_idx)
-    : m_queue(p_queue), m_graph(p_graph), m_service_idx(p_service_idx)
+                                      dnet::tGraphSP p_graph, Int32SA p_service_ids)
+    : m_queue(p_queue), m_graph(p_graph), m_service_ids(p_service_ids)
 {
-    m_service_rng = dsample::CRN::getInstance().get(m_service_idx - 1);
     vertex_busy_map = get(vertex_busy, *m_graph);
     vertex_service_map = get(vertex_service_rate, *m_graph);
     vertex_number_in_queue_map = get(vertex_number_in_queue, *m_graph);
@@ -68,7 +67,11 @@ void dcore::ArrivalHandler::update(dcore::ArrivalEvent *subject)
 
     entry = subject->getEvent();
     vertex = boost::vertex(entry->getDestination(), *m_graph);
-    service_time = gsl_ran_exponential(m_service_rng.get(),
+
+    dsample::tGslRngSP service_rng = dsample::CRN::getInstance().get(
+        m_service_ids[entry->getDestination()]);
+
+    service_time = gsl_ran_exponential(service_rng.get(),
                                        1 / vertex_service_map[vertex]);
 
     dcommon::Entry *new_entry = new dcommon::Entry(

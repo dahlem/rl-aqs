@@ -48,10 +48,10 @@ namespace dsample = des::sampling;
 
 
 dcore::DepartureHandler::DepartureHandler(dcommon::tQueueSP p_queue,
-    dnet::tGraphSP p_graph, boost::uint32_t p_depart_uniform_idx)
-    : m_queue(p_queue), m_graph(p_graph), m_depart_uniform_idx(p_depart_uniform_idx)
+                                          dnet::tGraphSP p_graph,
+                                          Int32SA p_depart_uniform_ids)
+    : m_queue(p_queue), m_graph(p_graph), m_depart_uniform_ids(p_depart_uniform_ids)
 {
-    m_depart_uniform_rng = dsample::CRN::getInstance().get(m_depart_uniform_idx - 1);
     vertex_busy_map = get(vertex_busy, *m_graph);
     vertex_number_in_queue_map = get(vertex_number_in_queue, *m_graph);
     vertex_index_map = get(boost::vertex_index, *m_graph);
@@ -105,7 +105,9 @@ void dcore::DepartureHandler::update(dcore::DepartureEvent *subject)
                   boost::indirect_cmp <float*, std::greater <float> >(&edge_weights[0]));
 
         double temp = 0.0;
-        double u = gsl_rng_uniform(m_depart_uniform_rng.get());
+        dsample::tGslRngSP depart_uniform_rng = dsample::CRN::getInstance().get(
+            m_depart_uniform_ids[entry->getDestination()]);
+        double u = gsl_rng_uniform(depart_uniform_rng.get());
 
         for (boost::uint32_t e = 0; e < degree; ++e) {
             dnet::Edge edge = edges[sorted_edge_weights[e]];

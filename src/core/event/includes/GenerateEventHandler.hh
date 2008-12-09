@@ -21,7 +21,17 @@
 #ifndef __GENERATEEVENTHANDLER_HH__
 #define __GENERATEEVENTHANDLER_HH__
 
+#if HAVE_CONFIG_H
+# include <config.h>
+#endif
+
+#ifndef __STDC_CONSTANT_MACROS
+# define __STDC_CONSTANT_MACROS
+#endif /* __STDC_CONSTANT_MACROS */
+
+#include <boost/cstdint.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/shared_array.hpp>
 
 
 #include "LadderQueue.hh"
@@ -43,10 +53,12 @@ namespace dnet = des::network;
 
 namespace des
 {
-    namespace core
-    {
+namespace core
+{
+
 
 typedef boost::shared_array <int> tIntSA;
+typedef boost::shared_array <boost::int32_t> Int32SA;
 
 
 /** @class GenerateEventHandler
@@ -55,14 +67,14 @@ typedef boost::shared_array <int> tIntSA;
 class GenerateEventHandler : public design::Observer<dcore::LastArrivalEvent>
 {
 public:
-    GenerateEventHandler(dnet::tGraphSP, dsample::tGslRngSP, int, dcommon::tQueueSP, double);
+    GenerateEventHandler(dnet::tGraphSP, Int32SA, int, dcommon::tQueueSP, double);
     ~GenerateEventHandler();
 
     void update(dcore::LastArrivalEvent *subject);
 
 private:
     dnet::tGraphSP m_graph;
-    dsample::tGslRngSP m_arrivalRng;
+    Int32SA m_arrivalRngs;
     int m_generations;
     dcommon::tQueueSP m_queue;
     double m_stopTime;
@@ -78,7 +90,7 @@ private:
 typedef boost::shared_ptr <GenerateEventHandler> tGenerateEventHandlerSP;
 
 
-    }
+}
 }
 
 

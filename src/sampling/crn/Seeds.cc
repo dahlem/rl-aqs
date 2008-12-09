@@ -59,7 +59,7 @@ void Seeds::init() throw (SamplingException)
 {
     if (!isInitialised) {
         seed = CRN::getInstance().init(gsl_rng_default_seed);
-        seeds_rng = CRN::getInstance().get(seed - 1);
+        seeds_rng = CRN::getInstance().get(seed);
         fromStream = false;
 
         CRN::getInstance().log(gsl_rng_default_seed, "seeds");

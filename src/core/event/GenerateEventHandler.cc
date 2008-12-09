@@ -24,22 +24,27 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/iterator/filter_iterator.hpp>
 
-#include "GenerateEventHandler.hh"
-#include "EventGenerator.hh"
-namespace dcore = des::core;
-
 #include "Entry.hh"
 namespace dcommon = des::common;
 
+#include "GenerateEventHandler.hh"
+#include "EventGenerator.hh"
+
+
+
+namespace des
+{
+namespace core
+{
 
 
 dcore::GenerateEventHandler::GenerateEventHandler(
     dnet::tGraphSP p_graph,
-    dsample::tGslRngSP p_arrivalRng,
+    Int32SA p_arrivalRngs,
     int p_generations,
     dcommon::tQueueSP p_queue,
     double p_stopTime)
-    : m_graph(p_graph), m_arrivalRng(p_arrivalRng), m_generations(p_generations),
+    : m_graph(p_graph), m_arrivalRngs(p_arrivalRngs), m_generations(p_generations),
       m_queue(p_queue), m_stopTime(p_stopTime)
 {
     int vertices = 0;
@@ -87,6 +92,7 @@ void dcore::GenerateEventHandler::update(dcore::LastArrivalEvent *subject)
 
             FilterIter filter_iter_first(predicate, v_iter.first, v_iter.second);
             FilterIter filter_iter_last(predicate, v_iter.second, v_iter.second);
+            dsample::tGslRngSP arrival_rng;
 
             for (; filter_iter_first != filter_iter_last; ++filter_iter_first) {
                 if (count == 0) {
@@ -96,11 +102,13 @@ void dcore::GenerateEventHandler::update(dcore::LastArrivalEvent *subject)
                     double arrival_rate = vertex_arrival_props_map[*filter_iter_first];
 
                     // generate the events
-                    dcore::EventGenerator::generate(m_queue, m_arrivalRng,
+                    arrival_rng = dsample::CRN::getInstance().get(
+                        m_arrivalRngs[dest]);
+                    dcore::EventGenerator::generate(m_queue, arrival_rng,
                                                     dest, arrival_rate,
                                                     entry->getArrival(), stopTime);
                 } else {
-                    std::cout << "Error: Expected a single vertex to be traced!" << std::endl;
+                    std::cout << "Error: Expected a vertex!" << std::endl;
                     break;
                 }
 
@@ -108,4 +116,9 @@ void dcore::GenerateEventHandler::update(dcore::LastArrivalEvent *subject)
             }
         }
     }
+}
+
+
+
+}
 }

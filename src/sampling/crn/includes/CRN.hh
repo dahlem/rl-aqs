@@ -90,6 +90,16 @@ public:
      */
     void log(const boost::intmax_t p_seed, std::string eventType);
 
+    /** @fn log(std::string eventType)
+     * Log the seed and its purpose of use.
+     *
+     * @param const boost::intmax_t the min seed of the random number generator
+     * @param const boost::intmax_t the max seed of the random number generator
+     * @param std::string the event type
+     */
+    void log(const boost::intmax_t p_min, const boost::intmax_t p_max,
+             std::string eventType);
+
 
     CRN();
     ~CRN();

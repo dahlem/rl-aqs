@@ -26,6 +26,7 @@
 #endif /* __STDC_CONSTANT_MACROS */
 
 #include <boost/cstdint.hpp>
+#include <boost/shared_array.hpp>
 #include <boost/shared_ptr.hpp>
 
 
@@ -47,8 +48,11 @@ namespace dsample = des::sampling;
 
 namespace des
 {
-    namespace core
-    {
+namespace core
+{
+
+typedef boost::shared_array <boost::int32_t> Int32SA;
+
 
 /** @class DepartureHandler
  * The class @code{DepartureHandler} handles departure events in the DES.
@@ -56,7 +60,7 @@ namespace des
 class DepartureHandler : public design::Observer<dcore::DepartureEvent>
 {
 public:
-    DepartureHandler(dcommon::tQueueSP p_queue, dnet::tGraphSP p_graph, boost::uint32_t p_depart_uniform_idx);
+    DepartureHandler(dcommon::tQueueSP p_queue, dnet::tGraphSP p_graph, Int32SA p_depart_uniform_ids);
     ~DepartureHandler();
 
     void update(dcore::DepartureEvent *subject);
@@ -64,8 +68,7 @@ public:
 private:
     dcommon::tQueueSP m_queue;
     dnet::tGraphSP m_graph;
-    boost::uint32_t m_depart_uniform_idx;
-    dsample::tGslRngSP m_depart_uniform_rng;
+    Int32SA m_depart_uniform_ids;
     dnet::VertexBusyMap vertex_busy_map;
     dnet::VertexNumberInQueueMap vertex_number_in_queue_map;
     dnet::VertexIndexMap vertex_index_map;
@@ -79,7 +82,7 @@ private:
 typedef boost::shared_ptr <DepartureHandler> tDepartureHandlerSP;
 
 
-    }
+}
 }
 
 

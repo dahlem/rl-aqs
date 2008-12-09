@@ -66,7 +66,7 @@ public:
             memset(m_output_neurons.get(), 0, m_num_outputs * sizeof(double));
 
             // initialise the weights
-            dsample::tGslRngSP uniform_rng = dsample::CRN::getInstance().get(p_uniform_idx - 1);
+            dsample::tGslRngSP uniform_rng = dsample::CRN::getInstance().get(p_uniform_idx);
 
             // [-range_*;+range_*]
             double range_hidden = 1 / sqrt(static_cast<double> (m_num_inputs));

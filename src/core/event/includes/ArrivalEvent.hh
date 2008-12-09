@@ -36,8 +36,9 @@ namespace design = des::design;
 
 namespace des
 {
-    namespace core
-    {
+namespace core
+{
+
 
 /** @class ArrivalEvent
  * The class @code{ArrivalEvent} signals an arrival event in the DES.
@@ -56,7 +57,8 @@ public:
  */
 typedef boost::shared_ptr <ArrivalEvent> tArrivalEventSP;
 
-    }
+
+}
 }
 
 

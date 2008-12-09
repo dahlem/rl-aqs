@@ -38,7 +38,7 @@ const boost::int32_t dsample::CRN::init(const boost::intmax_t p_seed)
     gsl_rng_set(rng.get(), p_seed);
     m_gslRngs.push_back(rng);
 
-    return m_gslRngs.size();
+    return (m_gslRngs.size() - 1);
 }
 
 
@@ -55,4 +55,11 @@ dsample::tGslRngSP dsample::CRN::get(const boost::uint32_t p_rng) throw (Samplin
 void dsample::CRN::log(const boost::intmax_t p_seed, std::string eventType)
 {
     std::cout << "Use seed " << p_seed << " for the " << eventType << "." << std::endl;
+}
+
+
+void dsample::CRN::log(const boost::intmax_t p_min, const boost::intmax_t p_max,
+                       std::string eventType)
+{
+    std::cout << "Use seed indeces [" << p_min << ", " << p_max << "] for the " << eventType << "." << std::endl;
 }

@@ -31,6 +31,7 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/iterator/filter_iterator.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/shared_array.hpp>
 
 #include <gsl/gsl_randist.h>
 
@@ -81,6 +82,66 @@ namespace des
 namespace core
 {
 
+typedef boost::shared_array <boost::int32_t> Int32SA;
+
+
+Int32SA arrivalCRN(dnet::tGraphSP p_graph)
+{
+    boost::uint16_t vertices = boost::num_vertices(*p_graph);
+    Int32SA arrivalCRNs = Int32SA(new boost::int32_t[vertices]);
+    boost::uint32_t seed = 0;
+
+    // init the crn for the arrival events
+    for (boost::uint16_t i = 0; i < vertices; ++i) {
+        seed = dsample::Seeds::getInstance().getSeed();
+        arrivalCRNs[i] = dsample::CRN::getInstance().init(seed);
+    }
+
+    dsample::CRN::getInstance().log(
+        arrivalCRNs[0], arrivalCRNs[vertices - 1], "arrival events");
+
+    return arrivalCRNs;
+}
+
+
+Int32SA serviceCRN(dnet::tGraphSP p_graph)
+{
+    boost::uint16_t vertices = boost::num_vertices(*p_graph);
+    Int32SA serviceCRNs = Int32SA(new boost::int32_t[vertices]);
+    boost::uint32_t seed = 0;
+
+    // init the crn for the service events
+    for (boost::uint16_t i = 0; i < vertices; ++i) {
+        seed = dsample::Seeds::getInstance().getSeed();
+        serviceCRNs[i] = dsample::CRN::getInstance().init(seed);
+    }
+
+    dsample::CRN::getInstance().log(
+        serviceCRNs[0], serviceCRNs[vertices - 1], "service events");
+
+    return serviceCRNs;
+}
+
+
+Int32SA departureCRN(dnet::tGraphSP p_graph)
+{
+    boost::uint16_t vertices = boost::num_vertices(*p_graph);
+    Int32SA departureCRNs = Int32SA(new boost::int32_t[vertices]);
+    boost::uint32_t seed = 0;
+
+    // init the crn for the departure events
+    for (boost::uint16_t i = 0; i < vertices; ++i) {
+        seed = dsample::Seeds::getInstance().getSeed();
+        departureCRNs[i] = dsample::CRN::getInstance().init(seed);
+    }
+
+    dsample::CRN::getInstance().log(
+        departureCRNs[0], departureCRNs[vertices - 1], "departure events");
+
+    return departureCRNs;
+}
+
+
 sim_output Simulation::simulate(tDesArgsSP desArgs)
 {
     dnet::tGraphSP graph(new dnet::Graph);
@@ -102,27 +163,14 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
         std::cout << "Generate the graph " << std::endl;
     }
 
-    boost::int32_t arrival_rng_index;
-    boost::int32_t service_rng_index;
-    boost::int32_t depart_uniform_rng_index;
-    boost::uint32_t seed = 0;
-
     // init the crn for the arrival events
-    seed = dsample::Seeds::getInstance().getSeed();
-    arrival_rng_index = dsample::CRN::getInstance().init(seed);
-    dsample::CRN::getInstance().log(seed, "arrival events");
+    Int32SA arrivalCRNs = arrivalCRN(graph);
 
     // init the crn for the service events
-    seed = dsample::Seeds::getInstance().getSeed();
-    service_rng_index = dsample::CRN::getInstance().init(seed);
-    dsample::CRN::getInstance().log(seed, "service events");
+    Int32SA serviceCRNs = serviceCRN(graph);
 
     // init the crn for the departure uniform rv
-    seed = dsample::Seeds::getInstance().getSeed();
-    depart_uniform_rng_index = dsample::CRN::getInstance().init(seed);
-    dsample::CRN::getInstance().log(seed, "departure uniform");
-
-    dsample::tGslRngSP arrival_rng = dsample::CRN::getInstance().get(arrival_rng_index - 1);
+    Int32SA departureCRNs = departureCRN(graph);
 
     dnet::VertexIndexMap vertex_index_props_map =
         get(boost::vertex_index, *graph);
@@ -165,6 +213,8 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
                 destination = vertex_index_props_map[*filter_iter_first];
                 arrival_rate = vertex_arrival_props_map[*filter_iter_first];
 
+                dsample::tGslRngSP arrival_rng = dsample::CRN::getInstance().get(
+                    arrivalCRNs[destination]);
                 EventGenerator::generate(
                     queue, arrival_rng, destination, arrival_rate);
             } else {
@@ -178,10 +228,14 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
         double graphGenRate = desArgs->stop_time;
 
         std::pair <dnet::VertexIterator, dnet::VertexIterator> p;
+        dsample::tGslRngSP arrival_rng;
+
         for (p = boost::vertices(*graph); p.first != p.second; ++p.first) {
             destination = vertex_index_props_map[*p.first];
             arrival_rate = vertex_arrival_props_map[*p.first];
 
+            arrival_rng = dsample::CRN::getInstance().get(
+                arrivalCRNs[destination]);
             EventGenerator::generate(
                 queue, arrival_rng, destination, arrival_rate, stopTime);
         }
@@ -214,9 +268,9 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
         new LogGraphHandler(resultsBaseDir, graph));
 
     tArrivalHandlerSP arrivalHandler(
-        new ArrivalHandler(queue, graph, service_rng_index));
+        new ArrivalHandler(queue, graph, serviceCRNs));
     tDepartureHandlerSP departureHandler(
-        new DepartureHandler(queue, graph, depart_uniform_rng_index));
+        new DepartureHandler(queue, graph, departureCRNs));
     tNumEventsHandlerSP numEventsHandler(
         new NumEventsHandler(graph));
     tLastEventHandlerSP lastEventHandler(
@@ -232,7 +286,7 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
     if (desArgs->generations > 1) {
         tGenerateEventHandlerSP generateEventHandler(
             new GenerateEventHandler(
-                graph, arrival_rng, desArgs->generations, queue, desArgs->stop_time));
+                graph, arrivalCRNs, desArgs->generations, queue, desArgs->stop_time));
         lastArrivalEvent->attach(generateEventHandler);
     }
 
