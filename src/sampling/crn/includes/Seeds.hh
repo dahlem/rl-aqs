@@ -7,6 +7,9 @@
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 // implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+#if HAVE_CONFIG_H
+# include <config.h>
+#endif
 
 #ifndef __DES_SAMPLING_SEEDS_HH__
 #define __DES_SAMPLING_SEEDS_HH__

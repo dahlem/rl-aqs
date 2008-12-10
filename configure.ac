@@ -10,7 +10,7 @@
 
 AC_PREREQ(2.61)
 AC_INIT([Discrete Event Simulation for Service Interaction],
-        [1.7],
+        [1.8],
         [Dominik Dahlem Dominik.Dahlem@cs.tcd.ie], 
         [des])
 
@@ -24,14 +24,15 @@ AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([dist-bzip2])
 
 
-LF_CONFIGURE_CC
+#LF_CONFIGURE_CC
 LF_CONFIGURE_CXX
 LF_HOST_TYPE
 LF_SET_WARNINGS
 
+AC_LANG(C++)
 AC_PROG_CXX
-AC_PROG_CC
-AC_PROG_CPP
+#AC_PROG_CC
+#AC_PROG_CPP
 AC_PROG_LIBTOOL
 AC_SUBST(LIBTOOL_DEPS)
 
@@ -50,7 +51,6 @@ AC_CHECK_FUNCS([floor memset sqrt pow])
 AC_CHECK_LIB([m],[cos])
 AC_CHECK_LIB([gslcblas],[cblas_dgemm])
 AC_CHECK_LIB([gsl],[gsl_blas_dgemm])
-
 
 # Boost library check
 AC_ARG_ENABLE(boost, AS_HELP_STRING(
@@ -107,16 +107,16 @@ AC_ARG_ENABLE(mpi, AS_HELP_STRING(
 		   [enable MPI @<:@default=no@:>@]), 
 		   [USE_MPI=$enableval], [USE_MPI=no])
 if test "x$USE_MPI" = xyes; then
-   HAVE_MPI=TRUE
+   ACX_MPI([], [AC_MSG_WARN([cannot configure MPI (compile in serial)])])
    SNOW=", snow"
-   AC_SUBST(HAVE_MPI)
    AC_SUBST(SNOW)
 else
-   HAVE_MPI=FALSE
+   MPICXX="${CXX}"
+   AC_SUBST(MPICXX)
    SNOW=""
-   AC_SUBST(HAVE_MPI)
    AC_SUBST(SNOW)
 fi
+AM_CONDITIONAL(COMPILE_PARALLEL, test "x$USE_MPI" = xyes)
 
 
 # Check for ladder stats
@@ -183,6 +183,8 @@ AC_CONFIG_FILES([
    src/design/Makefile
    src/design/pattern/Makefile
    src/io/Makefile
+   src/mpi/Makefile
+   src/mpi/test/Makefile
    src/network/Makefile
    src/network/evolution/Makefile
    src/network/main/Makefile

@@ -1,4 +1,4 @@
-# Copyright (C) 2007, 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+# Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 #  
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without 
@@ -8,29 +8,28 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-noinst_LTLIBRARIES = libsamplingcrn.la
+bin_PROGRAMS = crn_test
 
-libsamplingcrn_la_SOURCES =                                           \
-	CRN.cc                                                        \
-	Seeds.cc
+crn_test_SOURCES =                                                    \
+	crn_test.cc
 
-
-libsamplingcrn_la_CPPFLAGS =                                          \
+crn_test_CPPFLAGS =                                                   \
 	$(BOOST_CPPFLAGS)                                             \
 	-I$(top_srcdir)/src/sampling/crn/includes                     \
 	-I$(top_srcdir)/src/design/pattern/includes                   \
 	-I$(top_srcdir)/src/sampling/common/includes
 
 
-libsamplingcrn_la_LIBADD =                                            \
+crn_test_LDADD =                                                      \
 	$(BOOST_LDFLAGS)                                              \
+	$(BOOST_PROGRAM_OPTIONS_LIB)                                  \
+	$(top_srcdir)/src/sampling/crn/libsamplingcrn.la              \
+	$(top_srcdir)/src/sampling/common/libsamplingcommon.la        \
 	-lgsl                                                         \
-	-lm                                                           \
-	$(top_srcdir)/src/sampling/common/libsamplingcommon.la
+	-lm
 
 
-include_HEADERS = includes
-
+MAINTAINERCLEANFILES = Makefile.in
 
 CXX = $(MPICXX)
-libsamplingcrn_la_LIBADD += $(MPILIBS)
+crn_test_LDADD += $(MPILIBS)
