@@ -52,6 +52,8 @@ int main(int argc, char *argv[])
 
 #ifdef HAVE_MPI
     MPI_Barrier(MPI_COMM_WORLD);
+    dsample::Seeds::getInstance().close();
+
     MPI_Finalize();
 #endif /* HAVE_MPI */
 
