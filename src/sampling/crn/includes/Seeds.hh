@@ -18,12 +18,17 @@
 # define __STDC_CONSTANT_MACROS
 #endif /* __STDC_CONSTANT_MACROS */
 
-
-#include <fstream>
+#ifdef HAVE_MPI
+# include <mpio.h>
+#else
+# include <fstream>
+#endif /* HAVE_MPI */
 
 #include <boost/cstdint.hpp>
 
-#include <gsl/gsl_randist.h>
+#ifndef HAVE_MPI
+# include <gsl/gsl_randist.h>
+#endif /* HAVE_MPI */
 
 #include "Singleton.hh"
 namespace ddesign = des::design;
@@ -51,14 +56,20 @@ public:
 
     /**
      * initialise the <code>Seeds</code> class with a file to read the
-     * random seeds from.
+     * random seeds from. The MPI version requires an explicit call to close
+     * to close the mpi shared file.
      *
      * @param string the file to read the seeds from
      * @throws SamplingException thrown, if the file does not exist or
      *                           cannot be opened.
      */
+#ifdef HAVE_MPI
+    void init(const char *p_file) throw (SamplingException);
+    void close();
+#else
     void init(const char *p_file) throw (SamplingException);
     void init() throw (SamplingException);
+#endif /* HAVE_MPI */
 
     /**
      * Retrieve the next seed from the seeds file.
@@ -72,11 +83,15 @@ public:
 private:
     Seeds(const Singleton<Seeds> &);
 
+#ifndef HAVE_MPI
     std::ifstream is;
     tGslRngSP seeds_rng;
+    bool fromStream;
+#else
+    MPI_File fh;
+#endif /* HAVE_MPI */
 
     int seed;
-    bool fromStream;
     bool isInitialised;
 
 };

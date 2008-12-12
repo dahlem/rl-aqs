@@ -8,13 +8,14 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-bin_PROGRAMS = crn_test
+bin_PROGRAMS = crn_test seeds_read
 
 crn_test_SOURCES =                                                    \
 	crn_test.cc
 
 crn_test_CPPFLAGS =                                                   \
 	$(BOOST_CPPFLAGS)                                             \
+	$(GSL_CFLAGS)                                                 \
 	-I$(top_srcdir)/src/sampling/crn/includes                     \
 	-I$(top_srcdir)/src/design/pattern/includes                   \
 	-I$(top_srcdir)/src/sampling/common/includes
@@ -25,11 +26,17 @@ crn_test_LDADD =                                                      \
 	$(BOOST_PROGRAM_OPTIONS_LIB)                                  \
 	$(top_srcdir)/src/sampling/crn/libsamplingcrn.la              \
 	$(top_srcdir)/src/sampling/common/libsamplingcommon.la        \
-	-lgsl                                                         \
-	-lm
+	$(GSL_LIBS)
 
+seeds_read_SOURCES =                                                  \
+	seeds_read.cc
+
+seeds_read_CPPFLAGS =                                                 \
+	$(BOOST_CPPFLAGS)
+
+seeds_read_LDADD =                                                    \
+	$(BOOST_LDFLAGS)
 
 MAINTAINERCLEANFILES = Makefile.in
 
-CXX = $(MPICXX)
-crn_test_LDADD += $(MPILIBS)
+include $(top_srcdir)/mk/mpi.am

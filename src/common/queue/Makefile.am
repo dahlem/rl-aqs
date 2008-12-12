@@ -29,3 +29,5 @@ libcommonqueue_la_LIBADD =                                            \
 	../list/libcommonlist.la
 
 include_HEADERS = includes
+
+include $(top_srcdir)/mk/mpi.am

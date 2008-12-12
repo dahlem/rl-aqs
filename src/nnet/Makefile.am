@@ -16,6 +16,7 @@ nnet_gaussian_SOURCES =                                               \
 
 nnet_gaussian_CPPFLAGS =                                              \
 	$(BOOST_CPPFLAGS)                                             \
+	$(GSL_CFLAGS)                                                 \
 	-I$(top_srcdir)/src/utils/vector/includes                     \
 	-I$(top_srcdir)/src/sampling/crn/includes                     \
 	-I$(top_srcdir)/src/design/pattern/includes                   \
@@ -29,9 +30,10 @@ nnet_gaussian_LDADD =                                                 \
 	$(top_srcdir)/src/sampling/crn/libsamplingcrn.la              \
 	$(top_srcdir)/src/utils/vector/libutils_vector.la             \
 	$(top_srcdir)/src/sampling/common/libsamplingcommon.la        \
-	-lgsl                                                         \
-	-lm
+	$(GSL_LIBS)
 
 
 include_HEADERS = includes
 MAINTAINERCLEANFILES = Makefile.in
+
+include $(top_srcdir)/mk/mpi.am

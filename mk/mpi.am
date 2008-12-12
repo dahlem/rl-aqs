@@ -1,0 +1,2 @@
+CXX = $(MPICXX)
+LIBS += $(MPILIBS)

@@ -42,8 +42,8 @@
 
 namespace des
 {
-    namespace common
-    {
+namespace common
+{
 
 typedef std::stack <int> StackInt;
 typedef boost::shared_ptr <StackInt> StackIntSP;
@@ -142,7 +142,7 @@ struct delete_disposer
 };
 
 
-    }
+}
 }
 
 

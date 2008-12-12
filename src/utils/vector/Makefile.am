@@ -16,3 +16,5 @@ libutils_vector_la_CPPFLAGS = -I./includes
 
 
 include_HEADERS = includes
+
+include $(top_srcdir)/mk/mpi.am

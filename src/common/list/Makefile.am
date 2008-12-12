@@ -13,8 +13,6 @@ noinst_LTLIBRARIES = libcommonlist.la
 libcommonlist_la_SOURCES =                                            \
 	Entry.cc
 
-#	List.cc                                                       
-
 libcommonlist_la_CPPFLAGS =                                           \
 	$(BOOST_CPPFLAGS)                                             \
 	 -I./includes
@@ -24,3 +22,6 @@ libcommonlist_la_LIBADD =                                             \
 
 
 include_HEADERS = includes
+
+
+include $(top_srcdir)/mk/mpi.am

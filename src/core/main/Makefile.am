@@ -17,7 +17,6 @@ des_main_SOURCES =                                                       \
 	des_main.cc
 
 des_main_CPPFLAGS =                                                      \
-	$(BOOST_CPPFLAGS)                                                \
 	-I./includes                                                     \
 	-I$(top_srcdir)/src/core/event/includes                          \
 	-I$(top_srcdir)/src/network/evolution/includes                   \
@@ -29,17 +28,19 @@ des_main_CPPFLAGS =                                                      \
 	-I$(top_srcdir)/src/io/includes                                  \
 	-I$(top_srcdir)/src/statistics/analysis/includes                 \
 	-I$(top_srcdir)/src/date/includes                                \
-	-I$(top_srcdir)/src/common/list/includes
+	-I$(top_srcdir)/src/common/list/includes                         \
+	$(BOOST_CPPFLAGS)                                                \
+	$(EXPAT_CFLAGS)
 
 
 des_main_LDADD =                                                         \
 	$(BOOST_LDFLAGS)                                                 \
+	$(EXPAT_LDFLAGS)                                                 \
 	$(BOOST_PROGRAM_OPTIONS_LIB)                                     \
 	$(BOOST_FILESYSTEM_LIB)                                          \
 	$(BOOST_SYSTEM_LIB)                                              \
+	$(BOOST_GRAPH_LIB)                                               \
 	$(GSL_LIBS)                                                      \
-	-lboost_graph                                                    \
-	-lm                                                              \
 	$(top_srcdir)/src/date/libdesdate.la                             \
 	$(top_srcdir)/src/sampling/crn/libsamplingcrn.la                 \
 	$(top_srcdir)/src/sampling/lhs/libsamplinglhs.la                 \
@@ -52,3 +53,5 @@ des_main_LDADD =                                                         \
 
 include_HEADERS = includes
 MAINTAINERCLEANFILES = Makefile.in
+
+include $(top_srcdir)/mk/mpi.am

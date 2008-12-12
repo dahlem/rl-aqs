@@ -1,0 +1,12 @@
+#!/bin/sh
+#PBS -l walltime=00:01:00
+#PBS -q parallel
+#PBS -l cput=00:02:00
+#PBS -l nodes=1:ppn=2
+
+cat $PBS_NODEFILE
+cd $HOME/@PACKAGE@-@VERSION@
+
+mpiexec ./src/core/main/des_main
+
+echo "Done"

@@ -17,13 +17,14 @@ libstatisticsanalysis_la_SOURCES =                                    \
 
 libstatisticsanalysis_la_CPPFLAGS =                                   \
 	$(BOOST_CPPFLAGS)                                             \
+	$(GSL_CFLAGS)                                                 \
 	-I./includes
 
 libstatisticsanalysis_la_LIBADD =                                     \
 	$(BOOST_LDFLAGS)                                              \
-	-lgsl                                                         \
-	-lgslcblas                                                    \
-	-lm
+	$(GSL_LIBS)
 
 include_HEADERS = includes
 MAINTAINERCLEANFILES = Makefile.in
+
+include $(top_srcdir)/mk/mpi.am

@@ -23,3 +23,5 @@ LDADD =                                                               \
 
 include_HEADERS = includes
 MAINTAINERCLEANFILES = Makefile.in
+
+include $(top_srcdir)/mk/mpi.am

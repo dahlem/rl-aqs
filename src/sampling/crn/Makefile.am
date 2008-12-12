@@ -16,6 +16,7 @@ libsamplingcrn_la_SOURCES =                                           \
 
 
 libsamplingcrn_la_CPPFLAGS =                                          \
+	$(GSL_CFLAGS)                                                 \
 	$(BOOST_CPPFLAGS)                                             \
 	-I$(top_srcdir)/src/sampling/crn/includes                     \
 	-I$(top_srcdir)/src/design/pattern/includes                   \
@@ -24,13 +25,11 @@ libsamplingcrn_la_CPPFLAGS =                                          \
 
 libsamplingcrn_la_LIBADD =                                            \
 	$(BOOST_LDFLAGS)                                              \
-	-lgsl                                                         \
-	-lm                                                           \
+	$(GSL_LIBS)                                                   \
 	$(top_srcdir)/src/sampling/common/libsamplingcommon.la
 
 
 include_HEADERS = includes
 
 
-CXX = $(MPICXX)
-libsamplingcrn_la_LIBADD += $(MPILIBS)
+include $(top_srcdir)/mk/mpi.am

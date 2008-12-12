@@ -38,6 +38,7 @@ libcoreevent_la_SOURCES =                                                  \
 
 libcoreevent_la_CPPFLAGS =                                                 \
 	$(BOOST_CPPFLAGS)                                                  \
+	$(GSL_CFLAGS)                                                      \
 	-I./includes                                                       \
 	-I$(top_srcdir)/src/design/pattern/includes                        \
 	-I$(top_srcdir)/src/statistics/analysis/includes                   \
@@ -52,8 +53,7 @@ libcoreevent_la_LIBADD =                                                   \
 	$(BOOST_LDFLAGS)                                                   \
 	$(BOOST_FILESYSTEM_LIB)                                            \
 	$(BOOST_SYSTEM_LIB)                                                \
-	-lgsl                                                              \
-	-lm                                                                \
+	$(GSL_LIBS)                                                        \
 	$(top_srcdir)/src/io/libdesio.la                                   \
 	$(top_srcdir)/src/sampling/common/libsamplingcommon.la             \
 	$(top_srcdir)/src/statistics/analysis/libstatisticsanalysis.la     \
@@ -62,3 +62,5 @@ libcoreevent_la_LIBADD =                                                   \
 
 include_HEADERS = includes
 MAINTAINERCLEANFILES = Makefile.in
+
+include $(top_srcdir)/mk/mpi.am

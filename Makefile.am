@@ -18,6 +18,10 @@ endif
 
 EXTRA_DIST = \
 	README \
+	seeds.dat \
+	des.pbs.in \
+	crn_test.pbs.in \
+	seeds_read.pbs.in \
 	$(srcdir)/graphs \
 	$(srcdir)/graphs_dense.sh \
 	$(srcdir)/graphs.sh \
@@ -42,7 +46,6 @@ DISTCHECK_CONFIGURE_FLAGS = --enable-gcov --enable-valgrind
 DISTCLEANFILES = configure
 MAINTAINERCLEANFILES = "Makefile.in semantic.cache"
 MOSTLYCLEANFILES = ${DX_CLEANFILES}
-
 
 
 clean-local:

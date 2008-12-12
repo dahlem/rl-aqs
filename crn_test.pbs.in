@@ -1,0 +1,14 @@
+#!/bin/sh
+#PBS -l walltime=00:05:00
+#PBS -q parallel
+#PBS -l cput=00:20:00
+#PBS -l nodes=2:ppn=2
+
+cat $PBS_NODEFILE
+cd $HOME/@PACKAGE@-@VERSION@
+
+export LD_LIBRARY_PATH=/usr/support/arch/x86_64/BOOST/1.37.0/lib:$LD_LIBRARY_PATH
+
+mpiexec ./src/mpi/test/crn_test
+
+echo "Done"

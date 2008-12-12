@@ -25,13 +25,12 @@
 
 #include <fstream>
 #include <numeric>
+#include <string>
 #include <vector>
 
 #ifndef NDEBUG
 # include <iostream>
 #endif
-
-#include <fstream>
 
 #include <boost/foreach.hpp>
 #include <boost/graph/adjacency_list.hpp>
@@ -385,8 +384,9 @@ void dnet::WEvonet::print_dot(const std::string& filename)
 
     if (out.is_open()) {
         boost::dynamic_properties dp = getProperties(g);
+        std::string node_id = "node_id";
 
-        boost::write_graphviz(out, *g, dp);
+        boost::write_graphviz(out, *g, dp, node_id);
         out.close();
     }
 }

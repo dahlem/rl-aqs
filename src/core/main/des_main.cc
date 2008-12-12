@@ -21,6 +21,10 @@
 #include <iostream>
 #include <sstream>
 
+#ifdef HAVE_MPI
+# include <mpi.h>
+#endif /* HAVE_MPI */
+
 #include "common.hh"
 #include "CL.hh"
 #include "Simulation.hh"
@@ -47,6 +51,14 @@ typedef boost::shared_ptr <SimLHS> SimLHSSP;
 
 int main(int argc, char *argv[])
 {
+#ifdef HAVE_MPI
+    int rank, num_tasks;
+
+    MPI_Init(&argc, &argv);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &num_tasks);
+#endif /* HAVE_MPI */
+
     dcore::tDesArgsSP desArgs(new dcore::desArgs_t);
     dcore::CL cl;
 
@@ -63,6 +75,12 @@ int main(int argc, char *argv[])
     desArgs->sim_num = 1;
     desArgs->rep_num = 1;
 
+#ifdef HAVE_MPI
+    if (desArgs->seeds_filename != "") {
+        // read the seeds
+        dsample::Seeds::getInstance().init(desArgs->seeds_filename.c_str());
+    }
+#else
     if (desArgs->seeds_filename != "") {
         // read the seeds
         dsample::Seeds::getInstance().init(desArgs->seeds_filename.c_str());
@@ -71,6 +89,7 @@ int main(int argc, char *argv[])
         std::cout << "Use random number to generate seeds." << std::endl;
         dsample::Seeds::getInstance().init();
     }
+#endif /* HAVE_MPI */
 
     dcore::sim_output output;
     if (desArgs->lhs && desArgs->confidence) {
@@ -107,6 +126,10 @@ int main(int argc, char *argv[])
                  << "," << output.replications;
         sim_results->print(csv_line);
     }
+
+#ifdef HAVE_MPI
+    MPI_Finalize();
+#endif /* HAVE_MPI */
 
     return EXIT_SUCCESS;
 }

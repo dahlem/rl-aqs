@@ -30,18 +30,20 @@ wevonet_main_CPPFLAGS =                                               \
 	-I$(top_srcdir)/src/sampling/crn/includes                     \
 	-I$(top_srcdir)/src/design/pattern/includes                   \
 	-I$(top_srcdir)/src/sampling/common/includes                  \
-	$(BOOST_CPPFLAGS)
+	$(BOOST_CPPFLAGS)                                             \
+	$(EXPAT_CFLAGS)
 
 
 wevonet_main_LDADD =                                                  \
 	$(top_srcdir)/src/network/evolution/libnetevo.la              \
 	$(top_srcdir)/src/sampling/crn/libsamplingcrn.la              \
 	$(top_srcdir)/src/sampling/common/libsamplingcommon.la        \
-	-lboost_graph                                                 \
+	$(BOOST_GRAPH_LIB)                                            \
 	$(BOOST_PROGRAM_OPTIONS_LIB)                                  \
 	$(BOOST_FILESYSTEM_LIB)                                       \
 	$(BOOST_SYSTEM_LIB)                                           \
-	$(BOOST_LDFLAGS)
+	$(BOOST_LDFLAGS)                                              \
+	$(EXPAT_LDFLAGS)
 
 
 MAINTAINERCLEANFILES = Makefile.in

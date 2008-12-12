@@ -21,7 +21,7 @@ AC_CONFIG_HEADER([config.h])
 # place where extra autoconf macros are kept
 AC_CONFIG_MACRO_DIR([m4])
 
-AM_INIT_AUTOMAKE([dist-bzip2])
+AM_INIT_AUTOMAKE
 
 
 #LF_CONFIGURE_CC
@@ -29,46 +29,64 @@ LF_CONFIGURE_CXX
 LF_HOST_TYPE
 LF_SET_WARNINGS
 
-AC_LANG(C++)
 AC_PROG_CXX
-#AC_PROG_CC
-#AC_PROG_CPP
+define([AC_LIBTOOL_LANG_CXX_CONFIG], [:])dnl
+define([AC_LIBTOOL_LANG_F77_CONFIG], [:])dnl
 AC_PROG_LIBTOOL
 AC_SUBST(LIBTOOL_DEPS)
 
 # Checks for header files.
 # Checks for typedefs, structures, and compiler characteristics.
-AC_HEADER_STDBOOL
 AC_C_CONST
+AC_C_LONG_LONG
 AC_TYPE_SIZE_T
+AC_CXX_BOOL
+AC_CXX_CONST_CAST
+AC_CXX_EXPLICIT
+AC_CXX_EXCEPTIONS
+AC_CXX_TEMPLATES
+AC_CXX_HAVE_STD
+AC_CXX_NAMESPACES
+AC_CXX_HAVE_NUMERIC_LIMITS
+AC_CXX_HAVE_STL
 
 # Checks for library functions.
 AC_HEADER_STDC
 AC_CHECK_FUNCS([floor memset sqrt pow])
 
-
 # GSL library checks
-AC_CHECK_LIB([m],[cos])
-AC_CHECK_LIB([gslcblas],[cblas_dgemm])
-AC_CHECK_LIB([gsl],[gsl_blas_dgemm])
+AX_PATH_GSL([1.9])
 
 # Boost library check
-AC_ARG_ENABLE(boost, AS_HELP_STRING(
-		     [--enable-boost], 
-		     [enable the Boost library @<:@default=no@:>@]), 
-		     [BOOSTLIB=$enableval], [BOOSTLIB=no])
+AX_BOOST_BASE([1.35])
+AX_BOOST_GRAPH
+AX_BOOST_DATE_TIME
+AX_BOOST_PROGRAM_OPTIONS
+AX_BOOST_FILESYSTEM
+AX_BOOST_SYSTEM
 
-if test x$BOOSTLIB = xyes; then
-  AX_BOOST_BASE([1.35])
-  AX_BOOST_SYSTEM
-  AX_BOOST_DATE_TIME
-  AX_BOOST_FILESYSTEM
-  AX_BOOST_IOSTREAMS
-  AX_BOOST_PROGRAM_OPTIONS
-  AM_CONDITIONAL(BOOST_SUPPORT, true)
+AX_LIB_EXPAT
+
+CPPFLAGS="-W -Wall -Wno-long-long -pedantic ${CPPFLAGS}"
+
+# Check for MPI
+AC_ARG_ENABLE(mpi, AS_HELP_STRING(
+		   [--enable-mpi], 
+		   [enable MPI @<:@default=no@:>@]), 
+		   [USE_MPI=$enableval], [USE_MPI=no])
+if test "x$USE_MPI" = xyes; then
+   AC_LANG([C++])
+   ACX_MPI([], [AC_MSG_WARN([cannot configure MPI (compile in serial)])])
+   SNOW=", snow"
+   AC_SUBST(SNOW)
 else
-  AM_CONDITIONAL(BOOST_SUPPORT, false)
+   MPICXX="${CXX}"
+   AC_SUBST(MPICXX)
+   SNOW=""
+   AC_SUBST(SNOW)
 fi
+AM_CONDITIONAL(COMPILE_PARALLEL, test "x$USE_MPI" = xyes)
+
 
 # Check for debug
 AC_ARG_ENABLE(debug, AS_HELP_STRING(
@@ -94,30 +112,9 @@ if test x$TESTLIB = xyes; then
   AC_SUBST(CPPUNIT_CFLAGS)
   AC_SUBST(CPPUNIT_LIBS)
   AM_CONDITIONAL(CPPUNIT_SUPPORT, true)
-  CPPFLAGS="-W -Wall -pedantic -ggdb3 ${CPPFLAGS}"
 else
   AM_CONDITIONAL(CPPUNIT_SUPPORT, false)
-  CPPFLAGS="-W -Wall -pedantic -ggdb0 ${CPPFLAGS}"
 fi
-
-
-# Check for MPI
-AC_ARG_ENABLE(mpi, AS_HELP_STRING(
-		   [--enable-mpi], 
-		   [enable MPI @<:@default=no@:>@]), 
-		   [USE_MPI=$enableval], [USE_MPI=no])
-if test "x$USE_MPI" = xyes; then
-   ACX_MPI([], [AC_MSG_WARN([cannot configure MPI (compile in serial)])])
-   SNOW=", snow"
-   AC_SUBST(SNOW)
-else
-   MPICXX="${CXX}"
-   AC_SUBST(MPICXX)
-   SNOW=""
-   AC_SUBST(SNOW)
-fi
-AM_CONDITIONAL(COMPILE_PARALLEL, test "x$USE_MPI" = xyes)
-
 
 # Check for ladder stats
 # can be enabled to record statistics for the ladder queue
@@ -163,6 +160,9 @@ DX_INIT_DOXYGEN([DES], [Doxyfile], [doc/doxygen])
 AC_CONFIG_FILES([
    README
    Makefile
+   des.pbs
+   crn_test.pbs
+   seeds_read.pbs
    doc/Makefile
    m4/Makefile
    R/Makefile

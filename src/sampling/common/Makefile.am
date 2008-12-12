@@ -15,14 +15,16 @@ libsamplingcommon_la_SOURCES =                                        \
 	SamplingException.cc
 
 libsamplingcommon_la_CPPFLAGS =                                       \
+	$(GSL_CFLAGS)                                                 \
 	$(BOOST_CPPFLAGS)                                             \
 	-I./includes                                                  \
 	-I$(top_srcdir)/src/design/pattern/includes
 
 libsamplingcommon_la_LIBADD =                                         \
 	$(BOOST_LDFLAGS)                                              \
-	-lgsl                                                         \
-	-lm
+	$(GSL_LIBS)
 
 
 include_HEADERS = includes
+
+include $(top_srcdir)/mk/mpi.am

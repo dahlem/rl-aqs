@@ -150,6 +150,12 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
             return EXIT_FAILURE;
         }
     }
+#ifdef HAVE_MPI
+    else {
+        std::cerr << "Require a seeds file!" << std::endl;
+        return EXIT_FAILURE;
+    }
+#endif /* HAVE_MPI */
 
     if (vm.count(RESULTS.c_str())) {
         desArgs->results_dir = vm[RESULTS.c_str()].as <std::string>();

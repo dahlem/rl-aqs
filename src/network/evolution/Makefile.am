@@ -17,11 +17,15 @@ libnetevo_la_SOURCES =                                                \
 
 libnetevo_la_CPPFLAGS =                                               \
 	-I./includes                                                  \
-	$(BOOST_CPPFLAGS)
+	$(BOOST_CPPFLAGS)                                             \
+	$(EXPAT_CFLAGS)
 
 libnetevo_la_LIBADD =                                                 \
-	-lboost_graph                                                 \
-	$(BOOST_LDFLAGS)
+	$(BOOST_GRAPH_LIB)                                            \
+	$(BOOST_LDFLAGS)                                              \
+	$(EXPAT_LDFLAGS)
 
 include_HEADERS = includes
 MAINTAINERCLEANFILES = Makefile.in
+
+include $(top_srcdir)/mk/mpi.am

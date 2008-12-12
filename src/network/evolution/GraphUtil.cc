@@ -24,6 +24,7 @@
 #endif
 
 #include <fstream>
+#include <string>
 
 #include <boost/graph/adjacency_list.hpp>
 
@@ -55,8 +56,8 @@ void dnet::GraphUtil::print_dot(dnet::tGraphSP p_graph, const std::string& filen
 
     if (out.is_open()) {
         boost::dynamic_properties dp = getProperties(p_graph);
-
-        boost::write_graphviz(out, *p_graph, dp);
+        std::string node_id = "node_id";
+        boost::write_graphviz(out, *p_graph, dp, node_id);
         out.close();
     }
 }

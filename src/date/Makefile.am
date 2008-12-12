@@ -23,3 +23,5 @@ libdesdate_la_LIBADD =                                               \
 
 include_HEADERS = includes
 MAINTAINERCLEANFILES = Makefile.in
+
+include $(top_srcdir)/mk/mpi.am
