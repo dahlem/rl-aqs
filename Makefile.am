@@ -19,9 +19,12 @@ endif
 EXTRA_DIST = \
 	README \
 	seeds.dat \
+	seeds-mpi.dat \
+	iitac.sh \
 	des.pbs.in \
 	crn_test.pbs.in \
 	seeds_read.pbs.in \
+	struct_test.pbs.in \
 	$(srcdir)/graphs \
 	$(srcdir)/graphs_dense.sh \
 	$(srcdir)/graphs.sh \

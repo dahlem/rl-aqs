@@ -8,7 +8,7 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-bin_PROGRAMS = crn_test seeds_read
+bin_PROGRAMS = crn_test seeds_read struct_test
 
 crn_test_SOURCES =                                                    \
 	crn_test.cc
@@ -35,6 +35,15 @@ seeds_read_CPPFLAGS =                                                 \
 	$(BOOST_CPPFLAGS)
 
 seeds_read_LDADD =                                                    \
+	$(BOOST_LDFLAGS)
+
+struct_test_SOURCES =                                                 \
+	struct_test.cc
+
+struct_test_CPPFLAGS =                                                \
+	$(BOOST_CPPFLAGS)
+
+struct_test_LDADD =                                                   \
 	$(BOOST_LDFLAGS)
 
 MAINTAINERCLEANFILES = Makefile.in

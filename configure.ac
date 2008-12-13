@@ -163,6 +163,7 @@ AC_CONFIG_FILES([
    des.pbs
    crn_test.pbs
    seeds_read.pbs
+   struct_test.pbs
    doc/Makefile
    m4/Makefile
    R/Makefile
