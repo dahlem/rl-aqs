@@ -7,6 +7,6 @@
 cat $PBS_NODEFILE
 cd $HOME/@PACKAGE@-@VERSION@
 
-mpiexec ./src/core/main/des_main
+mpiexec ./src/core/main/des_main --graph graphs/test/10_3.gml --seeds seeds-mpi.dat --graph_generation 5 --confidence 1 --lhs 1 --simulations 5 --min_stop_time 1 --max_stop_time 10
 
 echo "Done"

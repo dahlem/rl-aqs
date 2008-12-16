@@ -26,11 +26,11 @@
 # include <config.h>
 #endif
 
-#ifndef __STDC_CONSTANT_MACROS
-# define __STDC_CONSTANT_MACROS
-#endif /* __STDC_CONSTANT_MACROS */
-
-#include <boost/cstdint.hpp>
+#ifdef HAVE_MPI
+# include <climits>
+# include <mpi.h>
+# define KILL_PILL USHRT_MAX
+#endif /* HAVE_MPI */
 
 
 namespace des
@@ -41,7 +41,7 @@ namespace core
 /** @struct sim_output
  * Specifies the output variables of the simulation
  */
-struct sim_output
+typedef struct
 {
     // single simulation output
     double system_average_delay;
@@ -54,20 +54,42 @@ struct sim_output
     double sd_system_expected_average_num_in_queue;
 
     // number of replications
-    boost::uint16_t replications;
+    unsigned int replications;
+} sim_output;
 
-    sim_output()
-        : system_average_delay(0.0),
-          system_expected_average_num_in_queue(0.0),
-          mean_system_average_delay(0.0),
-          mean_system_expected_average_num_in_queue(0.0),
-          sd_system_average_delay(0.0),
-          sd_system_expected_average_num_in_queue(0.0),
-          replications(1)
-        {}
 
-};
 
+#ifdef HAVE_MPI
+
+typedef struct {
+    unsigned int replications;   /* initial replications required */
+    unsigned int simulations;    /* initial number of simulations */
+    unsigned int sim_num;        /* simulation number */
+    unsigned int rep_num;        /* replication number */
+
+    double stop_time;               /* stopping time of the DES */
+    double min_stop_time;           /* min. stopping time of the DES */
+    double max_stop_time;           /* max. stopping time of the DES */
+    double alpha;                   /* 100(1 - alpha) confidence interval for the experiments */
+    double error;                   /* error threshold for the ci calculations */
+
+    int vertex;          /* the vertex to trace */
+    int graph_rate;      /* the rate to generate graphs at */
+    int generations;     /* number of generations for the event simulation */
+
+    unsigned short trace_event;               /* trace an event */
+    unsigned short log_events;                /* log the events */
+    unsigned short confidence;                /* run experiments within a confidence band */
+    unsigned short lhs;                       /* run experiments with lhs sampling */
+
+    char graph_filename[256];     /* filename for the graph */
+    char seeds_filename[256];     /* filename for the seeds */
+    char results_dir[256];        /* directory name for the results */
+    char events_unprocessed[256]; /* filename for the unprocessed events */
+    char events_processed[256];   /* filename for the processed events */
+} tDesArgsMPI;
+
+#endif /* HAVE_MPI */
 
 }
 }

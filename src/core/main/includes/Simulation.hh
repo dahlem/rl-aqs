@@ -27,6 +27,10 @@
 # include <config.h>
 #endif
 
+#ifdef HAVE_MPI
+# include <mpi.h>
+#endif /* HAVE_MPI */
+
 #include <boost/shared_ptr.hpp>
 
 #include "common.hh"
@@ -58,7 +62,11 @@ public:
      *
      * @return the simulation output variables
      */
+#ifdef HAVE_MPI
+    void simulate(MPI_Datatype mpi_desargs, MPI_Datatype mpi_desout);
+#else
     sim_output simulate(tDesArgsSP);
+#endif /* HAVE_MPI */
 
 private:
 

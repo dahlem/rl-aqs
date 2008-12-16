@@ -19,9 +19,17 @@
  *
  * @author Dominik Dahlem
  */
+#if HAVE_CONFIG_H
+# include <config.h>
+#endif
+
 #ifndef __STDC_CONSTANT_MACROS
 # define __STDC_CONSTANT_MACROS
 #endif /* __STDC_CONSTANT_MACROS */
+
+#ifdef HAVE_MPI
+# include <mpi.h>
+#endif /* HAVE_MPI */
 
 #include <iostream>
 #include <sstream>
@@ -142,198 +150,231 @@ Int32SA departureCRN(dnet::tGraphSP p_graph)
 }
 
 
+#ifdef HAVE_MPI
+void Simulation::simulate(MPI_Datatype mpi_desargs, MPI_Datatype mpi_desout)
+#else
 sim_output Simulation::simulate(tDesArgsSP desArgs)
+#endif /* HAVE_MPI */
 {
     dnet::tGraphSP graph(new dnet::Graph);
     dcommon::tQueueSP queue(new dcommon::LadderQueue);
+    std::string graph_filename;
 
-    std::cout << "Simulation: " << desArgs->sim_num << ", Replication: "
-              << desArgs->rep_num << std::endl;
+    // receive the input arguments via mpi
+#ifdef HAVE_MPI
+    tDesArgsMPI dArgs;
+    tDesArgsMPI *desArgs;
+    MPI_Status status;
 
-    if (desArgs->graph_filename != "") {
-        // read the graph
-        try {
-            dnet::GraphUtil::read(graph, desArgs->graph_filename, dnet::WEvonet::GRAPHML);
-        } catch (dnet::GraphException &ge) {
-            std::cerr << "Error: Cannot open graph file " << desArgs->graph_filename
-                      << "!" << std::endl;
+    desArgs = &dArgs;
+
+    while (true) {
+        MPI_Recv(&dArgs, mpi_desargs, 1, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+
+        // kill yourself, if job's done
+        if (status.MPI_TAG == KILL_PILL) {
+            break;
         }
-    } else {
-        // generate the graph
-        std::cout << "Generate the graph " << std::endl;
-    }
 
-    // init the crn for the arrival events
-    Int32SA arrivalCRNs = arrivalCRN(graph);
+#endif /* HAVE_MPI */
 
-    // init the crn for the service events
-    Int32SA serviceCRNs = serviceCRN(graph);
+        std::cout << "Simulation: " << desArgs->sim_num << ", Replication: "
+                  << desArgs->rep_num << std::endl;
 
-    // init the crn for the departure uniform rv
-    Int32SA departureCRNs = departureCRN(graph);
+        if (std::string(desArgs->graph_filename) != "") {
+            // read the graph
+            try {
+                dnet::GraphUtil::read(graph, std::string(desArgs->graph_filename), dnet::WEvonet::GRAPHML);
+            } catch (dnet::GraphException &ge) {
+                std::cerr << "Error: Cannot open graph file " << desArgs->graph_filename
+                          << "!" << std::endl;
+            }
+        } else {
+            // generate the graph
+            std::cout << "Generate the graph " << std::endl;
+        }
 
-    dnet::VertexIndexMap vertex_index_props_map =
-        get(boost::vertex_index, *graph);
-    dnet::VertexArrivalRateMap vertex_arrival_props_map =
-        get(vertex_arrival_rate, *graph);
+        // init the crn for the arrival events
+        Int32SA arrivalCRNs = arrivalCRN(graph);
 
-    // generate events for each vertex in the graph
-    double stopTime;
+        // init the crn for the service events
+        Int32SA serviceCRNs = serviceCRN(graph);
 
-    // find out whether we only generate the events in phases
-    if (desArgs->generations < 0) {
-        stopTime = desArgs->stop_time;
-    } else {
-        // calculate the phases
-        stopTime = desArgs->stop_time / desArgs->generations;
-    }
+        // init the crn for the departure uniform rv
+        Int32SA departureCRNs = departureCRN(graph);
 
-    boost::int32_t destination;
-    double arrival_rate;
+        dnet::VertexIndexMap vertex_index_props_map =
+            get(boost::vertex_index, *graph);
+        dnet::VertexArrivalRateMap vertex_arrival_props_map =
+            get(vertex_arrival_rate, *graph);
 
-    // generate events over this graph
-    if (desArgs->trace_event) {
-        int count = 0;
+        // generate events for each vertex in the graph
+        double stopTime;
 
-        // filter the graph to find the vertex
-        std::pair <dnet::VertexIterator, dnet::VertexIterator> v_iter;
-        v_iter = boost::vertices(*graph);
+        // find out whether we only generate the events in phases
+        if (desArgs->generations < 0) {
+            stopTime = desArgs->stop_time;
+        } else {
+            // calculate the phases
+            stopTime = desArgs->stop_time / desArgs->generations;
+        }
 
-        typedef boost::filter_iterator<dnet::exists_vertex_index<dnet::VertexIndexMap>, dnet::VertexIterator>
-            FilterIter;
+        boost::int32_t destination;
+        double arrival_rate;
 
-        dnet::exists_vertex_index<dnet::VertexIndexMap>
-            predicate(vertex_index_props_map, desArgs->vertex);
-        FilterIter filter_iter_first(predicate, v_iter.first, v_iter.second);
-        FilterIter filter_iter_last(predicate, v_iter.second, v_iter.second);
+        // generate events over this graph
+        if (desArgs->trace_event) {
+            int count = 0;
 
-        for (; filter_iter_first != filter_iter_last; ++filter_iter_first) {
-            if (count == 0) {
-                // generate a single event
-                destination = vertex_index_props_map[*filter_iter_first];
-                arrival_rate = vertex_arrival_props_map[*filter_iter_first];
+            // filter the graph to find the vertex
+            std::pair <dnet::VertexIterator, dnet::VertexIterator> v_iter;
+            v_iter = boost::vertices(*graph);
 
-                dsample::tGslRngSP arrival_rng = dsample::CRN::getInstance().get(
+            typedef boost::filter_iterator<dnet::exists_vertex_index<dnet::VertexIndexMap>, dnet::VertexIterator>
+                FilterIter;
+
+            dnet::exists_vertex_index<dnet::VertexIndexMap>
+                predicate(vertex_index_props_map, desArgs->vertex);
+            FilterIter filter_iter_first(predicate, v_iter.first, v_iter.second);
+            FilterIter filter_iter_last(predicate, v_iter.second, v_iter.second);
+
+            for (; filter_iter_first != filter_iter_last; ++filter_iter_first) {
+                if (count == 0) {
+                    // generate a single event
+                    destination = vertex_index_props_map[*filter_iter_first];
+                    arrival_rate = vertex_arrival_props_map[*filter_iter_first];
+
+                    dsample::tGslRngSP arrival_rng = dsample::CRN::getInstance().get(
+                        arrivalCRNs[destination]);
+                    EventGenerator::generate(
+                        queue, arrival_rng, destination, arrival_rate);
+                } else {
+                    std::cout << "Error: Expected a single vertex to be traced!" << std::endl;
+                    break;
+                }
+
+                count++;
+            }
+        } else {
+            double graphGenRate = desArgs->stop_time;
+
+            std::pair <dnet::VertexIterator, dnet::VertexIterator> p;
+            dsample::tGslRngSP arrival_rng;
+
+            for (p = boost::vertices(*graph); p.first != p.second; ++p.first) {
+                destination = vertex_index_props_map[*p.first];
+                arrival_rate = vertex_arrival_props_map[*p.first];
+
+                arrival_rng = dsample::CRN::getInstance().get(
                     arrivalCRNs[destination]);
                 EventGenerator::generate(
-                    queue, arrival_rng, destination, arrival_rate);
-            } else {
-                std::cout << "Error: Expected a single vertex to be traced!" << std::endl;
-                break;
+                    queue, arrival_rng, destination, arrival_rate, stopTime);
             }
 
-            count++;
-        }
-    } else {
-        double graphGenRate = desArgs->stop_time;
+            if (desArgs->graph_rate > 1) {
+                graphGenRate = desArgs->stop_time / desArgs->graph_rate;
+            }
 
-        std::pair <dnet::VertexIterator, dnet::VertexIterator> p;
-        dsample::tGslRngSP arrival_rng;
-
-        for (p = boost::vertices(*graph); p.first != p.second; ++p.first) {
-            destination = vertex_index_props_map[*p.first];
-            arrival_rate = vertex_arrival_props_map[*p.first];
-
-            arrival_rng = dsample::CRN::getInstance().get(
-                arrivalCRNs[destination]);
-            EventGenerator::generate(
-                queue, arrival_rng, destination, arrival_rate, stopTime);
+            EventGenerator::generateLogGraph(
+                queue, graphGenRate, desArgs->stop_time);
         }
 
-        if (desArgs->graph_rate > 1) {
-            graphGenRate = desArgs->stop_time / desArgs->graph_rate;
+        // configure the results directory
+        std::stringstream baseDir;
+        baseDir << std::string(desArgs->results_dir) << "/" << desArgs->sim_num << "/"
+                << desArgs->rep_num;
+        std::string resultsBaseDir = baseDir.str();
+
+        // instantiate the events & handlers
+        tAdminEventSP adminEvent(new AdminEvent);
+        tPreAnyEventSP preAnyEvent(new PreAnyEvent);
+        tPostAnyEventSP postAnyEvent(new PostAnyEvent);
+        tArrivalEventSP arrivalEvent(new ArrivalEvent);
+        tDepartureEventSP departureEvent(new DepartureEvent);
+        tPostEventSP postEvent(new PostEvent);
+        tLastArrivalEventSP lastArrivalEvent(new LastArrivalEvent);
+        tAckEventSP ackEvent(new AckEvent);
+        tLeaveEventSP leaveEvent(new LeaveEvent);
+
+        tLogGraphHandlerSP logGraphHandler(
+            new LogGraphHandler(resultsBaseDir, graph));
+
+        tArrivalHandlerSP arrivalHandler(
+            new ArrivalHandler(queue, graph, serviceCRNs));
+        tDepartureHandlerSP departureHandler(
+            new DepartureHandler(queue, graph, departureCRNs));
+        tNumEventsHandlerSP numEventsHandler(
+            new NumEventsHandler(graph));
+        tLastEventHandlerSP lastEventHandler(
+            new LastEventHandler(graph));
+        tUtilisationHandlerSP utilisationHandler(
+            new UtilisationHandler(graph));
+        tExpectedAverageEventInQueueHandlerSP expectedAverageEventInQueueHandler(
+            new ExpectedAverageEventInQueueHandler(graph));
+        tAckHandlerSP ackHandler(
+            new AckHandler(queue));
+
+        // we only need to register an event generation handler, if there are > 1 phases
+        if (desArgs->generations > 1) {
+            tGenerateEventHandlerSP generateEventHandler(
+                new GenerateEventHandler(
+                    graph, arrivalCRNs, desArgs->generations, queue, desArgs->stop_time));
+            lastArrivalEvent->attach(generateEventHandler);
         }
 
-        EventGenerator::generateLogGraph(
-            queue, graphGenRate, desArgs->stop_time);
+        // attach the handlers to the events
+        // the order of the handlers is important
+        adminEvent->attach(logGraphHandler);
+
+        // only register the logging handlers, if they are configured.
+        if (desArgs->log_events) {
+            std::string events_processed = std::string(desArgs->events_processed);
+            std::string events_unprocessed = std::string(desArgs->events_unprocessed);
+
+            dio::tResultsSP processed_events(
+                new dio::Results(events_processed, resultsBaseDir));
+            dio::tResultsSP unprocessed_events(
+                new dio::Results(events_unprocessed, resultsBaseDir));
+
+            tProcessedEventsHandlerSP processedEventsHandler(
+                new ProcessedEventsHandler(processed_events));
+            tUnprocessedEventsHandlerSP unprocessedEventsHandler(
+                new UnprocessedEventsHandler(unprocessed_events, queue));
+
+            preAnyEvent->attach(processedEventsHandler);
+            postEvent->attach(unprocessedEventsHandler);
+        }
+
+        arrivalEvent->attach(numEventsHandler);
+        arrivalEvent->attach(arrivalHandler);
+
+        departureEvent->attach(departureHandler);
+
+        ackEvent->attach(ackHandler);
+
+        postAnyEvent->attach(utilisationHandler);
+        postAnyEvent->attach(expectedAverageEventInQueueHandler);
+        postAnyEvent->attach(lastEventHandler);
+
+        // instantiate the event processor and set the events
+        tEventProcessorSP processor(
+            new EventProcessor(queue, adminEvent, preAnyEvent, postAnyEvent, arrivalEvent,
+                               departureEvent, postEvent, lastArrivalEvent, ackEvent,
+                               leaveEvent, desArgs->stop_time));
+
+        // process the events
+        sim_output output;
+        if (processor->process()) {
+            output = Report::accumResults(graph);
+        }
+
+#ifdef HAVE_MPI
+        // send the result back
+        MPI_Send(&output, mpi_desout, 1, 0, status.MPI_TAG, MPI_COMM_WORLD);
     }
-
-    // configure the results directory
-    std::stringstream baseDir;
-    baseDir << desArgs->results_dir << "/" << desArgs->sim_num << "/" << desArgs->rep_num;
-    std::string resultsBaseDir = baseDir.str();
-
-    // instantiate the events & handlers
-    tAdminEventSP adminEvent(new AdminEvent);
-    tPreAnyEventSP preAnyEvent(new PreAnyEvent);
-    tPostAnyEventSP postAnyEvent(new PostAnyEvent);
-    tArrivalEventSP arrivalEvent(new ArrivalEvent);
-    tDepartureEventSP departureEvent(new DepartureEvent);
-    tPostEventSP postEvent(new PostEvent);
-    tLastArrivalEventSP lastArrivalEvent(new LastArrivalEvent);
-    tAckEventSP ackEvent(new AckEvent);
-    tLeaveEventSP leaveEvent(new LeaveEvent);
-
-    tLogGraphHandlerSP logGraphHandler(
-        new LogGraphHandler(resultsBaseDir, graph));
-
-    tArrivalHandlerSP arrivalHandler(
-        new ArrivalHandler(queue, graph, serviceCRNs));
-    tDepartureHandlerSP departureHandler(
-        new DepartureHandler(queue, graph, departureCRNs));
-    tNumEventsHandlerSP numEventsHandler(
-        new NumEventsHandler(graph));
-    tLastEventHandlerSP lastEventHandler(
-        new LastEventHandler(graph));
-    tUtilisationHandlerSP utilisationHandler(
-        new UtilisationHandler(graph));
-    tExpectedAverageEventInQueueHandlerSP expectedAverageEventInQueueHandler(
-        new ExpectedAverageEventInQueueHandler(graph));
-    tAckHandlerSP ackHandler(
-        new AckHandler(queue));
-
-    // we only need to register an event generation handler, if there are > 1 phases
-    if (desArgs->generations > 1) {
-        tGenerateEventHandlerSP generateEventHandler(
-            new GenerateEventHandler(
-                graph, arrivalCRNs, desArgs->generations, queue, desArgs->stop_time));
-        lastArrivalEvent->attach(generateEventHandler);
-    }
-
-    // attach the handlers to the events
-    // the order of the handlers is important
-    adminEvent->attach(logGraphHandler);
-
-    // only register the logging handlers, if they are configured.
-    if (desArgs->log_events) {
-        dio::tResultsSP processed_events(
-            new dio::Results(desArgs->events_processed, resultsBaseDir));
-        dio::tResultsSP unprocessed_events(
-            new dio::Results(desArgs->events_unprocessed, resultsBaseDir));
-
-        tProcessedEventsHandlerSP processedEventsHandler(
-            new ProcessedEventsHandler(processed_events));
-        tUnprocessedEventsHandlerSP unprocessedEventsHandler(
-            new UnprocessedEventsHandler(unprocessed_events, queue));
-
-        preAnyEvent->attach(processedEventsHandler);
-        postEvent->attach(unprocessedEventsHandler);
-    }
-
-    arrivalEvent->attach(numEventsHandler);
-    arrivalEvent->attach(arrivalHandler);
-
-    departureEvent->attach(departureHandler);
-
-    ackEvent->attach(ackHandler);
-
-    postAnyEvent->attach(utilisationHandler);
-    postAnyEvent->attach(expectedAverageEventInQueueHandler);
-    postAnyEvent->attach(lastEventHandler);
-
-    // instantiate the event processor and set the events
-    tEventProcessorSP processor(
-        new EventProcessor(queue, adminEvent, preAnyEvent, postAnyEvent, arrivalEvent,
-                           departureEvent, postEvent, lastArrivalEvent, ackEvent,
-                           leaveEvent, desArgs->stop_time));
-
-    // process the events
-    sim_output output;
-    if (processor->process()) {
-        output = Report::accumResults(graph);
-    }
-
+#else
     return output;
+#endif /* HAVE_MPI */
 }
 
 
