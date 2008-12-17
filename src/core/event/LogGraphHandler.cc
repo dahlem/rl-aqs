@@ -59,7 +59,7 @@ void dcore::LogGraphHandler::update(dcore::AdminEvent *subject)
     std::stringstream file_str;
 
     file_str << m_resultDir << "/" << "graph" << counter << ".gml";
-    dnet::GraphUtil::print(m_graph, file_str.str(), dnet::WEvonet::GRAPHML);
+    dnet::GraphUtil::print(m_graph, file_str.str(), dnet::GraphUtil::GRAPHML);
 
     counter++;
 }

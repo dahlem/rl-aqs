@@ -31,8 +31,7 @@
 #include <boost/graph/property_iter_range.hpp>
 
 #include "GraphException.hh"
-#include "WEvonet.hh"
-namespace dnet = des::network;
+#include "DirectedGraph.hh"
 
 
 namespace des { namespace network {
@@ -44,6 +43,12 @@ class GraphUtil
 {
 public:
 
+    /** @enum GraphTypes
+     * This enum declares the supported output graph formats. Currently supported
+     * are the dot format (graphviz) and the graphml format.
+     */
+    enum GraphTypes { GRAPHVIZ = 1, GRAPHML };
+
     /** @fn void print(const std::string& filename, GraphTypes graphType)
      * Print the graph using either of the supported graph formats. The default format
      * is graphviz.
@@ -51,17 +56,17 @@ public:
      * @param const std::string& the filename to be printed into
      * @param const GraphTypes the graph type selected for the output
      */
-    static void print(dnet::tGraphSP, const std::string& filename, const dnet::WEvonet::GraphTypes);
+    static void print(tGraphSP, const std::string& filename, const GraphTypes);
 
-    /** @fn void read(tGraphSP, std::string) throw (dnet::GraphException)
+    /** @fn void read(tGraphSP, std::string) throw (GraphException)
      * Read a graph from a file and store it into the first parameter.
      *
      * @param tGraphSP the graph object
      * @param const std::string& the filename to read the graph from
      * @param const GraphTypes the graph type selected for the input
      */
-    static void read(dnet::tGraphSP, const std::string&, const dnet::WEvonet::GraphTypes)
-        throw (dnet::GraphException);
+    static void read(tGraphSP, const std::string&, const GraphTypes)
+        throw (GraphException);
 
 private:
 
@@ -70,22 +75,22 @@ private:
 
     ~GraphUtil()
         {}
-    
-    static boost::dynamic_properties getProperties(dnet::tGraphSP p_graph);
+
+    static boost::dynamic_properties getProperties(tGraphSP p_graph);
 
     /** @fn void print_dot(const std::string& filename)
      * Print the graph using the graphviz interface of BGL into a file
      *
      * @param const std::string& the filename to be printed into
      */
-    static void print_dot(dnet::tGraphSP, const std::string& filename);
+    static void print_dot(tGraphSP, const std::string& filename);
 
     /** @fn void print_graphml(const std::string& filename)
      * Print the graph into a graphml format
      *
      * @param const std::string& the filename to be printed into
      */
-    static void print_graphml(dnet::tGraphSP, const std::string& filename);
+    static void print_graphml(tGraphSP, const std::string& filename);
 
     /** @fn void read_dot(tGraphSP, const std::string& filename)
      * Read the graph using the graphviz interface of BGL from a file
@@ -93,8 +98,8 @@ private:
      * @param tGraphSP the graph object to store the graph
      * @param const std::string& the filename to be printed into
      */
-    static void read_dot(dnet::tGraphSP, const std::string& filename)
-        throw (dnet::GraphException);
+    static void read_dot(tGraphSP, const std::string& filename)
+        throw (GraphException);
 
     /** @fn void read_graphml(tGraphSP, const std::string& filename)
      * Read the graph from a graphml format
@@ -102,8 +107,8 @@ private:
      * @param tGraphSP the graph object to store the graph
      * @param const std::string& the filename to be printed into
      */
-    static void read_graphml(dnet::tGraphSP, const std::string& filename)
-        throw (dnet::GraphException);
+    static void read_graphml(tGraphSP, const std::string& filename)
+        throw (GraphException);
 };
 
 

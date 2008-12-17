@@ -30,17 +30,22 @@
 
 #include "GraphException.hh"
 #include "GraphUtil.hh"
-namespace dnet = des::network;
 
 
-void dnet::GraphUtil::print(dnet::tGraphSP p_graph, const std::string& filename,
-                            const dnet::WEvonet::GraphTypes graphType)
+namespace des
+{
+namespace network
+{
+
+
+void GraphUtil::print(tGraphSP p_graph, const std::string& filename,
+                            const GraphTypes graphType)
 {
     switch (graphType) {
-      case dnet::WEvonet::GRAPHVIZ:
+      case GRAPHVIZ:
           print_dot(p_graph, filename);
           break;
-      case dnet::WEvonet::GRAPHML:
+      case GRAPHML:
           print_graphml(p_graph, filename);
           break;
       default:
@@ -50,7 +55,7 @@ void dnet::GraphUtil::print(dnet::tGraphSP p_graph, const std::string& filename,
 }
 
 
-void dnet::GraphUtil::print_dot(dnet::tGraphSP p_graph, const std::string& filename)
+void GraphUtil::print_dot(tGraphSP p_graph, const std::string& filename)
 {
     std::ofstream out(filename.c_str(), std::ios::out);
 
@@ -63,7 +68,7 @@ void dnet::GraphUtil::print_dot(dnet::tGraphSP p_graph, const std::string& filen
 }
 
 
-void dnet::GraphUtil::print_graphml(dnet::tGraphSP p_graph, const std::string& filename)
+void GraphUtil::print_graphml(tGraphSP p_graph, const std::string& filename)
 {
     std::ofstream out(filename.c_str(), std::ios::out);
 
@@ -77,15 +82,15 @@ void dnet::GraphUtil::print_graphml(dnet::tGraphSP p_graph, const std::string& f
 }
 
 
-void dnet::GraphUtil::read(dnet::tGraphSP p_graph, const std::string& p_filename,
-                           const dnet::WEvonet::GraphTypes p_graphType)
-    throw (dnet::GraphException)
+void GraphUtil::read(tGraphSP p_graph, const std::string& p_filename,
+                           const GraphTypes p_graphType)
+    throw (GraphException)
 {
     switch (p_graphType) {
-      case dnet::WEvonet::GRAPHVIZ:
+      case GRAPHVIZ:
           read_dot(p_graph, p_filename);
           break;
-      case dnet::WEvonet::GRAPHML:
+      case GRAPHML:
           read_graphml(p_graph, p_filename);
           break;
       default:
@@ -95,8 +100,8 @@ void dnet::GraphUtil::read(dnet::tGraphSP p_graph, const std::string& p_filename
 }
 
 
-void dnet::GraphUtil::read_graphml(dnet::tGraphSP p_graph, const std::string& p_filename)
-    throw (dnet::GraphException)
+void GraphUtil::read_graphml(tGraphSP p_graph, const std::string& p_filename)
+    throw (GraphException)
 {
     std::ifstream in(p_filename.c_str(), std::ifstream::in);
 
@@ -106,18 +111,18 @@ void dnet::GraphUtil::read_graphml(dnet::tGraphSP p_graph, const std::string& p_
         try {
             boost::read_graphml(in, (*p_graph.get()), dp);
         } catch (...) {
-            throw dnet::GraphException(dnet::GraphException::GRAPH_READ_ERROR);
+            throw GraphException(GraphException::GRAPH_READ_ERROR);
         }
 
         in.close();
     } else {
-        throw dnet::GraphException(dnet::GraphException::GRAPH_INPUT_ERROR);
+        throw GraphException(GraphException::GRAPH_INPUT_ERROR);
     }
 }
 
 
-void dnet::GraphUtil::read_dot(dnet::tGraphSP p_graph, const std::string& p_filename)
-    throw (dnet::GraphException)
+void GraphUtil::read_dot(tGraphSP p_graph, const std::string& p_filename)
+    throw (GraphException)
 {
     std::ifstream in(p_filename.c_str(), std::ifstream::in);
 
@@ -127,33 +132,37 @@ void dnet::GraphUtil::read_dot(dnet::tGraphSP p_graph, const std::string& p_file
         try {
             boost::read_graphviz(in, (*p_graph.get()), dp);
         } catch (...) {
-            throw dnet::GraphException(dnet::GraphException::GRAPH_READ_ERROR);
+            throw GraphException(GraphException::GRAPH_READ_ERROR);
         }
 
         in.close();
     } else {
-        throw dnet::GraphException(dnet::GraphException::GRAPH_INPUT_ERROR);
+        throw GraphException(GraphException::GRAPH_INPUT_ERROR);
     }
 }
 
 
-boost::dynamic_properties dnet::GraphUtil::getProperties(dnet::tGraphSP p_graph)
+boost::dynamic_properties GraphUtil::getProperties(tGraphSP p_graph)
 {
     boost::dynamic_properties dp;
-    dp.property(dnet::WEvonet::EDGE_WEIGHT, get(boost::edge_weight, *p_graph));
-    dp.property(dnet::WEvonet::VERTEX_ID, get(boost::vertex_index, *p_graph));
-    dp.property(dnet::WEvonet::SERVICE_RATE, get(vertex_service_rate, *p_graph));
-    dp.property(dnet::WEvonet::ARRIVAL_RATE, get(vertex_arrival_rate, *p_graph));
-    dp.property(dnet::WEvonet::BUSY, get(vertex_busy, *p_graph));
-    dp.property(dnet::WEvonet::TIME_SERVICE_ENDS, get(vertex_time_service_ends, *p_graph));
-    dp.property(dnet::WEvonet::NUMBER_IN_QUEUE, get(vertex_number_in_queue, *p_graph));
-    dp.property(dnet::WEvonet::AVERAGE_DELAY_IN_QUEUE, get(vertex_average_delay_in_queue, *p_graph));
-    dp.property(dnet::WEvonet::NUM_EVENTS, get(vertex_num_events, *p_graph));
-    dp.property(dnet::WEvonet::UTILISATION, get(vertex_utilisation, *p_graph));
-    dp.property(dnet::WEvonet::BDT, get(vertex_Bdt, *p_graph));
-    dp.property(dnet::WEvonet::QDT, get(vertex_Qdt, *p_graph));
-    dp.property(dnet::WEvonet::LAST_EVENT_TIME, get(vertex_last_event_time, *p_graph));
-    dp.property(dnet::WEvonet::EXPECTED_AVERAGE_NUMBER_EVENT, get(vertex_expected_average_number_event, *p_graph));
+    dp.property(EDGE_WEIGHT, get(boost::edge_weight, *p_graph));
+    dp.property(VERTEX_ID, get(boost::vertex_index, *p_graph));
+    dp.property(SERVICE_RATE, get(vertex_service_rate, *p_graph));
+    dp.property(ARRIVAL_RATE, get(vertex_arrival_rate, *p_graph));
+    dp.property(BUSY, get(vertex_busy, *p_graph));
+    dp.property(TIME_SERVICE_ENDS, get(vertex_time_service_ends, *p_graph));
+    dp.property(NUMBER_IN_QUEUE, get(vertex_number_in_queue, *p_graph));
+    dp.property(AVERAGE_DELAY_IN_QUEUE, get(vertex_average_delay_in_queue, *p_graph));
+    dp.property(NUM_EVENTS, get(vertex_num_events, *p_graph));
+    dp.property(UTILISATION, get(vertex_utilisation, *p_graph));
+    dp.property(BDT, get(vertex_Bdt, *p_graph));
+    dp.property(QDT, get(vertex_Qdt, *p_graph));
+    dp.property(LAST_EVENT_TIME, get(vertex_last_event_time, *p_graph));
+    dp.property(EXPECTED_AVERAGE_NUMBER_EVENT, get(vertex_expected_average_number_event, *p_graph));
 
     return dp;
+}
+
+
+}
 }

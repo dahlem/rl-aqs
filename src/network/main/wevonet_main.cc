@@ -36,8 +36,9 @@ namespace po = boost::program_options;
 namespace dsample = des::sampling;
 
 #include "GraphUtil.hh"
+#include "DirectedGraph.hh"
 #include "WEvonet.hh"
-using des::network::WEvonet;
+namespace dnet =  des::network;
 
 
 const std::string HELP = "help";
@@ -97,7 +98,7 @@ int main(int argc, char *argv[])
         max_edges = vm[MAX_EDGES.c_str()].as<int>();
     } else {
         std::cout << "Default maximum number of edges is to MAX_edges." << std::endl;
-        max_edges = WEvonet::MAX_EDGES;
+        max_edges = dnet::WEvonet::MAX_EDGES;
     }
 
     if (vm.count(FORMAT.c_str())) {
@@ -105,14 +106,14 @@ int main(int argc, char *argv[])
 
         if (format_temp == 1) {
             std::cout << "Use the dot output format." << std::endl;
-            format = WEvonet::GRAPHVIZ;
+            format = dnet::GraphUtil::GRAPHVIZ;
         } else {
             std::cout << "Use the GraphML output format." << std::endl;
-            format = WEvonet::GRAPHML;
+            format = dnet::GraphUtil::GRAPHML;
         }
     } else {
         std::cout << "Use the GraphML output format." << std::endl;
-        format = WEvonet::GRAPHML;
+        format = dnet::GraphUtil::GRAPHML;
     }
 
     if (vm.count(FILENAME.c_str())) {
@@ -191,12 +192,12 @@ int main(int argc, char *argv[])
     // use the WEvonet class
     std::cout << "Generating Graph..." << std::endl;
 
-    WEvonet net(net_size, max_edges, edge_fixed, r1, r2, r3);
+    dnet::tGraphSP g = dnet::WEvonet::createBBVGraph(net_size, max_edges, edge_fixed, r1, r2, r3);
 
-    if (format == WEvonet::GRAPHVIZ) {
-        net.print(filename, WEvonet::GRAPHVIZ);
+    if (format == dnet::GraphUtil::GRAPHVIZ) {
+        dnet::GraphUtil::print(g, filename, dnet::GraphUtil::GRAPHVIZ);
     } else {
-        net.print(filename, WEvonet::GRAPHML);
+        dnet::GraphUtil::print(g, filename, dnet::GraphUtil::GRAPHML);
     }
 
     return EXIT_SUCCESS;

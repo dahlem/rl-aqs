@@ -79,7 +79,7 @@ namespace dsample = des::sampling;
 #include "LadderQueue.hh"
 namespace dcommon = des::common;
 
-#include "WEvonet.hh"
+#include "DirectedGraph.hh"
 #include "GraphException.hh"
 #include "GraphUtil.hh"
 namespace dnet = des::network;
@@ -184,7 +184,7 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
         if (std::string(desArgs->graph_filename) != "") {
             // read the graph
             try {
-                dnet::GraphUtil::read(graph, std::string(desArgs->graph_filename), dnet::WEvonet::GRAPHML);
+                dnet::GraphUtil::read(graph, std::string(desArgs->graph_filename), dnet::GraphUtil::GRAPHML);
             } catch (dnet::GraphException &ge) {
                 std::cerr << "Error: Cannot open graph file " << desArgs->graph_filename
                           << "!" << std::endl;
