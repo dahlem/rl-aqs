@@ -75,6 +75,17 @@ public:
                                    double p_edge_weight, tGslRngSP p_edge_rng,
                                    tGslRngSP p_uniform_rng, tGslRngSP p_vertex_arrival_rng);
 
+    static tGraphSP createERGraph(boost::uint32_t p_size, double p_edge_weight, tGslRngSP p_vertex_arrival_rng,
+                                  double p);
+
+private:
+
+    WEvonet()
+        {}
+
+    ~WEvonet()
+        {}
+
 
     /** @fn void advance(int p_steps)
      * Evolve the network for a further given steps
@@ -84,14 +95,6 @@ public:
     static void advance(boost::uint32_t, tGraphSP,
                         tGslRngSP, tGslRngSP, tGslRngSP,
                         double, boost::uint32_t);
-
-private:
-
-    WEvonet()
-        {}
-
-    ~WEvonet()
-        {}
 
     /** @fn void assign_edge_weights(Vertex &v)
      * Assign the edge weights to the created edges of the newly created

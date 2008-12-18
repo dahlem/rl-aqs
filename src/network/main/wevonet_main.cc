@@ -48,6 +48,8 @@ const std::string MAX_EDGES = "max_edges";
 const std::string FILENAME = "filename";
 const std::string FORMAT = "format";
 const std::string WEIGHT_FIXED = "weight";
+const std::string EDGE_PROB = "edge_prob";
+const std::string GENERATOR = "generator";
 
 
 
@@ -56,30 +58,48 @@ int main(int argc, char *argv[])
     int net_size;
     int max_edges;
     int format, format_temp;
+    int net_gen = 1;
     double edge_fixed = -1.0;
+    double edge_prob = 0.05;
 
     dsample::tGslRngSP r1, r2, r3;
     std::string filename;
     std::string seeds_file;
 
     // Declare the supported options.
-    po::options_description desc("Configuration");
+    po::options_description opt_desc = po::options_description();
+
+    po::options_description desc("General Configuration");
     desc.add_options()
         (HELP.c_str(), "produce help message")
         (SIZE.c_str(), po::value<int>(), "set the size of the network")
-        (MAX_EDGES.c_str(), po::value<int>(), "set the maximum number of edges to connect a new vertex")
         (FILENAME.c_str(), po::value<std::string>(), "set the filename for the graph output")
         (SEEDS.c_str(), po::value <std::string>(), "set the seeds for the event simulator.")
         (FORMAT.c_str(), po::value <int>(), "set the output format (1=dot, 2=graphML).")
+        (GENERATOR.c_str(), po::value <int>()->default_value(1), "Network generator (1=BBV, 2=Erdoes-Renyi).")
+        ;
+
+    po::options_description desc_soc("Social Network Configuration");
+    desc_soc.add_options()
+        (MAX_EDGES.c_str(), po::value<int>(), "set the maximum number of edges to connect a new vertex")
         (WEIGHT_FIXED.c_str(), po::value <double>()->default_value(-1.0), "fix the edge weights (-1=dont't fix).")
         ;
 
+    po::options_description desc_rand("Erdoes-Renyi Network Configuration");
+    desc_rand.add_options()
+        (EDGE_PROB.c_str(), po::value <double>()->default_value(0.05), "probability of having an edge (u,v).")
+        ;
+
+    opt_desc.add(desc);
+    opt_desc.add(desc_soc);
+    opt_desc.add(desc_rand);
+
     po::variables_map vm;
-    po::store(po::parse_command_line(argc, argv, desc), vm);
+    po::store(po::parse_command_line(argc, argv, opt_desc), vm);
     po::notify(vm);
 
     if (vm.count(HELP.c_str())) {
-        std::cout << desc << std::endl;
+        std::cout << opt_desc << std::endl;
         return EXIT_SUCCESS;
     }
 
@@ -143,6 +163,18 @@ int main(int argc, char *argv[])
     std::cout << "Fix the edge weight at "
               << edge_fixed << "." << std::endl;
 
+    if (vm.count(EDGE_PROB.c_str())) {
+        edge_prob = vm[EDGE_PROB.c_str()].as <double>();
+    }
+    std::cout << "The probability of having in edge (u,v) is "
+              << edge_prob << " (only for ER graphs)." << std::endl;
+
+    if (vm.count(GENERATOR.c_str())) {
+        net_gen = vm[GENERATOR.c_str()].as <int>();
+    }
+    std::cout << "Generate network type "
+              << net_gen << "." << std::endl;
+
     boost::int32_t arrival_rng_index;
     boost::int32_t seeds_rng_index;
     boost::int32_t uniform_rng_index;
@@ -192,7 +224,13 @@ int main(int argc, char *argv[])
     // use the WEvonet class
     std::cout << "Generating Graph..." << std::endl;
 
-    dnet::tGraphSP g = dnet::WEvonet::createBBVGraph(net_size, max_edges, edge_fixed, r1, r2, r3);
+    dnet::tGraphSP g;
+
+    if (net_gen == 1) {
+        g = dnet::WEvonet::createBBVGraph(net_size, max_edges, edge_fixed, r1, r2, r3);
+    } else if (net_gen == 2) {
+        g = dnet::WEvonet::createERGraph(net_size, edge_fixed, r1, edge_prob);
+    }
 
     if (format == dnet::GraphUtil::GRAPHVIZ) {
         dnet::GraphUtil::print(g, filename, dnet::GraphUtil::GRAPHVIZ);

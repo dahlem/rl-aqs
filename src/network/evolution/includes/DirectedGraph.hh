@@ -24,6 +24,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/depth_first_search.hpp>
 #include <boost/graph/properties.hpp>
 #include <boost/graph/property_iter_range.hpp>
 
@@ -354,6 +355,23 @@ struct exists_vertex_index {
 
     VertexIndexMap m_indexMap;
     int m_index;
+};
+
+
+template <typename EdgesToBeRemoved>
+struct cycle_detector : public boost::dfs_visitor<>
+{
+    cycle_detector(EdgesToBeRemoved &edgesToBeRemoved)
+        : m_edgesToBeRemoved(edgesToBeRemoved) { }
+
+    template <class Edge, class Graph>
+    void back_edge(Edge e, Graph &g) {
+        m_edgesToBeRemoved.push_back(e);
+    }
+
+protected:
+    EdgesToBeRemoved &m_edgesToBeRemoved;
+    
 };
 
 

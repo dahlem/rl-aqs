@@ -24,8 +24,10 @@
 #endif
 
 #include <fstream>
+#include <list>
 #include <numeric>
 #include <string>
+#include <utility>
 #include <vector>
 
 #ifndef NDEBUG
@@ -35,9 +37,12 @@
 #include <boost/foreach.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/breadth_first_search.hpp>
+#include <boost/graph/erdos_renyi_generator.hpp>
 #include <boost/graph/property_iter_range.hpp>
+#include <boost/graph/topological_sort.hpp>
 #include <boost/pending/indirect_cmp.hpp>
 #include <boost/pending/integer_range.hpp>
+#include <boost/random/linear_congruential.hpp>
 
 #include <gsl/gsl_rng.h>
 
@@ -343,6 +348,60 @@ void WEvonet::assign_edge_weights(Vertex &v, tGraphSP g)
     }
 }
 
+tGraphSP WEvonet::createERGraph(boost::uint32_t p_size, double fixed_edge_weight,
+                                tGslRngSP p_vertex_arrival_rng, double p)
+{
+    typedef boost::erdos_renyi_iterator<boost::minstd_rand, Graph> ERGen;
+    boost::minstd_rand gen;
+
+    // Create graph with p_size nodes and edges with probability p
+    tGraphSP g = tGraphSP(new Graph(ERGen(gen, p_size, p, false), ERGen(), p_size));
+
+    VertexIndexMap vertexIndexMap = get(boost::vertex_index, *g);
+    VertexArrivalRateMap vertex_arrival_props_map
+        = get(vertex_arrival_rate, *g);
+    VertexServiceRateMap vertex_service_props_map
+        = get(vertex_service_rate, *g);
+
+    // assign ids, arrival and service rates
+    std::pair <VertexIterator, VertexIterator> p_v;
+    int i = 0;
+    for (p_v = boost::vertices(*g); p_v.first != p_v.second; ++p_v.first) {
+        vertexIndexMap[*p_v.first] = i++;
+        vertex_arrival_props_map[*p_v.first] =
+            (gsl_rng_uniform(p_vertex_arrival_rng.get()) * 10);
+        vertex_service_props_map[*p_v.first] = vertex_arrival_props_map[*p_v.first];
+    }
+
+    // remove cycles
+    typedef std::vector <Edge> EdgesToBeRemoved;
+    EdgesToBeRemoved edgesToBeRemoved;
+    cycle_detector <EdgesToBeRemoved> vis(edgesToBeRemoved);
+    boost::depth_first_search(*g, visitor(vis));
+
+    EdgesToBeRemoved::iterator it(edgesToBeRemoved.begin()),
+        it_end(edgesToBeRemoved.end());
+    for (; it != it_end; ++it) {
+        boost::remove_edge(*it, *g);
+    }
+
+    // balance the service rates
+    typedef std::list <Vertex> BalanceOrder;
+    BalanceOrder balance_order;
+    boost::topological_sort(*g, std::front_inserter(balance_order));
+
+    for (p_v = boost::vertices(*g); p_v.first != p_v.second; ++p_v.first) {
+        assign_edge_weights(*p_v.first, g);
+    }
+
+    for (BalanceOrder::iterator it = balance_order.begin(); it != balance_order.end(); ++it) {
+        if (boost::out_degree(*it, *g) > 0) {
+            balance_vertex_strength(*it, g, fixed_edge_weight);
+        }
+    }
+
+    return g;
+}
 
 }
 }
