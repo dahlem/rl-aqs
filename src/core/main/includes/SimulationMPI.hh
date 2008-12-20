@@ -82,11 +82,11 @@ public:
      *
      * @return the simulation output variables
      */
-    static void simulate(tDesArgsSP p_desArgs, MPI_Datatype mpi_desargs, MPI_Datatype mpi_desout)
+    static void simulate(tDesArgsSP p_desArgs, MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout)
         {
             MPI_Status status;
-            sim_output output;
-            int jobs = 0;
+            int jobs = 1;
+            int rc;
             
             // 1. perform lhs
             gsl_vector *min, *max;
@@ -108,65 +108,165 @@ public:
 
             dsample::LHS::sample(rng.get(), min, max, p_desArgs->simulations, &sample);
 
+            std::stringstream outDir, simDir, csv_line;
+            std::vector <dio::tResultsSP> replica_results;
+            
+            simDir << p_desArgs->results_dir << "/";
+
+            std::stringstream *sim_results_lines = new std::stringstream[p_desArgs->simulations];
+            
+            std::string dir = simDir.str();
+            std::string file = "simulations.dat";
+
+            dio::tResultsSP sim_results(
+                new dio::Results(file, dir));
+
+            csv_line << "sim_num," << ARGS_HEADER << ",actual_reps";
+            sim_results->print(csv_line);
+            csv_line.str("");
+            
             // 3. run experiment
             for (boost::uint16_t i = 0; i < p_desArgs->simulations; ++i) {
                 // start initial number of experiments
                 // copy the desArgs into the mpi desargs
-                tDesArgsMPI desArgsMPI;
-                copy(p_desArgs, desArgsMPI);
+                tSimArgsMPI desArgsMPI;
 
                 // set the i-th experiment conditions
                 desArgsMPI.stop_time = gsl_matrix_get(sample, i, 0);
                 desArgsMPI.sim_num = i + 1;
                 
-                for (desArgsMPI.rep_num = 1; desArgsMPI.rep_num < p_desArgs->replications; ++desArgsMPI.rep_num) {
+                for (desArgsMPI.rep_num = 1; desArgsMPI.rep_num <= p_desArgs->replications;
+                     ++desArgsMPI.rep_num) {
                     // send the desargs to the slave nodes
-                    MPI_Send(&desArgsMPI, mpi_desargs, 1, desArgsMPI.sim_num, jobs, MPI_COMM_WORLD);
+#ifndef NDEBUG
+                    std::cout << "Sending job: " << jobs << ". Simulation " << desArgsMPI.sim_num
+                              << " and replication " << desArgsMPI.rep_num << "." << std::endl;
+                    std::cout.flush();
+#endif /* NDEBUG */
+                    rc = MPI_Send(&desArgsMPI, 1, mpi_desargs, jobs, jobs, MPI_COMM_WORLD);
+                    if (rc != MPI_SUCCESS) {
+                        std::cerr << "Error sending task to slave." << std::endl;
+                        MPI_Abort(MPI_COMM_WORLD, 916);
+                    }
                     jobs++;
                 }
+
+                // prepare the replica results
+                outDir << p_desArgs->results_dir << "/" << desArgsMPI.sim_num;
+
+                dir = outDir.str();
+                outDir.str("");
+                file = "replica_results.dat";
+
+#ifndef NDEBUG
+                std::cout << "Creating file " << dir << "/" << file << std::endl;
+                std::cout.flush();
+#endif /* NDEBUG */
+
+                dio::tResultsSP replica_output(
+                    new dio::Results(file, dir));
+
+                csv_line << "sim_num,rep_num,systemDelay,systemAvgNumEvents,meanDelay,varDelay,meanAvgNumEvents,varAvgNumEvents";
+                replica_output->print(csv_line);
+                csv_line.str("");
+
+                replica_results.push_back(replica_output);
+
+                // prepare the overall results
+                sim_results_lines[i] << desArgsMPI.sim_num << "," << desArgsMPI.stop_time << ","
+                                     << p_desArgs->generations << "," << p_desArgs->confidence << ","
+                                     << p_desArgs->alpha << "," << p_desArgs->error << ","
+                                     << p_desArgs->replications << ",";
             }
 
             // 4. continue with as many experiments as needed
             while (!areAllSignificant(areExpsSignificant)) {
+                sim_output *output = new sim_output[1];
+#ifndef NDEBUG
+                std::cout << "Receive results." << std::endl;
+                std::cout.flush();
+#endif /* NDEBUG */
                 // receive results
-                MPI_Recv(&output, mpi_desout, 1, MPI_ANY_SOURCE, MPI_ANY_TAG,
-                         MPI_COMM_WORLD, &status);
+                rc = MPI_Recv(output, 1, mpi_desout, MPI_ANY_SOURCE, MPI_ANY_TAG,
+                              MPI_COMM_WORLD, &status);
+                if (rc != MPI_SUCCESS) {
+                    std::cerr << "Error receiving results from slave." << std::endl;
+                    MPI_Abort(MPI_COMM_WORLD, 916);
+                }
 
+#ifndef NDEBUG
+                std::cout << "Received simulation: " << output->simulation_id << ", replications: "
+                          << output->replications << std::endl;
+                std::cout.flush();
+#endif /* NDEBUG */
                 // update fields
-                avgDelays[status.MPI_SOURCE - 1].push(output.system_average_delay);
-                avgNumEvents[status.MPI_SOURCE - 1].push(output.system_expected_average_num_in_queue);
+                avgDelays[output->simulation_id - 1].push(output->system_average_delay);
+                avgNumEvents[output->simulation_id - 1].push(output->system_expected_average_num_in_queue);
                 
                 // test whether this result is significant
-                if (avgDelays[status.MPI_SOURCE - 1].getNumValues() > 2) {
+                if (avgDelays[output->simulation_id - 1].getNumValues()
+                    > (p_desArgs->simulations - 1)) {
                     bool isConfident =
                         dstats::CI::isConfidentWithPrecision(
-                            avgDelays[status.MPI_SOURCE - 1].mean(),
-                            avgDelays[status.MPI_SOURCE - 1].variance(),
-                            avgDelays[status.MPI_SOURCE - 1].getNumValues(),
+                            avgDelays[output->simulation_id - 1].mean(),
+                            avgDelays[output->simulation_id - 1].variance(),
+                            avgDelays[output->simulation_id - 1].getNumValues(),
                             p_desArgs->alpha, p_desArgs->error)
                         &&
                         dstats::CI::isConfidentWithPrecision(
-                            avgNumEvents[status.MPI_SOURCE - 1].mean(),
-                            avgNumEvents[status.MPI_SOURCE - 1].variance(),
-                            avgNumEvents[status.MPI_SOURCE - 1].getNumValues(),
+                            avgNumEvents[output->simulation_id - 1].mean(),
+                            avgNumEvents[output->simulation_id - 1].variance(),
+                            avgNumEvents[output->simulation_id - 1].getNumValues(),
                             p_desArgs->alpha, p_desArgs->error);
                     
                     // if not send another replica
                     if (!isConfident) {
+#ifndef NDEBUG
+                        std::cout << "Simulation " << output->simulation_id << " is not confident." << std::endl;
+                        std::cout.flush();
+#endif /* NDEBUG */
                         // update the experiment arguments
-                        tDesArgsMPI desArgsMPI;
-                        copy(p_desArgs, desArgsMPI);
-                        desArgsMPI.rep_num = avgDelays[status.MPI_SOURCE - 1].getNumValues() + 1;
-                        desArgsMPI.sim_num = status.MPI_SOURCE;
-                        desArgsMPI.stop_time = gsl_matrix_get(
-                            sample, status.MPI_SOURCE - 1, 0);
+                        tSimArgsMPI desArgsMPI;
 
-                        MPI_Send(&desArgsMPI, mpi_desargs, 1, desArgsMPI.sim_num, jobs, MPI_COMM_WORLD);
+                        desArgsMPI.rep_num = avgDelays[output->simulation_id - 1].getNumValues() + 1;
+                        desArgsMPI.sim_num = output->simulation_id;
+                        desArgsMPI.stop_time = gsl_matrix_get(
+                            sample, output->simulation_id - 1, 0);
+
+                        rc = MPI_Send(&desArgsMPI, 1, mpi_desargs, status.MPI_SOURCE, jobs, MPI_COMM_WORLD);
+                        if (rc != MPI_SUCCESS) {
+                            std::cerr << "Error sending task to slave." << std::endl;
+                            MPI_Abort(MPI_COMM_WORLD, 916);
+                        }
                         jobs++;
                     } else {
-                        areExpsSignificant[status.MPI_SOURCE - 1] = true;
+#ifndef NDEBUG
+                        std::cout << "Simulation " << output->simulation_id << " is confident." << std::endl;
+                        std::cout.flush();
+#endif /* NDEBUG */
+                        areExpsSignificant[output->simulation_id - 1] = true;
+
+                        // write the overall results
+                        sim_results_lines[output->simulation_id - 1] << output->replications;
                     }
                 }
+
+                // write replica results
+                csv_line.str("");
+                csv_line << output->simulation_id << "," << output->replications << ","
+                         << output->system_average_delay << ","
+                         << output->system_expected_average_num_in_queue
+                         << "," << avgDelays[output->simulation_id - 1].mean() << ","
+                         << avgDelays[output->simulation_id - 1].variance() << ","
+                         << avgNumEvents[output->simulation_id - 1].mean() << ","
+                         << avgNumEvents[output->simulation_id - 1].variance();
+                replica_results[output->simulation_id - 1]->print(csv_line);
+                
+                delete[] output;
+            }
+
+            for (boost::uint16_t i = 0; i < p_desArgs->simulations; ++i) {
+                sim_results->print(sim_results_lines[i]);
             }
             
             // 5. free gsl stuff
@@ -204,37 +304,6 @@ private:
             
             return true;
         }
-
-    static void copy(tDesArgsSP desArgs, tDesArgsMPI &desArgsMPI) 
-        {
-            // copy the cl args over to the mpi args
-            desArgsMPI.replications = desArgs->replications;
-            desArgsMPI.simulations = desArgs->simulations;
-            desArgsMPI.sim_num = desArgs->sim_num;
-            desArgsMPI.rep_num = desArgs->rep_num;
-
-            desArgsMPI.stop_time = desArgs->stop_time;
-            desArgsMPI.min_stop_time = desArgs->min_stop_time;
-            desArgsMPI.max_stop_time = desArgs->max_stop_time;
-            desArgsMPI.alpha = desArgs->alpha;
-            desArgsMPI.error = desArgs->error;
-
-            desArgsMPI.vertex = desArgs->vertex;
-            desArgsMPI.graph_rate = desArgs->graph_rate;
-            desArgsMPI.generations = desArgs->generations;
-
-            desArgsMPI.trace_event = desArgs->trace_event;
-            desArgsMPI.log_events = desArgs->log_events;
-            desArgsMPI.confidence = desArgs->confidence;
-            desArgsMPI.lhs = desArgs->lhs;
-
-            strncpy(desArgsMPI.graph_filename, desArgs->graph_filename.c_str(), 256);
-            strncpy(desArgsMPI.seeds_filename, desArgs->seeds_filename.c_str(), 256);
-            strncpy(desArgsMPI.results_dir, desArgs->results_dir.c_str(), 256);
-            strncpy(desArgsMPI.events_unprocessed, desArgs->events_unprocessed.c_str(), 256);
-            strncpy(desArgsMPI.events_unprocessed, desArgs->events_unprocessed.c_str(), 256);
-        }
-    
 };
 
 

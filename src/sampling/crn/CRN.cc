@@ -11,6 +11,10 @@
 /** @file CRN.cc
  * Implementation of the common random number interface @ref{CRN.hh}
  */
+#if HAVE_CONFIG_H
+# include <config.h>
+#endif
+
 #include <iostream>
 
 #include <gsl/gsl_rng.h>
@@ -54,12 +58,18 @@ dsample::tGslRngSP dsample::CRN::get(const boost::uint32_t p_rng) throw (Samplin
 
 void dsample::CRN::log(const boost::intmax_t p_seed, std::string eventType)
 {
+#ifndef NDEBUG
     std::cout << "Use seed " << p_seed << " for the " << eventType << "." << std::endl;
+    std::cout.flush();
+#endif /* NDEBUG */
 }
 
 
 void dsample::CRN::log(const boost::intmax_t p_min, const boost::intmax_t p_max,
                        std::string eventType)
 {
+#ifndef NDEBUG
     std::cout << "Use seed indeces [" << p_min << ", " << p_max << "] for the " << eventType << "." << std::endl;
+    std::cout.flush();
+#endif /* NDEBUG */
 }

@@ -28,27 +28,22 @@ des_main_CPPFLAGS =                                                      \
 	-I$(top_srcdir)/src/io/includes                                  \
 	-I$(top_srcdir)/src/statistics/analysis/includes                 \
 	-I$(top_srcdir)/src/date/includes                                \
-	-I$(top_srcdir)/src/common/list/includes                         \
-	$(BOOST_CPPFLAGS)                                                \
-	$(EXPAT_CFLAGS)
+	-I$(top_srcdir)/src/common/list/includes
 
 
 des_main_LDADD =                                                         \
-	$(BOOST_LDFLAGS)                                                 \
-	$(EXPAT_LDFLAGS)                                                 \
-	$(BOOST_PROGRAM_OPTIONS_LIB)                                     \
-	$(BOOST_FILESYSTEM_LIB)                                          \
-	$(BOOST_SYSTEM_LIB)                                              \
-	$(BOOST_GRAPH_LIB)                                               \
-	$(GSL_LIBS)                                                      \
 	$(top_srcdir)/src/date/libdesdate.la                             \
 	$(top_srcdir)/src/sampling/crn/libsamplingcrn.la                 \
 	$(top_srcdir)/src/sampling/lhs/libsamplinglhs.la                 \
+	$(top_srcdir)/src/sampling/common/libsamplingcommon.la           \
 	$(top_srcdir)/src/statistics/analysis/libstatisticsanalysis.la   \
 	$(top_srcdir)/src/sampling/common/libsamplingcommon.la           \
 	$(top_srcdir)/src/common/queue/libcommonqueue.la                 \
 	$(top_srcdir)/src/common/list/libcommonlist.la                   \
-	$(top_srcdir)/src/core/event/libcoreevent.la
+	$(top_srcdir)/src/core/event/libcoreevent.la                     \
+	$(top_srcdir)/src/network/evolution/libnetevo.la                 \
+	$(BOOST_LDFLAGS)                                                 \
+	$(BOOST_PROGRAM_OPTIONS_LIB)
 
 
 include_HEADERS = includes

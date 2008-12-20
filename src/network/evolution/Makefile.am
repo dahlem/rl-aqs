@@ -17,13 +17,13 @@ libnetevo_la_SOURCES =                                                \
 
 libnetevo_la_CPPFLAGS =                                               \
 	-I./includes                                                  \
-	$(BOOST_CPPFLAGS)                                             \
-	$(EXPAT_CFLAGS)
+	$(BOOST_CPPFLAGS)
 
 libnetevo_la_LIBADD =                                                 \
 	$(BOOST_GRAPH_LIB)                                            \
 	$(BOOST_LDFLAGS)                                              \
 	$(EXPAT_LDFLAGS)
+
 
 include_HEADERS = includes
 MAINTAINERCLEANFILES = Makefile.in

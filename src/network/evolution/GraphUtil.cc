@@ -103,13 +103,20 @@ void GraphUtil::read(tGraphSP p_graph, const std::string& p_filename,
 void GraphUtil::read_graphml(tGraphSP p_graph, const std::string& p_filename)
     throw (GraphException)
 {
+#ifndef NDEBUG
+    std::cout << "Read graphml file." << std::endl;
+#endif /* NDEBUG */
     std::ifstream in(p_filename.c_str(), std::ifstream::in);
 
     if (in.is_open()) {
         boost::dynamic_properties dp = getProperties(p_graph);
 
         try {
-            boost::read_graphml(in, (*p_graph.get()), dp);
+            boost::read_graphml(in, *p_graph, dp);
+#ifndef NDEBUG
+            std::cout << "Successfully read graph." << std::endl;
+            std::cout << "Vertices: " << boost::num_vertices(*p_graph) << std::endl;
+#endif /* NDEBUG */
         } catch (...) {
             throw GraphException(GraphException::GRAPH_READ_ERROR);
         }
@@ -124,13 +131,19 @@ void GraphUtil::read_graphml(tGraphSP p_graph, const std::string& p_filename)
 void GraphUtil::read_dot(tGraphSP p_graph, const std::string& p_filename)
     throw (GraphException)
 {
+#ifndef NDEBUG
+    std::cout << "Read graphviz file." << std::endl;
+#endif /* NDEBUG */
     std::ifstream in(p_filename.c_str(), std::ifstream::in);
 
     if (in.is_open()) {
         boost::dynamic_properties dp = getProperties(p_graph);
 
         try {
-            boost::read_graphviz(in, (*p_graph.get()), dp);
+            boost::read_graphviz(in, *p_graph, dp);
+#ifndef NDEBUG
+            std::cout << "Successfully read graph." << std::endl;
+#endif /* NDEBUG */
         } catch (...) {
             throw GraphException(GraphException::GRAPH_READ_ERROR);
         }
@@ -144,6 +157,10 @@ void GraphUtil::read_dot(tGraphSP p_graph, const std::string& p_filename)
 
 boost::dynamic_properties GraphUtil::getProperties(tGraphSP p_graph)
 {
+#ifndef NDEBUG
+    std::cout << "Get dynamic graph properties." << std::endl;
+#endif /* NDEBUG */
+
     boost::dynamic_properties dp;
     dp.property(EDGE_WEIGHT, get(boost::edge_weight, *p_graph));
     dp.property(VERTEX_ID, get(boost::vertex_index, *p_graph));

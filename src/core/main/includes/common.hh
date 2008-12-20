@@ -55,6 +55,7 @@ typedef struct
 
     // number of replications
     unsigned int replications;
+    unsigned int simulation_id;
 } sim_output;
 
 
@@ -62,32 +63,12 @@ typedef struct
 #ifdef HAVE_MPI
 
 typedef struct {
-    unsigned int replications;   /* initial replications required */
-    unsigned int simulations;    /* initial number of simulations */
     unsigned int sim_num;        /* simulation number */
     unsigned int rep_num;        /* replication number */
 
     double stop_time;               /* stopping time of the DES */
-    double min_stop_time;           /* min. stopping time of the DES */
-    double max_stop_time;           /* max. stopping time of the DES */
-    double alpha;                   /* 100(1 - alpha) confidence interval for the experiments */
-    double error;                   /* error threshold for the ci calculations */
+} tSimArgsMPI;
 
-    int vertex;          /* the vertex to trace */
-    int graph_rate;      /* the rate to generate graphs at */
-    int generations;     /* number of generations for the event simulation */
-
-    unsigned short trace_event;               /* trace an event */
-    unsigned short log_events;                /* log the events */
-    unsigned short confidence;                /* run experiments within a confidence band */
-    unsigned short lhs;                       /* run experiments with lhs sampling */
-
-    char graph_filename[256];     /* filename for the graph */
-    char seeds_filename[256];     /* filename for the seeds */
-    char results_dir[256];        /* directory name for the results */
-    char events_unprocessed[256]; /* filename for the unprocessed events */
-    char events_processed[256];   /* filename for the processed events */
-} tDesArgsMPI;
 
 #endif /* HAVE_MPI */
 

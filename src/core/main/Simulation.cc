@@ -93,115 +93,147 @@ namespace core
 typedef boost::shared_array <boost::int32_t> Int32SA;
 
 
-Int32SA arrivalCRN(dnet::tGraphSP p_graph)
+Int32SA arrivalCRN(boost::uint16_t p_num_vertices)
 {
-    boost::uint16_t vertices = boost::num_vertices(*p_graph);
-    Int32SA arrivalCRNs = Int32SA(new boost::int32_t[vertices]);
+#ifndef NDEBUG
+    std::cout << "Init CRN for arrivals" << std::endl;
+    std::cout.flush();
+#endif /* NDEBUG */
+
+    Int32SA arrivalCRNs = Int32SA(new boost::int32_t[p_num_vertices]);
     boost::uint32_t seed = 0;
 
     // init the crn for the arrival events
-    for (boost::uint16_t i = 0; i < vertices; ++i) {
+    for (boost::uint16_t i = 0; i < p_num_vertices; ++i) {
         seed = dsample::Seeds::getInstance().getSeed();
         arrivalCRNs[i] = dsample::CRN::getInstance().init(seed);
     }
 
     dsample::CRN::getInstance().log(
-        arrivalCRNs[0], arrivalCRNs[vertices - 1], "arrival events");
+        arrivalCRNs[0], arrivalCRNs[p_num_vertices - 1], "arrival events");
 
     return arrivalCRNs;
 }
 
 
-Int32SA serviceCRN(dnet::tGraphSP p_graph)
+Int32SA serviceCRN(boost::uint16_t p_num_vertices)
 {
-    boost::uint16_t vertices = boost::num_vertices(*p_graph);
-    Int32SA serviceCRNs = Int32SA(new boost::int32_t[vertices]);
+#ifndef NDEBUG
+    std::cout << "Init CRN for servicing" << std::endl;
+    std::cout.flush();
+#endif /* NDEBUG */
+
+    Int32SA serviceCRNs = Int32SA(new boost::int32_t[p_num_vertices]);
     boost::uint32_t seed = 0;
 
     // init the crn for the service events
-    for (boost::uint16_t i = 0; i < vertices; ++i) {
+    for (boost::uint16_t i = 0; i < p_num_vertices; ++i) {
         seed = dsample::Seeds::getInstance().getSeed();
         serviceCRNs[i] = dsample::CRN::getInstance().init(seed);
     }
 
     dsample::CRN::getInstance().log(
-        serviceCRNs[0], serviceCRNs[vertices - 1], "service events");
+        serviceCRNs[0], serviceCRNs[p_num_vertices - 1], "service events");
 
     return serviceCRNs;
 }
 
 
-Int32SA departureCRN(dnet::tGraphSP p_graph)
+Int32SA departureCRN(boost::uint16_t p_num_vertices)
 {
-    boost::uint16_t vertices = boost::num_vertices(*p_graph);
-    Int32SA departureCRNs = Int32SA(new boost::int32_t[vertices]);
+#ifndef NDEBUG
+    std::cout << "Init CRN for departures" << std::endl;
+    std::cout.flush();
+#endif /* NDEBUG */
+
+    Int32SA departureCRNs = Int32SA(new boost::int32_t[p_num_vertices]);
     boost::uint32_t seed = 0;
 
     // init the crn for the departure events
-    for (boost::uint16_t i = 0; i < vertices; ++i) {
+    for (boost::uint16_t i = 0; i < p_num_vertices; ++i) {
         seed = dsample::Seeds::getInstance().getSeed();
         departureCRNs[i] = dsample::CRN::getInstance().init(seed);
     }
 
     dsample::CRN::getInstance().log(
-        departureCRNs[0], departureCRNs[vertices - 1], "departure events");
+        departureCRNs[0], departureCRNs[p_num_vertices - 1], "departure events");
 
     return departureCRNs;
 }
 
 
 #ifdef HAVE_MPI
-void Simulation::simulate(MPI_Datatype mpi_desargs, MPI_Datatype mpi_desout)
+void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
+                          tDesArgsSP desArgs)
 #else
 sim_output Simulation::simulate(tDesArgsSP desArgs)
 #endif /* HAVE_MPI */
 {
-    dnet::tGraphSP graph(new dnet::Graph);
-    dcommon::tQueueSP queue(new dcommon::LadderQueue);
-    std::string graph_filename;
-
+    boost::uint16_t sim_num, rep_num, num_vertices;
+    double stop_time;
     // receive the input arguments via mpi
 #ifdef HAVE_MPI
-    tDesArgsMPI dArgs;
-    tDesArgsMPI *desArgs;
+    tSimArgsMPI simArgs;
     MPI_Status status;
-
-    desArgs = &dArgs;
+    int rc;
 
     while (true) {
-        MPI_Recv(&dArgs, mpi_desargs, 1, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+# ifndef NDEBUG
+        std::cout << "Receive task from master." << std::endl;
+        std::cout.flush();
+# endif /* NDEBUG */
+        rc = MPI_Recv(&simArgs, 1, mpi_desargs, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+        if (rc != MPI_SUCCESS) {
+            std::cerr << "Error receiving tasks from master." << std::endl;
+            MPI_Abort(MPI_COMM_WORLD, 913);
+        }
 
         // kill yourself, if job's done
         if (status.MPI_TAG == KILL_PILL) {
             break;
         }
+        sim_num = simArgs.sim_num;
+        rep_num = simArgs.rep_num;
+        stop_time = simArgs.stop_time;
 
+#else
+        sim_num = desArgs->sim_num;
+        rep_num = desArgs->rep_num;
+        stop_time = desArgs->stop_time;
 #endif /* HAVE_MPI */
 
-        std::cout << "Simulation: " << desArgs->sim_num << ", Replication: "
-                  << desArgs->rep_num << std::endl;
+        dnet::tGraphSP graph(new dnet::Graph);
+        dcommon::tQueueSP queue(new dcommon::LadderQueue);
 
-        if (std::string(desArgs->graph_filename) != "") {
+        if (desArgs->graph_filename != "") {
             // read the graph
             try {
-                dnet::GraphUtil::read(graph, std::string(desArgs->graph_filename), dnet::GraphUtil::GRAPHML);
+                dnet::GraphUtil::read(graph, desArgs->graph_filename, dnet::GraphUtil::GRAPHML);
             } catch (dnet::GraphException &ge) {
                 std::cerr << "Error: Cannot open graph file " << desArgs->graph_filename
                           << "!" << std::endl;
+                MPI_Abort(MPI_COMM_WORLD, 917);
             }
         } else {
             // generate the graph
             std::cout << "Generate the graph " << std::endl;
         }
 
+#ifndef NDEBUG
+        std::cout << "Simulation: " << sim_num << ", Replication: " << rep_num << std::endl;
+        std::cout.flush();
+#endif /* NDEBUG */
+
+        num_vertices = boost::num_vertices(*graph);
+
         // init the crn for the arrival events
-        Int32SA arrivalCRNs = arrivalCRN(graph);
+        Int32SA arrivalCRNs = arrivalCRN(num_vertices);
 
         // init the crn for the service events
-        Int32SA serviceCRNs = serviceCRN(graph);
+        Int32SA serviceCRNs = serviceCRN(num_vertices);
 
         // init the crn for the departure uniform rv
-        Int32SA departureCRNs = departureCRN(graph);
+        Int32SA departureCRNs = departureCRN(num_vertices);
 
         dnet::VertexIndexMap vertex_index_props_map =
             get(boost::vertex_index, *graph);
@@ -209,14 +241,14 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
             get(vertex_arrival_rate, *graph);
 
         // generate events for each vertex in the graph
-        double stopTime;
+        double stopTimeAdj;
 
         // find out whether we only generate the events in phases
         if (desArgs->generations < 0) {
-            stopTime = desArgs->stop_time;
+            stopTimeAdj = stop_time;
         } else {
             // calculate the phases
-            stopTime = desArgs->stop_time / desArgs->generations;
+            stopTimeAdj = stop_time / desArgs->generations;
         }
 
         boost::int32_t destination;
@@ -256,10 +288,14 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
                 count++;
             }
         } else {
-            double graphGenRate = desArgs->stop_time;
+            double graphGenRate = stop_time;
 
             std::pair <dnet::VertexIterator, dnet::VertexIterator> p;
             dsample::tGslRngSP arrival_rng;
+
+#ifndef NDEBUG
+            std::cout << "Generate events" << std::endl;
+#endif /* NDEBUG */
 
             for (p = boost::vertices(*graph); p.first != p.second; ++p.first) {
                 destination = vertex_index_props_map[*p.first];
@@ -268,21 +304,20 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
                 arrival_rng = dsample::CRN::getInstance().get(
                     arrivalCRNs[destination]);
                 EventGenerator::generate(
-                    queue, arrival_rng, destination, arrival_rate, stopTime);
+                    queue, arrival_rng, destination, arrival_rate, stopTimeAdj);
             }
 
             if (desArgs->graph_rate > 1) {
-                graphGenRate = desArgs->stop_time / desArgs->graph_rate;
+                graphGenRate = stop_time / desArgs->graph_rate;
             }
 
             EventGenerator::generateLogGraph(
-                queue, graphGenRate, desArgs->stop_time);
+                queue, graphGenRate, stop_time);
         }
 
         // configure the results directory
         std::stringstream baseDir;
-        baseDir << std::string(desArgs->results_dir) << "/" << desArgs->sim_num << "/"
-                << desArgs->rep_num;
+        baseDir << desArgs->results_dir << "/" << sim_num << "/" << rep_num;
         std::string resultsBaseDir = baseDir.str();
 
         // instantiate the events & handlers
@@ -318,7 +353,7 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
         if (desArgs->generations > 1) {
             tGenerateEventHandlerSP generateEventHandler(
                 new GenerateEventHandler(
-                    graph, arrivalCRNs, desArgs->generations, queue, desArgs->stop_time));
+                    graph, arrivalCRNs, desArgs->generations, queue, stop_time));
             lastArrivalEvent->attach(generateEventHandler);
         }
 
@@ -328,13 +363,10 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
 
         // only register the logging handlers, if they are configured.
         if (desArgs->log_events) {
-            std::string events_processed = std::string(desArgs->events_processed);
-            std::string events_unprocessed = std::string(desArgs->events_unprocessed);
-
             dio::tResultsSP processed_events(
-                new dio::Results(events_processed, resultsBaseDir));
+                new dio::Results(desArgs->events_processed, resultsBaseDir));
             dio::tResultsSP unprocessed_events(
-                new dio::Results(events_unprocessed, resultsBaseDir));
+                new dio::Results(desArgs->events_unprocessed, resultsBaseDir));
 
             tProcessedEventsHandlerSP processedEventsHandler(
                 new ProcessedEventsHandler(processed_events));
@@ -360,17 +392,34 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
         tEventProcessorSP processor(
             new EventProcessor(queue, adminEvent, preAnyEvent, postAnyEvent, arrivalEvent,
                                departureEvent, postEvent, lastArrivalEvent, ackEvent,
-                               leaveEvent, desArgs->stop_time));
+                               leaveEvent, stop_time));
 
         // process the events
-        sim_output output;
-        if (processor->process()) {
-            output = Report::accumResults(graph);
-        }
+#ifndef NDEBUG
+        std::cout << "Process events" << std::endl;
+#endif /* NDEBUG */
+        processor->process();
+        sim_output *output = new sim_output[1];
+
+        Report::accumResults(graph, output);
+        output->simulation_id = sim_num;
+        output->replications = rep_num;
 
 #ifdef HAVE_MPI
         // send the result back
-        MPI_Send(&output, mpi_desout, 1, 0, status.MPI_TAG, MPI_COMM_WORLD);
+# ifndef NDEBUG
+        std::cout << "Send result back" << std::endl;
+        std::cout << "Simulation: " << output->simulation_id << ", replications: "
+                  << output->replications << std::endl;
+        std::cout.flush();
+# endif /* NDEBUG */
+        rc = MPI_Send(output, 1, mpi_desout, 0, status.MPI_TAG, MPI_COMM_WORLD);
+        if (rc != MPI_SUCCESS) {
+            std::cerr << "Error sending result to master." << std::endl;
+            MPI_Abort(MPI_COMM_WORLD, 914);
+        }
+
+        delete[] output;
     }
 #else
     return output;

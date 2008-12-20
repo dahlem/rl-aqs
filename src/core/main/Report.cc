@@ -40,15 +40,12 @@ namespace des
 namespace core
 {
 
-sim_output Report::accumResults(dnet::tGraphSP p_graph)
+void Report::accumResults(dnet::tGraphSP p_graph, sim_output *output)
 {
-    sim_output output;
-    output.system_average_delay
+    output->system_average_delay
         = meanDelay(p_graph);
-    output.system_expected_average_num_in_queue
+    output->system_expected_average_num_in_queue
         = meanExpectedAverageNumberEvents(p_graph);
-
-    return output;
 }
 
 double Report::meanExpectedAverageNumberEvents(dnet::tGraphSP p_graph)

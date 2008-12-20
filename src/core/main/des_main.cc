@@ -54,45 +54,33 @@ typedef boost::shared_ptr <SimCI> SimCISP;
 typedef dcore::SimulationLHS <SimCISP> SimLHS;
 typedef boost::shared_ptr <SimLHS> SimLHSSP;
 #else
-void register_desargs(MPI_Datatype MPI_Desargs, dcore::tDesArgsMPI value)
+void register_simargs(MPI_Datatype &MPI_Simargs, dcore::tSimArgsMPI &value)
 {
-    int          blocklens[5];
-    MPI_Aint     indices[5];
-    MPI_Datatype old_types[5];
+    int          blocklens[2];
+    MPI_Aint     indices[2];
+    MPI_Datatype old_types[2];
 
     /* One value of each type */
-    blocklens[0] = 4;
-    blocklens[1] = 5;
-    blocklens[2] = 3;
-    blocklens[3] = 4;
-    blocklens[4] = 1280;
+    blocklens[0] = 2;
+    blocklens[1] = 1;
 
     /* The base types */
     old_types[0] = MPI_UNSIGNED;
     old_types[1] = MPI_DOUBLE;
-    old_types[2] = MPI_INT;
-    old_types[3] = MPI_SHORT;
-    old_types[4] = MPI_CHAR;
 
     /* The locations of each element */
-    MPI_Address(&value.replications, &indices[0]);
+    MPI_Address(&value.sim_num, &indices[0]);
     MPI_Address(&value.stop_time, &indices[1]);
-    MPI_Address(&value.vertex, &indices[2]);
-    MPI_Address(&value.trace_event, &indices[3]);
-    MPI_Address(&value.graph_filename, &indices[4]);
 
     /* Make relative */
-    indices[4] = indices[4] - indices[0];
-    indices[3] = indices[3] - indices[0];
-    indices[2] = indices[2] - indices[0];
     indices[1] = indices[1] - indices[0];
     indices[0] = 0;
 
-    MPI_Type_struct(5, blocklens, indices, old_types, &MPI_Desargs);
+    MPI_Type_struct(2, blocklens, indices, old_types, &MPI_Simargs);
 }
 
 
-void register_desout(MPI_Datatype MPI_Desout, dcore::sim_output value)
+void register_simout(MPI_Datatype &MPI_Desout, dcore::sim_output &value)
 {
     int          blocklens[2];
     MPI_Aint     indices[2];
@@ -100,7 +88,7 @@ void register_desout(MPI_Datatype MPI_Desout, dcore::sim_output value)
 
     /* One value of each type */
     blocklens[0] = 6;
-    blocklens[1] = 1;
+    blocklens[1] = 2;
 
     /* The base types */
     old_types[0] = MPI_DOUBLE;
@@ -124,53 +112,78 @@ void register_desout(MPI_Datatype MPI_Desout, dcore::sim_output value)
 int main(int argc, char *argv[])
 {
     dcore::tDesArgsSP desArgs(new dcore::desArgs_t);
+    char dateCStr[128];
 
 #ifdef HAVE_MPI
-    int rank, num_tasks;
-    MPI_Datatype MPI_Desargs, MPI_Desout;
+    int rank, num_tasks, rc;
+    MPI_Datatype MPI_Simargs, MPI_Desout;
     dcore::sim_output outVal;
-    dcore::tDesArgsMPI desArgsMPI;
+    dcore::tSimArgsMPI desArgsMPI;
 
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &num_tasks);
 
     // register the structs
-    register_desargs(MPI_Desargs, desArgsMPI);
-    register_desout(MPI_Desout, outVal);
-    MPI_Type_commit(&MPI_Desargs);
+# ifndef NDEBUG
+    std::cout << "Register the structs with MPI." << std::endl;
+# endif /* NDEBUG */
+
+    register_simargs(MPI_Simargs, desArgsMPI);
+    register_simout(MPI_Desout, outVal);
+    MPI_Type_commit(&MPI_Simargs);
     MPI_Type_commit(&MPI_Desout);
-
-    if (rank == 0) {
-
 #endif /* HAVE_MPI */
 
-        dcore::CL cl;
+    dcore::CL cl;
 
-        if (cl.parse(argc, argv, desArgs)) {
-            return EXIT_SUCCESS;
-        }
+    if (cl.parse(argc, argv, desArgs)) {
+        return EXIT_SUCCESS;
+    }
 
-        // set the basedir for the results
-        std::stringstream baseDir;
-        baseDir << desArgs->results_dir << "/";
-        baseDir << ddate::CurDateSingleton::getInstance().get();
-        desArgs->results_dir = baseDir.str();
-
-        desArgs->sim_num = 1;
-        desArgs->rep_num = 1;
+    // set the basedir for the results
+    std::stringstream baseDir;
+    std::string dateStr = ddate::CurDateSingleton::getInstance().get();
+    strncpy(dateCStr, dateStr.c_str(), 128);
 
 #ifdef HAVE_MPI
+    rc = MPI_Bcast(dateCStr, 128, MPI_CHAR, 0, MPI_COMM_WORLD);
+    if (rc != MPI_SUCCESS) {
+        std::cerr << "Error broadcasting the date string." << std::endl;
+        MPI_Abort(MPI_COMM_WORLD, 915);
+    }
+#endif /* HAVE_MPI */
+
+    baseDir << desArgs->results_dir << "/" << dateCStr;
+    desArgs->results_dir = baseDir.str();
+
+# ifndef NDEBUG
+    std::cout << "Base directory set to: " << desArgs->results_dir << std::endl;
+# endif /* NDEBUG */
+
+    desArgs->sim_num = 1;
+    desArgs->rep_num = 1;
+
+#ifdef HAVE_MPI
+    if (rank == 0) {
 
         // check whether we have enough nodes
         if ((desArgs->simulations * desArgs->replications + 1) > num_tasks) {
+            std::cerr << "Error: Not enough nodes available!" << std::endl;
             MPI_Abort(MPI_COMM_WORLD, 911);
         }
+    }
 
-        if (desArgs->seeds_filename != "") {
-            // read the seeds
-            dsample::Seeds::getInstance().init(desArgs->seeds_filename.c_str());
-        }
+    if (desArgs->seeds_filename != "") {
+# ifndef NDEBUG
+        std::cout << "Init the seeds" << std::endl;
+# endif /* NDEBUG */
+
+        // read the seeds
+        dsample::Seeds::getInstance().init(desArgs->seeds_filename.c_str());
+    } else {
+        std::cerr << "Error: Seed file needs to be present!" << std::endl;
+        MPI_Abort(MPI_COMM_WORLD, 912);
     }
 #else
     if (desArgs->seeds_filename != "") {
@@ -186,8 +199,11 @@ int main(int argc, char *argv[])
 #ifdef HAVE_MPI
     if (rank == 0) {
         if (desArgs->lhs && desArgs->confidence) {
+# ifndef NDEBUG
+            std::cout << "Start master." << std::endl;
+# endif /* NDEBUG */
             // master node
-            dcore::SimulationMPI::simulate(desArgs, MPI_Desargs, MPI_Desout);
+            dcore::SimulationMPI::simulate(desArgs, MPI_Simargs, MPI_Desout);
 
             // send kill pill
             for(int i = 1; i < num_tasks; ++i) {
@@ -196,9 +212,12 @@ int main(int argc, char *argv[])
             }
         }
     } else {
+# ifndef NDEBUG
+        std::cout << "Start slave: " << rank << std::endl;
+# endif /* NDEBUG */
         // slave node
         dcore::SimSP sim(new dcore::Simulation());
-        sim->simulate(MPI_Desargs, MPI_Desout);
+        sim->simulate(MPI_Simargs, MPI_Desout, desArgs);
     }
 #else
     dcore::sim_output output;
@@ -239,11 +258,15 @@ int main(int argc, char *argv[])
 #endif /* HAVE_MPI */
 
 #ifdef HAVE_MPI
-    MPI_Barrier(MPI_COMM_WORLD);
-
+# ifndef NDEBUG
+    std::cout << "Closing shared seed file." << std::endl;
+# endif /* NDEBUG */
     dsample::Seeds::getInstance().close();
 
-    MPI_Type_free(&MPI_Desargs);
+# ifndef NDEBUG
+    std::cout << "Free up MPI resources." << std::endl;
+# endif /* NDEBUG */
+    MPI_Type_free(&MPI_Simargs);
     MPI_Type_free(&MPI_Desout);
     MPI_Finalize();
 #endif /* HAVE_MPI */

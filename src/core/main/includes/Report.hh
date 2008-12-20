@@ -40,7 +40,7 @@ namespace core
 class Report
 {
 public:
-    static sim_output accumResults(dnet::tGraphSP);
+    static void accumResults(dnet::tGraphSP, sim_output*);
 
 private:
     Report()

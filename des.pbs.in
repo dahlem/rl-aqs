@@ -1,12 +1,15 @@
 #!/bin/sh
-#PBS -l walltime=00:01:00
+#PBS -l walltime=00:05:00
 #PBS -q parallel
-#PBS -l cput=00:02:00
-#PBS -l nodes=1:ppn=2
+#PBS -l cput=00:30:00
+#PBS -l nodes=3:ppn=2
 
 cat $PBS_NODEFILE
 cd $HOME/@PACKAGE@-@VERSION@
 
-mpiexec ./src/core/main/des_main --graph graphs/test/10_3.gml --seeds seeds-mpi.dat --graph_generation 5 --confidence 1 --lhs 1 --simulations 5 --min_stop_time 1 --max_stop_time 10
+export LD_LIBRARY_PATH=/usr/support/arch/x86_64/MVAPICH/mvapich--0.9.8-gcc-3.4.6-pgf90/lib:/usr/support/arch/x86_64/BOOST/1.37.0/lib:/usr/support/arch/x86_64/GSL/gsl-1.9-gcc-3.4.6/lib:$LD_LIBRARY_PATH
+export PATH=/usr/support/arch/x86_64/MVAPICH/mvapich--0.9.8-gcc-3.4.6-pgf90/bin:$PATH
+
+mpiexec ./src/core/main/des_main --graph $HOME/@PACKAGE@-@VERSION@/graphs/test/10_3.gml --seeds $HOME/@PACKAGE@-@VERSION@/seeds-mpi.dat --confidence 1 --lhs 1 --simulations 2 --min_stop_time 1 --max_stop_time 10 --results $HOME/@PACKAGE@-@VERSION@/results
 
 echo "Done"

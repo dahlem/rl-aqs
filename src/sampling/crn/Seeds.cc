@@ -68,7 +68,7 @@ void Seeds::init(const char *p_file) throw (SamplingException)
 
     if (!isInitialised) {
         rc = MPI_File_open(
-            MPI_COMM_WORLD, const_cast<char *> (p_file), MPI_MODE_RDONLY | MPI_MODE_SEQUENTIAL, MPI_INFO_NULL, &fh );
+            MPI_COMM_WORLD, const_cast<char *> (p_file), MPI_MODE_RDONLY | MPI_MODE_SEQUENTIAL, MPI_INFO_NULL, &fh);
         if (rc != MPI_SUCCESS) {
             std::cerr << "Error opening seed file " << p_file << "." << std::endl;
             std::cerr.flush();
@@ -127,7 +127,6 @@ const boost::uint32_t Seeds::getSeed() throw (SamplingException)
 
     newSeed = static_cast<boost::uint32_t>(buf[0]);
     delete[] buf;
-
 #else
     std::string line;
 
@@ -150,6 +149,11 @@ const boost::uint32_t Seeds::getSeed() throw (SamplingException)
         newSeed = gsl_rng_uniform_int(seeds_rng.get(), gsl_rng_max(seeds_rng.get()));
     }
 #endif /* HAVE_MPI */
+
+#ifndef NDEBUG
+    std::cout << "Return seed: " << newSeed << std::endl;
+    std::cout.flush();
+#endif /* NDEBUG */
 
     return newSeed;
 }

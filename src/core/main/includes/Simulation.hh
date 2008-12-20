@@ -63,7 +63,7 @@ public:
      * @return the simulation output variables
      */
 #ifdef HAVE_MPI
-    void simulate(MPI_Datatype mpi_desargs, MPI_Datatype mpi_desout);
+    void simulate(MPI_Datatype&, MPI_Datatype&, tDesArgsSP);
 #else
     sim_output simulate(tDesArgsSP);
 #endif /* HAVE_MPI */
