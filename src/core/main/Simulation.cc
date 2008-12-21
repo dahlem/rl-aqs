@@ -212,11 +212,49 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
             } catch (dnet::GraphException &ge) {
                 std::cerr << "Error: Cannot open graph file " << desArgs->graph_filename
                           << "!" << std::endl;
+#ifdef HAVE_MPI
                 MPI_Abort(MPI_COMM_WORLD, 917);
+#endif /* HAVE_MPI */
+
             }
         } else {
             // generate the graph
-            std::cout << "Generate the graph " << std::endl;
+            std::cout << "Generate the graph." << std::endl;
+            dsample::tGslRngSP r1, r2, r3;
+            boost::int32_t num_edges_rng_index;
+            boost::uint32_t seed = 0;
+
+            seed = dsample::Seeds::getInstance().getSeed();
+            num_edges_rng_index = dsample::CRN::getInstance().init(seed);
+            dsample::CRN::getInstance().log(seed, "number of edges");
+
+            r1 = dsample::CRN::getInstance().get(num_edges_rng_index);
+
+            if (desArgs->net_gen == 1) {
+                std::cout << "Generate social graph..." << std::endl;
+                std::cout << "Size: " << desArgs->net_size << std::endl
+                          << "Max edges: " << desArgs->max_edges << std::endl
+                          << "Fix edge weight: " << desArgs->edge_fixed << std::endl;
+
+                boost::int32_t arrival_rng_index;
+                boost::int32_t uniform_rng_index;
+
+                seed = dsample::Seeds::getInstance().getSeed();
+                arrival_rng_index = dsample::CRN::getInstance().init(seed);
+                dsample::CRN::getInstance().log(seed, "vertex arrival rate");
+                seed = dsample::Seeds::getInstance().getSeed();
+                uniform_rng_index = dsample::CRN::getInstance().init(seed);
+                dsample::CRN::getInstance().log(seed, "uniform");
+
+                r2 = dsample::CRN::getInstance().get(uniform_rng_index);
+                r3 = dsample::CRN::getInstance().get(arrival_rng_index);
+                graph = dnet::WEvonet::createBBVGraph(desArgs->net_size, desArgs->max_edges, desArgs->edge_fixed,
+                                                      r1, r2, r3);
+            } else if (desArgs->net_gen == 2) {
+                std::cout << "Generate Erdos-Renyi graph..." << std::endl;
+
+                graph = dnet::WEvonet::createERGraph(desArgs->net_size, desArgs->edge_fixed, r1, desArgs->edge_prob);
+            }
         }
 
 #ifndef NDEBUG
@@ -399,27 +437,25 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
         std::cout << "Process events" << std::endl;
 #endif /* NDEBUG */
         processor->process();
-        sim_output *output = new sim_output[1];
+        sim_output output;
 
-        Report::accumResults(graph, output);
-        output->simulation_id = sim_num;
-        output->replications = rep_num;
+        Report::accumResults(graph, &output);
+        output.simulation_id = sim_num;
+        output.replications = rep_num;
 
 #ifdef HAVE_MPI
         // send the result back
 # ifndef NDEBUG
         std::cout << "Send result back" << std::endl;
-        std::cout << "Simulation: " << output->simulation_id << ", replications: "
-                  << output->replications << std::endl;
+        std::cout << "Simulation: " << output.simulation_id << ", replications: "
+                  << output.replications << std::endl;
         std::cout.flush();
 # endif /* NDEBUG */
-        rc = MPI_Send(output, 1, mpi_desout, 0, status.MPI_TAG, MPI_COMM_WORLD);
+        rc = MPI_Send(&output, 1, mpi_desout, 0, status.MPI_TAG, MPI_COMM_WORLD);
         if (rc != MPI_SUCCESS) {
             std::cerr << "Error sending result to master." << std::endl;
             MPI_Abort(MPI_COMM_WORLD, 914);
         }
-
-        delete[] output;
     }
 #else
     return output;

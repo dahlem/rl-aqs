@@ -41,7 +41,11 @@ namespace fs = boost::filesystem;
 #include <boost/program_options/variables_map.hpp>
 namespace po = boost::program_options;
 
+#include "WEvonet.hh"
+namespace dnet = des::network;
+
 #include "CL.hh"
+
 
 
 namespace des
@@ -74,8 +78,20 @@ CL::CL()
     opt_des.add_options()
         (STOPTIME.c_str(), po::value <double>()->default_value(100.0), "set the stop time of the event simulator.")
         (GENERATIONS.c_str(), po::value <boost::int32_t>()->default_value(-1), "set the number of generations for the event simulator.")
+        (SIZE.c_str(), po::value<int>()->default_value(10), "set the size of the network")
+        (GENERATOR.c_str(), po::value <int>()->default_value(1), "Network generator (1=BBV, 2=Erdoes-Renyi).")
         ;
 
+    po::options_description opt_soc("Social Network Configuration");
+    opt_soc.add_options()
+        (MAX_EDGES.c_str(), po::value<int>()->default_value(dnet::WEvonet::MAX_EDGES), "set the maximum number of edges to connect a new vertex")
+        (WEIGHT_FIXED.c_str(), po::value <double>()->default_value(-1.0), "fix the edge weights (-1=dont't fix).")
+        ;
+
+    po::options_description opt_rand("Erdoes-Renyi Network Configuration");
+    opt_rand.add_options()
+        (EDGE_PROB.c_str(), po::value <double>()->default_value(0.05), "probability of having an edge (u,v).")
+        ;
     po::options_description opt_ci("Confidence Interval Configuration");
     opt_ci.add_options()
         (WITH_CI.c_str(), po::value <bool>()->default_value(false), "Obtain a specified experiment precision.")
@@ -101,6 +117,8 @@ CL::CL()
     opt_desc->add(opt_general);
     opt_desc->add(opt_app);
     opt_desc->add(opt_des);
+    opt_desc->add(opt_soc);
+    opt_desc->add(opt_rand);
     opt_desc->add(opt_ci);
     opt_desc->add(opt_lhs);
     opt_desc->add(opt_debug);
@@ -240,6 +258,36 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
             return EXIT_FAILURE;
         }
     }
+
+    if (vm.count(SIZE.c_str())) {
+        desArgs->net_size = vm[SIZE.c_str()].as<int>();
+    }
+    std::cout << "Size of network set to "
+              << desArgs->net_size << "." << std::endl;
+
+    if (vm.count(MAX_EDGES.c_str())) {
+        desArgs->max_edges = vm[MAX_EDGES.c_str()].as<int>();
+    }
+    std::cout << "Maximum number of edges is set to "
+              << desArgs->max_edges << "." << std::endl;
+
+    if (vm.count(WEIGHT_FIXED.c_str())) {
+        desArgs->edge_fixed = vm[WEIGHT_FIXED.c_str()].as <double>();
+    }
+    std::cout << "Fix the edge weight at "
+              << desArgs->edge_fixed << "." << std::endl;
+
+    if (vm.count(EDGE_PROB.c_str())) {
+        desArgs->edge_prob = vm[EDGE_PROB.c_str()].as <double>();
+    }
+    std::cout << "The probability of having in edge (u,v) is "
+              << desArgs->edge_prob << " (only for ER graphs)." << std::endl;
+
+    if (vm.count(GENERATOR.c_str())) {
+        desArgs->net_gen = vm[GENERATOR.c_str()].as <int>();
+    }
+    std::cout << "Generate network type "
+              << desArgs->net_gen << "." << std::endl;
 
     std::cout << std::endl;
     std::cout << "Output Files:" << std::endl;

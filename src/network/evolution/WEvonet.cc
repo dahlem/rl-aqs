@@ -30,10 +30,6 @@
 #include <utility>
 #include <vector>
 
-#ifndef NDEBUG
-# include <iostream>
-#endif
-
 #include <boost/foreach.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/breadth_first_search.hpp>
@@ -325,14 +321,6 @@ void WEvonet::balance_vertex_strength(Vertex &v, tGraphSP g, double fixed_edge_w
                                       color_vec.begin(),
                                       vertex_index_props_map,
                                       color_vec[0])));
-
-#ifndef NDEBUG
-    std::pair <VertexIterator, VertexIterator> p;
-
-    for (p = boost::vertices(*g); p.first != p.second; ++p.first) {
-        std::cout << vertex_arrival_props_map[*p.first] << std::endl;
-    }
-#endif /* NDEBUG */
 }
 
 

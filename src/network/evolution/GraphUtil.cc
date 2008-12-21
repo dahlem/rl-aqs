@@ -157,10 +157,6 @@ void GraphUtil::read_dot(tGraphSP p_graph, const std::string& p_filename)
 
 boost::dynamic_properties GraphUtil::getProperties(tGraphSP p_graph)
 {
-#ifndef NDEBUG
-    std::cout << "Get dynamic graph properties." << std::endl;
-#endif /* NDEBUG */
-
     boost::dynamic_properties dp;
     dp.property(EDGE_WEIGHT, get(boost::edge_weight, *p_graph));
     dp.property(VERTEX_ID, get(boost::vertex_index, *p_graph));

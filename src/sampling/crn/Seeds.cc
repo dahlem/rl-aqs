@@ -12,10 +12,10 @@
 #endif
 
 #include <cstddef>
+#include <iostream>
 #include <string>
 
 #ifdef HAVE_MPI
-# include <iostream>
 # include <mpi.h>
 # include <mpio.h>
 #else

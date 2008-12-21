@@ -62,13 +62,19 @@ const std::string SIMULATIONS = "simulations";
 const std::string ALPHA = "alpha";
 const std::string ERROR = "error";
 
+const std::string SIZE = "size";
+const std::string MAX_EDGES = "max_edges";
+const std::string WEIGHT_FIXED = "weight";
+const std::string EDGE_PROB = "edge_prob";
+const std::string GENERATOR = "graph_generator";
+
 
 /** @typedef tOptDescSP
  * Specifies shared pointer to the boost options description
  */
 typedef boost::shared_ptr <po::options_description> tOptDescSP;
 
-static const std::string ARGS_HEADER = "stop_time,generations,confidence,alpha,error,initial_reps";
+static const std::string ARGS_HEADER = "stop_time,generations,confidence,alpha,error,initial_reps,network,size,max_edges,edgeProb,edgeDiffusion";
 
 /** @struct
  * structure specifying the command line variables.
@@ -98,11 +104,18 @@ struct desArgs_t {
     boost::uint16_t sim_num;        /* simulation number */
     boost::uint16_t rep_num;        /* replication number */
 
+    boost::uint16_t net_size;       /* network size */
+    boost::uint16_t max_edges;      /* max number of edges */
+    boost::uint16_t net_gen;        /* network generator */
+    double edge_fixed;              /* information diffusion coefficient */
+    double edge_prob;               /* probability of vertices connecting */
+
     friend std::ostream& operator <<(std::ostream &p_os, const desArgs_t &desArgs)
         {
             p_os << desArgs.stop_time << "," << desArgs.generations << ","
                  << desArgs.confidence << "," << desArgs.alpha << "," << desArgs.error
-                 << "," << desArgs.replications;
+                 << "," << desArgs.replications << "," << desArgs.net_gen << "," << desArgs.net_size
+                 << "," << desArgs.max_edges << "," << desArgs.edge_prob << "," << desArgs.edge_fixed;
 
             return p_os;
         }
