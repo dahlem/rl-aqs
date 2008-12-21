@@ -12,3 +12,9 @@ tests/statistics/correlation/StatsCorrelationSuite
 /*.png
 /des*tar*
 /results/
+crn_test.pbs
+des.pbs
+read_graphml.pbs
+seeds_read.pbs
+struct_test.pbs
+*.eps
