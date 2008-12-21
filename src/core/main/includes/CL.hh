@@ -43,8 +43,6 @@ namespace des { namespace core {
  * const variables specifying the allowed options.
  */
 const std::string STOPTIME = "stop_time";
-const std::string MINSTOPTIME = "min_stop_time";
-const std::string MAXSTOPTIME = "max_stop_time";
 const std::string GENERATIONS = "generations";
 const std::string GRAPH = "graph";
 const std::string SEEDS = "seeds";
@@ -63,6 +61,8 @@ const std::string ALPHA = "alpha";
 const std::string ERROR = "error";
 
 const std::string SIZE = "size";
+const std::string MINSIZE = "min_size";
+const std::string MAXSIZE = "max_size";
 const std::string MAX_EDGES = "max_edges";
 const std::string WEIGHT_FIXED = "weight";
 const std::string EDGE_PROB = "edge_prob";
@@ -91,8 +91,6 @@ struct desArgs_t {
     boost::int32_t graph_rate;      /* the rate to generate graphs at */
 
     double stop_time;               /* stopping time of the DES */
-    double min_stop_time;           /* min. stopping time of the DES */
-    double max_stop_time;           /* max. stopping time of the DES */
     boost::int32_t generations;     /* number of generations for the event simulation */
     bool confidence;                /* run experiments within a confidence band */
     bool lhs;                       /* run experiments with lhs sampling */
@@ -105,6 +103,8 @@ struct desArgs_t {
     boost::uint16_t rep_num;        /* replication number */
 
     boost::uint16_t net_size;       /* network size */
+    boost::uint16_t min_size;       /* min. network size */
+    boost::uint16_t max_size;       /* max. network size */
     boost::uint16_t max_edges;      /* max number of edges */
     boost::uint16_t net_gen;        /* network generator */
     double edge_fixed;              /* information diffusion coefficient */

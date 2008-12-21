@@ -165,6 +165,7 @@ AC_CONFIG_FILES([
    seeds_read.pbs
    struct_test.pbs
    read_graphml.pbs
+   write_seeds.pbs
    doc/Makefile
    m4/Makefile
    R/Makefile

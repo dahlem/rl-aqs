@@ -65,8 +65,7 @@ typedef struct
 typedef struct {
     unsigned int sim_num;        /* simulation number */
     unsigned int rep_num;        /* replication number */
-
-    double stop_time;               /* stopping time of the DES */
+    unsigned int net_size;      /* replication number */
 } tSimArgsMPI;
 
 

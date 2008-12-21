@@ -96,8 +96,8 @@ public:
 
             min = gsl_vector_calloc(1);
             max = gsl_vector_calloc(1);
-            gsl_vector_set(min, 0, p_desArgs->min_stop_time);
-            gsl_vector_set(max, 0, p_desArgs->max_stop_time);
+            gsl_vector_set(min, 0, p_desArgs->min_size);
+            gsl_vector_set(max, 0, p_desArgs->max_size);
 
             dsample::LHS::sample(rng.get(), min, max, p_desArgs->simulations, &sample);
 
@@ -119,7 +119,7 @@ public:
                 p_desArgs->sim_num = i + 1;
 
                 // set the i-th experiment conditions
-                p_desArgs->stop_time = gsl_matrix_get(sample, i, 0);
+                p_desArgs->net_size = static_cast<boost::uint16_t> (round(gsl_matrix_get(sample, i, 0)));
 
                 output = m_dsim->simulate(p_desArgs);
 

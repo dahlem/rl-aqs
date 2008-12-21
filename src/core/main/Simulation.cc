@@ -170,7 +170,7 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
 #endif /* HAVE_MPI */
 {
     boost::uint16_t sim_num, rep_num, num_vertices;
-    double stop_time;
+    boost::uint16_t net_size;
     // receive the input arguments via mpi
 #ifdef HAVE_MPI
     tSimArgsMPI simArgs;
@@ -194,12 +194,12 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
         }
         sim_num = simArgs.sim_num;
         rep_num = simArgs.rep_num;
-        stop_time = simArgs.stop_time;
+        net_size = simArgs.net_size;
 
 #else
         sim_num = desArgs->sim_num;
         rep_num = desArgs->rep_num;
-        stop_time = desArgs->stop_time;
+        net_size = desArgs->net_size;
 #endif /* HAVE_MPI */
 
         dnet::tGraphSP graph(new dnet::Graph);
@@ -283,10 +283,10 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
 
         // find out whether we only generate the events in phases
         if (desArgs->generations < 0) {
-            stopTimeAdj = stop_time;
+            stopTimeAdj = desArgs->stop_time;
         } else {
             // calculate the phases
-            stopTimeAdj = stop_time / desArgs->generations;
+            stopTimeAdj = desArgs->stop_time / desArgs->generations;
         }
 
         boost::int32_t destination;
@@ -326,7 +326,7 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
                 count++;
             }
         } else {
-            double graphGenRate = stop_time;
+            double graphGenRate = desArgs->stop_time;
 
             std::pair <dnet::VertexIterator, dnet::VertexIterator> p;
             dsample::tGslRngSP arrival_rng;
@@ -346,11 +346,11 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
             }
 
             if (desArgs->graph_rate > 1) {
-                graphGenRate = stop_time / desArgs->graph_rate;
+                graphGenRate = desArgs->stop_time / desArgs->graph_rate;
             }
 
             EventGenerator::generateLogGraph(
-                queue, graphGenRate, stop_time);
+                queue, graphGenRate, desArgs->stop_time);
         }
 
         // configure the results directory
@@ -391,7 +391,7 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
         if (desArgs->generations > 1) {
             tGenerateEventHandlerSP generateEventHandler(
                 new GenerateEventHandler(
-                    graph, arrivalCRNs, desArgs->generations, queue, stop_time));
+                    graph, arrivalCRNs, desArgs->generations, queue, desArgs->stop_time));
             lastArrivalEvent->attach(generateEventHandler);
         }
 
@@ -430,7 +430,7 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
         tEventProcessorSP processor(
             new EventProcessor(queue, adminEvent, preAnyEvent, postAnyEvent, arrivalEvent,
                                departureEvent, postEvent, lastArrivalEvent, ackEvent,
-                               leaveEvent, stop_time));
+                               leaveEvent, desArgs->stop_time));
 
         // process the events
 #ifndef NDEBUG

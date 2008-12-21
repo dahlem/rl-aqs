@@ -104,8 +104,8 @@ CL::CL()
     opt_lhs.add_options()
         (WITH_LHS.c_str(), po::value <bool>()->default_value(false), "Perform LHS sampling for the experiments.")
         (SIMULATIONS.c_str(), po::value <boost::uint32_t>()->default_value(7), "set the number of simulations to run.")
-        (MINSTOPTIME.c_str(), po::value <double>()->default_value(10.0), "set the min. stop time of the event simulator.")
-        (MAXSTOPTIME.c_str(), po::value <double>()->default_value(100.0), "set the max. stop time of the event simulator.")
+        (MINSIZE.c_str(), po::value <boost::uint16_t>()->default_value(10), "set the min. network size.")
+        (MAXSIZE.c_str(), po::value <boost::uint16_t>()->default_value(1000), "set the max. network size.")
         ;
 
     po::options_description opt_debug("Debug Configuration");
@@ -198,16 +198,6 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
     }
     std::cout << "Stopping time set to " << desArgs->stop_time << "." << std::endl;
 
-    if (vm.count(MINSTOPTIME.c_str())) {
-        desArgs->min_stop_time = vm[MINSTOPTIME.c_str()].as <double>();
-    }
-    std::cout << "Minimum stopping time set to " << desArgs->min_stop_time << "." << std::endl;
-
-    if (vm.count(MAXSTOPTIME.c_str())) {
-        desArgs->max_stop_time = vm[MAXSTOPTIME.c_str()].as <double>();
-    }
-    std::cout << "Maximum stopping time set to " << desArgs->max_stop_time << "." << std::endl;
-
     if (vm.count(GENERATIONS.c_str())) {
         desArgs->generations = vm[GENERATIONS.c_str()].as <boost::int32_t>();
         std::cout << "Number of generations set to " << desArgs->generations << "." << std::endl;
@@ -264,6 +254,16 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
     }
     std::cout << "Size of network set to "
               << desArgs->net_size << "." << std::endl;
+
+    if (vm.count(MINSIZE.c_str())) {
+        desArgs->min_size = vm[MINSIZE.c_str()].as <boost::uint16_t>();
+    }
+    std::cout << "Minimum network size " << desArgs->min_size << "." << std::endl;
+
+    if (vm.count(MAXSIZE.c_str())) {
+        desArgs->max_size = vm[MAXSIZE.c_str()].as <boost::uint16_t>();
+    }
+    std::cout << "Maximum network size " << desArgs->max_size << "." << std::endl;
 
     if (vm.count(MAX_EDGES.c_str())) {
         desArgs->max_edges = vm[MAX_EDGES.c_str()].as<int>();

@@ -8,7 +8,8 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-bin_PROGRAMS = crn_test seeds_read struct_test groups_test read_graphml
+bin_PROGRAMS = crn_test seeds_read struct_test groups_test \
+	read_graphml write_seeds
 
 crn_test_SOURCES =                                                    \
 	crn_test.cc
@@ -65,6 +66,21 @@ read_graphml_CPPFLAGS =                                               \
 read_graphml_LDADD =                                                  \
 	$(top_srcdir)/src/network/evolution/libnetevo.la              \
 	$(BOOST_LDFLAGS)
+
+
+write_seeds_SOURCES =                                                 \
+	write_seeds.cc
+
+write_seeds_CPPFLAGS =                                                \
+	$(BOOST_CPPFLAGS)                                             \
+	$(GSL_CFLAGS)
+
+write_seeds_LDADD =                                                   \
+	$(BOOST_LDFLAGS)                                              \
+	$(BOOST_FILESYSTEM_LIB)                                       \
+	$(BOOST_SYSTEM_LIB)                                           \
+	$(GSL_LIBS)
+
 
 MAINTAINERCLEANFILES = Makefile.in
 
