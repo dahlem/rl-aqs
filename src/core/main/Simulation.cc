@@ -170,7 +170,9 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
 #endif /* HAVE_MPI */
 {
     boost::uint16_t sim_num, rep_num, num_vertices;
-    boost::uint16_t net_size;
+    boost::uint16_t net_size, max_edges;
+    double edge_prob;
+
     // receive the input arguments via mpi
 #ifdef HAVE_MPI
     tSimArgsMPI simArgs;
@@ -195,11 +197,16 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
         sim_num = simArgs.sim_num;
         rep_num = simArgs.rep_num;
         net_size = simArgs.net_size;
+        max_edges = simArgs.max_edges;
+        edge_prob = simArgs.edge_prob;
 
 #else
         sim_num = desArgs->sim_num;
         rep_num = desArgs->rep_num;
         net_size = desArgs->net_size;
+        max_edges = desArgs->max_edges;
+        edge_prob = desArgs->edge_prob;
+
 #endif /* HAVE_MPI */
 
         dnet::tGraphSP graph(new dnet::Graph);
@@ -233,7 +240,7 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
             if (desArgs->net_gen == 1) {
                 std::cout << "Generate social graph..." << std::endl;
                 std::cout << "Size: " << desArgs->net_size << std::endl
-                          << "Max edges: " << desArgs->max_edges << std::endl
+                          << "Max edges: " << max_edges << std::endl
                           << "Fix edge weight: " << desArgs->edge_fixed << std::endl;
 
                 boost::int32_t arrival_rng_index;
@@ -248,12 +255,12 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
 
                 r2 = dsample::CRN::getInstance().get(uniform_rng_index);
                 r3 = dsample::CRN::getInstance().get(arrival_rng_index);
-                graph = dnet::WEvonet::createBBVGraph(desArgs->net_size, desArgs->max_edges, desArgs->edge_fixed,
+                graph = dnet::WEvonet::createBBVGraph(desArgs->net_size, max_edges, desArgs->edge_fixed,
                                                       r1, r2, r3);
             } else if (desArgs->net_gen == 2) {
                 std::cout << "Generate Erdos-Renyi graph..." << std::endl;
 
-                graph = dnet::WEvonet::createERGraph(desArgs->net_size, desArgs->edge_fixed, r1, desArgs->edge_prob);
+                graph = dnet::WEvonet::createERGraph(desArgs->net_size, desArgs->edge_fixed, r1, edge_prob);
             }
         }
 

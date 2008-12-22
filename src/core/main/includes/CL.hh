@@ -64,8 +64,12 @@ const std::string SIZE = "size";
 const std::string MINSIZE = "min_size";
 const std::string MAXSIZE = "max_size";
 const std::string MAX_EDGES = "max_edges";
+const std::string MIN_MAX_EDGES = "min_max_edges";
+const std::string MAX_MAX_EDGES = "max_max_edges";
 const std::string WEIGHT_FIXED = "weight";
 const std::string EDGE_PROB = "edge_prob";
+const std::string MIN_EDGE_PROB = "min_edge_prob";
+const std::string MAX_EDGE_PROB = "max_edge_prob";
 const std::string GENERATOR = "graph_generator";
 
 
@@ -74,7 +78,7 @@ const std::string GENERATOR = "graph_generator";
  */
 typedef boost::shared_ptr <po::options_description> tOptDescSP;
 
-static const std::string ARGS_HEADER = "stop_time,generations,confidence,alpha,error,initial_reps,network,size,max_edges,edgeProb,edgeDiffusion";
+static const std::string ARGS_HEADER = "stop_time,generations,confidence,alpha,error,initial_reps,network_size,max_edges,edgeProb,edgeDiffusion";
 
 /** @struct
  * structure specifying the command line variables.
@@ -106,9 +110,14 @@ struct desArgs_t {
     boost::uint16_t min_size;       /* min. network size */
     boost::uint16_t max_size;       /* max. network size */
     boost::uint16_t max_edges;      /* max number of edges */
+    boost::uint16_t min_max_edges;  /* min. maximum number of edges */
+    boost::uint16_t max_max_edges;  /* max. maximum number of edges */
+
     boost::uint16_t net_gen;        /* network generator */
     double edge_fixed;              /* information diffusion coefficient */
     double edge_prob;               /* probability of vertices connecting */
+    double min_edge_prob;           /* min. probability of vertices connecting */
+    double max_edge_prob;           /* max. probability of vertices connecting */
 
     friend std::ostream& operator <<(std::ostream &p_os, const desArgs_t &desArgs)
         {

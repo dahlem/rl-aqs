@@ -63,9 +63,11 @@ typedef struct
 #ifdef HAVE_MPI
 
 typedef struct {
-    unsigned int sim_num;        /* simulation number */
-    unsigned int rep_num;        /* replication number */
-    unsigned int net_size;      /* replication number */
+    unsigned int sim_num;       /* simulation number */
+    unsigned int rep_num;       /* replication number */
+    unsigned int net_size;      /* network size */
+    unsigned int max_edges;     /* max edges */
+    double edge_prob;           /* probability of edge (u,v) */
 } tSimArgsMPI;
 
 

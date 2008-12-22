@@ -14,6 +14,7 @@ des_main_SOURCES =                                                       \
 	CL.cc                                                            \
 	Simulation.cc                                                    \
 	Report.cc                                                        \
+	LhsUtils.cc                                                      \
 	des_main.cc
 
 des_main_CPPFLAGS =                                                      \

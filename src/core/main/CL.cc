@@ -28,6 +28,7 @@
 #endif /* __STDC_CONSTANT_MACROS */
 
 #include <iostream>
+#include <limits>
 #include <string>
 
 #include <boost/cstdint.hpp>
@@ -104,8 +105,18 @@ CL::CL()
     opt_lhs.add_options()
         (WITH_LHS.c_str(), po::value <bool>()->default_value(false), "Perform LHS sampling for the experiments.")
         (SIMULATIONS.c_str(), po::value <boost::uint32_t>()->default_value(7), "set the number of simulations to run.")
-        (MINSIZE.c_str(), po::value <boost::uint16_t>()->default_value(10), "set the min. network size.")
-        (MAXSIZE.c_str(), po::value <boost::uint16_t>()->default_value(1000), "set the max. network size.")
+        (MINSIZE.c_str(), po::value <boost::uint16_t>()->default_value(
+            std::numeric_limits<boost::uint16_t>::max()), "set the min. network size.")
+        (MAXSIZE.c_str(), po::value <boost::uint16_t>()->default_value(
+            std::numeric_limits<boost::uint16_t>::max()), "set the max. network size.")
+        (MIN_MAX_EDGES.c_str(), po::value <boost::uint16_t>()->default_value(
+            std::numeric_limits<boost::uint16_t>::max()), "set the min. maximum number of edges.")
+        (MAX_MAX_EDGES.c_str(), po::value <boost::uint16_t>()->default_value(
+            std::numeric_limits<boost::uint16_t>::max()), "set the max. maximum number of edges.")
+        (MIN_EDGE_PROB.c_str(), po::value <double>()->default_value(
+            std::numeric_limits<double>::max()), "set the min. probability of having edge (u,v).")
+        (MAX_EDGE_PROB.c_str(), po::value <double>()->default_value(
+            std::numeric_limits<double>::max()), "set the max. probability of having edge (u,v).")
         ;
 
     po::options_description opt_debug("Debug Configuration");
@@ -271,6 +282,17 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
     std::cout << "Maximum number of edges is set to "
               << desArgs->max_edges << "." << std::endl;
 
+
+    if (vm.count(MIN_MAX_EDGES.c_str())) {
+        desArgs->min_max_edges = vm[MIN_MAX_EDGES.c_str()].as <boost::uint16_t>();
+    }
+    std::cout << "Minimum max. number of edges set to " << desArgs->min_max_edges << "." << std::endl;
+
+    if (vm.count(MAX_MAX_EDGES.c_str())) {
+        desArgs->max_max_edges = vm[MAX_MAX_EDGES.c_str()].as <boost::uint16_t>();
+    }
+    std::cout << "Maximum max. number of edges set to " << desArgs->max_max_edges << "." << std::endl;
+
     if (vm.count(WEIGHT_FIXED.c_str())) {
         desArgs->edge_fixed = vm[WEIGHT_FIXED.c_str()].as <double>();
     }
@@ -282,6 +304,16 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
     }
     std::cout << "The probability of having in edge (u,v) is "
               << desArgs->edge_prob << " (only for ER graphs)." << std::endl;
+
+    if (vm.count(MIN_EDGE_PROB.c_str())) {
+        desArgs->min_edge_prob = vm[MIN_EDGE_PROB.c_str()].as <double>();
+    }
+    std::cout << "Minimum probability of having in edge (u,v) set to " << desArgs->min_edge_prob << "." << std::endl;
+
+    if (vm.count(MAX_EDGE_PROB.c_str())) {
+        desArgs->max_edge_prob = vm[MAX_EDGE_PROB.c_str()].as <double>();
+    }
+    std::cout << "Maximum probability of having in edge (u,v) set to " << desArgs->max_edge_prob << "." << std::endl;
 
     if (vm.count(GENERATOR.c_str())) {
         desArgs->net_gen = vm[GENERATOR.c_str()].as <int>();

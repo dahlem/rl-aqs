@@ -31,6 +31,9 @@
 # define __STDC_CONSTANT_MACROS
 #endif /* __STDC_CONSTANT_MACROS */
 
+#if NDEBUG
+# include <iostream>
+#endif /* NDEBUG */
 #include <sstream>
 #include <string>
 
@@ -41,9 +44,6 @@
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_vector.h>
 
-#include "common.hh"
-#include "CL.hh"
-
 #include "Results.hh"
 namespace dio = des::io;
 
@@ -51,6 +51,10 @@ namespace dio = des::io;
 #include "Seeds.hh"
 #include "LHS.hh"
 namespace dsample = des::sampling;
+
+#include "common.hh"
+#include "CL.hh"
+#include "LhsUtils.hh"
 
 
 
@@ -94,10 +98,29 @@ public:
             dsample::tGslRngSP rng
                 = dsample::CRN::getInstance().get(rng_index);
 
-            min = gsl_vector_calloc(1);
-            max = gsl_vector_calloc(1);
-            gsl_vector_set(min, 0, p_desArgs->min_size);
-            gsl_vector_set(max, 0, p_desArgs->max_size);
+            int dimensions = LhsUtils::dimensions(p_desArgs);
+
+#ifndef NDEBUG
+            std::cout << "The number of LHS dimensions is " << dimensions << std::endl;
+            std::cout << "Network Size Index: " << LhsUtils::getNetSizeIndex(p_desArgs) << std::endl;
+            std::cout << "Max. Edges Index: " << LhsUtils::getMaxEdgesIndex(p_desArgs) << std::endl;
+#endif /* NDEBUG */
+
+            min = gsl_vector_calloc(dimensions);
+            max = gsl_vector_calloc(dimensions);
+
+            if (LhsUtils::getNetSizeIndex(p_desArgs) >= 0) {
+                gsl_vector_set(min, LhsUtils::getNetSizeIndex(p_desArgs), p_desArgs->min_size);
+                gsl_vector_set(max, LhsUtils::getNetSizeIndex(p_desArgs), p_desArgs->max_size);
+            }
+            if (LhsUtils::getMaxEdgesIndex(p_desArgs) >= 0) {
+                gsl_vector_set(min, LhsUtils::getMaxEdgesIndex(p_desArgs), p_desArgs->min_max_edges);
+                gsl_vector_set(max, LhsUtils::getMaxEdgesIndex(p_desArgs), p_desArgs->max_max_edges);
+            }
+            if (LhsUtils::getEdgeProbIndex(p_desArgs) >= 0) {
+                gsl_vector_set(min, LhsUtils::getEdgeProbIndex(p_desArgs), p_desArgs->min_edge_prob);
+                gsl_vector_set(max, LhsUtils::getEdgeProbIndex(p_desArgs), p_desArgs->max_edge_prob);
+            }
 
             dsample::LHS::sample(rng.get(), min, max, p_desArgs->simulations, &sample);
 
@@ -119,7 +142,20 @@ public:
                 p_desArgs->sim_num = i + 1;
 
                 // set the i-th experiment conditions
-                p_desArgs->net_size = static_cast<boost::uint16_t> (round(gsl_matrix_get(sample, i, 0)));
+                if (LhsUtils::getNetSizeIndex(p_desArgs) >= 0) {
+                    p_desArgs->net_size = static_cast<boost::uint16_t> (
+                        round(gsl_matrix_get(
+                                  sample, i, LhsUtils::getNetSizeIndex(p_desArgs))));
+                }
+                if (LhsUtils::getMaxEdgesIndex(p_desArgs) >= 0) {
+                    p_desArgs->max_edges = static_cast<boost::uint16_t> (
+                        round(gsl_matrix_get(
+                                  sample, i, LhsUtils::getMaxEdgesIndex(p_desArgs))));
+                }
+                if (LhsUtils::getEdgeProbIndex(p_desArgs) >= 0) {
+                    p_desArgs->edge_prob = gsl_matrix_get(
+                        sample, i, LhsUtils::getEdgeProbIndex(p_desArgs));
+                }
 
                 output = m_dsim->simulate(p_desArgs);
 
@@ -145,7 +181,6 @@ private:
 
     void operator=(const SimulationLHS&)
         {}
-
 
     DecoratedSim m_dsim;
 };
