@@ -114,6 +114,12 @@
 /* define debugging, if disabled */
 #undef NDEBUG
 
+/* define event debugging, if disabled */
+#undef NDEBUG_EVENTS
+
+/* define queue debugging, if disabled */
+#undef NDEBUG_QUEUE
+
 /* Name of package */
 #undef PACKAGE
 

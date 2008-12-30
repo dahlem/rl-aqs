@@ -21,6 +21,10 @@
 # include <config.h>
 #endif
 
+#ifndef NDEBUG_EVENTS
+# include <iostream>
+#endif /* NDEBUG_EVENTS */
+
 #include <cstdlib>
 #include <vector>
 
@@ -68,6 +72,14 @@ void dcore::DepartureHandler::update(dcore::DepartureEvent *subject)
     dnet::OutEdgeIterator out_edge_it, out_edge_it_end;
     dcommon::Entry *entry = subject->getEvent();
     dnet::Vertex vertex = boost::vertex(entry->getDestination(), *m_graph);
+
+
+#ifndef NDEBUG_EVENTS
+    std::cout << "** Departure for vertex: " << entry->getDestination() << std::endl;
+    std::cout << "Event: " << const_cast <const dcommon::Entry&> (*entry) << std::endl;
+    std::cout << "Number in queue: " << vertex_number_in_queue_map[vertex]
+              << ", busy: " << vertex_busy_map[vertex] << std::endl;
+#endif /* NDEBUG_EVENTS */
 
     // if the server is busy then re-schedule
     // otherwise schedule the departure
@@ -120,6 +132,10 @@ void dcore::DepartureHandler::update(dcore::DepartureEvent *subject)
                     const_cast <const dcommon::Entry&> (*entry));
 
                 new_entry->depart(destination, dcore::ARRIVAL_EVENT);
+#ifndef NDEBUG_EVENTS
+                std::cout << "Schedule new arrival event: " << const_cast <const dcommon::Entry&> (*new_entry)
+                          << std::endl;
+#endif /* NDEBUG_EVENTS */
                 new_entry->push(new_entry->getOrigin());
                 m_queue->push(new_entry);
 
@@ -135,6 +151,10 @@ void dcore::DepartureHandler::update(dcore::DepartureEvent *subject)
                 const_cast <const dcommon::Entry&> (*entry));
 
             new_entry->leave(dcore::EXTERNAL_EVENT, dcore::LEAVE_EVENT);
+#ifndef NDEBUG_EVENTS
+            std::cout << "Schedule new leave event: " << const_cast <const dcommon::Entry&> (*new_entry)
+                      << std::endl;
+#endif /* NDEBUG_EVENTS */
             m_queue->push(new_entry);
         } else {
             // schedule ack events
@@ -144,6 +164,10 @@ void dcore::DepartureHandler::update(dcore::DepartureEvent *subject)
                 const_cast <const dcommon::Entry&> (*entry));
 
             new_entry->acknowledge(origin, destination, dcore::ACK_EVENT);
+#ifndef NDEBUG_EVENTS
+            std::cout << "Schedule new acknowledge event: " << const_cast <const dcommon::Entry&> (*new_entry)
+                      << std::endl;
+#endif /* NDEBUG_EVENTS */
             m_queue->push(new_entry);
             eventPath->pop();
         }

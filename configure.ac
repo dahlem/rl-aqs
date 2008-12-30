@@ -88,6 +88,24 @@ fi
 AM_CONDITIONAL(COMPILE_PARALLEL, test "x$USE_MPI" = xyes)
 
 
+# Check for queue debug
+AC_ARG_ENABLE(debug-queue, AS_HELP_STRING(
+		     [--enable-debug-queue], 
+		     [enable queue debugging @<:@default=no@:>@]), 
+		     [QUEUEDEBUGGING=$enableval], [QUEUEDEBUGGING=no])
+if test "x$QUEUEDEBUGGING" = xno; then
+  AC_DEFINE(NDEBUG_QUEUE, 1, [define queue debugging, if disabled])
+fi
+
+# Check for event debug
+AC_ARG_ENABLE(debug-events, AS_HELP_STRING(
+		     [--enable-debug-events], 
+		     [enable events debugging @<:@default=no@:>@]), 
+		     [EVENTSDEBUGGING=$enableval], [EVENTSDEBUGGING=no])
+if test "x$EVENTSDEBUGGING" = xno; then
+  AC_DEFINE(NDEBUG_EVENTS, 1, [define event debugging, if disabled])
+fi
+
 # Check for debug
 AC_ARG_ENABLE(debug, AS_HELP_STRING(
 		     [--enable-debug], 
@@ -97,6 +115,8 @@ if test "x$DEBUGGING" = xyes; then
   AC_DEFINE(BOOST_DISABLE_ASSERTS, 0, [disable boost asserts, if enabled])
 else
   AC_DEFINE(NDEBUG, 1, [define debugging, if disabled])
+  AC_DEFINE(NDEBUG_QUEUE, 1, [define queue debugging, if disabled])
+  AC_DEFINE(NDEBUG_EVENTS, 1, [define event debugging, if disabled])
   AC_DEFINE(BOOST_DISABLE_ASSERTS, 1, [disable boost asserts, if enabled])
 fi
 

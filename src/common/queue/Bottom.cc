@@ -21,6 +21,10 @@
 # include <config.h>
 #endif
 
+#ifndef NDEBUG_QUEUE
+# include <iostream>
+#endif /* NDEBUG_QUEUE */
+
 #ifdef HAVE_LADDERSTATS
 # include <iostream>
 # include <ostream>
@@ -97,9 +101,15 @@ const boost::uint32_t dcommon::Bottom::size()
  */
 const bool dcommon::Bottom::push(dcommon::Entry *p_entry) throw (dcommon::QueueException)
 {
+#ifndef NDEBUG_QUEUE
+    std::cout << "Bottom -- Push event: " << const_cast <const dcommon::Entry&> (*p_entry) << std::endl;
+#endif /* NDEBUG_EVENTS */
     bool inserted = false;
 
     if (p_entry->getArrival() < m_lastEvent) {
+#ifndef NDEBUG_QUEUE
+        std::cout << "Bottom -- PAST event! Last dequeued event: " << m_lastEvent << std::endl;
+#endif /* NDEBUG_QUEUE */
         throw dcommon::QueueException(
             dcommon::QueueException::PAST_EVENT_NOT_ALLOWED);
     }
@@ -107,11 +117,17 @@ const bool dcommon::Bottom::push(dcommon::Entry *p_entry) throw (dcommon::QueueE
     if (m_list->empty()) {
         // insert straight-away
         m_list->push_back(*p_entry);
+#ifndef NDEBUG_QUEUE
+        std::cout << "Bottom -- Inserted at the back." << std::endl;
+#endif /* NDEBUG_EVENTS */
         inserted = true;
     } else {
         // if the last element is already <= the new entry then insert at the back
         if (m_list->back().getArrival() <= p_entry->getArrival()) {
             m_list->push_back(*p_entry);
+#ifndef NDEBUG_QUEUE
+            std::cout << "Bottom -- Inserted at the back." << std::endl;
+#endif /* NDEBUG_EVENTS */
             inserted = true;
         } else {
             // insertion sort from the back
@@ -121,7 +137,13 @@ const bool dcommon::Bottom::push(dcommon::Entry *p_entry) throw (dcommon::QueueE
             for(; it != itend; ++it) {
                 if (it->getArrival() <= p_entry->getArrival()) {
                     dcommon::EntryList::iterator pos = m_list->s_iterator_to(*it);
-                    m_list->insert(pos++, *p_entry);
+                    pos++;
+                    m_list->insert(pos, *p_entry);
+#ifndef NDEBUG_QUEUE
+                    dcommon::EntryList::iterator pos_start = m_list->s_iterator_to(*it);
+                    std::cout << "Bottom -- Inserted between " << pos_start->getArrival()
+                              << " and " << pos->getArrival() << std::endl;
+#endif /* NDEBUG_EVENTS */
                     inserted = true;
                     break;
                 }
@@ -132,6 +154,9 @@ const bool dcommon::Bottom::push(dcommon::Entry *p_entry) throw (dcommon::QueueE
     // worst case scenario: we ended up iterating from back to front without inserting
     if (!inserted) {
         m_list->push_front(*p_entry);
+#ifndef NDEBUG_QUEUE
+        std::cout << "Bottom -- Inserted at the front." << std::endl;
+#endif /* NDEBUG_EVENTS */
         inserted = true;
     }
 
@@ -153,7 +178,22 @@ void dcommon::Bottom::push(dcommon::EntryList* p_list)
 {
     // this sort does NOT seem to be stable at all
     p_list->sort();
+
+#ifndef NDEBUG_QUEUE
+    std::cout << "Bottom -- Push list. Size: " << p_list->size() << std::endl;
+    dcommon::Entry *ef = reinterpret_cast<dcommon::Entry*>(&p_list->front());
+    dcommon::Entry *eb = reinterpret_cast<dcommon::Entry*>(&p_list->back());
+    std::cout << "from: " << ef->getArrival() << " to: " << eb->getArrival() << std::endl;
+#endif /* NDEBUG_EVENTS */
+
     m_list->merge(*p_list);
+
+#ifndef NDEBUG_QUEUE
+    std::cout << "Bottom -- Merged lists. Size: " << m_list->size() << std::endl;
+    ef = reinterpret_cast<dcommon::Entry*>(&m_list->front());
+    eb = reinterpret_cast<dcommon::Entry*>(&m_list->back());
+    std::cout << "from: " << ef->getArrival() << " to: " << eb->getArrival() << std::endl;
+#endif /* NDEBUG_EVENTS */
 
 #ifdef HAVE_LADDERSTATS
     events_in += p_list->size();

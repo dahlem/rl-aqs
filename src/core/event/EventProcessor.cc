@@ -69,6 +69,9 @@ bool EventProcessor::process()
 
     try {
         while ((entry = m_queue->dequeue()) != NULL) {
+#ifndef NDEBUG_EVENTS
+            std::cout << "Handle event: " << const_cast <const dcommon::Entry&> (*entry) << std::endl;
+#endif /* NDEBUG_EVENTS */
             // if it is a admin event, then handle it
             if (entry->getType() == LOG_GRAPH_EVENT) {
                 m_adminEvent->admin(entry);
@@ -127,10 +130,10 @@ bool EventProcessor::process()
         }
     }
 
-#ifndef NDEBUG
+#ifndef NDEBUG_EVENTS
     std::cout << m_queue->getInEvents() << ", " << m_queue->getOutEvents() << std::endl;
     assert(m_queue->getInEvents() == m_queue->getOutEvents());
-#endif /* NDEBUG */
+#endif /* NDEBUG_EVENTS */
 
 
     return true;

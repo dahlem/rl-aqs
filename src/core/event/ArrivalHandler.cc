@@ -17,6 +17,14 @@
 /** @file ArrivalHandler.cc
  * Implementation of a basic arrival handler.
  */
+#if HAVE_CONFIG_H
+# include <config.h>
+#endif
+
+#ifndef NDEBUG_EVENTS
+# include <iostream>
+#endif /* NDEBUG_EVENTS */
+
 #include <cstdlib>
 
 #include <gsl/gsl_randist.h>
@@ -77,6 +85,11 @@ void dcore::ArrivalHandler::update(dcore::ArrivalEvent *subject)
     dcommon::Entry *new_entry = new dcommon::Entry(
         const_cast <const dcommon::Entry&> (*entry));
 
+#ifndef NDEBUG_EVENTS
+    std::cout << "** Arrival for vertex: " << entry->getDestination() << std::endl;
+    std::cout << "Event: " << const_cast <const dcommon::Entry&> (*entry) << std::endl;
+#endif /* NDEBUG_EVENTS */
+
     // if the server is busy then re-schedule
     // otherwise schedule the departure
     if (vertex_busy_map[vertex]) {
@@ -85,11 +98,22 @@ void dcore::ArrivalHandler::update(dcore::ArrivalEvent *subject)
         departure = vertex_time_service_ends_map[vertex] + service_time;
         vertex_number_in_queue_map[vertex]++;
 
+#ifndef NDEBUG_EVENTS
+        std::cout << "Busy -- service time: " << service_time
+                  << ", Time service ends: " << vertex_time_service_ends_map[vertex]
+                  << ",  number in queue: " << vertex_number_in_queue_map[vertex]
+                  << std::endl;
+#endif /* NDEBUG_EVENTS */
+
         // delay the event
         new_entry->delayed(delay, departure, dcore::DEPARTURE_EVENT);
     } else {
         // enqueue a departure event into the queue with a stochastic service time
         departure = entry->getArrival() + service_time;
+
+#ifndef NDEBUG_EVENTS
+        std::cout << "Not busy -- service time: " << service_time << std::endl;
+#endif /* NDEBUG_EVENTS */
 
         // set the busy flag to true
         vertex_busy_map[vertex] = true;
@@ -98,6 +122,11 @@ void dcore::ArrivalHandler::update(dcore::ArrivalEvent *subject)
         new_entry->service(departure, dcore::DEPARTURE_EVENT);
     }
 
+#ifndef NDEBUG_EVENTS
+    std::cout << "Calc average delay -- Num events: " << vertex_num_events_map[vertex]
+              << ", average delay in queue: " << vertex_average_delay_in_queue_map[vertex]
+              << ", delay: " << delay << std::endl;
+#endif /* NDEBUG_EVENTS */
     // calculate the average delay in the queue
     vertex_average_delay_in_queue_map[vertex] =
         dstats::Stats::mean(vertex_num_events_map[vertex],
@@ -105,5 +134,11 @@ void dcore::ArrivalHandler::update(dcore::ArrivalEvent *subject)
                             delay);
 
     vertex_time_service_ends_map[vertex] = departure;
+
+#ifndef NDEBUG_EVENTS
+    std::cout << "Schedule departure event: " << const_cast <const dcommon::Entry&> (*new_entry)
+              << std::endl;
+#endif /* NDEBUG_EVENTS */
+
     m_queue->push(new_entry);
 }

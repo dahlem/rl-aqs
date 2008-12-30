@@ -21,6 +21,10 @@
 # include <config.h>
 #endif
 
+#ifndef NDEBUG_QUEUE
+# include <iostream>
+#endif /* NDEBUG_EVENTS */
+
 #ifdef HAVE_LADDERSTATS
 # include <iostream>
 # include <ostream>
@@ -234,6 +238,9 @@ void dcommon::Ladder::updateNEvents(boost::uint32_t p_rung, boost::int32_t size)
 
 const bool dcommon::Ladder::push(dcommon::Entry *p_entry) throw (dcommon::QueueException)
 {
+#ifndef NDEBUG_QUEUE
+    std::cout << "Ladder -- Push event: " << const_cast <const dcommon::Entry&> (*p_entry) << std::endl;
+#endif /* NDEBUG_EVENTS */
     // cannot enqueue, if the internal structure has not been initialised
     // by an epoch
 //     if (getNBC() == 0) {
@@ -250,7 +257,15 @@ const bool dcommon::Ladder::push(dcommon::Entry *p_entry) throw (dcommon::QueueE
     // found
     if (nRungs <= m_lowestRung) {
         // insert into tail of rung x, bucket k
+#ifndef NDEBUG_QUEUE
+        std::cout << "Ladder -- Rung: " << nRungs << ", bucket: "
+                  << bucket(p_entry->getArrival(), nRungs);
+#endif /* NDEBUG_EVENTS */
         m_rungs[nRungs][bucket(p_entry->getArrival(), nRungs)].push_back(*p_entry);
+#ifndef NDEBUG_QUEUE
+        std::cout << ", size: " << m_rungs[nRungs][bucket(p_entry->getArrival(), nRungs)].size()
+                  << std::endl;
+#endif /* NDEBUG_EVENTS */
         updateNEvents(nRungs, 1);
     } else {
         throw dcommon::QueueException(dcommon::QueueException::RUNG_NOT_FOUND);
@@ -343,6 +358,11 @@ dcommon::EntryList* const dcommon::Ladder::delist() throw (dcommon::QueueExcepti
 
     updateNEvents(m_lowestRung, -size);
 
+#ifndef NDEBUG_QUEUE
+    std::cout << "Ladder -- Delist: " << m_lowestRung << ", bucket: "
+              << m_currentBucket[m_lowestRung] << ", size: " << temp->size()
+              << std::endl;
+#endif /* NDEBUG_EVENTS */
     return temp;
 }
 

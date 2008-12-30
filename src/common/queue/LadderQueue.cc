@@ -25,6 +25,10 @@
 # define __STDC_CONSTANT_MACROS
 #endif /* __STDC_CONSTANT_MACROS */
 
+#ifndef NDEBUG_QUEUE
+# include <iostream>
+#endif /* NDEBUG_EVENTS */
+
 #if HAVE_LADDERTIMING
 # include <ctime>
 # include <iostream>
@@ -97,6 +101,10 @@ void LadderQueue::record()
 
 const bool LadderQueue::push(Entry *p_entry) throw (QueueException)
 {
+#ifndef NDEBUG_QUEUE
+    std::cout << "LQ -- Push event: " << const_cast <const dcommon::Entry&> (*p_entry) << std::endl;
+#endif /* NDEBUG_EVENTS */
+
 #ifdef HAVE_LADDERTIMING
     struct timeval start, finish;
     double time_delta = 0.0;
@@ -106,11 +114,20 @@ const bool LadderQueue::push(Entry *p_entry) throw (QueueException)
     if (p_entry->getArrival() >= m_top->getTopStart()) {
         // insert at the tail of top
         m_top->push(p_entry);
+#ifndef NDEBUG_QUEUE
+        std::cout << "LQ -- Inserted at top." << std::endl;
+#endif /* NDEBUG_EVENTS */
     } else {
         try {
             m_ladder->push(p_entry);
+#ifndef NDEBUG_QUEUE
+            std::cout << "LQ -- Inserted at ladder." << std::endl;
+#endif /* NDEBUG_EVENTS */
         } catch (QueueException qe) {
             m_bottom->push(p_entry);
+#ifndef NDEBUG_QUEUE
+            std::cout << "LQ -- Inserted at bottom." << std::endl;
+#endif /* NDEBUG_EVENTS */
             if (m_bottom->size() > m_ladder->getThres()) {
                 // check whether ladder is empty
                 // if yes, get max and min TS values from bottom and enlist
@@ -120,9 +137,15 @@ const bool LadderQueue::push(Entry *p_entry) throw (QueueException)
 
                     EntryList *list = m_bottom->list();
                     m_ladder->push(list, max, min);
+#ifndef NDEBUG_QUEUE
+                    std::cout << "LQ -- Insert bottom to ladder." << std::endl;
+#endif /* NDEBUG_EVENTS */
                 } else {
                     EntryList *list = m_bottom->list();
                     m_ladder->pushBack(list);
+#ifndef NDEBUG_QUEUE
+                    std::cout << "LQ -- Push back bottom to ladder." << std::endl;
+#endif /* NDEBUG_EVENTS */
                 }
             }
         }
@@ -160,6 +183,9 @@ Entry* LadderQueue::dequeue() throw (QueueException)
         // bottom serves the dequeue operation
         entry = m_bottom->front();
         m_bottom->pop_front();
+#ifndef NDEBUG_QUEUE
+        std::cout << "LQ -- Dequeue from bottom" << std::endl;
+#endif /* NDEBUG_EVENTS */
     } else {
         // otherwise the ladder will transfer events to the bottom
         boost::uint32_t size = m_ladder->getNBC();
@@ -168,6 +194,9 @@ Entry* LadderQueue::dequeue() throw (QueueException)
             // the ladder contains events to be transferred to bottom
             list = m_ladder->delist();
             m_bottom->push(list);
+#ifndef NDEBUG_QUEUE
+            std::cout << "LQ -- Transferred ladder to bottom" << std::endl;
+#endif /* NDEBUG_EVENTS */
             entry = m_bottom->front();
             m_bottom->pop_front();
         } else {
@@ -182,13 +211,25 @@ Entry* LadderQueue::dequeue() throw (QueueException)
                 list = m_top->delist();
                 m_ladder->push(list, max, min);
                 m_top->reset();
+#ifndef NDEBUG_QUEUE
+                std::cout << "LQ -- Transferred top to ladder." << std::endl;
+#endif /* NDEBUG_EVENTS */
                 list = m_ladder->delist();
                 m_bottom->push(list);
+#ifndef NDEBUG_QUEUE
+                std::cout << "LQ -- Transferred ladder to bottom." << std::endl;
+#endif /* NDEBUG_EVENTS */
                 entry = m_bottom->front();
                 m_bottom->pop_front();
             }
         }
     }
+
+#ifndef NDEBUG_QUEUE
+    if (entry != NULL) {
+        std::cout << "LQ -- Dequeue event: " << const_cast <const dcommon::Entry&> (*entry) << std::endl;
+    }
+#endif /* NDEBUG_EVENTS */
 
 #ifdef HAVE_LADDERTIMING
     gettimeofday(&finish, NULL);
