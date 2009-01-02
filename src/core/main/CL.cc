@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -81,6 +81,7 @@ CL::CL()
         (GENERATIONS.c_str(), po::value <boost::int32_t>()->default_value(-1), "set the number of generations for the event simulator.")
         (SIZE.c_str(), po::value<int>()->default_value(10), "set the size of the network")
         (GENERATOR.c_str(), po::value <int>()->default_value(1), "Network generator (1=BBV, 2=Erdoes-Renyi).")
+        (MAX_ARRIVAL.c_str(), po::value <double>()->default_value(1), "Max. arrival rate.")
         ;
 
     po::options_description opt_soc("Social Network Configuration");
@@ -208,6 +209,11 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
         desArgs->stop_time = vm[STOPTIME.c_str()].as <double>();
     }
     std::cout << "Stopping time set to " << desArgs->stop_time << "." << std::endl;
+
+    if (vm.count(MAX_ARRIVAL.c_str())) {
+        desArgs->max_arrival = vm[MAX_ARRIVAL.c_str()].as <double>();
+    }
+    std::cout << "Max. arrival rate set to " << desArgs->max_arrival << "." << std::endl;
 
     if (vm.count(GENERATIONS.c_str())) {
         desArgs->generations = vm[GENERATIONS.c_str()].as <boost::int32_t>();

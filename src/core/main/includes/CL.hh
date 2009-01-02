@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -44,6 +44,7 @@ namespace des { namespace core {
  */
 const std::string STOPTIME = "stop_time";
 const std::string GENERATIONS = "generations";
+const std::string MAX_ARRIVAL = "max_arrival_rate";
 const std::string GRAPH = "graph";
 const std::string SEEDS = "seeds";
 const std::string HELP = "help";
@@ -53,6 +54,7 @@ const std::string VERTEX = "vertex";
 const std::string VERS = "version";
 const std::string LOG_GRAPH_RATE = "graph_generation";
 const std::string LOG_EVENTS = "log_events";
+
 const std::string WITH_CI = "confidence";
 const std::string WITH_LHS = "lhs";
 const std::string REPLICATIONS = "replications";
@@ -93,6 +95,7 @@ struct desArgs_t {
     bool log_events;                /* log the events */
     boost::int32_t vertex;          /* the vertex to trace */
     boost::int32_t graph_rate;      /* the rate to generate graphs at */
+    double max_arrival;             /* the max. arrival rate */
 
     double stop_time;               /* stopping time of the DES */
     boost::int32_t generations;     /* number of generations for the event simulation */
@@ -122,6 +125,7 @@ struct desArgs_t {
     friend std::ostream& operator <<(std::ostream &p_os, const desArgs_t &desArgs)
         {
             p_os << desArgs.stop_time << "," << desArgs.generations << ","
+                 << desArgs.max_arrival << ","
                  << desArgs.confidence << "," << desArgs.alpha << "," << desArgs.error
                  << "," << desArgs.replications << "," << desArgs.net_gen << "," << desArgs.net_size
                  << "," << desArgs.max_edges << "," << desArgs.edge_prob << "," << desArgs.edge_fixed;

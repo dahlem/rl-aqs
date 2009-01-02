@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -256,11 +256,12 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
                 r2 = dsample::CRN::getInstance().get(uniform_rng_index);
                 r3 = dsample::CRN::getInstance().get(arrival_rng_index);
                 graph = dnet::WEvonet::createBBVGraph(desArgs->net_size, max_edges, desArgs->edge_fixed,
-                                                      r1, r2, r3);
+                                                      desArgs->max_arrival, r1, r2, r3);
             } else if (desArgs->net_gen == 2) {
                 std::cout << "Generate Erdos-Renyi graph..." << std::endl;
 
-                graph = dnet::WEvonet::createERGraph(desArgs->net_size, desArgs->edge_fixed, r1, edge_prob);
+                graph = dnet::WEvonet::createERGraph(desArgs->net_size, desArgs->edge_fixed,
+                                                     desArgs->max_arrival, r1, edge_prob);
             }
         }
 

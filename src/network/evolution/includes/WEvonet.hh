@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -72,11 +72,11 @@ public:
      *        arrival rate.
      */
     static tGraphSP createBBVGraph(boost::uint32_t p_size, boost::uint32_t p_max_edges,
-                                   double p_edge_weight, tGslRngSP p_edge_rng,
+                                   double p_edge_weight, double p_max_arrival_rate, tGslRngSP p_edge_rng,
                                    tGslRngSP p_uniform_rng, tGslRngSP p_vertex_arrival_rng);
 
-    static tGraphSP createERGraph(boost::uint32_t p_size, double p_edge_weight, tGslRngSP p_vertex_arrival_rng,
-                                  double p);
+    static tGraphSP createERGraph(boost::uint32_t p_size, double p_edge_weight, double p_max_arrival_rate,
+                                  tGslRngSP p_vertex_arrival_rng, double p);
 
 private:
 
@@ -94,7 +94,7 @@ private:
      */
     static void advance(boost::uint32_t, tGraphSP,
                         tGslRngSP, tGslRngSP, tGslRngSP,
-                        double, boost::uint32_t);
+                        double, double, boost::uint32_t);
 
     /** @fn void assign_edge_weights(Vertex &v)
      * Assign the edge weights to the created edges of the newly created

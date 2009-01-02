@@ -51,7 +51,7 @@ namespace des { namespace network {
 
 
 
-tGraphSP WEvonet::createBBVGraph(boost::uint32_t p_size, boost::uint32_t max_edges, double fixed_edge_weight,
+tGraphSP WEvonet::createBBVGraph(boost::uint32_t p_size, boost::uint32_t max_edges, double fixed_edge_weight, double max_arrival_rate,
                                  tGslRngSP num_edges_rng, tGslRngSP uniform_rng, tGslRngSP vertex_arrival_rng)
 {
     // create the graph
@@ -89,7 +89,7 @@ tGraphSP WEvonet::createBBVGraph(boost::uint32_t p_size, boost::uint32_t max_edg
 
     // create a small graph upon which the evolution is excercised
     Vertex v1 = add_vertex(*g);
-    vertex_arrival_props_map[v1] = (gsl_rng_uniform(vertex_arrival_rng.get()) * 10);
+    vertex_arrival_props_map[v1] = (gsl_rng_uniform(vertex_arrival_rng.get()) * max_arrival_rate);
     vertex_service_props_map[v1] = vertex_arrival_props_map[v1];
     vertex_index_props_map[v1] = 0;
     vertex_busy_map[v1] = false;
@@ -148,7 +148,7 @@ tGraphSP WEvonet::createBBVGraph(boost::uint32_t p_size, boost::uint32_t max_edg
     edge_weight_props_map[e2] = 0.5;
 
     advance(p_size - 3, g, num_edges_rng, uniform_rng, vertex_arrival_rng,
-            fixed_edge_weight, max_edges);
+            fixed_edge_weight, max_arrival_rate, max_edges);
 
     return g;
 }
@@ -156,7 +156,7 @@ tGraphSP WEvonet::createBBVGraph(boost::uint32_t p_size, boost::uint32_t max_edg
 
 void WEvonet::advance(boost::uint32_t p_steps, tGraphSP g,
                       tGslRngSP num_edges_rng, tGslRngSP uniform_rng, tGslRngSP vertex_arrival_rng,
-                      double fixed_edge_weight, boost::uint32_t max_edges)
+                      double fixed_edge_weight, double max_arrival_rate, boost::uint32_t max_edges)
 {
     VServiceIterator service_it, service_it_end;
     VertexArrivalRateMap vertex_arrival_props_map
@@ -222,7 +222,7 @@ void WEvonet::advance(boost::uint32_t p_steps, tGraphSP g,
 
         // create vertex
         Vertex v = boost::add_vertex(*g);
-        vertex_arrival_props_map[v] = (gsl_rng_uniform(vertex_arrival_rng.get()) * 10);
+        vertex_arrival_props_map[v] = (gsl_rng_uniform(vertex_arrival_rng.get()) * max_arrival_rate);
         vertex_service_props_map[v] = vertex_arrival_props_map[v];
         vertex_index_props_map[v] = vertices;
         vertex_busy_map[v] = false;
@@ -336,7 +336,7 @@ void WEvonet::assign_edge_weights(Vertex &v, tGraphSP g)
     }
 }
 
-tGraphSP WEvonet::createERGraph(boost::uint32_t p_size, double fixed_edge_weight,
+tGraphSP WEvonet::createERGraph(boost::uint32_t p_size, double fixed_edge_weight, double max_arrival_rate,
                                 tGslRngSP p_vertex_arrival_rng, double p)
 {
     typedef boost::erdos_renyi_iterator<boost::minstd_rand, Graph> ERGen;
@@ -357,7 +357,7 @@ tGraphSP WEvonet::createERGraph(boost::uint32_t p_size, double fixed_edge_weight
     for (p_v = boost::vertices(*g); p_v.first != p_v.second; ++p_v.first) {
         vertexIndexMap[*p_v.first] = i++;
         vertex_arrival_props_map[*p_v.first] =
-            (gsl_rng_uniform(p_vertex_arrival_rng.get()) * 10);
+            (gsl_rng_uniform(p_vertex_arrival_rng.get()) * max_arrival_rate);
         vertex_service_props_map[*p_v.first] = vertex_arrival_props_map[*p_v.first];
     }
 
