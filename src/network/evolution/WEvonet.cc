@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -203,7 +203,7 @@ void WEvonet::advance(boost::uint32_t p_steps, tGraphSP g,
         accum_service_rate = std::accumulate(service_it, service_it_end, 0.0);
 
         // a vector to hold the discover time property for each vertex
-        std::vector <float> service_rates(vertices);
+        std::vector <double> service_rates(vertices);
 
         // Use std::sort to order the vertices by their service rate
         std::vector <boost::graph_traits <Graph>::vertices_size_type>
@@ -218,7 +218,7 @@ void WEvonet::advance(boost::uint32_t p_steps, tGraphSP g,
 
         // sort the service_rate_order according to the service_rates in ascending order
         std::sort(service_rate_order.begin(), service_rate_order.end(),
-                  boost::indirect_cmp <float*, std::greater <float> >(&service_rates[0]));
+                  boost::indirect_cmp <double*, std::greater <double> >(&service_rates[0]));
 
         // create vertex
         Vertex v = boost::add_vertex(*g);
@@ -287,11 +287,11 @@ void WEvonet::balance_vertex_strength(Vertex &v, tGraphSP g, double fixed_edge_w
     size_t vertices = boost::num_vertices(*g);
 
     // external property to keep the enduced differences in strengths
-    std::vector <float> strength_diff_vec(vertices);
-    std::vector <float> strength_diff_apply_vec(vertices);
+    std::vector <double> strength_diff_vec(vertices);
+    std::vector <double> strength_diff_apply_vec(vertices);
 
-    typedef boost::iterator_property_map <std::vector <float>::iterator,
-        boost::property_map <Graph, boost::vertex_index_t>::type, float, float&> IterStrDiffMap;
+    typedef boost::iterator_property_map <std::vector <double>::iterator,
+        boost::property_map <Graph, boost::vertex_index_t>::type, double, double&> IterStrDiffMap;
 
     IterStrDiffMap strength_diff_map(strength_diff_vec.begin(), vertex_index_props_map);
     IterStrDiffMap strength_diff_apply_map(strength_diff_apply_vec.begin(), vertex_index_props_map);

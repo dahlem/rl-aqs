@@ -98,7 +98,7 @@ void dcore::DepartureHandler::update(dcore::DepartureEvent *subject)
         tie(out_edge_it, out_edge_it_end) = boost::out_edges(vertex, *m_graph);
 
         std::vector <dnet::Edge> edges(degree);
-        std::vector <float> edge_weights;
+        std::vector <double> edge_weights;
         std::vector <int> sorted_edge_weights(degree);
         boost::integer_range <int> range(0, degree);
 
@@ -114,7 +114,7 @@ void dcore::DepartureHandler::update(dcore::DepartureEvent *subject)
 
         // sort the sorted_edge_weights according to the edge_weights in ascending order
         std::sort(sorted_edge_weights.begin(), sorted_edge_weights.end(),
-                  boost::indirect_cmp <float*, std::greater <float> >(&edge_weights[0]));
+                  boost::indirect_cmp <double*, std::greater <double> >(&edge_weights[0]));
 
         double temp = 0.0;
         dsample::tGslRngSP depart_uniform_rng = dsample::CRN::getInstance().get(

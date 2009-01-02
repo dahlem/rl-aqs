@@ -133,9 +133,12 @@ void dcore::ArrivalHandler::update(dcore::ArrivalEvent *subject)
                             vertex_average_delay_in_queue_map[vertex],
                             delay);
 
-    vertex_time_service_ends_map[vertex] = departure;
+    // set the time the service ends to the arrival time of the scheduled departure event
+    vertex_time_service_ends_map[vertex] = new_entry->getArrival();
 
 #ifndef NDEBUG_EVENTS
+    std::cout << "Set the time the service ends to: " << vertex_time_service_ends_map[vertex]
+              << std::endl;
     std::cout << "Schedule departure event: " << const_cast <const dcommon::Entry&> (*new_entry)
               << std::endl;
 #endif /* NDEBUG_EVENTS */

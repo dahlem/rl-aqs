@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -127,12 +127,12 @@ namespace des { namespace network {
 /** @typedef VertexServiceRateProperty
  * Specifies the property for the vertex service rate
  */
-typedef boost::property <vertex_service_rate_t, float> VertexServiceRateProperty;
+typedef boost::property <vertex_service_rate_t, double> VertexServiceRateProperty;
 
 /** @typedef VertexArrivalRateProperty
  * Specifies the property for the vertex arrival rate
  */
-typedef boost::property <vertex_arrival_rate_t, float, VertexServiceRateProperty> VertexArrivalRateProperty;
+typedef boost::property <vertex_arrival_rate_t, double, VertexServiceRateProperty> VertexArrivalRateProperty;
 
 /** @typedef VertexArrivalRateProperty
  * Specifies the property for the vertex number in queue
@@ -142,7 +142,7 @@ typedef boost::property <vertex_number_in_queue_t, int, VertexArrivalRatePropert
 /** @typedef VertexAverageDelayInQueueProperty
  * Specifies the property for the vertex average delay in queue
  */
-typedef boost::property <vertex_average_delay_in_queue_t, float, VertexNumberInQueueProperty> VertexAverageDelayInQueueProperty;
+typedef boost::property <vertex_average_delay_in_queue_t, double, VertexNumberInQueueProperty> VertexAverageDelayInQueueProperty;
 
 /** @typedef VertexBusyProperty
  * Specifies the property for the vertex busy flag
@@ -152,7 +152,7 @@ typedef boost::property <vertex_busy_t, bool, VertexAverageDelayInQueueProperty>
 /** @typedef VertexTimeServiceEndsProperty
  * Specifies the property for the time service ends attribute of a vertex
  */
-typedef boost::property <vertex_time_service_ends_t, float, VertexBusyProperty> VertexTimeServiceEndsProperty;
+typedef boost::property <vertex_time_service_ends_t, double, VertexBusyProperty> VertexTimeServiceEndsProperty;
 
 /** @typedef VertexNumEventsProperty
  * Specifies the property for the number of events attribute of a vertex
@@ -162,27 +162,27 @@ typedef boost::property <vertex_num_events_t, int, VertexTimeServiceEndsProperty
 /** @typedef VertexUtilisationProperty
  * Specifies the property for the utlisation attribute of a vertex
  */
-typedef boost::property <vertex_utilisation_t, float, VertexNumEventsProperty> VertexUtilisationProperty;
+typedef boost::property <vertex_utilisation_t, double, VertexNumEventsProperty> VertexUtilisationProperty;
 
 /** @typedef VertexBdtProperty
  * Specifies the property for the fractional utlisation attribute of a vertex
  */
-typedef boost::property <vertex_Bdt_t, float, VertexUtilisationProperty> VertexBdtProperty;
+typedef boost::property <vertex_Bdt_t, double, VertexUtilisationProperty> VertexBdtProperty;
 
 /** @typedef VertexQdtProperty
  * Specifies the property for the fractional expected number of events in queue attribute of a vertex
  */
-typedef boost::property <vertex_Qdt_t, float, VertexBdtProperty> VertexQdtProperty;
+typedef boost::property <vertex_Qdt_t, double, VertexBdtProperty> VertexQdtProperty;
 
 /** @typedef VertexExpectedAverageNumberEventProperty
  * Specifies the property for the expected average number of events in queue attribute of a vertex
  */
-typedef boost::property <vertex_expected_average_number_event_t, float, VertexQdtProperty> VertexExpectedAverageNumberEventProperty;
+typedef boost::property <vertex_expected_average_number_event_t, double, VertexQdtProperty> VertexExpectedAverageNumberEventProperty;
 
 /** @typedef VertexLastEventTimeProperty
  * Specifies the property for the last event time attribute of a vertex
  */
-typedef boost::property <vertex_last_event_time_t, float, VertexExpectedAverageNumberEventProperty> VertexLastEventTimeProperty;
+typedef boost::property <vertex_last_event_time_t, double, VertexExpectedAverageNumberEventProperty> VertexLastEventTimeProperty;
 
 /** @typedef VertexProperties
  * This type definition assembles all the properties for the vertices of the graph
@@ -192,7 +192,7 @@ typedef boost::property <boost::vertex_index_t, int, VertexLastEventTimeProperty
 /** @typedef EdgeWeightProperty
  * Specifies the property for the edge weight
  */
-typedef boost::property <boost::edge_weight_t, float> EdgeWeightProperty;
+typedef boost::property <boost::edge_weight_t, double> EdgeWeightProperty;
 
 
 /** @typedef Graph
@@ -371,7 +371,7 @@ struct cycle_detector : public boost::dfs_visitor<>
 
 protected:
     EdgesToBeRemoved &m_edgesToBeRemoved;
-    
+
 };
 
 

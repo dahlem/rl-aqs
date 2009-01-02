@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -43,7 +43,7 @@ namespace boost
     BOOST_INSTALL_PROPERTY(vertex, service_rate);
 }
 
-typedef boost::property<vertex_service_rate_t, float> VertexServiceRateProperty;
+typedef boost::property<vertex_service_rate_t, double> VertexServiceRateProperty;
 
 int main()
 {
@@ -116,7 +116,7 @@ int main()
     // calculate the ranking of service rates
 
     // a vector to hold the discover time property for each vertex
-    std::vector <float> service_rates(num_vertices((*g.get())));
+    std::vector <double> service_rates(num_vertices((*g.get())));
 
     // Use std::sort to order the vertices by their discover time
     std::vector<graph_traits<Graph>::vertices_size_type> service_rate_order(num_vertices((*g.get())));
@@ -125,7 +125,7 @@ int main()
      std::copy(ci, ci_end, service_rates.begin());
 
      std::sort(service_rate_order.begin(), service_rate_order.end(),
-               indirect_cmp < float*, std::greater < float > >(&service_rates[0]));
+               indirect_cmp < double*, std::greater < double > >(&service_rates[0]));
 
      double temp = 0.0;
      for (unsigned int i = 0; i < num_vertices((*g.get())); ++i) {

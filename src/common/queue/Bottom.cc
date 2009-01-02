@@ -23,6 +23,7 @@
 
 #ifndef NDEBUG_QUEUE
 # include <iostream>
+# include <iomanip>
 #endif /* NDEBUG_QUEUE */
 
 #ifdef HAVE_LADDERSTATS
@@ -102,13 +103,15 @@ const boost::uint32_t dcommon::Bottom::size()
 const bool dcommon::Bottom::push(dcommon::Entry *p_entry) throw (dcommon::QueueException)
 {
 #ifndef NDEBUG_QUEUE
-    std::cout << "Bottom -- Push event: " << const_cast <const dcommon::Entry&> (*p_entry) << std::endl;
+    std::cout << std::setprecision(14) << "Bottom -- Push event: " << const_cast <const dcommon::Entry&> (*p_entry)
+              << std::endl;
 #endif /* NDEBUG_EVENTS */
     bool inserted = false;
 
     if (p_entry->getArrival() < m_lastEvent) {
 #ifndef NDEBUG_QUEUE
-        std::cout << "Bottom -- PAST event! Last dequeued event: " << m_lastEvent << std::endl;
+        std::cout << std::setprecision(14) << "Bottom -- PAST event! Last dequeued event: "
+                  << m_lastEvent << std::endl;
 #endif /* NDEBUG_QUEUE */
         throw dcommon::QueueException(
             dcommon::QueueException::PAST_EVENT_NOT_ALLOWED);
@@ -138,12 +141,12 @@ const bool dcommon::Bottom::push(dcommon::Entry *p_entry) throw (dcommon::QueueE
                 if (it->getArrival() <= p_entry->getArrival()) {
                     dcommon::EntryList::iterator pos = m_list->s_iterator_to(*it);
                     pos++;
-                    m_list->insert(pos, *p_entry);
 #ifndef NDEBUG_QUEUE
                     dcommon::EntryList::iterator pos_start = m_list->s_iterator_to(*it);
                     std::cout << "Bottom -- Inserted between " << pos_start->getArrival()
                               << " and " << pos->getArrival() << std::endl;
 #endif /* NDEBUG_EVENTS */
+                    m_list->insert(pos, *p_entry);
                     inserted = true;
                     break;
                 }
