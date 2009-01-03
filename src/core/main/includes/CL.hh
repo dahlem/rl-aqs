@@ -45,6 +45,7 @@ namespace des { namespace core {
 const std::string STOPTIME = "stop_time";
 const std::string GENERATIONS = "generations";
 const std::string MAX_ARRIVAL = "max_arrival_rate";
+const std::string BOOST_ARRIVAL = "boost_arrival";
 const std::string GRAPH = "graph";
 const std::string SEEDS = "seeds";
 const std::string HELP = "help";
@@ -96,6 +97,7 @@ struct desArgs_t {
     boost::int32_t vertex;          /* the vertex to trace */
     boost::int32_t graph_rate;      /* the rate to generate graphs at */
     double max_arrival;             /* the max. arrival rate */
+    double boost_arrival;           /* boost arrival rate */
 
     double stop_time;               /* stopping time of the DES */
     boost::int32_t generations;     /* number of generations for the event simulation */
@@ -125,7 +127,7 @@ struct desArgs_t {
     friend std::ostream& operator <<(std::ostream &p_os, const desArgs_t &desArgs)
         {
             p_os << desArgs.stop_time << "," << desArgs.generations << ","
-                 << desArgs.max_arrival << ","
+                 << desArgs.max_arrival << "," << desArgs.boost_arrival << ","
                  << desArgs.confidence << "," << desArgs.alpha << "," << desArgs.error
                  << "," << desArgs.replications << "," << desArgs.net_gen << "," << desArgs.net_size
                  << "," << desArgs.max_edges << "," << desArgs.edge_prob << "," << desArgs.edge_fixed;

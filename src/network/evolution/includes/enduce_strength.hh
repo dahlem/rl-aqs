@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -48,13 +48,14 @@ public:
                                     VertexIndexMap vertex_index_map,
                                     StrengthDiffMap vertex_strength_diff_map,
                                     StrengthDiffMap vertex_strength_diff_apply_map,
-                                    double edge_weight)
+                                    double edge_weight, double boost_arrival)
         :  m_vertex_arrival_map(vertex_arrival_map),
            m_edge_weight_map(edge_weight_map),
            m_vertex_index_map(vertex_index_map),
            m_vertex_strength_diff_map(vertex_strength_diff_map),
            m_vertex_strength_diff_apply_map(vertex_strength_diff_apply_map),
-           m_edge_weight(edge_weight) {}
+           m_edge_weight(edge_weight),
+           m_boost_arrival(boost_arrival) {}
 
     template <typename Edge, typename Graph>
     void examine_edge(Edge e, const Graph & g) const
@@ -80,7 +81,8 @@ public:
             // assign the service rate to the apply strength difference
             // this only happens for the root node
             if (m_vertex_strength_diff_map[u] == 0.0) {
-                m_vertex_strength_diff_apply_map[u] = m_vertex_arrival_map[u];
+                m_vertex_strength_diff_apply_map[u] =
+                    m_boost_arrival * m_vertex_arrival_map[u];
             }
         }
 
@@ -98,6 +100,7 @@ public:
     StrengthDiffMap m_vertex_strength_diff_map;
     StrengthDiffMap m_vertex_strength_diff_apply_map;
     double m_edge_weight;
+    double m_boost_arrival;
 };
 
 

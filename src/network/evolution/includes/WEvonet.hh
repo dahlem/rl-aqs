@@ -72,10 +72,11 @@ public:
      *        arrival rate.
      */
     static tGraphSP createBBVGraph(boost::uint32_t p_size, boost::uint32_t p_max_edges,
-                                   double p_edge_weight, double p_max_arrival_rate, tGslRngSP p_edge_rng,
-                                   tGslRngSP p_uniform_rng, tGslRngSP p_vertex_arrival_rng);
+                                   double p_edge_weight, double p_max_arrival_rate, double p_boost_arrival,
+                                   tGslRngSP p_edge_rng, tGslRngSP p_uniform_rng, tGslRngSP p_vertex_arrival_rng);
 
-    static tGraphSP createERGraph(boost::uint32_t p_size, double p_edge_weight, double p_max_arrival_rate,
+    static tGraphSP createERGraph(boost::uint32_t p_size, double p_edge_weight,
+                                  double p_max_arrival_rate, double p_boost_arrival,
                                   tGslRngSP p_vertex_arrival_rng, double p);
 
 private:
@@ -94,7 +95,7 @@ private:
      */
     static void advance(boost::uint32_t, tGraphSP,
                         tGslRngSP, tGslRngSP, tGslRngSP,
-                        double, double, boost::uint32_t);
+                        double, double, double, boost::uint32_t);
 
     /** @fn void assign_edge_weights(Vertex &v)
      * Assign the edge weights to the created edges of the newly created
@@ -112,7 +113,7 @@ private:
      *
      * @param Vertex& The vertex from which to start the adjustment
      */
-    static void balance_vertex_strength(Vertex&, tGraphSP, double);
+    static void balance_vertex_strength(Vertex&, tGraphSP, double, double);
 
 };
 
