@@ -10,7 +10,7 @@
 
 AC_PREREQ(2.61)
 AC_INIT([Discrete Event Simulation for Service Interaction],
-        [1.9],
+        [2.0],
         [Dominik Dahlem Dominik.Dahlem@cs.tcd.ie], 
         [des])
 
@@ -106,6 +106,15 @@ if test "x$EVENTSDEBUGGING" = xno; then
   AC_DEFINE(NDEBUG_EVENTS, 1, [define event debugging, if disabled])
 fi
 
+# Check for network evo debug
+AC_ARG_ENABLE(debug-network, AS_HELP_STRING(
+		     [--enable-debug-network], 
+		     [enable network debugging @<:@default=no@:>@]), 
+		     [NETDEBUGGING=$enableval], [NETDEBUGGING=no])
+if test "x$NETDEBUGGING" = xno; then
+  AC_DEFINE(NDEBUG_NETWORK, 1, [define network debugging, if disabled])
+fi
+
 # Check for debug
 AC_ARG_ENABLE(debug, AS_HELP_STRING(
 		     [--enable-debug], 
@@ -117,6 +126,7 @@ else
   AC_DEFINE(NDEBUG, 1, [define debugging, if disabled])
   AC_DEFINE(NDEBUG_QUEUE, 1, [define queue debugging, if disabled])
   AC_DEFINE(NDEBUG_EVENTS, 1, [define event debugging, if disabled])
+  AC_DEFINE(NDEBUG_NETWORK, 1, [define network debugging, if disabled])
   AC_DEFINE(BOOST_DISABLE_ASSERTS, 1, [disable boost asserts, if enabled])
 fi
 

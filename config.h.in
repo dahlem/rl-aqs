@@ -117,6 +117,9 @@
 /* define event debugging, if disabled */
 #undef NDEBUG_EVENTS
 
+/* define network debugging, if disabled */
+#undef NDEBUG_NETWORK
+
 /* define queue debugging, if disabled */
 #undef NDEBUG_QUEUE
 

@@ -23,6 +23,10 @@
 # include <config.h>
 #endif
 
+#ifdef NDEBUG_NETWORK
+# include <iostream>
+#endif /* NDEBUG_NETWORK */
+
 #include <fstream>
 #include <list>
 #include <numeric>
@@ -325,7 +329,8 @@ tGraphSP WEvonet::createERGraph(boost::uint32_t p_size, double fixed_edge_weight
         vertexIndexMap[*p_v.first] = i++;
         vertex_arrival_props_map[*p_v.first] =
             (gsl_rng_uniform(p_vertex_arrival_rng.get()) * max_arrival_rate);
-        vertex_service_props_map[*p_v.first] = vertex_arrival_props_map[*p_v.first];
+        vertex_service_props_map[*p_v.first] =
+            boost_arrival * vertex_arrival_props_map[*p_v.first];
     }
 
     // remove cycles
@@ -350,8 +355,19 @@ tGraphSP WEvonet::createERGraph(boost::uint32_t p_size, double fixed_edge_weight
     }
 
     for (BalanceOrder::iterator it = balance_order.begin(); it != balance_order.end(); ++it) {
+#ifdef NDEBUG_NETWORK
+        std::cout << "WEvonet -- Balance vertex: " << vertexIndexMap[*it] << std::endl;
+#endif /* NDEBUG_NETWORK */
         if (boost::out_degree(*it, *g) > 0) {
+#ifdef NDEBUG_NETWORK
+            std::cout << "WEvonet -- Vertex[" << vertexIndexMap[*it] << "] outdegree: "
+                      << boost::out_degree(*it, *g) << std::endl;
+#endif /* NDEBUG_NETWORK */
             balance_vertex_strength(*it, g, fixed_edge_weight, boost_arrival);
+#ifdef NDEBUG_NETWORK
+        } else {
+            std::cout << "WEvonet -- Vertex not balanced: " << vertexIndexMap[*it] << std::endl;
+#endif /* NDEBUG_NETWORK */
         }
     }
 
