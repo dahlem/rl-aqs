@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -89,7 +89,7 @@ public:
             replica_output->print(csv_line);
 
             // start 2 experiments
-            for (p_desArgs->rep_num = 1; p_desArgs->rep_num < m_initialExp; ++p_desArgs->rep_num) {
+            for (p_desArgs->rep_num = 1; p_desArgs->rep_num <= m_initialExp; ++p_desArgs->rep_num) {
                 csv_line.str("");
                 output = m_dsim->simulate(p_desArgs);
                 avgDelay.push(output.system_average_delay);
