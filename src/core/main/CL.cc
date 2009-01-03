@@ -83,11 +83,11 @@ CL::CL()
         (GENERATOR.c_str(), po::value <int>()->default_value(1), "Network generator (1=BBV, 2=Erdoes-Renyi).")
         (MAX_ARRIVAL.c_str(), po::value <double>()->default_value(1.0), "Max. arrival rate.")
         (BOOST_ARRIVAL.c_str(), po::value <double>()->default_value(1.0), "Boost the arrival rate.")
+        (MAX_EDGES.c_str(), po::value<boost::uint32_t>()->default_value(dnet::WEvonet::MAX_EDGES), "set the maximum number of edges to connect a new vertex")
         ;
 
     po::options_description opt_soc("Social Network Configuration");
     opt_soc.add_options()
-        (MAX_EDGES.c_str(), po::value<int>()->default_value(dnet::WEvonet::MAX_EDGES), "set the maximum number of edges to connect a new vertex")
         (WEIGHT_FIXED.c_str(), po::value <double>()->default_value(-1.0), "fix the edge weights (-1=dont't fix).")
         ;
 
@@ -111,10 +111,10 @@ CL::CL()
             std::numeric_limits<boost::uint16_t>::max()), "set the min. network size.")
         (MAXSIZE.c_str(), po::value <boost::uint16_t>()->default_value(
             std::numeric_limits<boost::uint16_t>::max()), "set the max. network size.")
-        (MIN_MAX_EDGES.c_str(), po::value <boost::uint16_t>()->default_value(
-            std::numeric_limits<boost::uint16_t>::max()), "set the min. maximum number of edges.")
-        (MAX_MAX_EDGES.c_str(), po::value <boost::uint16_t>()->default_value(
-            std::numeric_limits<boost::uint16_t>::max()), "set the max. maximum number of edges.")
+        (MIN_MAX_EDGES.c_str(), po::value <boost::uint32_t>()->default_value(
+            std::numeric_limits<boost::uint32_t>::max()), "set the min. maximum number of edges.")
+        (MAX_MAX_EDGES.c_str(), po::value <boost::uint32_t>()->default_value(
+            std::numeric_limits<boost::uint32_t>::max()), "set the max. maximum number of edges.")
         (MIN_EDGE_PROB.c_str(), po::value <double>()->default_value(
             std::numeric_limits<double>::max()), "set the min. probability of having edge (u,v).")
         (MAX_EDGE_PROB.c_str(), po::value <double>()->default_value(
@@ -289,19 +289,19 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
     std::cout << "Maximum network size " << desArgs->max_size << "." << std::endl;
 
     if (vm.count(MAX_EDGES.c_str())) {
-        desArgs->max_edges = vm[MAX_EDGES.c_str()].as<int>();
+        desArgs->max_edges = vm[MAX_EDGES.c_str()].as<boost::uint32_t>();
     }
     std::cout << "Maximum number of edges is set to "
               << desArgs->max_edges << "." << std::endl;
 
 
     if (vm.count(MIN_MAX_EDGES.c_str())) {
-        desArgs->min_max_edges = vm[MIN_MAX_EDGES.c_str()].as <boost::uint16_t>();
+        desArgs->min_max_edges = vm[MIN_MAX_EDGES.c_str()].as <boost::uint32_t>();
     }
     std::cout << "Minimum max. number of edges set to " << desArgs->min_max_edges << "." << std::endl;
 
     if (vm.count(MAX_MAX_EDGES.c_str())) {
-        desArgs->max_max_edges = vm[MAX_MAX_EDGES.c_str()].as <boost::uint16_t>();
+        desArgs->max_max_edges = vm[MAX_MAX_EDGES.c_str()].as <boost::uint32_t>();
     }
     std::cout << "Maximum max. number of edges set to " << desArgs->max_max_edges << "." << std::endl;
 

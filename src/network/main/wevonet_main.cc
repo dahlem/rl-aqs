@@ -20,6 +20,7 @@
 #include <iostream>
 #include <string>
 
+#include <boost/cstdint.hpp>
 #include <boost/shared_ptr.hpp>
 
 #include <boost/filesystem.hpp>
@@ -58,7 +59,7 @@ const std::string BOOST_ARRIVAL = "boost_arrival";
 int main(int argc, char *argv[])
 {
     int net_size;
-    int max_edges;
+    boost::uint32_t max_edges;
     int format, format_temp;
     int net_gen = 1;
     double edge_fixed = -1.0;
@@ -82,11 +83,11 @@ int main(int argc, char *argv[])
         (GENERATOR.c_str(), po::value <int>()->default_value(1), "Network generator (1=BBV, 2=Erdoes-Renyi).")
         (MAX_ARRIVAL.c_str(), po::value <double>()->default_value(1), "Maximum arrival rate.")
         (BOOST_ARRIVAL.c_str(), po::value <double>()->default_value(1.0), "Boost the arrival rate.")
+        (MAX_EDGES.c_str(), po::value<boost::uint32_t>()->default_value(dnet::WEvonet::MAX_EDGES), "set the maximum number of edges to connect a new vertex")
         ;
 
     po::options_description desc_soc("Social Network Configuration");
     desc_soc.add_options()
-        (MAX_EDGES.c_str(), po::value<int>(), "set the maximum number of edges to connect a new vertex")
         (WEIGHT_FIXED.c_str(), po::value <double>()->default_value(-1.0), "fix the edge weights (-1=dont't fix).")
         ;
 
@@ -118,13 +119,10 @@ int main(int argc, char *argv[])
     }
 
     if (vm.count(MAX_EDGES.c_str())) {
-        std::cout << "Maximum number of edges is set to "
-                  << vm[MAX_EDGES.c_str()].as<int>() << "." << std::endl;
-        max_edges = vm[MAX_EDGES.c_str()].as<int>();
-    } else {
-        std::cout << "Default maximum number of edges is to MAX_edges." << std::endl;
-        max_edges = dnet::WEvonet::MAX_EDGES;
+        max_edges = vm[MAX_EDGES.c_str()].as<boost::uint32_t>();
     }
+    std::cout << "Maximum number of edges is set to "
+              << max_edges << "." << std::endl;
 
     if (vm.count(FORMAT.c_str())) {
         format_temp = vm[FORMAT.c_str()].as<int>();
@@ -247,7 +245,7 @@ int main(int argc, char *argv[])
                                           max_arrival, boost_arrival, r1, r2, r3);
     } else if (net_gen == 2) {
         g = dnet::WEvonet::createERGraph(net_size, edge_fixed, max_arrival,
-                                         boost_arrival, r1, edge_prob);
+                                         boost_arrival, r1, edge_prob, max_edges);
     }
 
     if (format == dnet::GraphUtil::GRAPHVIZ) {

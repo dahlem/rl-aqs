@@ -114,9 +114,9 @@ struct desArgs_t {
     boost::uint16_t net_size;       /* network size */
     boost::uint16_t min_size;       /* min. network size */
     boost::uint16_t max_size;       /* max. network size */
-    boost::uint16_t max_edges;      /* max number of edges */
-    boost::uint16_t min_max_edges;  /* min. maximum number of edges */
-    boost::uint16_t max_max_edges;  /* max. maximum number of edges */
+    boost::uint32_t max_edges;      /* max number of edges */
+    boost::uint32_t min_max_edges;  /* min. maximum number of edges */
+    boost::uint32_t max_max_edges;  /* max. maximum number of edges */
 
     boost::uint16_t net_gen;        /* network generator */
     double edge_fixed;              /* information diffusion coefficient */

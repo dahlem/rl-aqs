@@ -77,7 +77,7 @@ public:
 
     static tGraphSP createERGraph(boost::uint32_t p_size, double p_edge_weight,
                                   double p_max_arrival_rate, double p_boost_arrival,
-                                  tGslRngSP p_vertex_arrival_rng, double p);
+                                  tGslRngSP p_vertex_arrival_rng, double p, boost::uint32_t max_edges);
 
 private:
 
