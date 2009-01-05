@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -48,6 +48,7 @@
 #include <gsl/gsl_vector.h>
 
 #include "Results.hh"
+#include "FsUtils.hh"
 namespace dio = des::io;
 
 #include "CRN.hh"
@@ -140,8 +141,10 @@ public:
             dio::tResultsSP sim_results(
                 new dio::Results(file, dir));
 
-            csv_line << "sim_num," << ARGS_HEADER << ",actual_reps";
-            sim_results->print(csv_line);
+            if (p_desArgs->add_sim.empty()) {
+                csv_line << "sim_num," << ARGS_HEADER << ",actual_reps";
+                sim_results->print(csv_line);
+            }
             csv_line.str("");
 
             // 3. run experiment

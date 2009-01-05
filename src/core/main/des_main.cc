@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -143,7 +143,17 @@ int main(int argc, char *argv[])
 
     // set the basedir for the results
     std::stringstream baseDir;
-    std::string dateStr = ddate::CurDateSingleton::getInstance().get();
+
+    // if we start a new experiment we'll create a new date string
+    std::string dateStr;
+
+    // otherwise use the one supplied on the command-line
+    if (desArgs->add_sim.empty()) {
+        dateStr = ddate::CurDateSingleton::getInstance().get();
+    } else {
+        dateStr = desArgs->add_sim;
+    }
+
     strncpy(dateCStr, dateStr.c_str(), 128);
 
 #ifdef HAVE_MPI
@@ -247,8 +257,10 @@ int main(int argc, char *argv[])
         dio::tResultsSP sim_results(
             new dio::Results(file, dir));
 
-        csv_line << "sim_num," << dcore::ARGS_HEADER << ",actual_reps";
-        sim_results->print(csv_line);
+        if (desArgs->add_sim.empty()) {
+            csv_line << "sim_num," << dcore::ARGS_HEADER << ",actual_reps";
+            sim_results->print(csv_line);
+        }
 
         csv_line.str("");
         csv_line << desArgs->sim_num << "," << const_cast <const dcore::desArgs_t&> (*desArgs)

@@ -55,6 +55,7 @@ const std::string VERTEX = "vertex";
 const std::string VERS = "version";
 const std::string LOG_GRAPH_RATE = "graph_generation";
 const std::string LOG_EVENTS = "log_events";
+const std::string ADD_SIM = "add_sim";
 
 const std::string WITH_CI = "confidence";
 const std::string WITH_LHS = "lhs";
@@ -92,6 +93,8 @@ struct desArgs_t {
     std::string results_dir;        /* directory name for the results */
     std::string events_unprocessed; /* filename for the unprocessed events */
     std::string events_processed;   /* filename for the processed events */
+    std::string add_sim;            /* add to existing experiments */
+
     bool trace_event;               /* trace an event */
     bool log_events;                /* log the events */
     boost::int32_t vertex;          /* the vertex to trace */

@@ -84,6 +84,7 @@ CL::CL()
         (MAX_ARRIVAL.c_str(), po::value <double>()->default_value(1.0), "Max. arrival rate.")
         (BOOST_ARRIVAL.c_str(), po::value <double>()->default_value(1.0), "Boost the arrival rate.")
         (MAX_EDGES.c_str(), po::value<boost::uint32_t>()->default_value(dnet::WEvonet::MAX_EDGES), "set the maximum number of edges to connect a new vertex")
+        (ADD_SIM.c_str(), po::value<std::string>()->default_value(std::string("")), "add to existing experiments")
         ;
 
     po::options_description opt_soc("Social Network Configuration");
@@ -193,6 +194,12 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
     }
     std::cout << "Set the results directory "
               << desArgs->results_dir << "." << std::endl;
+
+    if (vm.count(ADD_SIM.c_str())) {
+        desArgs->add_sim = vm[ADD_SIM.c_str()].as <std::string>();
+    }
+    std::cout << "Add to existing experiments "
+              << desArgs->add_sim << "." << std::endl;
 
     if (vm.count(LOG_GRAPH_RATE.c_str())) {
         desArgs->graph_rate = vm[LOG_GRAPH_RATE.c_str()].as <boost::int32_t>();

@@ -1,4 +1,4 @@
-# Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+# Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 #  
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without 
@@ -30,6 +30,7 @@ des_main_CPPFLAGS =                                                      \
 	-I$(top_srcdir)/src/statistics/analysis/includes                 \
 	-I$(top_srcdir)/src/date/includes                                \
 	-I$(top_srcdir)/src/common/list/includes
+	$(BOOST_CPPFLAGS)
 
 
 des_main_LDADD =                                                         \
@@ -43,7 +44,6 @@ des_main_LDADD =                                                         \
 	$(top_srcdir)/src/common/list/libcommonlist.la                   \
 	$(top_srcdir)/src/core/event/libcoreevent.la                     \
 	$(top_srcdir)/src/network/evolution/libnetevo.la                 \
-	$(BOOST_LDFLAGS)                                                 \
 	$(BOOST_PROGRAM_OPTIONS_LIB)
 
 

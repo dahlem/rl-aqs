@@ -41,6 +41,7 @@
 namespace dstats = des::statistics;
 
 #include "Results.hh"
+#include "FsUtils.hh"
 namespace dio = des::io;
 
 
@@ -73,7 +74,14 @@ public:
     sim_output simulate(tDesArgsSP p_desArgs)
         {
             std::stringstream outDir, csv_line;
-            outDir << p_desArgs->results_dir << "/" << p_desArgs->sim_num;
+            outDir << p_desArgs->results_dir << "/";
+
+            if (!p_desArgs->add_sim.empty()) {
+                std::string parentDir = outDir.str();
+                p_desArgs->sim_num = dio::FsUtils::directories(parentDir) + 1;
+            }
+
+            outDir << p_desArgs->sim_num;
 
             std::string dir = outDir.str();
             std::string file = "replica_results.dat";
@@ -85,8 +93,10 @@ public:
             dstats::OnlineStats avgDelay;
             dstats::OnlineStats avgNumEvents;
 
-            csv_line << "sim_num,rep_num,systemDelay,systemAvgNumEvents,meanDelay,varDelay,meanAvgNumEvents,varAvgNumEvents";
-            replica_output->print(csv_line);
+            if (p_desArgs->add_sim.empty()) {
+                csv_line << "sim_num,rep_num,systemDelay,systemAvgNumEvents,meanDelay,varDelay,meanAvgNumEvents,varAvgNumEvents";
+                replica_output->print(csv_line);
+            }
 
             // start 2 experiments
             for (p_desArgs->rep_num = 1; p_desArgs->rep_num <= m_initialExp; ++p_desArgs->rep_num) {

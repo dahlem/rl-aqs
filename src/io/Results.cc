@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -43,8 +43,10 @@ Results::Results(std::string &filename, std::string &dir)
 
     path_str << dir << "/" << filename;
 
-    // create a buffer
-    buf = tStrBufSP(new str_buf(path_str.str()));
+    // create a buffer, if it exists append at the end of the file
+    buf = tStrBufSP(
+        new str_buf(
+            path_str.str(), std::ios_base::out | std::ios_base::app));
 
     // create a output stream
     os = tOstreamSP(new std::ostream(buf.get()));
