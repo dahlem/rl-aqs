@@ -13,37 +13,6 @@
 ## Keywords: plotting
 ## Created: 15.07.2008
 
-des.graph.service.plot <- function(graph, filename, ps=TRUE) {
-  if (ps) {
-    postscript(eval.dir(filename), onefile=FALSE)
-  }
-
-  plot(graph,
-       vertex.label=get.vertex.attribute(graph, "service_rate"),
-       edge.label=get.edge.attribute(graph, "weight"),
-       vertex.label.family="Helvetica", edge.label.family="Helvetica")
-
-  if (ps) {
-    dev.off()
-  }
-}
-
-des.graph.arrival.plot <- function(graph, filename, ps=TRUE) {
-  if (ps) {
-    postscript(eval.dir(filename), onefile=FALSE)
-  }
-
-  plot(graph,
-       vertex.label=get.vertex.attribute(graph, "arrival_rate"),
-       edge.label=get.edge.attribute(graph, "weight"),
-       vertex.label.family="Helvetica", edge.label.family="Helvetica")
-
-  if (ps) {
-    dev.off()
-  }
-}
-
-
 des.graph.sim.main <- function(replications, graphs, nodes, stopTime) {
   des.graph.arrival.hist.plot(replications, graphs, nodes)
   des.graph.utilisation.plot(replications, graphs, nodes)
@@ -52,6 +21,15 @@ des.graph.sim.main <- function(replications, graphs, nodes, stopTime) {
   des.graph.delay.customers.evo.plot(replications, graphs, nodes, stopTime)
   des.graph.average.delay.in.queue.plot(replications, graphs, nodes)
   des.graph.average.delay.in.queue.evo.plot(replications, graphs, nodes, stopTime)
+
+  des.graph.numEvents.betweenness.plot(replications, graphs, nodes)
+  des.graph.utilisation.betweenness.plot(replications, graphs, nodes)
+  des.graph.delay.betweenness.plot(replications, graphs, nodes)
+  des.graph.serviceRate.betweenness.plot(replications, graphs, nodes)
+  
+  des.graph.numEvents.degree.plot(replications, graphs, nodes)
+  des.graph.utilisation.degree.plot(replications, graphs, nodes)
+  des.graph.delay.degree.plot(replications, graphs, nodes)
 }
 
 des.graph.arrival.hist.plot <- function(replications, graphs, nodes, ps=TRUE) {
@@ -230,6 +208,270 @@ des.graph.utilisation.customers.evo.plot <- function(replications, graphs, nodes
 }
 
 
+des.graph.numEvents.betweenness.plot <- function(replications, graphs, nodes, ps=TRUE) {
+  if (ps) {
+    postscript("graph-betweenness-vs-numEvents-plot.eps", onefile=FALSE)
+  }
+
+  counter <- 1
+  df <- data.frame(expectedAverageNumEvents=rep(0, replications * nodes),
+                   betweenness=rep(0, replications * nodes));
+  
+  for (r in seq(1, replications)) {
+    if (file.exists(paste(r, "/graphs/graph", graphs - 1, ".gml", sep="")) == TRUE) {
+      print(paste("Read graph: ", r, "/graphs/graph", graphs - 1, ".gml", sep=""))
+      simEndGraph = paste(r, "/graphs/graph", graphs - 1, ".gml", sep="")
+      graph = read.graph(simEndGraph, format="graphml")
+      expectedAverageNumEvents <- get.vertex.attribute(graph, "expected_average_number_event")
+      betweenness <- betweenness(graph, directed = TRUE);
+      df$expectedAverageNumEvents[(1 + (counter - 1) * nodes):(nodes * counter)] <- expectedAverageNumEvents
+      df$betweenness[(1 + (counter - 1) * nodes):(nodes * counter)] <- betweenness
+      counter <- counter + 1
+    }
+  }
+
+  ## select only vertices with betweenness > 0
+  df <- df[df$betweenness > 0,]
+  
+  p <- ggplot(df, aes(y=expectedAverageNumEvents, x=betweenness))
+  p <- p + layer(geom = "point")
+  p <- p + scale_x_continuous("Betweenness")
+  p <- p + scale_y_continuous("Expected Average Number of Events in Queue")
+  p <- p + opts(title="Betweenness vs. Expected Average Number of Events in Queue")
+  p <- p + theme_bw()
+  print(p)
+
+  if (ps) {
+    dev.off()
+  }
+}
+
+
+des.graph.utilisation.betweenness.plot <- function(replications, graphs, nodes, ps=TRUE) {
+  if (ps) {
+    postscript("graph-betweenness-vs-util-plot.eps", onefile=FALSE)
+  }
+
+  counter <- 1
+  df <- data.frame(utilisation=rep(0, replications * nodes),
+                   betweenness=rep(0, replications * nodes));
+  
+  for (r in seq(1, replications)) {
+    if (file.exists(paste(r, "/graphs/graph", graphs - 1, ".gml", sep="")) == TRUE) {
+      print(paste("Read graph: ", r, "/graphs/graph", graphs - 1, ".gml", sep=""))
+      simEndGraph = paste(r, "/graphs/graph", graphs - 1, ".gml", sep="")
+      graph = read.graph(simEndGraph, format="graphml")
+      utilisation <- get.vertex.attribute(graph, "utilisation")
+      betweenness <- betweenness(graph, directed = TRUE);
+      df$utilisation[(1 + (counter - 1) * nodes):(nodes * counter)] <- utilisation
+      df$betweenness[(1 + (counter - 1) * nodes):(nodes * counter)] <- betweenness
+      counter <- counter + 1
+    }
+  }
+
+  ## select only vertices with betweenness > 0
+  df <- df[df$betweenness > 0,]
+  
+  p <- ggplot(df, aes(y=utilisation, x=betweenness))
+  p <- p + layer(geom = "point")
+  p <- p + scale_x_continuous("Betweenness")
+  p <- p + scale_y_continuous("Utilisation")
+  p <- p + opts(title="Betweenness vs. Utilisation")
+  p <- p + theme_bw()
+  print(p)
+
+  if (ps) {
+    dev.off()
+  }
+}
+
+
+des.graph.serviceRate.betweenness.plot <- function(replications, graphs, nodes, ps=TRUE) {
+  if (ps) {
+    postscript("graph-betweenness-vs-serviceRate-plot.eps", onefile=FALSE)
+  }
+
+  counter <- 1
+  df <- data.frame(serviceRate=rep(0, replications * nodes),
+                   betweenness=rep(0, replications * nodes));
+  
+  for (r in seq(1, replications)) {
+    if (file.exists(paste(r, "/graphs/graph", graphs - 1, ".gml", sep="")) == TRUE) {
+      print(paste("Read graph: ", r, "/graphs/graph", graphs - 1, ".gml", sep=""))
+      simEndGraph = paste(r, "/graphs/graph", graphs - 1, ".gml", sep="")
+      graph = read.graph(simEndGraph, format="graphml")
+      serviceRate <- get.vertex.attribute(graph, "service_rate")
+      betweenness <- betweenness(graph, directed = TRUE);
+      df$serviceRate[(1 + (counter - 1) * nodes):(nodes * counter)] <- serviceRate
+      df$betweenness[(1 + (counter - 1) * nodes):(nodes * counter)] <- betweenness
+      counter <- counter + 1
+    }
+  }
+
+  ## select only vertices with betweenness > 0
+  df <- df[df$betweenness > 0,]
+  
+  p <- ggplot(df, aes(y=serviceRate, x=betweenness))
+  p <- p + layer(geom = "point")
+  p <- p + scale_x_continuous("Betweenness")
+  p <- p + scale_y_continuous("Service Rate")
+  p <- p + opts(title="Betweenness vs. Service Rate")
+  p <- p + theme_bw()
+  print(p)
+
+  if (ps) {
+    dev.off()
+  }
+}
+
+
+des.graph.delay.betweenness.plot <- function(replications, graphs, nodes, ps=TRUE) {
+  if (ps) {
+    postscript("graph-betweenness-vs-delay-plot.eps", onefile=FALSE)
+  }
+
+  counter <- 1
+  df <- data.frame(delay=rep(0, replications * nodes),
+                   betweenness=rep(0, replications * nodes));
+  
+  for (r in seq(1, replications)) {
+    if (file.exists(paste(r, "/graphs/graph", graphs - 1, ".gml", sep="")) == TRUE) {
+      print(paste("Read graph: ", r, "/graphs/graph", graphs - 1, ".gml", sep=""))
+      simEndGraph = paste(r, "/graphs/graph", graphs - 1, ".gml", sep="")
+      graph = read.graph(simEndGraph, format="graphml")
+      delay <- get.vertex.attribute(graph, "average_delay_in_queue")
+      betweenness <- betweenness(graph, directed = TRUE);
+      df$delay[(1 + (counter - 1) * nodes):(nodes * counter)] <- delay
+      df$betweenness[(1 + (counter - 1) * nodes):(nodes * counter)] <- betweenness
+      counter <- counter + 1
+    }
+  }
+
+  ## select only vertices with betweenness > 0
+  df <- df[df$betweenness > 0,]
+  
+  p <- ggplot(df, aes(y=delay, x=betweenness))
+  p <- p + layer(geom = "point")
+  p <- p + scale_x_continuous("Betweenness")
+  p <- p + scale_y_continuous("Average Delay in Queue")
+  p <- p + opts(title="Average Delay in Queue vs. utilisation")
+  p <- p + theme_bw()
+  print(p)
+
+  if (ps) {
+    dev.off()
+  }
+}
+
+
+des.graph.numEvents.degree.plot <- function(replications, graphs, nodes, ps=TRUE) {
+  if (ps) {
+    postscript("graph-degree-vs-numEvents-plot.eps", onefile=FALSE)
+  }
+
+  counter <- 1
+  df <- data.frame(expectedAverageNumEvents=rep(0, replications * nodes),
+                   degree=rep(0, replications * nodes));
+  
+  for (r in seq(1, replications)) {
+    if (file.exists(paste(r, "/graphs/graph", graphs - 1, ".gml", sep="")) == TRUE) {
+      print(paste("Read graph: ", r, "/graphs/graph", graphs - 1, ".gml", sep=""))
+      simEndGraph = paste(r, "/graphs/graph", graphs - 1, ".gml", sep="")
+      graph = read.graph(simEndGraph, format="graphml")
+      expectedAverageNumEvents <- get.vertex.attribute(graph, "expected_average_number_event")
+      deg <- degree(graph, mode="in")
+      df$expectedAverageNumEvents[(1 + (counter - 1) * nodes):(nodes * counter)] <- expectedAverageNumEvents
+      df$degree[(1 + (counter - 1) * nodes):(nodes * counter)] <- deg
+      counter <- counter + 1
+    }
+  }
+
+  p <- ggplot(df, aes(y=expectedAverageNumEvents, x=degree))
+  p <- p + layer(geom = "point")
+  p <- p + scale_x_continuous("In-Degree")
+  p <- p + scale_y_continuous("Expected Average Number of Events in Queue")
+  p <- p + opts(title="In-Degree vs. Expected Average Number of Events in Queue")
+  p <- p + theme_bw()
+  print(p)
+
+  if (ps) {
+    dev.off()
+  }
+}
+
+
+des.graph.utilisation.degree.plot <- function(replications, graphs, nodes, ps=TRUE) {
+  if (ps) {
+    postscript("graph-degree-vs-util-plot.eps", onefile=FALSE)
+  }
+
+  counter <- 1
+  df <- data.frame(utilisation=rep(0, replications * nodes),
+                   degree=rep(0, replications * nodes));
+  
+  for (r in seq(1, replications)) {
+    if (file.exists(paste(r, "/graphs/graph", graphs - 1, ".gml", sep="")) == TRUE) {
+      print(paste("Read graph: ", r, "/graphs/graph", graphs - 1, ".gml", sep=""))
+      simEndGraph = paste(r, "/graphs/graph", graphs - 1, ".gml", sep="")
+      graph = read.graph(simEndGraph, format="graphml")
+      utilisation <- get.vertex.attribute(graph, "utilisation")
+      deg <- degree(graph, mode="in")
+      df$utilisation[(1 + (counter - 1) * nodes):(nodes * counter)] <- utilisation
+      df$degree[(1 + (counter - 1) * nodes):(nodes * counter)] <- deg
+      counter <- counter + 1
+    }
+  }
+  
+  p <- ggplot(df, aes(y=utilisation, x=degree))
+  p <- p + layer(geom = "point")
+  p <- p + scale_x_continuous("In-Degree")
+  p <- p + scale_y_continuous("Utilisation")
+  p <- p + opts(title="In-Degree vs. Utilisation")
+  p <- p + theme_bw()
+  print(p)
+
+  if (ps) {
+    dev.off()
+  }
+}
+
+
+des.graph.delay.degree.plot <- function(replications, graphs, nodes, ps=TRUE) {
+  if (ps) {
+    postscript("graph-degree-vs-delay-plot.eps", onefile=FALSE)
+  }
+
+  counter <- 1
+  df <- data.frame(delay=rep(0, replications * nodes),
+                   degree=rep(0, replications * nodes));
+  
+  for (r in seq(1, replications)) {
+    if (file.exists(paste(r, "/graphs/graph", graphs - 1, ".gml", sep="")) == TRUE) {
+      print(paste("Read graph: ", r, "/graphs/graph", graphs - 1, ".gml", sep=""))
+      simEndGraph = paste(r, "/graphs/graph", graphs - 1, ".gml", sep="")
+      graph = read.graph(simEndGraph, format="graphml")
+      delay <- get.vertex.attribute(graph, "average_delay_in_queue")
+      deg <- degree(graph, mode="in")
+      df$delay[(1 + (counter - 1) * nodes):(nodes * counter)] <- delay
+      df$degree[(1 + (counter - 1) * nodes):(nodes * counter)] <- deg
+      counter <- counter + 1
+    }
+  }
+  
+  p <- ggplot(df, aes(y=delay, x=degree))
+  p <- p + layer(geom = "point")
+  p <- p + scale_x_continuous("In-Degree")
+  p <- p + scale_y_continuous("Average Delay in Queue")
+  p <- p + opts(title="In-Degree vs. Average Delay in Queue")
+  p <- p + theme_bw()
+  print(p)
+
+  if (ps) {
+    dev.off()
+  }
+}
+
+
 des.graph.delay.customers.evo.plot <- function(replications, graphs, nodes, stopTime, ps=TRUE) {
   if (ps) {
     postscript("graph-delay-vs-customers-evo-plot.eps", onefile=FALSE)
@@ -370,3 +612,18 @@ des.graph.average.delay.in.queue.evo.plot <- function(replications, graphs, node
     dev.off()
   }
 }
+
+
+library(igraph)
+library(ggplot2)
+
+replicas <- read.csv("replica_results.dat", header=TRUE)
+simNum <- replicas$sim_num[1]
+
+simulations <- read.csv("../simulations.dat", header=TRUE)
+replications <- simulations[simulations$sim_num == simNum,]$actual_reps
+graphs <- simulations[simulations$sim_num == simNum,]$graphs
+nodes <- simulations[simulations$sim_num == simNum,]$network_size
+stopTime <- simulations[simulations$sim_num == simNum,]$stop_time
+
+des.graph.sim.main(replications, graphs, nodes, stopTime)
