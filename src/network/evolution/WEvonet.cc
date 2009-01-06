@@ -56,7 +56,7 @@ namespace des { namespace network {
 
 
 tGraphSP WEvonet::createBBVGraph(boost::uint32_t p_size, boost::uint32_t max_edges,
-                                 double fixed_edge_weight, double max_arrival_rate, double boost_arrival,
+                                 double fixed_edge_weight, double max_arrival_rate, double boost_arrival, double boost_edge,
                                  tGslRngSP num_edges_rng, tGslRngSP uniform_rng, tGslRngSP vertex_arrival_rng)
 {
     // create the graph
@@ -109,7 +109,7 @@ tGraphSP WEvonet::createBBVGraph(boost::uint32_t p_size, boost::uint32_t max_edg
     vertex_expected_average_number_event_map[v1] = 0.0;
 
     advance(p_size - 1, g, num_edges_rng, uniform_rng, vertex_arrival_rng,
-            fixed_edge_weight, max_arrival_rate, boost_arrival, max_edges);
+            fixed_edge_weight, max_arrival_rate, boost_arrival, boost_edge, max_edges);
 
     return g;
 }
@@ -118,7 +118,7 @@ tGraphSP WEvonet::createBBVGraph(boost::uint32_t p_size, boost::uint32_t max_edg
 void WEvonet::advance(boost::uint32_t p_steps, tGraphSP g,
                       tGslRngSP num_edges_rng, tGslRngSP uniform_rng, tGslRngSP vertex_arrival_rng,
                       double fixed_edge_weight, double max_arrival_rate,
-                      double boost_arrival, boost::uint32_t max_edges)
+                      double boost_arrival, double boost_edge, boost::uint32_t max_edges)
 {
     VServiceIterator service_it, service_it_end;
     VertexArrivalRateMap vertex_arrival_props_map
@@ -234,13 +234,13 @@ void WEvonet::advance(boost::uint32_t p_steps, tGraphSP g,
         assign_edge_weights(v, g);
 
         // re-calculate the node strengths using depth-first search originating from the new node
-        balance_vertex_strength(v, g, fixed_edge_weight, boost_arrival);
+        balance_vertex_strength(v, g, fixed_edge_weight, boost_arrival, boost_edge);
     }
 }
 
 
 void WEvonet::balance_vertex_strength(Vertex &v, tGraphSP g, double fixed_edge_weight,
-                                      double boost_arrival)
+                                      double boost_arrival, double boost_edge)
 {
     VertexArrivalRateMap vertex_arrival_props_map = get(vertex_arrival_rate, *g);
     VertexServiceRateMap vertex_service_props_map = get(vertex_service_rate, *g);
@@ -264,7 +264,7 @@ void WEvonet::balance_vertex_strength(Vertex &v, tGraphSP g, double fixed_edge_w
         VertexIndexMap, IterStrDiffMap>
         vis_enduced_strength(vertex_arrival_props_map, edge_weight_props_map,
                              vertex_index_props_map, strength_diff_map,
-                             strength_diff_apply_map, fixed_edge_weight, boost_arrival);
+                             strength_diff_apply_map, fixed_edge_weight, boost_arrival, boost_edge);
 
     // 1. determine the enduced differences in vertex strength
     boost::epidemic_visit(*g,
@@ -300,7 +300,7 @@ void WEvonet::assign_edge_weights(Vertex &v, tGraphSP g)
 }
 
 tGraphSP WEvonet::createERGraph(boost::uint32_t p_size, double fixed_edge_weight,
-                                double max_arrival_rate, double boost_arrival,
+                                double max_arrival_rate, double boost_arrival, double boost_edge,
                                 tGslRngSP p_vertex_arrival_rng, double p,
                                 boost::uint32_t max_edges)
 {
@@ -363,7 +363,7 @@ tGraphSP WEvonet::createERGraph(boost::uint32_t p_size, double fixed_edge_weight
             std::cout << "WEvonet -- Vertex[" << vertexIndexMap[*it] << "] outdegree: "
                       << boost::out_degree(*it, *g) << std::endl;
 #endif /* NDEBUG_NETWORK */
-            balance_vertex_strength(*it, g, fixed_edge_weight, boost_arrival);
+            balance_vertex_strength(*it, g, fixed_edge_weight, boost_arrival, boost_edge);
 #ifndef NDEBUG_NETWORK
         } else {
             std::cout << "WEvonet -- Vertex not balanced: " << vertexIndexMap[*it] << std::endl;

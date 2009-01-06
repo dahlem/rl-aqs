@@ -48,14 +48,15 @@ public:
                                     VertexIndexMap vertex_index_map,
                                     StrengthDiffMap vertex_strength_diff_map,
                                     StrengthDiffMap vertex_strength_diff_apply_map,
-                                    double edge_weight, double boost_arrival)
+                                    double edge_weight, double boost_arrival, double boost_edge)
         :  m_vertex_arrival_map(vertex_arrival_map),
            m_edge_weight_map(edge_weight_map),
            m_vertex_index_map(vertex_index_map),
            m_vertex_strength_diff_map(vertex_strength_diff_map),
            m_vertex_strength_diff_apply_map(vertex_strength_diff_apply_map),
            m_edge_weight(edge_weight),
-           m_boost_arrival(boost_arrival) {}
+           m_boost_arrival(boost_arrival),
+           m_boost_edge(boost_edge) {}
 
     template <typename Edge, typename Graph>
     void examine_edge(Edge e, const Graph & g) const
@@ -65,7 +66,7 @@ public:
             if (m_edge_weight > 0) {
                 update *= m_edge_weight;
             } else {
-                update *= m_edge_weight_map[e];
+                update *= (m_edge_weight_map[e] * m_boost_edge);
             }
 
             // update the target strength difference
@@ -101,6 +102,7 @@ public:
     StrengthDiffMap m_vertex_strength_diff_apply_map;
     double m_edge_weight;
     double m_boost_arrival;
+    double m_boost_edge;
 };
 
 

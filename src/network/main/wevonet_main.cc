@@ -53,6 +53,7 @@ const std::string EDGE_PROB = "edge_prob";
 const std::string GENERATOR = "generator";
 const std::string MAX_ARRIVAL = "max_arrival";
 const std::string BOOST_ARRIVAL = "boost_arrival";
+const std::string BOOST_EDGE = "boost_edge";
 
 
 
@@ -64,7 +65,7 @@ int main(int argc, char *argv[])
     int net_gen = 1;
     double edge_fixed = -1.0;
     double edge_prob = 0.05;
-    double max_arrival, boost_arrival;
+    double max_arrival, boost_arrival, boost_edge;
 
     dsample::tGslRngSP r1, r2, r3;
     std::string filename;
@@ -83,6 +84,7 @@ int main(int argc, char *argv[])
         (GENERATOR.c_str(), po::value <int>()->default_value(1), "Network generator (1=BBV, 2=Erdoes-Renyi).")
         (MAX_ARRIVAL.c_str(), po::value <double>()->default_value(1), "Maximum arrival rate.")
         (BOOST_ARRIVAL.c_str(), po::value <double>()->default_value(1.0), "Boost the arrival rate.")
+        (BOOST_EDGE.c_str(), po::value <double>()->default_value(1.0), "Boost the edge weight.")
         (MAX_EDGES.c_str(), po::value<boost::uint32_t>()->default_value(dnet::WEvonet::MAX_EDGES), "set the maximum number of edges to connect a new vertex")
         ;
 
@@ -171,6 +173,11 @@ int main(int argc, char *argv[])
     }
     std::cout << "Boost the arrival rate " << boost_arrival << "." << std::endl;
 
+    if (vm.count(BOOST_EDGE.c_str())) {
+        boost_edge = vm[BOOST_EDGE.c_str()].as <double>();
+    }
+    std::cout << "Boost the edge weight " << boost_edge << "." << std::endl;
+
     if (vm.count(WEIGHT_FIXED.c_str())) {
         edge_fixed = vm[WEIGHT_FIXED.c_str()].as <double>();
     }
@@ -242,10 +249,11 @@ int main(int argc, char *argv[])
 
     if (net_gen == 1) {
         g = dnet::WEvonet::createBBVGraph(net_size, max_edges, edge_fixed,
-                                          max_arrival, boost_arrival, r1, r2, r3);
+                                          max_arrival, boost_arrival, boost_edge, r1, r2, r3);
     } else if (net_gen == 2) {
         g = dnet::WEvonet::createERGraph(net_size, edge_fixed, max_arrival,
-                                         boost_arrival, r1, edge_prob, max_edges);
+                                         boost_arrival, boost_edge, r1, edge_prob,
+                                         max_edges);
     }
 
     if (format == dnet::GraphUtil::GRAPHVIZ) {

@@ -83,6 +83,7 @@ CL::CL()
         (GENERATOR.c_str(), po::value <int>()->default_value(1), "Network generator (1=BBV, 2=Erdoes-Renyi).")
         (MAX_ARRIVAL.c_str(), po::value <double>()->default_value(1.0), "Max. arrival rate.")
         (BOOST_ARRIVAL.c_str(), po::value <double>()->default_value(1.0), "Boost the arrival rate.")
+        (BOOST_EDGE.c_str(), po::value <double>()->default_value(1.0), "Boost the edge weight.")
         (MAX_EDGES.c_str(), po::value<boost::uint32_t>()->default_value(dnet::WEvonet::MAX_EDGES), "set the maximum number of edges to connect a new vertex")
         (ADD_SIM.c_str(), po::value<std::string>()->default_value(std::string("")), "add to existing experiments")
         ;
@@ -227,6 +228,11 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
         desArgs->boost_arrival = vm[BOOST_ARRIVAL.c_str()].as <double>();
     }
     std::cout << "Boost the arrival rate " << desArgs->boost_arrival << "." << std::endl;
+
+    if (vm.count(BOOST_EDGE.c_str())) {
+        desArgs->boost_edge = vm[BOOST_EDGE.c_str()].as <double>();
+    }
+    std::cout << "Boost the edge weight " << desArgs->boost_edge << "." << std::endl;
 
     if (vm.count(GENERATIONS.c_str())) {
         desArgs->generations = vm[GENERATIONS.c_str()].as <boost::int32_t>();
