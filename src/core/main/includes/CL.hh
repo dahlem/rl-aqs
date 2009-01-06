@@ -82,7 +82,7 @@ const std::string GENERATOR = "graph_generator";
  */
 typedef boost::shared_ptr <po::options_description> tOptDescSP;
 
-static const std::string ARGS_HEADER = "stop_time,generations,confidence,alpha,error,initial_reps,network_size,max_edges,edgeProb,edgeDiffusion";
+static const std::string ARGS_HEADER = "stop_time,generations,graphs,max_arrival,boost_arrival,confidence,alpha,error,initial_reps,network_type,network_size,max_edges,edgeProb,edgeDiffusion";
 
 /** @struct
  * structure specifying the command line variables.
@@ -129,7 +129,7 @@ struct desArgs_t {
 
     friend std::ostream& operator <<(std::ostream &p_os, const desArgs_t &desArgs)
         {
-            p_os << desArgs.stop_time << "," << desArgs.generations << ","
+            p_os << desArgs.stop_time << "," << desArgs.generations << "," << (desArgs.graph_rate + 1)
                  << desArgs.max_arrival << "," << desArgs.boost_arrival << ","
                  << desArgs.confidence << "," << desArgs.alpha << "," << desArgs.error
                  << "," << desArgs.replications << "," << desArgs.net_gen << "," << desArgs.net_size
