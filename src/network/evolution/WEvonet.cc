@@ -23,7 +23,7 @@
 # include <config.h>
 #endif
 
-#ifdef NDEBUG_NETWORK
+#ifndef NDEBUG_NETWORK
 # include <iostream>
 #endif /* NDEBUG_NETWORK */
 
@@ -355,16 +355,16 @@ tGraphSP WEvonet::createERGraph(boost::uint32_t p_size, double fixed_edge_weight
     }
 
     for (BalanceOrder::iterator it = balance_order.begin(); it != balance_order.end(); ++it) {
-#ifdef NDEBUG_NETWORK
+#ifndef NDEBUG_NETWORK
         std::cout << "WEvonet -- Balance vertex: " << vertexIndexMap[*it] << std::endl;
 #endif /* NDEBUG_NETWORK */
         if (boost::out_degree(*it, *g) > 0) {
-#ifdef NDEBUG_NETWORK
+#ifndef NDEBUG_NETWORK
             std::cout << "WEvonet -- Vertex[" << vertexIndexMap[*it] << "] outdegree: "
                       << boost::out_degree(*it, *g) << std::endl;
 #endif /* NDEBUG_NETWORK */
             balance_vertex_strength(*it, g, fixed_edge_weight, boost_arrival);
-#ifdef NDEBUG_NETWORK
+#ifndef NDEBUG_NETWORK
         } else {
             std::cout << "WEvonet -- Vertex not balanced: " << vertexIndexMap[*it] << std::endl;
 #endif /* NDEBUG_NETWORK */
