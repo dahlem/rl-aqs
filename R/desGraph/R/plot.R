@@ -37,7 +37,7 @@ des.graph.arrival.hist.plot <- function(replications, graphs, nodes, ps=TRUE) {
     postscript("graph-arrival-hist-plot.eps", onefile=FALSE)
   }
 
-  df <- data.frame(arrivalTimes=rep(0, nodes * replications));
+  df <- data.frame(arrivalTimes=rep(0, (nodes * replications)));
   
   for (r in seq(1, replications)) {
     print(paste("Read graph: ", r, "/graphs/graph0.gml", sep=""))
@@ -73,7 +73,7 @@ des.graph.utilisation.plot <- function(replications, graphs, nodes, ps=TRUE) {
   files <- paste(seq(1, replications), "/graphs/graph", graphs - 1, ".gml", sep="")
   fexists <- file.exists(files)
   ftrue <- fexists[fexists == TRUE]
-  df <- data.frame(utilisation=rep(0, nodes * length(ftrue)));
+  df <- data.frame(utilisation=rep(0, (nodes * length(ftrue))));
   counter <- 1
   
   for (r in seq(1, replications)) {
@@ -118,7 +118,7 @@ des.graph.utilisation.evo.plot <- function(replications, graphs, nodes, stopTime
     files <- paste(seq(1, replications), "/graphs/graph", i, ".gml", sep="")
     fexists <- file.exists(files)
     ftrue <- fexists[fexists == TRUE]
-    dflocal <- data.frame(utilisation=rep(0, nodes * length(ftrue)));
+    dflocal <- data.frame(utilisation=rep(0, (nodes * length(ftrue))));
     counter <- 1
     
     for (r in seq(1, replications)) {
@@ -169,8 +169,8 @@ des.graph.utilisation.customers.evo.plot <- function(replications, graphs, nodes
     files <- paste(seq(1, replications), "/graphs/graph", i, ".gml", sep="")
     fexists <- file.exists(files)
     ftrue <- fexists[fexists == TRUE]
-    dflocal <- data.frame(utilisation=rep(0, nodes * length(ftrue)),
-                          expectedAverageNumEvents=rep(0, nodes * length(ftrue)));
+    dflocal <- data.frame(utilisation=rep(0, (nodes * length(ftrue))),
+                          expectedAverageNumEvents=rep(0, (nodes * length(ftrue))));
     counter <- 1
     
     for (r in seq(1, replications)) {
@@ -214,8 +214,8 @@ des.graph.numEvents.betweenness.plot <- function(replications, graphs, nodes, ps
   }
 
   counter <- 1
-  df <- data.frame(expectedAverageNumEvents=rep(0, replications * nodes),
-                   betweenness=rep(0, replications * nodes));
+  df <- data.frame(expectedAverageNumEvents=rep(0, (replications * nodes)),
+                   betweenness=rep(0, (replications * nodes)));
   
   for (r in seq(1, replications)) {
     if (file.exists(paste(r, "/graphs/graph", graphs - 1, ".gml", sep="")) == TRUE) {
@@ -253,8 +253,8 @@ des.graph.utilisation.betweenness.plot <- function(replications, graphs, nodes, 
   }
 
   counter <- 1
-  df <- data.frame(utilisation=rep(0, replications * nodes),
-                   betweenness=rep(0, replications * nodes));
+  df <- data.frame(utilisation=rep(0, (replications * nodes)),
+                   betweenness=rep(0, (replications * nodes)));
   
   for (r in seq(1, replications)) {
     if (file.exists(paste(r, "/graphs/graph", graphs - 1, ".gml", sep="")) == TRUE) {
@@ -292,8 +292,8 @@ des.graph.serviceRate.betweenness.plot <- function(replications, graphs, nodes, 
   }
 
   counter <- 1
-  df <- data.frame(serviceRate=rep(0, replications * nodes),
-                   betweenness=rep(0, replications * nodes));
+  df <- data.frame(serviceRate=rep(0, (replications * nodes)),
+                   betweenness=rep(0, (replications * nodes)));
   
   for (r in seq(1, replications)) {
     if (file.exists(paste(r, "/graphs/graph", graphs - 1, ".gml", sep="")) == TRUE) {
@@ -331,8 +331,8 @@ des.graph.delay.betweenness.plot <- function(replications, graphs, nodes, ps=TRU
   }
 
   counter <- 1
-  df <- data.frame(delay=rep(0, replications * nodes),
-                   betweenness=rep(0, replications * nodes));
+  df <- data.frame(delay=rep(0, (replications * nodes)),
+                   betweenness=rep(0, (replications * nodes)));
   
   for (r in seq(1, replications)) {
     if (file.exists(paste(r, "/graphs/graph", graphs - 1, ".gml", sep="")) == TRUE) {
@@ -370,8 +370,8 @@ des.graph.numEvents.degree.plot <- function(replications, graphs, nodes, ps=TRUE
   }
 
   counter <- 1
-  df <- data.frame(expectedAverageNumEvents=rep(0, replications * nodes),
-                   degree=rep(0, replications * nodes));
+  df <- data.frame(expectedAverageNumEvents=rep(0, (replications * nodes)),
+                   degree=rep(0, (replications * nodes)));
   
   for (r in seq(1, replications)) {
     if (file.exists(paste(r, "/graphs/graph", graphs - 1, ".gml", sep="")) == TRUE) {
@@ -406,8 +406,8 @@ des.graph.utilisation.degree.plot <- function(replications, graphs, nodes, ps=TR
   }
 
   counter <- 1
-  df <- data.frame(utilisation=rep(0, replications * nodes),
-                   degree=rep(0, replications * nodes));
+  df <- data.frame(utilisation=rep(0, (replications * nodes)),
+                   degree=rep(0, (replications * nodes)));
   
   for (r in seq(1, replications)) {
     if (file.exists(paste(r, "/graphs/graph", graphs - 1, ".gml", sep="")) == TRUE) {
@@ -442,8 +442,8 @@ des.graph.delay.degree.plot <- function(replications, graphs, nodes, ps=TRUE) {
   }
 
   counter <- 1
-  df <- data.frame(delay=rep(0, replications * nodes),
-                   degree=rep(0, replications * nodes));
+  df <- data.frame(delay=rep(0, (replications * nodes)),
+                   degree=rep(0, (replications * nodes)));
   
   for (r in seq(1, replications)) {
     if (file.exists(paste(r, "/graphs/graph", graphs - 1, ".gml", sep="")) == TRUE) {
@@ -485,8 +485,8 @@ des.graph.delay.customers.evo.plot <- function(replications, graphs, nodes, stop
     files <- paste(seq(1, replications), "/graphs/graph", i, ".gml", sep="")
     fexists <- file.exists(files)
     ftrue <- fexists[fexists == TRUE]
-    dflocal <- data.frame(utilisation=rep(0, nodes * length(ftrue)),
-                          delay=rep(0, nodes * length(ftrue)));
+    dflocal <- data.frame(utilisation=rep(0, (nodes * length(ftrue))),
+                          delay=rep(0, (nodes * length(ftrue))));
     counter <- 1
     
     for (r in seq(1, replications)) {
@@ -531,7 +531,7 @@ des.graph.average.delay.in.queue.plot <- function(replications, graphs, nodes, p
   files <- paste(seq(1, replications), "/graphs/graph", graphs - 1, ".gml", sep="")
   fexists <- file.exists(files)
   ftrue <- fexists[fexists == TRUE]
-  df <- data.frame(averageDelayInQueue=rep(0, nodes * length(ftrue)));
+  df <- data.frame(averageDelayInQueue=rep(0, (nodes * length(ftrue))));
   counter <- 1
   
   for (r in seq(1, replications)) {
@@ -576,7 +576,7 @@ des.graph.average.delay.in.queue.evo.plot <- function(replications, graphs, node
     files <- paste(seq(1, replications), "/graphs/graph", i, ".gml", sep="")
     fexists <- file.exists(files)
     ftrue <- fexists[fexists == TRUE]
-    dflocal <- data.frame(delay=rep(0, nodes * length(ftrue)));
+    dflocal <- data.frame(delay=rep(0, (nodes * length(ftrue))));
     counter <- 1
     
     for (r in seq(1, replications)) {
@@ -621,6 +621,9 @@ replicas <- read.csv("replica_results.dat", header=TRUE)
 simNum <- replicas$sim_num[1]
 
 simulations <- read.csv("../simulations.dat", header=TRUE)
+
+print(simulations)
+
 replications <- simulations[simulations$sim_num == simNum,]$actual_reps
 graphs <- simulations[simulations$sim_num == simNum,]$graphs
 nodes <- simulations[simulations$sim_num == simNum,]$network_size

@@ -130,7 +130,7 @@ struct desArgs_t {
     friend std::ostream& operator <<(std::ostream &p_os, const desArgs_t &desArgs)
         {
             p_os << desArgs.stop_time << "," << desArgs.generations << "," << (desArgs.graph_rate + 1)
-                 << desArgs.max_arrival << "," << desArgs.boost_arrival << ","
+                 << "," << desArgs.max_arrival << "," << desArgs.boost_arrival << ","
                  << desArgs.confidence << "," << desArgs.alpha << "," << desArgs.error
                  << "," << desArgs.replications << "," << desArgs.net_gen << "," << desArgs.net_size
                  << "," << desArgs.max_edges << "," << desArgs.edge_prob << "," << desArgs.edge_fixed;
