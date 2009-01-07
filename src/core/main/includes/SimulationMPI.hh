@@ -108,6 +108,9 @@ public:
             std::cout << "The number of LHS dimensions is " << dimensions << std::endl;
             std::cout << "Network Size Index: " << LhsUtils::getNetSizeIndex(p_desArgs) << std::endl;
             std::cout << "Max. Edges Index: " << LhsUtils::getMaxEdgesIndex(p_desArgs) << std::endl;
+            std::cout << "Edge Prob. Index: " << LhsUtils::getEdgeProbIndex(p_desArgs) << std::endl;
+            std::cout << "Arrival Boost Index: " << LhsUtils::getVertexBoostIndex(p_desArgs) << std::endl;
+            std::cout << "Edge Boost Index: " << LhsUtils::getEdgeBoostIndex(p_desArgs) << std::endl;
 #endif /* NDEBUG */
 
             min = gsl_vector_calloc(dimensions);
@@ -124,6 +127,14 @@ public:
             if (LhsUtils::getEdgeProbIndex(p_desArgs) >= 0) {
                 gsl_vector_set(min, LhsUtils::getEdgeProbIndex(p_desArgs), p_desArgs->min_edge_prob);
                 gsl_vector_set(max, LhsUtils::getEdgeProbIndex(p_desArgs), p_desArgs->max_edge_prob);
+            }
+            if (LhsUtils::getVertexBoostIndex(p_desArgs) >= 0) {
+                gsl_vector_set(min, LhsUtils::getVertexBoostIndex(p_desArgs), p_desArgs->min_boost_arrival);
+                gsl_vector_set(max, LhsUtils::getVertexBoostIndex(p_desArgs), p_desArgs->max_boost_arrival);
+            }
+            if (LhsUtils::getEdgeBoostIndex(p_desArgs) >= 0) {
+                gsl_vector_set(min, LhsUtils::getEdgeBoostIndex(p_desArgs), p_desArgs->min_boost_edge);
+                gsl_vector_set(max, LhsUtils::getEdgeBoostIndex(p_desArgs), p_desArgs->max_boost_edge);
             }
 
             dsample::LHS::sample(rng.get(), min, max, p_desArgs->simulations, &sample);
@@ -173,6 +184,18 @@ public:
                         sample, i, LhsUtils::getEdgeProbIndex(p_desArgs));
                 } else {
                     desArgsMPI.edge_prob = p_desArgs->edge_prob;
+                }
+                if (LhsUtils::getVertexBoostIndex(p_desArgs) >= 0) {
+                    desArgsMPI.boost_arrival = gsl_matrix_get(
+                        sample, i, LhsUtils::getVertexBoostIndex(p_desArgs));
+                } else {
+                    desArgsMPI.boost_arrival = p_desArgs->boost_arrival;
+                }
+                if (LhsUtils::getEdgeBoostIndex(p_desArgs) >= 0) {
+                    desArgsMPI.boost_edge = gsl_matrix_get(
+                        sample, i, LhsUtils::getEdgeBoostIndex(p_desArgs));
+                } else {
+                    desArgsMPI.boost_edge = p_desArgs->boost_edge;
                 }
                 desArgsMPI.sim_num = i + 1;
 
@@ -293,6 +316,18 @@ public:
                                 sample, output->simulation_id - 1, LhsUtils::getEdgeProbIndex(p_desArgs));
                         } else {
                             desArgsMPI.edge_prob = p_desArgs->edge_prob;
+                        }
+                        if (LhsUtils::getVertexBoostIndex(p_desArgs) >= 0) {
+                            desArgsMPI.boost_arrival = gsl_matrix_get(
+                                sample, output->simulation_id - 1, LhsUtils::getVertexBoostIndex(p_desArgs));
+                        } else {
+                            desArgsMPI.boost_arrival = p_desArgs->boost_arrival;
+                        }
+                        if (LhsUtils::getEdgeBoostIndex(p_desArgs) >= 0) {
+                            desArgsMPI.boost_edge = gsl_matrix_get(
+                                sample, output->simulation_id - 1, LhsUtils::getEdgeBoostIndex(p_desArgs));
+                        } else {
+                            desArgsMPI.boost_edge = p_desArgs->boost_edge;
                         }
 
                         rc = MPI_Send(&desArgsMPI, 1, mpi_desargs, status.MPI_SOURCE, jobs, MPI_COMM_WORLD);

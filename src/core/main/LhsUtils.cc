@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -55,6 +55,12 @@ int LhsUtils::dimensions(tDesArgsSP p_desArgs)
     if (p_desArgs->min_edge_prob < std::numeric_limits<double>::max()) {
         dims++;
     }
+    if (p_desArgs->min_boost_arrival < std::numeric_limits<double>::max()) {
+        dims++;
+    }
+    if (p_desArgs->min_boost_edge < std::numeric_limits<double>::max()) {
+        dims++;
+    }
 
     return dims;
 }
@@ -106,6 +112,56 @@ int LhsUtils::getEdgeProbIndex(tDesArgsSP p_desArgs)
 
     return index;
 }
+
+
+int LhsUtils::getVertexBoostIndex(tDesArgsSP p_desArgs)
+{
+    int index = -1;
+
+    if (p_desArgs->min_boost_arrival < std::numeric_limits<double>::max()) {
+        if (p_desArgs->min_size < std::numeric_limits<boost::uint16_t>::max()) {
+            index++;
+        }
+        if (p_desArgs->min_max_edges < std::numeric_limits<boost::uint16_t>::max()) {
+            index++;
+        }
+        if (p_desArgs->min_edge_prob < std::numeric_limits<double>::max()) {
+            index++;
+        }
+        if (p_desArgs->min_boost_arrival < std::numeric_limits<double>::max()) {
+            index++;
+        }
+    }
+
+    return index;
+}
+
+
+int LhsUtils::getEdgeBoostIndex(tDesArgsSP p_desArgs)
+{
+    int index = -1;
+
+    if (p_desArgs->min_boost_edge < std::numeric_limits<double>::max()) {
+        if (p_desArgs->min_size < std::numeric_limits<boost::uint16_t>::max()) {
+            index++;
+        }
+        if (p_desArgs->min_max_edges < std::numeric_limits<boost::uint16_t>::max()) {
+            index++;
+        }
+        if (p_desArgs->min_edge_prob < std::numeric_limits<double>::max()) {
+            index++;
+        }
+        if (p_desArgs->min_boost_arrival < std::numeric_limits<double>::max()) {
+            index++;
+        }
+        if (p_desArgs->min_boost_edge < std::numeric_limits<double>::max()) {
+            index++;
+        }
+    }
+
+    return index;
+}
+
 
 
 }

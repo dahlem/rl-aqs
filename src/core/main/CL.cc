@@ -121,6 +121,14 @@ CL::CL()
             std::numeric_limits<double>::max()), "set the min. probability of having edge (u,v).")
         (MAX_EDGE_PROB.c_str(), po::value <double>()->default_value(
             std::numeric_limits<double>::max()), "set the max. probability of having edge (u,v).")
+        (MIN_BOOST_ARRIVAL.c_str(), po::value <double>()->default_value(
+            std::numeric_limits<double>::max()), "set the min. rate to boost the arrival rate.")
+        (MAX_BOOST_ARRIVAL.c_str(), po::value <double>()->default_value(
+            std::numeric_limits<double>::max()), "set the max. rate to boost the arrival rate.")
+        (MIN_BOOST_EDGE.c_str(), po::value <double>()->default_value(
+            std::numeric_limits<double>::max()), "set the min. rate to boost the edge weight.")
+        (MAX_BOOST_EDGE.c_str(), po::value <double>()->default_value(
+            std::numeric_limits<double>::max()), "set the max. rate to boost the edge weight.")
         ;
 
     po::options_description opt_debug("Debug Configuration");
@@ -233,6 +241,26 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
         desArgs->boost_edge = vm[BOOST_EDGE.c_str()].as <double>();
     }
     std::cout << "Boost the edge weight " << desArgs->boost_edge << "." << std::endl;
+
+    if (vm.count(MIN_BOOST_ARRIVAL.c_str())) {
+        desArgs->min_boost_arrival = vm[MIN_BOOST_ARRIVAL.c_str()].as <double>();
+    }
+    std::cout << "Min. boost rate for the arrival rate " << desArgs->min_boost_arrival << "." << std::endl;
+
+    if (vm.count(MIN_BOOST_EDGE.c_str())) {
+        desArgs->min_boost_edge = vm[MIN_BOOST_EDGE.c_str()].as <double>();
+    }
+    std::cout << "Min. boost rate for the edge weight " << desArgs->min_boost_edge << "." << std::endl;
+
+    if (vm.count(MAX_BOOST_ARRIVAL.c_str())) {
+        desArgs->max_boost_arrival = vm[MAX_BOOST_ARRIVAL.c_str()].as <double>();
+    }
+    std::cout << "Max. boost rate for the arrival rate " << desArgs->max_boost_arrival << "." << std::endl;
+
+    if (vm.count(MAX_BOOST_EDGE.c_str())) {
+        desArgs->max_boost_edge = vm[MAX_BOOST_EDGE.c_str()].as <double>();
+    }
+    std::cout << "Max. boost rate for the edge weight " << desArgs->max_boost_edge << "." << std::endl;
 
     if (vm.count(GENERATIONS.c_str())) {
         desArgs->generations = vm[GENERATIONS.c_str()].as <boost::int32_t>();

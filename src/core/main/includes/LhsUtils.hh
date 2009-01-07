@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -47,6 +47,8 @@ public:
     static int getNetSizeIndex(tDesArgsSP p_desArgs);
     static int getMaxEdgesIndex(tDesArgsSP p_desArgs);
     static int getEdgeProbIndex(tDesArgsSP p_desArgs);
+    static int getEdgeBoostIndex(tDesArgsSP p_desArgs);
+    static int getVertexBoostIndex(tDesArgsSP p_desArgs);
 
 private:
 

@@ -45,8 +45,6 @@ namespace des { namespace core {
 const std::string STOPTIME = "stop_time";
 const std::string GENERATIONS = "generations";
 const std::string MAX_ARRIVAL = "max_arrival_rate";
-const std::string BOOST_ARRIVAL = "boost_arrival";
-const std::string BOOST_EDGE = "boost_edge";
 
 const std::string GRAPH = "graph";
 const std::string SEEDS = "seeds";
@@ -76,6 +74,12 @@ const std::string WEIGHT_FIXED = "weight";
 const std::string EDGE_PROB = "edge_prob";
 const std::string MIN_EDGE_PROB = "min_edge_prob";
 const std::string MAX_EDGE_PROB = "max_edge_prob";
+const std::string BOOST_ARRIVAL = "boost_arrival";
+const std::string BOOST_EDGE = "boost_edge";
+const std::string MIN_BOOST_ARRIVAL = "min_boost_arrival";
+const std::string MAX_BOOST_ARRIVAL = "max_boost_arrival";
+const std::string MIN_BOOST_EDGE = "min_boost_edge";
+const std::string MAX_BOOST_EDGE = "max_boost_edge";
 const std::string GENERATOR = "graph_generator";
 
 
@@ -102,8 +106,6 @@ struct desArgs_t {
     boost::int32_t vertex;          /* the vertex to trace */
     boost::int32_t graph_rate;      /* the rate to generate graphs at */
     double max_arrival;             /* the max. arrival rate */
-    double boost_arrival;           /* boost arrival rate */
-    double boost_edge;              /* boost edge weight */
 
     double stop_time;               /* stopping time of the DES */
     boost::int32_t generations;     /* number of generations for the event simulation */
@@ -123,6 +125,12 @@ struct desArgs_t {
     boost::uint32_t max_edges;      /* max number of edges */
     boost::uint32_t min_max_edges;  /* min. maximum number of edges */
     boost::uint32_t max_max_edges;  /* max. maximum number of edges */
+    double boost_arrival;           /* boost arrival rate */
+    double min_boost_arrival;       /* min boost arrival rate */
+    double max_boost_arrival;       /* max boost arrival rate */
+    double boost_edge;              /* boost edge weight */
+    double min_boost_edge;          /* min boost edge weight */
+    double max_boost_edge;          /* max boost edge weight */
 
     boost::uint16_t net_gen;        /* network generator */
     double edge_fixed;              /* information diffusion coefficient */

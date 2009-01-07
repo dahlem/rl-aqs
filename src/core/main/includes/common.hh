@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -68,6 +68,8 @@ typedef struct {
     unsigned int net_size;      /* network size */
     unsigned int max_edges;     /* max edges */
     double edge_prob;           /* probability of edge (u,v) */
+    double boost_arrival;       /* boost arrival rate */
+    double boost_edge;          /* boost edge weight */
 } tSimArgsMPI;
 
 
