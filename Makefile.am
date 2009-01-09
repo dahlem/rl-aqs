@@ -1,4 +1,4 @@
-# Copyright (C) 2007, 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+# Copyright (C) 2007-2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 #  
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without 
@@ -22,9 +22,11 @@ EXTRA_DIST = \
 	seeds-mpi.dat \
 	iitac.sh \
 	des.pbs.in \
+	des_soc_1000s_5e_1000t.pbs \
 	crn_test.pbs.in \
 	seeds_read.pbs.in \
 	struct_test.pbs.in \
+	$(srcdir)/bin \
 	$(srcdir)/graphs \
 	$(srcdir)/graphs_dense.sh \
 	$(srcdir)/graphs.sh \

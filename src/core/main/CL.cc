@@ -166,6 +166,8 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
         return EXIT_FAILURE;
     }
 
+    std::cout << "1) I/O Configuration" << std::endl;
+
     if (vm.count(GRAPH.c_str())) {
         desArgs->graph_filename = vm[GRAPH.c_str()].as <std::string>();
         if (fs::exists(desArgs->graph_filename)) {
@@ -204,12 +206,6 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
     std::cout << "Set the results directory "
               << desArgs->results_dir << "." << std::endl;
 
-    if (vm.count(ADD_SIM.c_str())) {
-        desArgs->add_sim = vm[ADD_SIM.c_str()].as <std::string>();
-    }
-    std::cout << "Add to existing experiments "
-              << desArgs->add_sim << "." << std::endl;
-
     if (vm.count(LOG_GRAPH_RATE.c_str())) {
         desArgs->graph_rate = vm[LOG_GRAPH_RATE.c_str()].as <boost::int32_t>();
     }
@@ -221,6 +217,20 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
     }
     std::cout << "Log the events "
               << desArgs->log_events << "." << std::endl;
+
+
+    std::cout << std::endl << "2) Simulation Configuration" << std::endl;
+    if (vm.count(GENERATOR.c_str())) {
+        desArgs->net_gen = vm[GENERATOR.c_str()].as <int>();
+    }
+    std::cout << "Generate network type "
+              << desArgs->net_gen << "." << std::endl;
+
+    if (vm.count(ADD_SIM.c_str())) {
+        desArgs->add_sim = vm[ADD_SIM.c_str()].as <std::string>();
+    }
+    std::cout << "Add to existing experiments "
+              << desArgs->add_sim << "." << std::endl;
 
     if (vm.count(STOPTIME.c_str())) {
         desArgs->stop_time = vm[STOPTIME.c_str()].as <double>();
@@ -242,75 +252,11 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
     }
     std::cout << "Boost the edge weight " << desArgs->boost_edge << "." << std::endl;
 
-    if (vm.count(MIN_BOOST_ARRIVAL.c_str())) {
-        desArgs->min_boost_arrival = vm[MIN_BOOST_ARRIVAL.c_str()].as <double>();
-    }
-    std::cout << "Min. boost rate for the arrival rate " << desArgs->min_boost_arrival << "." << std::endl;
-
-    if (vm.count(MIN_BOOST_EDGE.c_str())) {
-        desArgs->min_boost_edge = vm[MIN_BOOST_EDGE.c_str()].as <double>();
-    }
-    std::cout << "Min. boost rate for the edge weight " << desArgs->min_boost_edge << "." << std::endl;
-
-    if (vm.count(MAX_BOOST_ARRIVAL.c_str())) {
-        desArgs->max_boost_arrival = vm[MAX_BOOST_ARRIVAL.c_str()].as <double>();
-    }
-    std::cout << "Max. boost rate for the arrival rate " << desArgs->max_boost_arrival << "." << std::endl;
-
-    if (vm.count(MAX_BOOST_EDGE.c_str())) {
-        desArgs->max_boost_edge = vm[MAX_BOOST_EDGE.c_str()].as <double>();
-    }
-    std::cout << "Max. boost rate for the edge weight " << desArgs->max_boost_edge << "." << std::endl;
-
     if (vm.count(GENERATIONS.c_str())) {
         desArgs->generations = vm[GENERATIONS.c_str()].as <boost::int32_t>();
         std::cout << "Number of generations set to " << desArgs->generations << "." << std::endl;
     } else {
         std::cout << "No generations." << std::endl;
-    }
-
-    if (vm.count(WITH_CI.c_str())) {
-        desArgs->confidence = vm[WITH_CI.c_str()].as <bool>();
-    }
-    std::cout << "Confidence Interval enabled: " << desArgs->confidence << std::endl;
-
-    if (vm.count(REPLICATIONS.c_str())) {
-        desArgs->replications = vm[REPLICATIONS.c_str()].as <boost::uint16_t>();
-    }
-    std::cout << "Number of replications: " << desArgs->replications << std::endl;
-
-    if (vm.count(ALPHA.c_str())) {
-        desArgs->alpha = vm[ALPHA.c_str()].as <double>();
-    }
-    std::cout << "Confidence interval (in %): " << 100 * (1 - desArgs->alpha) << std::endl;
-
-    if (vm.count(ERROR.c_str())) {
-        desArgs->error = vm[ERROR.c_str()].as <double>();
-    }
-    std::cout << "Reliative error (in %): " << 100 * (desArgs->error) << std::endl;
-
-    if (vm.count(TRACE.c_str())) {
-        desArgs->trace_event = vm[TRACE.c_str()].as <bool>();
-    }
-
-    if (vm.count(WITH_LHS.c_str())) {
-        desArgs->lhs = vm[WITH_LHS.c_str()].as <bool>();
-    }
-    std::cout << "LHS enabled: " << desArgs->lhs << std::endl;
-
-    if (vm.count(SIMULATIONS.c_str())) {
-        desArgs->simulations = vm[SIMULATIONS.c_str()].as <boost::uint32_t>();
-    }
-    std::cout << "Number of simulations set to " << desArgs->simulations << "." << std::endl;
-
-    if (desArgs->trace_event) {
-        if (vm.count(VERTEX.c_str())) {
-            desArgs->vertex = vm[VERTEX.c_str()].as <boost::int32_t>();
-            std::cout << std::endl << "Trace vertex " << desArgs->vertex << "." << std::endl;
-        } else {
-            std::cout << "A vertex needs to be specified to trace the event." << std::endl;
-            return EXIT_FAILURE;
-        }
     }
 
     if (vm.count(SIZE.c_str())) {
@@ -319,69 +265,135 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
     std::cout << "Size of network set to "
               << desArgs->net_size << "." << std::endl;
 
-    if (vm.count(MINSIZE.c_str())) {
-        desArgs->min_size = vm[MINSIZE.c_str()].as <boost::uint16_t>();
-    }
-    std::cout << "Minimum network size " << desArgs->min_size << "." << std::endl;
-
-    if (vm.count(MAXSIZE.c_str())) {
-        desArgs->max_size = vm[MAXSIZE.c_str()].as <boost::uint16_t>();
-    }
-    std::cout << "Maximum network size " << desArgs->max_size << "." << std::endl;
-
     if (vm.count(MAX_EDGES.c_str())) {
         desArgs->max_edges = vm[MAX_EDGES.c_str()].as<boost::uint32_t>();
     }
     std::cout << "Maximum number of edges is set to "
               << desArgs->max_edges << "." << std::endl;
 
-
-    if (vm.count(MIN_MAX_EDGES.c_str())) {
-        desArgs->min_max_edges = vm[MIN_MAX_EDGES.c_str()].as <boost::uint32_t>();
+    if (desArgs->net_gen == 1) {
+        std::cout << std::endl << "3) Social Network Configuration" << std::endl;
+        if (vm.count(WEIGHT_FIXED.c_str())) {
+            desArgs->edge_fixed = vm[WEIGHT_FIXED.c_str()].as <double>();
+        }
+        std::cout << "Fix the edge weight at "
+                  << desArgs->edge_fixed << "." << std::endl;
+    } else {
+        std::cout << std::endl << "3) Erdoes-Renyi Network Configuration" << std::endl;
+        if (vm.count(EDGE_PROB.c_str())) {
+            desArgs->edge_prob = vm[EDGE_PROB.c_str()].as <double>();
+        }
+        std::cout << "The probability of having in edge (u,v) is "
+                  << desArgs->edge_prob << " (only for ER graphs)." << std::endl;
     }
-    std::cout << "Minimum max. number of edges set to " << desArgs->min_max_edges << "." << std::endl;
 
-    if (vm.count(MAX_MAX_EDGES.c_str())) {
-        desArgs->max_max_edges = vm[MAX_MAX_EDGES.c_str()].as <boost::uint32_t>();
+    std::cout << std::endl << "4) Confidence Interval Configuration" << std::endl;
+    if (vm.count(WITH_CI.c_str())) {
+        desArgs->confidence = vm[WITH_CI.c_str()].as <bool>();
     }
-    std::cout << "Maximum max. number of edges set to " << desArgs->max_max_edges << "." << std::endl;
+    std::cout << "Confidence Interval enabled: " << desArgs->confidence << std::endl;
 
-    if (vm.count(WEIGHT_FIXED.c_str())) {
-        desArgs->edge_fixed = vm[WEIGHT_FIXED.c_str()].as <double>();
+    if (desArgs->confidence == 1) {
+        if (vm.count(REPLICATIONS.c_str())) {
+            desArgs->replications = vm[REPLICATIONS.c_str()].as <boost::uint16_t>();
+        }
+        std::cout << "Number of replications: " << desArgs->replications << std::endl;
+
+        if (vm.count(ALPHA.c_str())) {
+            desArgs->alpha = vm[ALPHA.c_str()].as <double>();
+        }
+        std::cout << "Confidence interval (in %): " << 100 * (1 - desArgs->alpha) << std::endl;
+
+        if (vm.count(ERROR.c_str())) {
+            desArgs->error = vm[ERROR.c_str()].as <double>();
+        }
+        std::cout << "Reliative error (in %): " << 100 * (desArgs->error) << std::endl;
     }
-    std::cout << "Fix the edge weight at "
-              << desArgs->edge_fixed << "." << std::endl;
 
-    if (vm.count(EDGE_PROB.c_str())) {
-        desArgs->edge_prob = vm[EDGE_PROB.c_str()].as <double>();
+    std::cout << std::endl << "5) Latin Hypercube Configuration" << std::endl;
+    if (vm.count(WITH_LHS.c_str())) {
+        desArgs->lhs = vm[WITH_LHS.c_str()].as <bool>();
     }
-    std::cout << "The probability of having in edge (u,v) is "
-              << desArgs->edge_prob << " (only for ER graphs)." << std::endl;
+    std::cout << "LHS enabled: " << desArgs->lhs << std::endl;
 
-    if (vm.count(MIN_EDGE_PROB.c_str())) {
-        desArgs->min_edge_prob = vm[MIN_EDGE_PROB.c_str()].as <double>();
+    if (desArgs->lhs == 1) {
+        if (vm.count(SIMULATIONS.c_str())) {
+            desArgs->simulations = vm[SIMULATIONS.c_str()].as <boost::uint32_t>();
+        }
+        std::cout << "Number of simulations set to " << desArgs->simulations << "." << std::endl;
+
+        if (vm.count(MIN_BOOST_ARRIVAL.c_str())) {
+            desArgs->min_boost_arrival = vm[MIN_BOOST_ARRIVAL.c_str()].as <double>();
+        }
+        std::cout << "Min. boost rate for the arrival rate " << desArgs->min_boost_arrival << "." << std::endl;
+
+        if (vm.count(MIN_BOOST_EDGE.c_str())) {
+            desArgs->min_boost_edge = vm[MIN_BOOST_EDGE.c_str()].as <double>();
+        }
+        std::cout << "Min. boost rate for the edge weight " << desArgs->min_boost_edge << "." << std::endl;
+
+        if (vm.count(MAX_BOOST_ARRIVAL.c_str())) {
+            desArgs->max_boost_arrival = vm[MAX_BOOST_ARRIVAL.c_str()].as <double>();
+        }
+        std::cout << "Max. boost rate for the arrival rate " << desArgs->max_boost_arrival << "." << std::endl;
+
+        if (vm.count(MAX_BOOST_EDGE.c_str())) {
+            desArgs->max_boost_edge = vm[MAX_BOOST_EDGE.c_str()].as <double>();
+        }
+        std::cout << "Max. boost rate for the edge weight " << desArgs->max_boost_edge << "." << std::endl;
+
+        if (vm.count(MINSIZE.c_str())) {
+            desArgs->min_size = vm[MINSIZE.c_str()].as <boost::uint16_t>();
+        }
+        std::cout << "Minimum network size " << desArgs->min_size << "." << std::endl;
+
+        if (vm.count(MAXSIZE.c_str())) {
+            desArgs->max_size = vm[MAXSIZE.c_str()].as <boost::uint16_t>();
+        }
+        std::cout << "Maximum network size " << desArgs->max_size << "." << std::endl;
+
+        if (vm.count(MIN_MAX_EDGES.c_str())) {
+            desArgs->min_max_edges = vm[MIN_MAX_EDGES.c_str()].as <boost::uint32_t>();
+        }
+        std::cout << "Minimum max. number of edges set to " << desArgs->min_max_edges << "." << std::endl;
+
+        if (vm.count(MAX_MAX_EDGES.c_str())) {
+            desArgs->max_max_edges = vm[MAX_MAX_EDGES.c_str()].as <boost::uint32_t>();
+        }
+        std::cout << "Maximum max. number of edges set to " << desArgs->max_max_edges << "." << std::endl;
+
+        if (vm.count(MIN_EDGE_PROB.c_str())) {
+            desArgs->min_edge_prob = vm[MIN_EDGE_PROB.c_str()].as <double>();
+        }
+        std::cout << "Minimum probability of having in edge (u,v) set to " << desArgs->min_edge_prob << "." << std::endl;
+
+        if (vm.count(MAX_EDGE_PROB.c_str())) {
+            desArgs->max_edge_prob = vm[MAX_EDGE_PROB.c_str()].as <double>();
+        }
+        std::cout << "Maximum probability of having in edge (u,v) set to " << desArgs->max_edge_prob << "." << std::endl;
     }
-    std::cout << "Minimum probability of having in edge (u,v) set to " << desArgs->min_edge_prob << "." << std::endl;
 
-    if (vm.count(MAX_EDGE_PROB.c_str())) {
-        desArgs->max_edge_prob = vm[MAX_EDGE_PROB.c_str()].as <double>();
-    }
-    std::cout << "Maximum probability of having in edge (u,v) set to " << desArgs->max_edge_prob << "." << std::endl;
-
-    if (vm.count(GENERATOR.c_str())) {
-        desArgs->net_gen = vm[GENERATOR.c_str()].as <int>();
-    }
-    std::cout << "Generate network type "
-              << desArgs->net_gen << "." << std::endl;
-
-    std::cout << std::endl;
-    std::cout << "Output Files:" << std::endl;
+    std::cout << std::endl << "6) Output Files" << std::endl;
 
     desArgs->events_unprocessed = "events_unprocessed.dat";
     desArgs->events_processed = "events_processed.dat";
 
     std::cout << "Unprocessed events\t" << desArgs->events_unprocessed << std::endl;
     std::cout << "Processed events\t" << desArgs->events_processed << std::endl;
+
+    if (vm.count(TRACE.c_str())) {
+        desArgs->trace_event = vm[TRACE.c_str()].as <bool>();
+    }
+    if (desArgs->trace_event) {
+        std::cout << std::endl << "7) Debug Configuration" << std::endl;
+        if (vm.count(VERTEX.c_str())) {
+            desArgs->vertex = vm[VERTEX.c_str()].as <boost::int32_t>();
+            std::cout << std::endl << "Trace vertex " << desArgs->vertex << "." << std::endl;
+        } else {
+            std::cout << "A vertex needs to be specified to trace the event." << std::endl;
+            return EXIT_FAILURE;
+        }
+    }
 
     std::cout << "******************************" << std::endl << std::endl;
 

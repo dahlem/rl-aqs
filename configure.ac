@@ -1,4 +1,4 @@
-# Copyright (C) 2007, 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+# Copyright (C) 2007-2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 #  
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without 
@@ -191,6 +191,7 @@ AC_CONFIG_FILES([
    README
    Makefile
    des.pbs
+   des_soc_1000s_5e_1000t.pbs
    crn_test.pbs
    seeds_read.pbs
    struct_test.pbs

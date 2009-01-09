@@ -29,7 +29,7 @@ des_main_CPPFLAGS =                                                      \
 	-I$(top_srcdir)/src/io/includes                                  \
 	-I$(top_srcdir)/src/statistics/analysis/includes                 \
 	-I$(top_srcdir)/src/date/includes                                \
-	-I$(top_srcdir)/src/common/list/includes
+	-I$(top_srcdir)/src/common/list/includes                         \
 	$(BOOST_CPPFLAGS)
 
 

@@ -1,4 +1,6 @@
-##### http://autoconf-archive.cryp.to/ax_prog_doxygen.html
+# ===========================================================================
+#            http://autoconf-archive.cryp.to/ax_prog_doxygen.html
+# ===========================================================================
 #
 # SYNOPSIS
 #
@@ -18,41 +20,39 @@
 #
 #   The DX_*_FEATURE macros control the default setting for the given
 #   Doxygen feature. Supported features are 'DOXYGEN' itself, 'DOT' for
-#   generating graphics, 'HTML' for plain HTML, 'CHM' for compressed
-#   HTML help (for MS users), 'CHI' for generating a seperate .chi file
-#   by the .chm file, and 'MAN', 'RTF', 'XML', 'PDF' and 'PS' for the
-#   appropriate output formats. The environment variable
-#   DOXYGEN_PAPER_SIZE may be specified to override the default
-#   'a4wide' paper size.
+#   generating graphics, 'HTML' for plain HTML, 'CHM' for compressed HTML
+#   help (for MS users), 'CHI' for generating a seperate .chi file by the
+#   .chm file, and 'MAN', 'RTF', 'XML', 'PDF' and 'PS' for the appropriate
+#   output formats. The environment variable DOXYGEN_PAPER_SIZE may be
+#   specified to override the default 'a4wide' paper size.
 #
-#   By default, HTML, PDF and PS documentation is generated as this
-#   seems to be the most popular and portable combination. MAN pages
-#   created by Doxygen are usually problematic, though by picking an
-#   appropriate subset and doing some massaging they might be better
-#   than nothing. CHM and RTF are specific for MS (note that you can't
-#   generate both HTML and CHM at the same time). The XML is rather
-#   useless unless you apply specialized post-processing to it.
+#   By default, HTML, PDF and PS documentation is generated as this seems to
+#   be the most popular and portable combination. MAN pages created by
+#   Doxygen are usually problematic, though by picking an appropriate subset
+#   and doing some massaging they might be better than nothing. CHM and RTF
+#   are specific for MS (note that you can't generate both HTML and CHM at
+#   the same time). The XML is rather useless unless you apply specialized
+#   post-processing to it.
 #
-#   The macros mainly control the default state of the feature. The use
-#   can override the default by specifying --enable or --disable. The
-#   macros ensure that contradictory flags are not given (e.g.,
+#   The macros mainly control the default state of the feature. The use can
+#   override the default by specifying --enable or --disable. The macros
+#   ensure that contradictory flags are not given (e.g.,
 #   --enable-doxygen-html and --enable-doxygen-chm,
-#   --enable-doxygen-anything with --disable-doxygen, etc.) Finally,
-#   each feature will be automatically disabled (with a warning) if the
-#   required programs are missing.
+#   --enable-doxygen-anything with --disable-doxygen, etc.) Finally, each
+#   feature will be automatically disabled (with a warning) if the required
+#   programs are missing.
 #
-#   Once all the feature defaults have been specified, call
-#   DX_INIT_DOXYGEN with the following parameters: a one-word name for
-#   the project for use as a filename base etc., an optional
-#   configuration file name (the default is 'Doxyfile', the same as
-#   Doxygen's default), and an optional output directory name (the
-#   default is 'doxygen-doc').
+#   Once all the feature defaults have been specified, call DX_INIT_DOXYGEN
+#   with the following parameters: a one-word name for the project for use
+#   as a filename base etc., an optional configuration file name (the
+#   default is 'Doxyfile', the same as Doxygen's default), and an optional
+#   output directory name (the default is 'doxygen-doc').
 #
 #   Automake Support
 #
-#   The following is a template aminclude.am file for use with
-#   Automake. Make targets and variables values are controlled by the
-#   various DX_COND_* conditionals set by autoconf.
+#   The following is a template aminclude.am file for use with Automake.
+#   Make targets and variables values are controlled by the various
+#   DX_COND_* conditionals set by autoconf.
 #
 #   The provided targets are:
 #
@@ -69,15 +69,14 @@
 #
 #     doxygen-pdf: Generate doxygen PDF documentation.
 #
-#   Note that by default these are not integrated into the automake
-#   targets. If doxygen is used to generate man pages, you can achieve
-#   this integration by setting man3_MANS to the list of man pages
-#   generated and then adding the dependency:
+#   Note that by default these are not integrated into the automake targets.
+#   If doxygen is used to generate man pages, you can achieve this
+#   integration by setting man3_MANS to the list of man pages generated and
+#   then adding the dependency:
 #
 #     $(man3_MANS): doxygen-doc
 #
-#   This will cause make to run doxygen and generate all the
-#   documentation.
+#   This will cause make to run doxygen and generate all the documentation.
 #
 #   The following variable is intended for use in Makefile.am:
 #
@@ -248,41 +247,15 @@
 #
 # LAST MODIFICATION
 #
-#   2007-02-13
+#   2008-04-12
 #
 # COPYLEFT
 #
-#   Copyright (c) 2007 Oren Ben-Kiki <oren@ben-kiki.org>
+#   Copyright (c) 2008 Oren Ben-Kiki <oren@ben-kiki.org>
 #
-#   This program is free software; you can redistribute it and/or
-#   modify it under the terms of the GNU General Public License as
-#   published by the Free Software Foundation; either version 2 of the
-#   License, or (at your option) any later version.
-#
-#   This program is distributed in the hope that it will be useful, but
-#   WITHOUT ANY WARRANTY; without even the implied warranty of
-#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-#   General Public License for more details.
-#
-#   You should have received a copy of the GNU General Public License
-#   along with this program; if not, write to the Free Software
-#   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-#   02111-1307, USA.
-#
-#   As a special exception, the respective Autoconf Macro's copyright
-#   owner gives unlimited permission to copy, distribute and modify the
-#   configure scripts that are the output of Autoconf when processing
-#   the Macro. You need not follow the terms of the GNU General Public
-#   License when using or distributing such scripts, even though
-#   portions of the text of the Macro appear in them. The GNU General
-#   Public License (GPL) does govern all other use of the material that
-#   constitutes the Autoconf Macro.
-#
-#   This special exception to the GPL applies to versions of the
-#   Autoconf Macro released by the Autoconf Macro Archive. When you
-#   make and distribute a modified version of the Autoconf Macro, you
-#   may extend this special exception to the GPL to apply to your
-#   modified version as well.
+#   Copying and distribution of this file, with or without modification, are
+#   permitted in any medium without royalty provided the copyright notice
+#   and this notice are preserved.
 
 ## ----------##
 ## Defaults. ##
@@ -325,9 +298,9 @@ AC_DEFUN([DX_IF_FEATURE], [ifelse(DX_FEATURE_$1, ON, [$2], [$3])])
 # Require the specified program to be found for the DX_CURRENT_FEATURE to work.
 AC_DEFUN([DX_REQUIRE_PROG], [
 AC_PATH_TOOL([$1], [$2])
-if test "$[DX_FLAG_][DX_CURRENT_FEATURE]" = 1; then
+if test "$DX_FLAG_[]DX_CURRENT_FEATURE$$1" = 1; then
     AC_MSG_WARN([$2 not found - will not DX_CURRENT_DESCRIPTION])
-    AC_SUBST([[DX_FLAG_][DX_CURRENT_FEATURE]], 0)
+    AC_SUBST([DX_FLAG_]DX_CURRENT_FEATURE, 0)
 fi
 ])
 
@@ -342,15 +315,15 @@ AC_DEFUN([DX_TEST_FEATURE], [test "$DX_FLAG_$1" = 1])
 # the DX_CURRENT_FEATURE.
 AC_DEFUN([DX_CHECK_DEPEND], [
 test "$DX_FLAG_$1" = "$2" \
-|| AC_MSG_ERROR([doxygen-[DX_CURRENT_FEATURE] ifelse([$2], 1,
-                            requires, contradicts) doxygen-[DX_CURRENT_FEATURE]])
+|| AC_MSG_ERROR([doxygen-DX_CURRENT_FEATURE ifelse([$2], 1,
+                            requires, contradicts) doxygen-DX_CURRENT_FEATURE])
 ])
 
 # DX_CLEAR_DEPEND(FEATURE, REQUIRED_FEATURE, REQUIRED_STATE)
 # ----------------------------------------------------------
 # Turn off the DX_CURRENT_FEATURE if the required feature is off.
 AC_DEFUN([DX_CLEAR_DEPEND], [
-test "$DX_FLAG_$1" = "$2" || AC_SUBST([[DX_FLAG_][DX_CURRENT_FEATURE]], 0)
+test "$DX_FLAG_$1" = "$2" || AC_SUBST([DX_FLAG_]DX_CURRENT_FEATURE, 0)
 ])
 
 # DX_FEATURE_ARG(FEATURE, DESCRIPTION,
@@ -364,7 +337,7 @@ test "$DX_FLAG_$1" = "$2" || AC_SUBST([[DX_FLAG_][DX_CURRENT_FEATURE]], 0)
 # requirement tests (DX_REQUIRE_PROG). Finally, an automake flag is set and
 # DO-IF-ON or DO-IF-OFF are called according to the final state of the feature.
 AC_DEFUN([DX_ARG_ABLE], [
-    define([DX_CURRENT_FEATURE], [$1])
+    AC_DEFUN([DX_CURRENT_FEATURE], [$1])
     AC_DEFUN([DX_CURRENT_DESCRIPTION], [$2])
     AC_ARG_ENABLE(doxygen-$1,
                   [AS_HELP_STRING(DX_IF_FEATURE([$1], [--disable-doxygen-$1],
@@ -558,5 +531,4 @@ esac
 #echo DX_FLAG_pdf=$DX_FLAG_pdf
 #echo DX_FLAG_ps=$DX_FLAG_ps
 #echo DX_ENV=$DX_ENV
-#echo DX_DOCDIR=$DX_DOCDIR
 ])

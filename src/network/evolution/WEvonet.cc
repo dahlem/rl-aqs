@@ -312,7 +312,14 @@ tGraphSP WEvonet::createERGraph(boost::uint32_t p_size, double fixed_edge_weight
     if (max_edges == WEvonet::MAX_EDGES) {
         g = tGraphSP(new Graph(ERGen(gen, p_size, p, false), ERGen(), p_size));
     } else {
-        g = tGraphSP(new Graph(ERGen(gen, p_size, max_edges, false), ERGen(), p_size));
+        g = tGraphSP(
+            new Graph(
+                ERGen(
+                    gen,
+                    static_cast<boost::graph_traits<Graph>::vertices_size_type> (p_size),
+                    static_cast<boost::graph_traits<Graph>::edges_size_type> (max_edges),
+                    false),
+                ERGen(), p_size));
     }
 
 

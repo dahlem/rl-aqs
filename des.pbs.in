@@ -10,6 +10,6 @@ cd $HOME/@PACKAGE@-@VERSION@
 export LD_LIBRARY_PATH=/usr/support/arch/x86_64/MVAPICH/mvapich--0.9.8-gcc-3.4.6-pgf90/lib:/usr/support/arch/x86_64/BOOST/1.37.0/lib:/usr/support/arch/x86_64/GSL/gsl-1.9-gcc-3.4.6/lib:$LD_LIBRARY_PATH
 export PATH=/usr/support/arch/x86_64/MVAPICH/mvapich--0.9.8-gcc-3.4.6-pgf90/bin:$PATH
 
-mpiexec ./src/core/main/des_main --graph $HOME/@PACKAGE@-@VERSION@/graphs/test/10_3.gml --seeds $HOME/@PACKAGE@-@VERSION@/seeds-mpi.dat --confidence 1 --lhs 1 --simulations 2 --min_stop_time 1 --max_stop_time 10 --results $HOME/@PACKAGE@-@VERSION@/results
+mpiexec ./src/core/main/des_main --seeds $HOME/@PACKAGE@-@VERSION@/seeds-mpi.dat --confidence 1 --lhs 1 --simulations 2 --replications 2 --graph_generator 1 --min_min_edges 2 --max_max_edges 5 --results $HOME/@PACKAGE@-@VERSION@/results
 
 echo "Done"

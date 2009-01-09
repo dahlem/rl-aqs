@@ -237,12 +237,22 @@ public:
                 replica_results.push_back(replica_output);
 
                 // prepare the overall results
-                sim_results_lines[i] << desArgsMPI.sim_num << "," << p_desArgs->stop_time << ","
-                                     << p_desArgs->generations << "," << p_desArgs->confidence << ","
-                                     << p_desArgs->alpha << "," << p_desArgs->error << ","
-                                     << p_desArgs->replications << "," << desArgsMPI.net_size
-                                     << "," << p_desArgs->max_edges << "," << p_desArgs->edge_prob
-                                     << "," << p_desArgs->edge_fixed;
+                sim_results_lines[i] << desArgsMPI.sim_num << ","
+                                     << p_desArgs->stop_time << ","
+                                     << p_desArgs->generations << ","
+                                     << (p_desArgs->graph_rate + 1) << ","
+                                     << p_desArgs->max_arrival << ","
+                                     << desArgsMPI.boost_arrival << ","
+                                     << desArgsMPI.boost_edge << ","
+                                     << p_desArgs->confidence << ","
+                                     << p_desArgs->alpha << ","
+                                     << p_desArgs->error << ","
+                                     << p_desArgs->replications << ","
+                                     << p_desArgs->net_gen << ","
+                                     << desArgsMPI.net_size << ","
+                                     << desArgsMPI.max_edges << ","
+                                     << desArgsMPI.edge_prob << ","
+                                     << p_desArgs->edge_fixed;
             }
 
             // 4. continue with as many experiments as needed
@@ -344,7 +354,7 @@ public:
                         areExpsSignificant[output->simulation_id - 1] = true;
 
                         // write the overall results
-                        sim_results_lines[output->simulation_id - 1] << output->replications;
+                        sim_results_lines[output->simulation_id - 1] << "," << output->replications;
                     }
                 }
 
