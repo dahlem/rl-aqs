@@ -191,7 +191,10 @@ AC_CONFIG_FILES([
    README
    Makefile
    des.pbs
+   des_soc_500s_3e_1000t.pbs
+   des_rand_500s_1000e_1000t.pbs
    des_soc_1000s_5e_1000t.pbs
+   des_soc_5000s_5e_1000t.pbs
    crn_test.pbs
    seeds_read.pbs
    struct_test.pbs
