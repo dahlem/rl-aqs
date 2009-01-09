@@ -99,3 +99,26 @@ stopTime <- simulations[simulations$sim_num == simNum,]$stop_time
 
 des.graph.single.utilisation.evo.plot(graphs, nodes, stopTime)
 des.graph.single.delay.evo.plot(graphs, nodes, stopTime)
+
+boostArrival <- simulations[simulations$sim_num == simNum,]$boost_arrival
+boostEdge <- simulations[simulations$sim_num == simNum,]$boost_edge
+
+repNum <- as.numeric(basename(getwd()))
+systemDelay <- replicas$systemDelay[repNum]
+systemAvgNumEvents <- replicas$systemAvgNumEvents[repNum]
+
+simEndGraph = paste("graphs/graph", graphs - 1, ".gml", sep="")
+graph = read.graph(simEndGraph, format="graphml")
+utilisations <- get.vertex.attribute(graph, "utilisation");
+utilisation <- mean(utilisations)
+
+## write a results file
+res <- data.frame(simNum, repNum,
+                  boostArrival, boostEdge,
+                  systemDelay,systemAvgNumEvents,utilisation)
+
+if (file.exists("../../results.dat") == TRUE) {
+  write.table(res, "../../results.dat", sep=",", col.names=FALSE, row.names=FALSE, append=TRUE, quote=FALSE)
+} else {
+  write.table(res, "../../results.dat", sep=",", row.names=FALSE, append=TRUE, quote=FALSE)
+}
