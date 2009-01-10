@@ -19,7 +19,9 @@
 
 #include <iostream>
 #include <string>
+#include <sstream>
 
+#include <boost/algorithm/string/replace.hpp>
 #include <boost/cstdint.hpp>
 #include <boost/shared_ptr.hpp>
 
@@ -54,13 +56,14 @@ const std::string GENERATOR = "generator";
 const std::string MAX_ARRIVAL = "max_arrival";
 const std::string BOOST_ARRIVAL = "boost_arrival";
 const std::string BOOST_EDGE = "boost_edge";
+const std::string NUM_GRAPHS = "num_graphs";
 
 
 
 int main(int argc, char *argv[])
 {
     int net_size;
-    boost::uint32_t max_edges;
+    boost::uint32_t max_edges, num_graphs;
     int format, format_temp;
     int net_gen = 1;
     double edge_fixed = -1.0;
@@ -86,6 +89,7 @@ int main(int argc, char *argv[])
         (BOOST_ARRIVAL.c_str(), po::value <double>()->default_value(1.0), "Boost the arrival rate.")
         (BOOST_EDGE.c_str(), po::value <double>()->default_value(1.0), "Boost the edge weight.")
         (MAX_EDGES.c_str(), po::value<boost::uint32_t>()->default_value(dnet::WEvonet::MAX_EDGES), "set the maximum number of edges to connect a new vertex")
+        (NUM_GRAPHS.c_str(), po::value<boost::uint32_t>()->default_value(1), "set the number of graphs to be generated")
         ;
 
     po::options_description desc_soc("Social Network Configuration");
@@ -125,6 +129,12 @@ int main(int argc, char *argv[])
     }
     std::cout << "Maximum number of edges is set to "
               << max_edges << "." << std::endl;
+
+    if (vm.count(NUM_GRAPHS.c_str())) {
+        num_graphs = vm[NUM_GRAPHS.c_str()].as<boost::uint32_t>();
+    }
+    std::cout << "Number of graphs to be generated "
+              << num_graphs << "." << std::endl;
 
     if (vm.count(FORMAT.c_str())) {
         format_temp = vm[FORMAT.c_str()].as<int>();
@@ -197,7 +207,6 @@ int main(int argc, char *argv[])
               << net_gen << "." << std::endl;
 
     boost::int32_t arrival_rng_index;
-    boost::int32_t seeds_rng_index;
     boost::int32_t uniform_rng_index;
     boost::int32_t num_edges_rng_index;
     boost::uint32_t seed = 0;
@@ -205,6 +214,25 @@ int main(int argc, char *argv[])
     if (seeds_file != "") {
         // read the seeds
         dsample::Seeds::getInstance().init(seeds_file.c_str());
+    } else {
+        // generate the seeds
+        std::cout << "Use random number to generate seeds." << std::endl;
+        // generate the seeds
+        dsample::Seeds::getInstance().init();
+    }
+
+    // generate the graphs
+    for (boost::uint32_t i = 1; i <= num_graphs; ++i) {
+        std::string file = filename;
+
+        // modify the filename, if a number of graphs have to be generated
+        if (num_graphs > 1) {
+            std::stringstream post_fix;
+            post_fix << i << ".gml";
+            boost::algorithm::replace_last(file, ".gml", post_fix.str());
+
+            std::cout << "Filename set to : " << file << std::endl;
+        }
 
         // init the crn for the arrival events
         seed = dsample::Seeds::getInstance().getSeed();
@@ -216,50 +244,31 @@ int main(int argc, char *argv[])
         seed = dsample::Seeds::getInstance().getSeed();
         num_edges_rng_index = dsample::CRN::getInstance().init(seed);
         dsample::CRN::getInstance().log(seed, "number of edges");
-    } else {
-        // generate the seeds
-        std::cout << "Use random number to generate seeds." << std::endl;
 
-        // 1. init the random number generator for the seeds
-        seeds_rng_index = dsample::CRN::getInstance().init(gsl_rng_default_seed);
-        dsample::CRN::getInstance().log(gsl_rng_default_seed, "seeds");
+        r1 = dsample::CRN::getInstance().get(num_edges_rng_index);
+        r2 = dsample::CRN::getInstance().get(uniform_rng_index);
+        r3 = dsample::CRN::getInstance().get(arrival_rng_index);
 
-        dsample::tGslRngSP seeds_rng = dsample::CRN::getInstance().get(seeds_rng_index);
+        // use the WEvonet class
+        std::cout << "Generating Graph..." << std::endl;
 
-        // 2. init the crn for the arrival events
-        seed = gsl_rng_uniform_int(seeds_rng.get(), gsl_rng_max(seeds_rng.get()));
-        arrival_rng_index = dsample::CRN::getInstance().init(seed);
-        dsample::CRN::getInstance().log(seed, "arrival events");
-        seed = gsl_rng_uniform_int(seeds_rng.get(), gsl_rng_max(seeds_rng.get()));
-        uniform_rng_index = dsample::CRN::getInstance().init(seed);
-        dsample::CRN::getInstance().log(seed, "uniform");
-        seed = gsl_rng_uniform_int(seeds_rng.get(), gsl_rng_max(seeds_rng.get()));
-        num_edges_rng_index = dsample::CRN::getInstance().init(seed);
-        dsample::CRN::getInstance().log(seed, "number of edges");
-    }
+        dnet::tGraphSP g;
 
-    r1 = dsample::CRN::getInstance().get(num_edges_rng_index);
-    r2 = dsample::CRN::getInstance().get(uniform_rng_index);
-    r3 = dsample::CRN::getInstance().get(arrival_rng_index);
+        if (net_gen == 1) {
+            g = dnet::WEvonet::createBBVGraph(net_size, max_edges, edge_fixed,
+                                              max_arrival, boost_arrival, boost_edge, r1, r2, r3);
+        } else if (net_gen == 2) {
+            seed = dsample::Seeds::getInstance().getSeed();
+            g = dnet::WEvonet::createERGraph(net_size, edge_fixed, max_arrival,
+                                             boost_arrival, boost_edge, r1, seed, edge_prob,
+                                             max_edges);
+        }
 
-    // use the WEvonet class
-    std::cout << "Generating Graph..." << std::endl;
-
-    dnet::tGraphSP g;
-
-    if (net_gen == 1) {
-        g = dnet::WEvonet::createBBVGraph(net_size, max_edges, edge_fixed,
-                                          max_arrival, boost_arrival, boost_edge, r1, r2, r3);
-    } else if (net_gen == 2) {
-        g = dnet::WEvonet::createERGraph(net_size, edge_fixed, max_arrival,
-                                         boost_arrival, boost_edge, r1, edge_prob,
-                                         max_edges);
-    }
-
-    if (format == dnet::GraphUtil::GRAPHVIZ) {
-        dnet::GraphUtil::print(g, filename, dnet::GraphUtil::GRAPHVIZ);
-    } else {
-        dnet::GraphUtil::print(g, filename, dnet::GraphUtil::GRAPHML);
+        if (format == dnet::GraphUtil::GRAPHVIZ) {
+            dnet::GraphUtil::print(g, file, dnet::GraphUtil::GRAPHVIZ);
+        } else {
+            dnet::GraphUtil::print(g, file, dnet::GraphUtil::GRAPHML);
+        }
     }
 
     return EXIT_SUCCESS;

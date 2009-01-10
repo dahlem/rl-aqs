@@ -260,10 +260,10 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
                                                       r1, r2, r3);
             } else if (desArgs->net_gen == 2) {
                 std::cout << "Generate Erdos-Renyi graph..." << std::endl;
-
+                seed = dsample::Seeds::getInstance().getSeed();
                 graph = dnet::WEvonet::createERGraph(desArgs->net_size, desArgs->edge_fixed,
                                                      desArgs->max_arrival, desArgs->boost_arrival,
-                                                     desArgs->boost_edge, r1, edge_prob, max_edges);
+                                                     desArgs->boost_edge, r1, seed, edge_prob, max_edges);
             }
         }
 

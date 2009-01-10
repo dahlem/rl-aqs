@@ -301,11 +301,11 @@ void WEvonet::assign_edge_weights(Vertex &v, tGraphSP g)
 
 tGraphSP WEvonet::createERGraph(boost::uint32_t p_size, double fixed_edge_weight,
                                 double max_arrival_rate, double boost_arrival, double boost_edge,
-                                tGslRngSP p_vertex_arrival_rng, double p,
+                                tGslRngSP p_vertex_arrival_rng, boost::uint32_t seed, double p,
                                 boost::uint32_t max_edges)
 {
     typedef boost::erdos_renyi_iterator<boost::minstd_rand, Graph> ERGen;
-    boost::minstd_rand gen;
+    boost::minstd_rand gen(seed);
 
     // Create graph with p_size nodes and edges with probability p
     tGraphSP g;
