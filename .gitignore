@@ -12,6 +12,10 @@
 /des*tar*
 /des-0.5.tar.bz2
 /des-0.5.tar.gz
+/des_rand_500s_1000e_1000t.pbs
+/des_soc_1000s_5e_1000t.pbs
+/des_soc_5000s_5e_1000t.pbs
+/des_soc_500s_3e_1000t.pbs
 /gprof
 /results/
 /write_seeds.pbs

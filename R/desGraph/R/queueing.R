@@ -13,6 +13,49 @@
 ## Keywords: queueing networks, jackson
 ## Created: 09.01.2009
 
+
+des.queueing <- function(graph) {
+  ## external arrival rate for node i
+  gamma <- get.vertex.attribute(graph, "arrival_rate")
+
+  ## transission probabilities from node i to node j
+  Q <- des.queueing.Q.matrix(graph)
+  I <- diag(vcount(graph))
+  temp <- I - Q
+
+  ## total arrival rate for node i
+  lambda <- gamma %*% solve(temp)
+
+  ## service rate
+  mu <- V(graph)$service_rate
+
+  ## utilisation
+  rho <- lambda / mu
+
+  ## number of jobs at node i
+  L <- rho / (1 - rho)
+
+  ## mean total waiting time
+  W <- 1 / sum(gamma) * sum(L)
+
+  ## average response time
+  w <- 1 / (mu - lambda)
+
+  ## average waiting time
+  r <- w %*% solve(temp)
+
+  ## average number of times a job visits node i
+  upsilon <- lambda / sum(gamma)
+
+  ## jackson product form
+  pfi <- (1 - rho) * rho^L
+  pf <- prod(pfi)
+
+  return(list(gamma=gamma, mu=mu, Q=Q, lambda=lambda, rho=rho,
+              L=L, W=W, w=w, r=r, upsilon=upsilon, jackson.pf=pf))
+}
+
+
 des.queueing.jackson.pf <- function(graph) {
   L <- des.queueing.L.vec(graph)
   rho <- des.queueing.rho.vec(graph)
