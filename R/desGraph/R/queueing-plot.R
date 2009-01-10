@@ -13,12 +13,38 @@
 ## Keywords: plotting
 ## Created: 10.01.2009
 
-des.queueing.arrival.hist.plot <- function(qt, ps=TRUE) {
+des.queueing.main <- function(qts, graphs) {
+  des.queueing.arrival.hist.plot(qts)
+  des.queueing.arrival.power.law.plot(qts)
+  des.queueing.average.response.hist.plot(qts)
+  des.queueing.average.response.power.law.plot(qts)
+  des.queueing.degree.hist.plot(qts, graphs)
+  des.queueing.degree.power.law.plot(qts, graphs)
+  des.queueing.service.power.law.plot(qts)
+  des.queueing.utilisation.hist.plot(qts)
+  des.queueing.numEvents.betweenness.plot(qts, graphs)
+  des.queueing.utilisation.betweenness.plot(qts, graphs)
+  des.queueing.serviceRate.betweenness.plot(qts, graphs)
+  des.queueing.delay.betweenness.plot(qts, graphs)
+  des.queueing.events.betweenness.plot(qts, graphs)
+  des.queueing.numEvents.degree.plot(qts, graphs)
+  des.queueing.utilisation.degree.plot(qts, graphs)
+  des.queueing.delay.degree.plot(qts, graphs)
+  des.queueing.delay.utilisation.plot(qts, graphs)
+}
+
+des.queueing.arrival.hist.plot <- function(qts, ps=TRUE) {
   if (ps) {
     postscript("queueing-total-arrival-hist-plot.eps", onefile=FALSE)
   }
 
-  df <- data.frame(lambda=as.vector(qt$lambda))
+  nodes <- length(qts[[1]]$lambda)
+  df <- data.frame(lambda=rep(0, length(qts) * nodes))
+
+  for (i in seq(1, length(qts))) {
+    df$lambda[(1 + (i - 1) * nodes):(nodes * i)] = qts[[i]]$lambda
+  }
+  
   p <- ggplot(df, aes(x=lambda))
   p <- p + geom_histogram(aes(y= ..density..))
   p <- p + geom_density(aes(y= ..density..), kernel="gaussian", adjust=2, fill=NA, colour="black")
@@ -33,14 +59,22 @@ des.queueing.arrival.hist.plot <- function(qt, ps=TRUE) {
   }
 }
 
-des.queueing.arrival.power.law.plot <- function(qt, ps=TRUE) {
+des.queueing.arrival.power.law.plot <- function(qts, ps=TRUE) {
   if (ps) {
     postscript("queueing-total-arrival-power-law-plot.eps", onefile=FALSE)
   }
 
-  lambda <- as.vector(qt$lambda)
-  rank <- rank(lambda)
-  df <- data.frame(lambda=lambda, rank=rank)
+  nodes <- length(qts[[1]]$lambda)
+  df <- data.frame(lambda=rep(0, length(qts) * nodes),
+                   rank=rep(0, length(qts) * nodes))
+
+  for (i in seq(1, length(qts))) {
+    lambda <- qts[[i]]$lambda
+    rank <- rank(lambda)
+    df$lambda[(1 + (i - 1) * nodes):(nodes * i)] = lambda
+    df$rank[(1 + (i - 1) * nodes):(nodes * i)] = rank
+  }
+
   p <- ggplot(df, aes(x=rank,y=lambda))
   p <- p + layer(geom = "point")
   p <- p + coord_trans(x = "log10", y = "log10")
@@ -55,13 +89,17 @@ des.queueing.arrival.power.law.plot <- function(qt, ps=TRUE) {
   }
 }
 
-des.queueing.degree.hist.plot <- function(qt, graph, ps=TRUE) {
+des.queueing.degree.hist.plot <- function(qts, graphs, ps=TRUE) {
   if (ps) {
     postscript("queueing-degree-hist-plot.eps", onefile=FALSE)
   }
 
-  degree <- degree(graph, mode="in")
-  df <- data.frame(degree);
+  nodes <- length(qts[[1]]$lambda)
+  df <- data.frame(degree=rep(0, length(qts) * nodes))
+
+  for (i in seq(1, length(qts))) {
+    df$degree[(1 + (i - 1) * nodes):(nodes * i)] = degree(graphs[[i]], mode="in")
+  }
 
   p <- ggplot(df, aes(x=degree))
   p <- p + geom_histogram(aes(y= ..density..))
@@ -77,20 +115,30 @@ des.queueing.degree.hist.plot <- function(qt, graph, ps=TRUE) {
   }
 }
 
-des.queueing.degree.power.law.plot <- function(qt, ps=TRUE) {
+des.queueing.degree.power.law.plot <- function(qts, graphs, ps=TRUE) {
   if (ps) {
     postscript("queueing-degree-power-law-plot.eps", onefile=FALSE)
   }
 
-  degree <- degree(graph, mode="in")
-  rank <- rank(lambda)
-  df <- data.frame(degree, rank)
-  p <- ggplot(df, aes(x=rank,y=lambda))
+  nodes <- length(qts[[1]]$lambda)
+  df <- data.frame(degree=rep(0, length(qts) * nodes),
+                   rank=rep(0, length(qts) * nodes))
+
+  for (i in seq(1, length(qts))) {
+    degree <- degree(graphs[[i]], mode="in")
+    rank <- rank(degree)
+    df$degree[(1 + (i - 1) * nodes):(nodes * i)] = degree
+    df$rank[(1 + (i - 1) * nodes):(nodes * i)] = rank
+  }
+
+  df <- df[df$degree > 0,]
+  
+  p <- ggplot(df, aes(x=rank,y=degree))
   p <- p + layer(geom = "point")
   p <- p + coord_trans(x = "log10", y = "log10")
-  p <- p + scale_y_continuous("In-Degree")
+  p <- p + scale_y_continuous("Vertex In-Degree")
   p <- p + scale_x_continuous("Rank")
-  p <- p + opts(title="In-Degree by Rank")
+  p <- p + opts(title="Vertex In-Degree by Rank")
   p <- p + theme_bw()
   print(p)
 
@@ -99,13 +147,17 @@ des.queueing.degree.power.law.plot <- function(qt, ps=TRUE) {
   }
 }
 
-des.queueing.average.response.hist.plot <- function(qt, ps=TRUE) {
+des.queueing.average.response.hist.plot <- function(qts, graphs, ps=TRUE) {
   if (ps) {
     postscript("queueing-average-response-hist-plot.eps", onefile=FALSE)
   }
 
-  response <- as.vector(qt$w)
-  df <- data.frame(response);
+  nodes <- length(qts[[1]]$w)
+  df <- data.frame(response=rep(0, length(qts) * nodes))
+
+  for (i in seq(1, length(qts))) {
+    df$response[(1 + (i - 1) * nodes):(nodes * i)] = qts[[i]]$w
+  }
 
   p <- ggplot(df, aes(x=response))
   p <- p + geom_histogram(aes(y= ..density..))
@@ -121,15 +173,23 @@ des.queueing.average.response.hist.plot <- function(qt, ps=TRUE) {
   }
 }
 
-des.queueing.average.response.power.law.plot <- function(qt, ps=TRUE) {
+des.queueing.average.response.power.law.plot <- function(qts, ps=TRUE) {
   if (ps) {
     postscript("queueing-average-response-power-law-plot.eps", onefile=FALSE)
   }
 
-  response <- as.vector(qt$w)
-  rank <- rank(lambda)
-  df <- data.frame(response, rank)
-  p <- ggplot(df, aes(x=rank,y=lambda))
+  nodes <- length(qts[[1]]$w)
+  df <- data.frame(response=rep(0, length(qts) * nodes),
+                   rank=rep(0, length(qts) * nodes))
+
+  for (i in seq(1, length(qts))) {
+    response <- qts[[i]]$w
+    rank <- rank(response)
+    df$response[(1 + (i - 1) * nodes):(nodes * i)] = response
+    df$rank[(1 + (i - 1) * nodes):(nodes * i)] = rank
+  }
+
+  p <- ggplot(df, aes(x=rank,y=response))
   p <- p + layer(geom = "point")
   p <- p + coord_trans(x = "log10", y = "log10")
   p <- p + scale_y_continuous("Average Response Time")
@@ -144,14 +204,22 @@ des.queueing.average.response.power.law.plot <- function(qt, ps=TRUE) {
 }
 
 
-des.queueing.service.power.law.plot <- function(qt, ps=TRUE) {
+des.queueing.service.power.law.plot <- function(qts, ps=TRUE) {
   if (ps) {
     postscript("queueing-total-service-power-law-plot.eps", onefile=FALSE)
   }
 
-  mu <- as.vector(qt$mu)
-  rank <- rank(lambda)
-  df <- data.frame(mu, rank)
+  nodes <- length(qts[[1]]$mu)
+  df <- data.frame(mu=rep(0, length(qts) * nodes),
+                   rank=rep(0, length(qts) * nodes))
+
+  for (i in seq(1, length(qts))) {
+    mu <- qts[[i]]$mu
+    rank <- rank(mu)
+    df$mu[(1 + (i - 1) * nodes):(nodes * i)] = mu
+    df$rank[(1 + (i - 1) * nodes):(nodes * i)] = rank
+  }
+
   p <- ggplot(df, aes(x=rank,y=mu))
   p <- p + layer(geom = "point")
   p <- p + coord_trans(x = "log10", y = "log10")
@@ -167,13 +235,20 @@ des.queueing.service.power.law.plot <- function(qt, ps=TRUE) {
 }
 
 
-des.queueing.utilisation.plot <- function(qt, ps=TRUE) {
+des.queueing.utilisation.hist.plot <- function(qts, ps=TRUE) {
   if (ps) {
     postscript("queueing-utilisation-hist-plot.eps", onefile=FALSE)
   }
 
-  df <- data.frame(utilisation=as.vector(qt$rho))
-  p <- ggplot(df, aes(x=utilisation))
+  nodes <- length(qts[[1]]$rho)
+  df <- data.frame(rho=rep(0, length(qts) * nodes))
+
+  for (i in seq(1, length(qts))) {
+    rho <- qts[[i]]$rho
+    df$rho[(1 + (i - 1) * nodes):(nodes * i)] = rho
+  }
+
+  p <- ggplot(df, aes(x=rho))
   p <- p + geom_histogram(aes(y= ..density..))
   p <- p + geom_density(aes(y= ..density..), kernel="gaussian", adjust=2, fill=NA, colour="black")
   p <- p + scale_y_continuous("")
@@ -187,16 +262,21 @@ des.queueing.utilisation.plot <- function(qt, ps=TRUE) {
   }
 }
 
-
-des.queueing.numEvents.betweenness.plot <- function(qt, graph, ps=TRUE) {
+des.queueing.numEvents.betweenness.plot <- function(qts, graphs, ps=TRUE) {
   if (ps) {
     postscript("queueing-betweenness-vs-numEvents-plot.eps", onefile=FALSE)
   }
 
-  expectedAverageNumEvents <- as.vector(qt$L)
-  betweenness <- betweenness(graph, directed=TRUE)
-  df <- data.frame(expectedAverageNumEvents,
-                   betweenness);
+  nodes <- length(qts[[1]]$L)
+  df <- data.frame(betweenness=rep(0, length(qts) * nodes),
+                   expectedAverageNumEvents=rep(0, length(qts) * nodes))
+
+  for (i in seq(1, length(qts))) {
+    expectedAverageNumEvents <- as.vector(qts[[i]]$L)
+    betweenness <- betweenness(graphs[[i]], directed=TRUE)
+    df$betweenness[(1 + (i - 1) * nodes):(nodes * i)] = betweenness
+    df$expectedAverageNumEvents[(1 + (i - 1) * nodes):(nodes * i)] = expectedAverageNumEvents
+  }
 
   ## select only vertices with betweenness > 0
   df <- df[df$betweenness > 0,]
@@ -215,14 +295,21 @@ des.queueing.numEvents.betweenness.plot <- function(qt, graph, ps=TRUE) {
 }
 
 
-des.queueing.utilisation.betweenness.plot <- function(qt, graph, ps=TRUE) {
+des.queueing.utilisation.betweenness.plot <- function(qts, graphs, ps=TRUE) {
   if (ps) {
     postscript("queueing-betweenness-vs-util-plot.eps", onefile=FALSE)
   }
 
-  utilisation <- as.vector(qt$rho)
-  betweenness <- betweenness(graph, directed=TRUE)
-  df <- data.frame(utilisation, betweenness);
+  nodes <- length(qts[[1]]$rho)
+  df <- data.frame(betweenness=rep(0, length(qts) * nodes),
+                   utilisation=rep(0, length(qts) * nodes))
+
+  for (i in seq(1, length(qts))) {
+    utilisation <- as.vector(qts[[i]]$rho)
+    betweenness <- betweenness(graphs[[i]], directed=TRUE)
+    df$betweenness[(1 + (i - 1) * nodes):(nodes * i)] = betweenness
+    df$utilisation[(1 + (i - 1) * nodes):(nodes * i)] = utilisation
+  }
 
   ## select only vertices with betweenness > 0
   df <- df[df$betweenness > 0,]
@@ -241,15 +328,22 @@ des.queueing.utilisation.betweenness.plot <- function(qt, graph, ps=TRUE) {
 }
 
 
-des.queueing.serviceRate.betweenness.plot <- function(qt, graph, ps=TRUE) {
+des.queueing.serviceRate.betweenness.plot <- function(qts, graphs, ps=TRUE) {
   if (ps) {
     postscript("queueing-betweenness-vs-serviceRate-plot.eps", onefile=FALSE)
   }
 
-  serviceRate <- as.vector(qt$mu)
-  betweenness <- betweenness(graph, directed=TRUE)
-  df <- data.frame(serviceRate, betweenness);
+  nodes <- length(qts[[1]]$mu)
+  df <- data.frame(betweenness=rep(0, length(qts) * nodes),
+                   serviceRate=rep(0, length(qts) * nodes))
 
+  for (i in seq(1, length(qts))) {
+    serviceRate <- as.vector(qts[[i]]$mu)
+    betweenness <- betweenness(graphs[[i]], directed=TRUE)
+    df$serviceRate[(1 + (i - 1) * nodes):(nodes * i)] = serviceRate
+    df$betweenness[(1 + (i - 1) * nodes):(nodes * i)] = betweenness
+  }
+  
   ## select only vertices with betweenness > 0
   df <- df[df$betweenness > 0,]
 
@@ -266,15 +360,21 @@ des.queueing.serviceRate.betweenness.plot <- function(qt, graph, ps=TRUE) {
   }
 }
 
-
-des.queueing.delay.betweenness.plot <- function(qt, graph, ps=TRUE) {
+des.queueing.delay.betweenness.plot <- function(qts, graphs, ps=TRUE) {
   if (ps) {
     postscript("queueing-betweenness-vs-delay-plot.eps", onefile=FALSE)
   }
 
-  delay <- as.vector(qt$r)
-  betweenness <- betweenness(graph, directed=TRUE)
-  df <- data.frame(delay, betweenness);
+  nodes <- length(qts[[1]]$r)
+  df <- data.frame(betweenness=rep(0, length(qts) * nodes),
+                   delay=rep(0, length(qts) * nodes))
+
+  for (i in seq(1, length(qts))) {
+    delay <- as.vector(qts[[i]]$r)
+    betweenness <- betweenness(graphs[[i]], directed=TRUE)
+    df$delay[(1 + (i - 1) * nodes):(nodes * i)] = delay
+    df$betweenness[(1 + (i - 1) * nodes):(nodes * i)] = betweenness
+  }
 
   ## select only vertices with betweenness > 0
   df <- df[df$betweenness > 0,]
@@ -293,14 +393,21 @@ des.queueing.delay.betweenness.plot <- function(qt, graph, ps=TRUE) {
 }
 
 
-des.queueing.events.betweenness.plot <- function(qt, graph, ps=TRUE) {
+des.queueing.events.betweenness.plot <- function(qts, graphs, ps=TRUE) {
   if (ps) {
     postscript("queueing-betweenness-vs-events.eps", onefile=FALSE)
   }
 
-  events <- as.vector(qt$upsilon)
-  betweenness <- betweenness(graph, directed=TRUE)
-  df <- data.frame(events, betweenness);
+  nodes <- length(qts[[1]]$upsilon)
+  df <- data.frame(betweenness=rep(0, length(qts) * nodes),
+                   events=rep(0, length(qts) * nodes))
+
+  for (i in seq(1, length(qts))) {
+    events <- as.vector(qts[[i]]$upsilon)
+    betweenness <- betweenness(graphs[[i]], directed=TRUE)
+    df$events[(1 + (i - 1) * nodes):(nodes * i)] = events
+    df$betweenness[(1 + (i - 1) * nodes):(nodes * i)] = betweenness
+  }
 
   ## select only vertices with betweenness > 0
   df <- df[df$betweenness > 0,]
@@ -318,15 +425,21 @@ des.queueing.events.betweenness.plot <- function(qt, graph, ps=TRUE) {
   }
 }
 
-
-des.queueing.numEvents.degree.plot <- function(qt, graph, ps=TRUE) {
+des.queueing.numEvents.degree.plot <- function(qts, graphs, ps=TRUE) {
   if (ps) {
     postscript("queueing-degree-vs-numEvents-plot.eps", onefile=FALSE)
   }
 
-  expectedAverageNumEvents <- as.vector(qt$L)
-  degree <- degree(graph, mode="in")
-  df <- data.frame(expectedAverageNumEvents, degree);
+  nodes <- length(qts[[1]]$L)
+  df <- data.frame(degree=rep(0, length(qts) * nodes),
+                   expectedAverageNumEvents=rep(0, length(qts) * nodes))
+
+  for (i in seq(1, length(qts))) {
+    expectedAverageNumEvents <- as.vector(qts[[i]]$L)
+    degree <- degree(graphs[[i]], mode="in")
+    df$expectedAverageNumEvents[(1 + (i - 1) * nodes):(nodes * i)] = expectedAverageNumEvents
+    df$degree[(1 + (i - 1) * nodes):(nodes * i)] = degree
+  }
 
   p <- ggplot(df, aes(y=expectedAverageNumEvents, x=degree))
   p <- p + layer(geom = "point")
@@ -342,15 +455,22 @@ des.queueing.numEvents.degree.plot <- function(qt, graph, ps=TRUE) {
 }
 
 
-des.queueing.utilisation.degree.plot <- function(qt, graph, ps=TRUE) {
+des.queueing.utilisation.degree.plot <- function(qts, graphs, ps=TRUE) {
   if (ps) {
     postscript("queueing-degree-vs-util-plot.eps", onefile=FALSE)
   }
 
-  utilisation <- as.vector(qt$rho)
-  degree <- degree(graph, mode="in")
-  df <- data.frame(utilisation, degree);
+  nodes <- length(qts[[1]]$rho)
+  df <- data.frame(degree=rep(0, length(qts) * nodes),
+                   utilisation=rep(0, length(qts) * nodes))
 
+  for (i in seq(1, length(qts))) {
+    utilisation <- as.vector(qts[[i]]$rho)
+    degree <- degree(graphs[[i]], mode="in")
+    df$utilisation[(1 + (i - 1) * nodes):(nodes * i)] = utilisation
+    df$degree[(1 + (i - 1) * nodes):(nodes * i)] = degree
+  }
+  
   p <- ggplot(df, aes(y=utilisation, x=degree))
   p <- p + layer(geom = "point")
   p <- p + scale_x_continuous("In-Degree")
@@ -364,16 +484,22 @@ des.queueing.utilisation.degree.plot <- function(qt, graph, ps=TRUE) {
   }
 }
 
-
-des.queueing.delay.degree.plot <- function(qt, graph, ps=TRUE) {
+des.queueing.delay.degree.plot <- function(qts, graphs, ps=TRUE) {
   if (ps) {
     postscript("queueing-degree-vs-delay-plot.eps", onefile=FALSE)
   }
 
-  delay <- as.vector(qt$r)
-  degree <- degree(graph, mode="in")
-  df <- data.frame(delay, degree);
+  nodes <- length(qts[[1]]$r)
+  df <- data.frame(degree=rep(0, length(qts) * nodes),
+                   delay=rep(0, length(qts) * nodes))
 
+  for (i in seq(1, length(qts))) {
+    delay <- as.vector(qts[[i]]$r)
+    degree <- degree(graphs[[i]], mode="in")
+    df$delay[(1 + (i - 1) * nodes):(nodes * i)] = delay
+    df$degree[(1 + (i - 1) * nodes):(nodes * i)] = degree
+  }
+  
   p <- ggplot(df, aes(y=delay, x=degree))
   p <- p + layer(geom = "point")
   p <- p + scale_x_continuous("In-Degree")
@@ -387,15 +513,21 @@ des.queueing.delay.degree.plot <- function(qt, graph, ps=TRUE) {
   }
 }
 
-
-des.queueing.delay.utilisation.plot <- function(qt, graph, ps=TRUE) {
+des.queueing.delay.utilisation.plot <- function(qts, graphs, ps=TRUE) {
   if (ps) {
-    postscript("queueing-delay-vs-customers-evo-plot.eps", onefile=FALSE)
+    postscript("queueing-delay-vs-utilisation-plot.eps", onefile=FALSE)
   }
 
-  delay <- as.vector(qt$r)
-  utilisation <- as.vector(qt$rho)
-  df <- data.frame(delay, utilisation);
+  nodes <- length(qts[[1]]$r)
+  df <- data.frame(utilisation=rep(0, length(qts) * nodes),
+                   delay=rep(0, length(qts) * nodes))
+
+  for (i in seq(1, length(qts))) {
+    delay <- as.vector(qts[[i]]$r)
+    utilisation <- as.vector(qts[[i]]$rho)
+    df$delay[(1 + (i - 1) * nodes):(nodes * i)] = delay
+    df$utilisation[(1 + (i - 1) * nodes):(nodes * i)] = utilisation
+  }
 
   p <- ggplot(df, aes(x=utilisation, y=delay))
   p <- p + layer(geom = "point")
@@ -414,6 +546,18 @@ des.queueing.delay.utilisation.plot <- function(qt, graph, ps=TRUE) {
 library(igraph)
 library(ggplot2)
 
-graphs <- dir()
+dir <- dir()
+numGraphs <- length(dir)
 
-des.queueing.main(qt, graph)
+qts <- list()
+graphs <- list()
+
+for (i in dir) {
+  print(paste("Read graph: ", i))
+  graph <- read.graph(i, format="graphml")
+  qt <- des.queueing(graph)
+  qts[[length(qts)+1]] = qt
+  graphs[[length(graphs)+1]] = graph
+}
+
+des.queueing.main(qts, graphs)
