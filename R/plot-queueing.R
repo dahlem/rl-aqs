@@ -543,18 +543,17 @@ des.queueing.delay.utilisation.plot <- function(qts, graphs, ps=TRUE) {
 }
 
 
-library(igraph)
-library(ggplot2)
+library(desGraph)
 
 dir <- dir()
-numGraphs <- length(dir)
+filtered <- grep(".gml", dir)
 
 qts <- list()
 graphs <- list()
 
-for (i in dir) {
-  print(paste("Read graph: ", i))
-  graph <- read.graph(i, format="graphml")
+for (i in filtered) {
+  print(paste("Read graph: ", dir[i]))
+  graph <- read.graph(dir[i], format="graphml")
   qt <- des.queueing(graph)
   qts[[length(qts)+1]] = qt
   graphs[[length(graphs)+1]] = graph

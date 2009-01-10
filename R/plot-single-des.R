@@ -83,8 +83,7 @@ des.graph.single.delay.evo.plot <- function(graphs, nodes, stopTime, ps=TRUE) {
 }
 
 
-library(igraph)
-library(ggplot2)
+library(desGraph)
 
 replicas <- read.csv("../replica_results.dat", header=TRUE)
 simNum <- replicas$sim_num[1]
