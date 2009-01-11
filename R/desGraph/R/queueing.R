@@ -51,7 +51,7 @@ des.queueing <- function(graph) {
   pfi <- (1 - rho) * rho^L
   pf <- prod(pfi)
 
-  return(list(gamma=gamma, mu=mu, Q=Q, lambda=lambda, rho=rho,
+  return(list(gamma=gamma, mu=mu, lambda=lambda, rho=rho,
               L=L, W=W, w=w, r=r, upsilon=upsilon, jackson.pf=pf))
 }
 
