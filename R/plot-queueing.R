@@ -265,7 +265,7 @@ des.queueing.service.power.law.plot <- function(qts, graphs, factor, ps=TRUE) {
 
   for (i in seq(1, length(qts))) {
     mu <- qts[[i]]$mu
-    rank <- rank(response)
+    rank <- rank(mu)
     df$mu[(nodes[i] + 1):(nodes[i+1])] = mu
     df$rank[(nodes[i] + 1):(nodes[i+1])] = rank
     df$size[(nodes[i] + 1):(nodes[i+1])] <- rep(vcount(graphs[[i]]), vcount(graphs[[i]]))

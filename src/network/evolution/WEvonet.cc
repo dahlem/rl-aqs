@@ -92,6 +92,9 @@ tGraphSP WEvonet::createBBVGraph(boost::uint32_t p_size, boost::uint32_t max_edg
     VertexExpectedAverageNumberEventMap vertex_expected_average_number_event_map
         = get(vertex_expected_average_number_event, *g);
 
+    // set the graph properties
+    boost::set_property(*g, graph_generator, 1);
+
     // create a small graph upon which the evolution is excercised
     Vertex v1 = add_vertex(*g);
     vertex_arrival_props_map[v1] = (gsl_rng_uniform(vertex_arrival_rng.get()) * max_arrival_rate);
@@ -322,6 +325,8 @@ tGraphSP WEvonet::createERGraph(boost::uint32_t p_size, double fixed_edge_weight
                 ERGen(), p_size));
     }
 
+    // set the graph properties
+    boost::set_property(*g, graph_generator, 2);
 
     VertexIndexMap vertexIndexMap = get(boost::vertex_index, *g);
     VertexArrivalRateMap vertex_arrival_props_map

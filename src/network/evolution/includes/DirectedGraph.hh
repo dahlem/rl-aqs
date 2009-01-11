@@ -19,9 +19,18 @@
  *
  * @author Dominik Dahlem
  */
+#if HAVE_CONFIG_H
+# include <config.h>
+#endif
+
 #ifndef __DES_NETWORK_DIRECTED_GRAPH_HH__
 #define __DES_NETWORK_DIRECTED_GRAPH_HH__
 
+#ifndef __STDC_CONSTANT_MACROS
+# define __STDC_CONSTANT_MACROS
+#endif /* __STDC_CONSTANT_MACROS */
+
+#include <boost/cstdint.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/depth_first_search.hpp>
@@ -103,6 +112,12 @@ enum vertex_expected_average_number_event_t { vertex_expected_average_number_eve
 enum vertex_last_event_time_t { vertex_last_event_time = 1122 };
 
 
+/** @enum graph_generator_t
+ * This enum extends the graph properties by a generator argument
+ */
+enum graph_generator_t { graph_generator = 1123 };
+
+
 // install the vertex service rate property
 namespace boost
 {
@@ -118,6 +133,7 @@ namespace boost
     BOOST_INSTALL_PROPERTY(vertex, utilisation);
     BOOST_INSTALL_PROPERTY(vertex, expected_average_number_event);
     BOOST_INSTALL_PROPERTY(vertex, last_event_time);
+    BOOST_INSTALL_PROPERTY(graph, generator);
 }
 
 
@@ -194,6 +210,11 @@ typedef boost::property <boost::vertex_index_t, int, VertexLastEventTimeProperty
  */
 typedef boost::property <boost::edge_weight_t, double> EdgeWeightProperty;
 
+/** @typedef GraphGeneratorProperty
+ * Specifies the property for the edge weight
+ */
+typedef boost::property <graph_generator_t, boost::uint16_t> GraphGeneratorProperty;
+
 
 /** @typedef Graph
  * Specifies the Graph as an adjacency list. The edges are represented in a
@@ -206,7 +227,8 @@ typedef boost::adjacency_list<boost::setS,
                               boost::listS,
                               boost::directedS,
                               VertexProperties,
-                              EdgeWeightProperty> Graph;
+                              EdgeWeightProperty,
+                              GraphGeneratorProperty> Graph;
 
 /** @typedef Vertex
  * Specifies the vertex descriptor of a graph
@@ -375,20 +397,21 @@ protected:
 };
 
 
-const std::string EDGE_WEIGHT                    = "weight";
-const std::string VERTEX_ID                      = "id";
-const std::string SERVICE_RATE                   = "service_rate";
-const std::string ARRIVAL_RATE                   = "arrival_rate";
-const std::string BUSY                           = "busy";
-const std::string TIME_SERVICE_ENDS              = "time_service_ends";
-const std::string NUMBER_IN_QUEUE                = "number_in_queue";
-const std::string AVERAGE_DELAY_IN_QUEUE         = "average_delay_in_queue";
-const std::string NUM_EVENTS                     = "num_events";
-const std::string UTILISATION                    = "utilisation";
-const std::string BDT                            = "Bdt";
-const std::string QDT                            = "Qdt";
-const std::string LAST_EVENT_TIME                = "last_event_time";
-const std::string EXPECTED_AVERAGE_NUMBER_EVENT  = "expected_average_number_event";
+const std::string EDGE_WEIGHT                       = "weight";
+const std::string VERTEX_ID                         = "id";
+const std::string SERVICE_RATE                      = "service_rate";
+const std::string ARRIVAL_RATE                      = "arrival_rate";
+const std::string BUSY                              = "busy";
+const std::string TIME_SERVICE_ENDS                 = "time_service_ends";
+const std::string NUMBER_IN_QUEUE                   = "number_in_queue";
+const std::string AVERAGE_DELAY_IN_QUEUE            = "average_delay_in_queue";
+const std::string NUM_EVENTS                        = "num_events";
+const std::string UTILISATION                       = "utilisation";
+const std::string BDT                               = "Bdt";
+const std::string QDT                               = "Qdt";
+const std::string LAST_EVENT_TIME                   = "last_event_time";
+const std::string EXPECTED_AVERAGE_NUMBER_EVENT     = "expected_average_number_event";
+const std::string GRAPH_GENERATOR                   = "graph_generator";
 
 
     }

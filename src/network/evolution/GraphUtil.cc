@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,9 +23,14 @@
 # include <config.h>
 #endif
 
+#ifndef __STDC_CONSTANT_MACROS
+# define __STDC_CONSTANT_MACROS
+#endif /* __STDC_CONSTANT_MACROS */
+
 #include <fstream>
 #include <string>
 
+#include <boost/cstdint.hpp>
 #include <boost/graph/adjacency_list.hpp>
 
 #include "GraphException.hh"
@@ -61,7 +66,7 @@ void GraphUtil::print_dot(tGraphSP p_graph, const std::string& filename)
 
     if (out.is_open()) {
         boost::dynamic_properties dp = getProperties(p_graph);
-        std::string node_id = "node_id";
+        std::string node_id = "id";
         boost::write_graphviz(out, *p_graph, dp, node_id);
         out.close();
     }
@@ -172,6 +177,10 @@ boost::dynamic_properties GraphUtil::getProperties(tGraphSP p_graph)
     dp.property(QDT, get(vertex_Qdt, *p_graph));
     dp.property(LAST_EVENT_TIME, get(vertex_last_event_time, *p_graph));
     dp.property(EXPECTED_AVERAGE_NUMBER_EVENT, get(vertex_expected_average_number_event, *p_graph));
+
+    boost::ref_property_map<Graph*, boost::uint16_t>
+        graphGenerator(get_property(*p_graph, graph_generator));
+    dp.property(GRAPH_GENERATOR, graphGenerator);
 
     return dp;
 }
