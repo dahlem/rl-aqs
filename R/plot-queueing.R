@@ -13,14 +13,14 @@
 ## Keywords: plotting
 ## Created: 10.01.2009
 
-des.queueing.main <- function(qts, graphs) {
+des.queueing.main <- function(qts, graphs, factor=NULL) {
   des.queueing.arrival.hist.plot(qts)
-  des.queueing.arrival.power.law.plot(qts)
+  des.queueing.arrival.power.law.plot(qts, graphs, factor)
   des.queueing.average.response.hist.plot(qts)
-  des.queueing.average.response.power.law.plot(qts)
+  des.queueing.average.response.power.law.plot(qts, graphs, factor)
   des.queueing.degree.hist.plot(qts, graphs)
-  des.queueing.degree.power.law.plot(qts, graphs)
-  des.queueing.service.power.law.plot(qts)
+  des.queueing.degree.power.law.plot(qts, graphs, factor)
+  des.queueing.service.power.law.plot(qts, graphs, factor)
   des.queueing.utilisation.hist.plot(qts)
   des.queueing.numEvents.betweenness.plot(qts, graphs)
   des.queueing.utilisation.betweenness.plot(qts, graphs)
@@ -59,24 +59,39 @@ des.queueing.arrival.hist.plot <- function(qts, ps=TRUE) {
   }
 }
 
-des.queueing.arrival.power.law.plot <- function(qts, ps=TRUE) {
+des.queueing.arrival.power.law.plot <- function(qts, graphs, factor, ps=TRUE) {
   if (ps) {
     postscript("queueing-total-arrival-power-law-plot.eps", onefile=FALSE)
   }
 
-  nodes <- length(qts[[1]]$lambda)
-  df <- data.frame(lambda=rep(0, length(qts) * nodes),
-                   rank=rep(0, length(qts) * nodes))
+  nodes <- rep(0, length(graphs) + 1)
+  for (i in seq(1, length(graphs))) {
+    nodes[i+1] <- nodes[i] + vcount(graphs[[i]])
+  }
+  
+  df <- data.frame(lambda=rep(0, nodes[length(graphs) + 1]),
+                   rank=rep(0, nodes[length(graphs) + 1]),
+                   size=rep(0, nodes[length(graphs) + 1]))
 
   for (i in seq(1, length(qts))) {
     lambda <- qts[[i]]$lambda
     rank <- rank(lambda)
-    df$lambda[(1 + (i - 1) * nodes):(nodes * i)] = lambda
-    df$rank[(1 + (i - 1) * nodes):(nodes * i)] = rank
+    df$lambda[(nodes[i] + 1):(nodes[i+1])] = lambda
+    df$rank[(nodes[i] + 1):(nodes[i+1])] = rank
+    df$size[(nodes[i] + 1):(nodes[i+1])] <- rep(vcount(graphs[[i]]), vcount(graphs[[i]]))
   }
 
   p <- ggplot(df, aes(x=rank,y=lambda))
-  p <- p + layer(geom = "point")
+  if (!is.null(factor)) {
+    if (factor == "size") {
+      p <- p + geom_point(aes(shape = factor(size)))
+    } else if (factor == "max_edges") {
+    } else {
+      p <- p + layer(geom = "point")
+    }
+  } else {
+    p <- p + layer(geom = "point")
+  }
   p <- p + coord_trans(x = "log10", y = "log10")
   p <- p + scale_y_continuous("Total Arrival Rates")
   p <- p + scale_x_continuous("Rank")
@@ -115,26 +130,41 @@ des.queueing.degree.hist.plot <- function(qts, graphs, ps=TRUE) {
   }
 }
 
-des.queueing.degree.power.law.plot <- function(qts, graphs, ps=TRUE) {
+des.queueing.degree.power.law.plot <- function(qts, graphs, factor, ps=TRUE) {
   if (ps) {
     postscript("queueing-degree-power-law-plot.eps", onefile=FALSE)
   }
 
-  nodes <- length(qts[[1]]$lambda)
-  df <- data.frame(degree=rep(0, length(qts) * nodes),
-                   rank=rep(0, length(qts) * nodes))
+  nodes <- rep(0, length(graphs) + 1)
+  for (i in seq(1, length(graphs))) {
+    nodes[i+1] <- nodes[i] + vcount(graphs[[i]])
+  }
+  
+  df <- data.frame(degree=rep(0, nodes[length(graphs) + 1]),
+                   rank=rep(0, nodes[length(graphs) + 1]),
+                   size=rep(0, nodes[length(graphs) + 1]))
 
   for (i in seq(1, length(qts))) {
     degree <- degree(graphs[[i]], mode="in")
     rank <- rank(degree)
-    df$degree[(1 + (i - 1) * nodes):(nodes * i)] = degree
-    df$rank[(1 + (i - 1) * nodes):(nodes * i)] = rank
+    df$degree[(nodes[i] + 1):(nodes[i+1])] = degree
+    df$rank[(nodes[i] + 1):(nodes[i+1])] = rank
+    df$size[(nodes[i] + 1):(nodes[i+1])] <- rep(vcount(graphs[[i]]), vcount(graphs[[i]]))
   }
 
   df <- df[df$degree > 0,]
-  
+
   p <- ggplot(df, aes(x=rank,y=degree))
-  p <- p + layer(geom = "point")
+  if (!is.null(factor)) {
+    if (factor == "size") {
+      p <- p + geom_point(aes(shape = factor(size)))
+    } else if (factor == "max_edges") {
+    } else {
+      p <- p + layer(geom = "point")
+    }
+  } else {
+    p <- p + layer(geom = "point")
+  }
   p <- p + coord_trans(x = "log10", y = "log10")
   p <- p + scale_y_continuous("Vertex In-Degree")
   p <- p + scale_x_continuous("Rank")
@@ -173,24 +203,39 @@ des.queueing.average.response.hist.plot <- function(qts, graphs, ps=TRUE) {
   }
 }
 
-des.queueing.average.response.power.law.plot <- function(qts, ps=TRUE) {
+des.queueing.average.response.power.law.plot <- function(qts, graphs, factor, ps=TRUE) {
   if (ps) {
     postscript("queueing-average-response-power-law-plot.eps", onefile=FALSE)
   }
 
-  nodes <- length(qts[[1]]$w)
-  df <- data.frame(response=rep(0, length(qts) * nodes),
-                   rank=rep(0, length(qts) * nodes))
+  nodes <- rep(0, length(graphs) + 1)
+  for (i in seq(1, length(graphs))) {
+    nodes[i+1] <- nodes[i] + vcount(graphs[[i]])
+  }
+  
+  df <- data.frame(response=rep(0, nodes[length(graphs) + 1]),
+                   rank=rep(0, nodes[length(graphs) + 1]),
+                   size=rep(0, nodes[length(graphs) + 1]))
 
   for (i in seq(1, length(qts))) {
     response <- qts[[i]]$w
     rank <- rank(response)
-    df$response[(1 + (i - 1) * nodes):(nodes * i)] = response
-    df$rank[(1 + (i - 1) * nodes):(nodes * i)] = rank
+    df$response[(nodes[i] + 1):(nodes[i+1])] = response
+    df$rank[(nodes[i] + 1):(nodes[i+1])] = rank
+    df$size[(nodes[i] + 1):(nodes[i+1])] <- rep(vcount(graphs[[i]]), vcount(graphs[[i]]))
   }
 
   p <- ggplot(df, aes(x=rank,y=response))
-  p <- p + layer(geom = "point")
+  if (!is.null(factor)) {
+    if (factor == "size") {
+      p <- p + geom_point(aes(shape = factor(size)))
+    } else if (factor == "max_edges") {
+    } else {
+      p <- p + layer(geom = "point")
+    }
+  } else {
+    p <- p + layer(geom = "point")
+  }
   p <- p + coord_trans(x = "log10", y = "log10")
   p <- p + scale_y_continuous("Average Response Time")
   p <- p + scale_x_continuous("Rank")
@@ -204,24 +249,39 @@ des.queueing.average.response.power.law.plot <- function(qts, ps=TRUE) {
 }
 
 
-des.queueing.service.power.law.plot <- function(qts, ps=TRUE) {
+des.queueing.service.power.law.plot <- function(qts, graphs, factor, ps=TRUE) {
   if (ps) {
     postscript("queueing-total-service-power-law-plot.eps", onefile=FALSE)
   }
 
-  nodes <- length(qts[[1]]$mu)
-  df <- data.frame(mu=rep(0, length(qts) * nodes),
-                   rank=rep(0, length(qts) * nodes))
+  nodes <- rep(0, length(graphs) + 1)
+  for (i in seq(1, length(graphs))) {
+    nodes[i+1] <- nodes[i] + vcount(graphs[[i]])
+  }
+  
+  df <- data.frame(mu=rep(0, nodes[length(graphs) + 1]),
+                   rank=rep(0, nodes[length(graphs) + 1]),
+                   size=rep(0, nodes[length(graphs) + 1]))
 
   for (i in seq(1, length(qts))) {
     mu <- qts[[i]]$mu
-    rank <- rank(mu)
-    df$mu[(1 + (i - 1) * nodes):(nodes * i)] = mu
-    df$rank[(1 + (i - 1) * nodes):(nodes * i)] = rank
+    rank <- rank(response)
+    df$mu[(nodes[i] + 1):(nodes[i+1])] = mu
+    df$rank[(nodes[i] + 1):(nodes[i+1])] = rank
+    df$size[(nodes[i] + 1):(nodes[i+1])] <- rep(vcount(graphs[[i]]), vcount(graphs[[i]]))
   }
 
   p <- ggplot(df, aes(x=rank,y=mu))
-  p <- p + layer(geom = "point")
+  if (!is.null(factor)) {
+    if (factor == "size") {
+      p <- p + geom_point(aes(shape = factor(size)))
+    } else if (factor == "max_edges") {
+    } else {
+      p <- p + layer(geom = "point")
+    }
+  } else {
+    p <- p + layer(geom = "point")
+  }
   p <- p + coord_trans(x = "log10", y = "log10")
   p <- p + scale_y_continuous("Service Rates")
   p <- p + scale_x_continuous("Rank")
@@ -547,6 +607,13 @@ library(desGraph)
 
 dir <- dir()
 filtered <- grep(".gml", dir)
+factored <- FALSE
+
+if (length(filtered) == 0) {
+  dir <- dir(recursive=TRUE)
+  filtered <- grep(".gml", dir)
+  factored <- TRUE
+}
 
 qts <- list()
 graphs <- list()
@@ -559,4 +626,8 @@ for (i in filtered) {
   graphs[[length(graphs)+1]] = graph
 }
 
-des.queueing.main(qts, graphs)
+if (factored == TRUE) {
+  des.queueing.main(qts, graphs, "size")
+} else {
+  des.queueing.main(qts, graphs)
+}
