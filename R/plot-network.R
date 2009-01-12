@@ -15,7 +15,7 @@
 
 des.network.radial.plot <- function(data, filename, ps=TRUE) {
   if (ps) {
-    postscript(filename, onefile=FALSE)
+    postscript(filename, onefile=FALSE, paper="special", width=7, height=7)
   }
 
   a <- as.character(max(data$degree))
