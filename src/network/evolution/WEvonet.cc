@@ -307,14 +307,23 @@ tGraphSP WEvonet::createERGraph(boost::uint32_t p_size, double fixed_edge_weight
                                 tGslRngSP p_vertex_arrival_rng, boost::uint32_t seed, double p,
                                 boost::uint32_t max_edges)
 {
+#ifndef NDEBUG_NETWORK
+    std::cout << "WEvonet -- Generate ER graph." << std::endl;
+#endif /* NDEBUG_NETWORK */
     typedef boost::erdos_renyi_iterator<boost::minstd_rand, Graph> ERGen;
     boost::minstd_rand gen(seed);
 
     // Create graph with p_size nodes and edges with probability p
     tGraphSP g;
     if (max_edges == WEvonet::MAX_EDGES) {
+#ifndef NDEBUG_NETWORK
+        std::cout << "WEvonet -- size: " << p_size << ", edge probability: " <<  p << std::endl;
+#endif /* NDEBUG_NETWORK */
         g = tGraphSP(new Graph(ERGen(gen, p_size, p, false), ERGen(), p_size));
     } else {
+#ifndef NDEBUG_NETWORK
+        std::cout << "WEvonet -- size: " << p_size << ", edges: " <<  max_edges << std::endl;
+#endif /* NDEBUG_NETWORK */
         g = tGraphSP(
             new Graph(
                 ERGen(
@@ -335,6 +344,9 @@ tGraphSP WEvonet::createERGraph(boost::uint32_t p_size, double fixed_edge_weight
         = get(vertex_service_rate, *g);
 
     // assign ids, arrival and service rates
+#ifndef NDEBUG_NETWORK
+    std::cout << "WEvonet -- Assign IDs and arrival rates." <<  std::endl;
+#endif /* NDEBUG_NETWORK */
     std::pair <VertexIterator, VertexIterator> p_v;
     int i = 0;
     for (p_v = boost::vertices(*g); p_v.first != p_v.second; ++p_v.first) {
@@ -346,6 +358,9 @@ tGraphSP WEvonet::createERGraph(boost::uint32_t p_size, double fixed_edge_weight
     }
 
     // remove cycles
+#ifndef NDEBUG_NETWORK
+    std::cout << "WEvonet -- Remove cycles." <<  std::endl;
+#endif /* NDEBUG_NETWORK */
     typedef std::vector <Edge> EdgesToBeRemoved;
     EdgesToBeRemoved edgesToBeRemoved;
     cycle_detector <EdgesToBeRemoved> vis(edgesToBeRemoved);
@@ -358,6 +373,9 @@ tGraphSP WEvonet::createERGraph(boost::uint32_t p_size, double fixed_edge_weight
     }
 
     // balance the service rates
+#ifndef NDEBUG_NETWORK
+    std::cout << "WEvonet -- Balance the service rates." <<  std::endl;
+#endif /* NDEBUG_NETWORK */
     typedef std::list <Vertex> BalanceOrder;
     BalanceOrder balance_order;
     boost::topological_sort(*g, std::front_inserter(balance_order));

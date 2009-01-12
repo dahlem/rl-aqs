@@ -124,9 +124,6 @@ if test "x$DEBUGGING" = xyes; then
   AC_DEFINE(BOOST_DISABLE_ASSERTS, 0, [disable boost asserts, if enabled])
 else
   AC_DEFINE(NDEBUG, 1, [define debugging, if disabled])
-  AC_DEFINE(NDEBUG_QUEUE, 1, [define queue debugging, if disabled])
-  AC_DEFINE(NDEBUG_EVENTS, 1, [define event debugging, if disabled])
-  AC_DEFINE(NDEBUG_NETWORK, 1, [define network debugging, if disabled])
   AC_DEFINE(BOOST_DISABLE_ASSERTS, 1, [disable boost asserts, if enabled])
 fi
 
