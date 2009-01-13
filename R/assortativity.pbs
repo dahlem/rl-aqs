@@ -1,12 +1,8 @@
 #!/bin/bash
-#
-# requested walltime
-#PBS -l walltime=48:00:00
-#
-# specify number of nodes and (optionally) cpus per node
-#PBS -l nodes=10:ppn=1
-#
-###
+#PBS -l walltime=12:00:00
+#PBS -q parallel
+#PBS -l cput=72:00:00
+#PBS -l nodes=3:ppn=2
 
 cd $PBS_O_WORKDIR
 umask 027
@@ -22,15 +18,13 @@ echo "Current working directory is `pwd`" >> $JOBINFO
 echo "nodes: $nodes" >> $JOBINFO
 echo "Running on $NUM_PROCESSES processors on $NUM_NODES nodes." >> $JOBINFO
 
-mpd_nodefile="mpd.nodes"
+export CFLAGS="-I/usr/support/common/people/darach/OPENMPI/1.2.8/include -DMPI2 "
+export LDFLAGS="-L/usr/support/common/people/darach/OPENMPI/1.2.8/lib -L/usr/support/common/people/darach/OPENMPI/1.2.8/lib/openmpi"
+export MPI_ROOT="/usr/support/common/people/darach/OPENMPI/1.2.8/"
 
-sort $PBS_NODEFILE | uniq -c  | awk '{ printf("%s:%s\n", $2, $1); }' > $mpd_nodefile
+export PATH=/usr/support/common/people/darach/R-PROJECT/2.8.0/bin:/usr/support/common/people/darach/OPENMPI/1.2.8/bin:$PATH
+export LD_LIBRARY_PATH=/usr/support/common/people/darach/OPENMPI/1.2.8/lib:$LD_LIBRARY_PATH
 
-/usr/support/mpich2/mpich2-1.0.7/bin/mpdboot -f $mpd_nodefile -n $NUM_NODES
-
-/usr/support/mpich2/mpich2-1.0.7/bin/mpiexec -l -n 1 /usr/support/R-PROJECT/R-2.7.0-mpich2/bin/R CMD BATCH  --slave --no-restore --no-save ./analysis/assortativity-analysis.R
-
-sleep 5
-/usr/support/mpich2/mpich2-1.0.7/bin/mpdallexit
+mpiexec -n 1 Rscript ./analysis/assortativity-analysis.R
 
 echo "Job finished at `date`" >> $JOBINFO

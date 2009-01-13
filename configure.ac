@@ -75,14 +75,18 @@ AC_ARG_ENABLE(mpi, AS_HELP_STRING(
 		   [enable MPI @<:@default=no@:>@]), 
 		   [USE_MPI=$enableval], [USE_MPI=no])
 if test "x$USE_MPI" = xyes; then
+   HAVE_MPI=TRUE
    AC_LANG([C++])
    ACX_MPI([], [AC_MSG_WARN([cannot configure MPI (compile in serial)])])
-   SNOW=", snow"
+   SNOW="snow"
+   AC_SUBST(HAVE_MPI)
    AC_SUBST(SNOW)
 else
+   HAVE_MPI=FALSE
    MPICXX="${CXX}"
    AC_SUBST(MPICXX)
    SNOW=""
+   AC_SUBST(HAVE_MPI)
    AC_SUBST(SNOW)
 fi
 AM_CONDITIONAL(COMPILE_PARALLEL, test "x$USE_MPI" = xyes)
