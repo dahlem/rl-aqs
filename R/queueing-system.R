@@ -17,23 +17,57 @@ library(desGraph)
 
 dir <- dir(recursive=TRUE)
 filtered <- grep(".gml", dir)
-factored <- TRUE
 
-df <- data.frame(graphs=rep("", length(filtered)),
+df <- data.frame(boostVertex=rep(0, length(filtered)),
+                 boostEdge=rep(0, length(filtered)),
                  W=rep(0, length(filtered)),
                  L=rep(0, length(filtered)),
-                 pf=rep(0, length(filtered)))
+                 pf=rep(0, length(filtered)),
+                 network=rep(0, length(filtered)))
 counter <- 1
 
 for (i in filtered) {
   print(paste("Read graph: ", dir[i]))
   graph <- read.graph(dir[i], format="graphml")
   qt <- des.queueing(graph)
-  df$graphs[counter] <- dir[i]
+  df$boostVertex[counter] <- as.numeric(sub(".*_bv(\\d.\\d{4}).*", "\\1", dir[i], perl=TRUE))
+  df$boostEdge[counter] <- as.numeric(sub(".*_be(\\d.\\d{4}).*", "\\1", dir[i], perl=TRUE))
   df$W[counter] <- qt$W
-  df$L[counter] <- qt$L
-  df$pf[counter] <- qt$pf
+  df$L[counter] <- sum(qt$L)
+  df$pf[counter] <- qt$jackson.pf
+  file <- basename(dir[i])
+  net <- sub("(\\W*)_.*", "\\1", file, perl=TRUE)
+
+  if (net == "rand") {
+    df$network <- 2
+  } else if (net == "soc") {
+    df$network <- 1
+  }
   
   counter <- counter + 1
 }
 
+write.csv(df, "system-results.dat", row.names=FALSE)
+
+validFiles <- dir[filtered]
+numReplications <- max(as.numeric(sub(".*_v(\\d).gml", "\\1", validFiles, perl=TRUE)))
+numGraphs <- length(filtered) / numReplications
+  
+dfmean <- data.frame(boostVertex=rep(0, numGraphs),
+                     boostEdge=rep(0, numGraphs),
+                     meanW=rep(0, numGraphs),
+                     meanL=rep(0, numGraphs),
+                     network=rep(0, numGraphs))
+
+for (i in seq(1, numGraphs)) {
+  print(paste("from", ((i - 1) * numReplications + 1), "to", (i * numReplications)))
+  meanW <- mean(df$W[((i - 1) * numReplications + 1):(i * numReplications)])
+  meanL <- mean(df$L[((i - 1) * numReplications + 1):(i * numReplications)])
+  dfmean$meanW[i] <- meanW
+  dfmean$meanL[i] <- meanL
+  dfmean$boostVertex[i] <- df$boostVertex[((i - 1) * numReplications + 1)]
+  dfmean$boostEdge[i] <- df$boostEdge[((i - 1) * numReplications + 1)]
+  dfmean$network[i] <- df$network[((i - 1) * numReplications + 1)]
+}
+
+write.csv(dfmean, "system-mean-results.dat", row.names=FALSE)

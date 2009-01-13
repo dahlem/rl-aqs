@@ -31,8 +31,9 @@ des.network.radial.plot <- function(data, filename, ps=TRUE) {
   p <- p + geom_point()
   p <- p + scale_y_continuous("In-Degree", breaks=breaks, labels=labels)
   p <- p + scale_x_continuous("")
-  p <- p + opts(title="Radial Plot of the Vertex In-Degree")
   p <- p + theme_bw()
+  p <- p + opts(title="Radial Plot of the Vertex In-Degree",
+                axis.text.x=theme_blank())
   print(p)
 
   if (ps) {

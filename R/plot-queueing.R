@@ -95,8 +95,9 @@ des.queueing.arrival.power.law.plot <- function(qts, graphs, factor, ps=TRUE) {
   p <- p + coord_trans(x = "log10", y = "log10")
   p <- p + scale_y_continuous("Total Arrival Rates")
   p <- p + scale_x_continuous("Rank")
-  p <- p + opts(title="Total Vertex Poisson Arrival Rates by Rank")
   p <- p + theme_bw()
+  p <- p + opts(title="Total Vertex Poisson Arrival Rates by Rank")
+  p <- p + scale_shape("Network Size")
   print(p)
 
   if (ps) {
@@ -168,8 +169,9 @@ des.queueing.degree.power.law.plot <- function(qts, graphs, factor, ps=TRUE) {
   p <- p + coord_trans(x = "log10", y = "log10")
   p <- p + scale_y_continuous("Vertex In-Degree")
   p <- p + scale_x_continuous("Rank")
-  p <- p + opts(title="Vertex In-Degree by Rank")
   p <- p + theme_bw()
+  p <- p + opts(title="Vertex In-Degree by Rank")
+  p <- p + scale_shape("Network Size")
   print(p)
 
   if (ps) {
@@ -239,8 +241,9 @@ des.queueing.average.response.power.law.plot <- function(qts, graphs, factor, ps
   p <- p + coord_trans(x = "log10", y = "log10")
   p <- p + scale_y_continuous("Average Response Time")
   p <- p + scale_x_continuous("Rank")
-  p <- p + opts(title="Average Response Times by Rank")
   p <- p + theme_bw()
+  p <- p + opts(title="Average Response Times by Rank")
+  p <- p + scale_shape("Network Size")
   print(p)
 
   if (ps) {
@@ -285,8 +288,9 @@ des.queueing.service.power.law.plot <- function(qts, graphs, factor, ps=TRUE) {
   p <- p + coord_trans(x = "log10", y = "log10")
   p <- p + scale_y_continuous("Service Rates")
   p <- p + scale_x_continuous("Rank")
-  p <- p + opts(title="Exponential Rates by Rank")
   p <- p + theme_bw()
+  p <- p + opts(title="Exponential Rates by Rank")
+  p <- p + scale_shape("Network Size")
   print(p)
 
   if (ps) {
