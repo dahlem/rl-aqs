@@ -66,7 +66,7 @@ function [value,dvalue,ddvalue,tauint,dtauint,wopt,Qval] = UWerr(Data,Stau,Nrep,
 # analyze input arguments:
 
   [N,Nalpha]=size(Data); # number of measurements and observables
-  results_outdir="./results/";
+  results_outdir="./";
   
   if nargin < 5 | isempty(Quantity)
     Quantity=1;
