@@ -1,16 +1,17 @@
 #!/bin/sh
-# surrogate.gnu
-# create a surrogate model given the data.
+# 2d-mses.gnu
+# Create a map of the mean squared errros.
 #
-# Usage: ./surrogate <data-file> <minX> <maxX> <minY> <maxY> <Title>
+# Usage: ./2d-mses.gnu <data-file> <minX> <maxX> <minY> <maxY>
 
-USAGE="./surrogate.gnu <data-file> <minX> <maxX> <minY> <maxY>";
+USAGE="./2d-mses.gnu <data-file> <minX> <maxX> <minY> <maxY> <xlabel> <ylabel>";
 DATAFILE=$1;
 MINX=$2;
 MAXX=$3;
 MINY=$4;
 MAXY=$5;
-TITLE=$6;
+XLABEL=$6;
+YLABEL=$7;
 
 # Check whether the command-line parameters are present
 if [ -z "$DATAFILE" ] ; then
@@ -54,8 +55,8 @@ set pm3d map
 unset key
 
 set title "Mean-Squared Error of a random sample of Validation Points"
-#set xlabel "x_1"
-#set ylabel "x_2"
+set xlabel "$XLABEL"
+set ylabel "$YLABEL"
 
 splot "$DATAFILE.dat" using 1:2:4 with points ps 3 pt 7 palette
 EOF

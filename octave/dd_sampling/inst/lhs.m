@@ -1,4 +1,4 @@
-## Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+## Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 ##  
 ## This file is free software; as a special exception the author gives
 ## unlimited permission to copy and/or distribute it, with or without 
@@ -20,7 +20,7 @@
 ##  n   : number of samples
 ##  min : vector (x_1, x_2, ..., x_k) of the minimum values for each dimension
 ##  max : vector (x_1, x_2, ..., x_k) of the maximum values for each dimension
-function S = lhs(n, min, max)
+function S = deslhs(n, min, max)
   if ((nargin ~= 3) || ~isnumeric(n) || (length(min) != length(max)))
     error("usage: lhs(n, min, max)");
     error(", where n is the number of samples");
@@ -40,5 +40,5 @@ function S = lhs(n, min, max)
 
     # scale the random variable to [min, max]
     S(:,j) = min(j) + P .* (max(j) - min(j));
-  end
+  endfor
 endfunction

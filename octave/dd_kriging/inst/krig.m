@@ -1,4 +1,4 @@
-## Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+## Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 ##  
 ## This file is free software; as a special exception the author gives
 ## unlimited permission to copy and/or distribute it, with or without 
@@ -38,13 +38,12 @@ function [l, beta, sigma_squared] = krig_likelihood(theta, X, y, f, nugget = 0)
   endif
 
   R = scf_gaussianm(X, theta, nugget);
-  R_inv = inv(R);
   n = rows(y);
-  beta = (f' * R_inv * f)^-1 * f' * R_inv * y;
+  beta = (f' * (R\f))^-1 * f' * (R\y);
   temp = y - f * beta;
-  sigma_squared = 1 / n * temp' * R_inv * temp;
-
-  l = - 0.5 * (n * log(2 * pi * sigma_squared) + log(det(R)) + n); #from PhD JD Martin Eq 2.37
+  sigma_squared = 1 / n * temp' * (R\temp);
+  
+  l = - 0.5 * (n * log(2 * pi * sigma_squared) + log(det(R)) + n); ##from PhD JD Martin Eq 2.37
 endfunction
 
 
@@ -57,15 +56,13 @@ endfunction
 
 function y = krig(x, X, R, beta, theta, y, f, nugget = 0)
   r = scf_gaussianu(X, x, theta, nugget);
-  R_inv = inv(R);
-  y = f' * beta + r' * R_inv * (y - f * beta);
+  y = f' * beta + r' * (R\(y - f * beta));
 endfunction
 
 
 function y = krig1(x, X, R, beta, theta, y, f, nugget = 0)
   r = scf_gaussianu(X, x, theta, nugget);
-  R_inv = inv(R);
-  y = f' * beta + r' * R_inv * (y - f * beta);
+  y = f' * beta + r' * (R\(y - f * beta));
   y = y(1);
 endfunction
 
@@ -74,9 +71,9 @@ endfunction
 ## From "A nonstationary covariance based kriging method for
 ## metamodeling in engineering design" by Xiong et. al.
 ## -------------------------------------------------
-function [l, beta] = krig_nonst_likelihood(X, y, f, xi, eta, sigma_sq)
+function [l, beta, sigma_sq] = krig_nonst_likelihood(X, y, f, xi, eta, nugget=0)
   if (nargin != 6)
-    usage("krig_nonst_likelihood(X, y, f, xi, eta, sigma_sq)");
+    usage("krig_nonst_likelihood(X, y, f, xi, eta, nugget)");
   endif
 
   if (rows(y) != rows(X))
@@ -87,17 +84,17 @@ function [l, beta] = krig_nonst_likelihood(X, y, f, xi, eta, sigma_sq)
     error("The vector f has to have the same dimension as matrix rows.");
   endif
 
-  R = scf_nonst_m(X, xi, eta, sigma_sq);
-  R_inv = inv(R);
+  R = scf_nonst_m(X, xi, eta, nugget);
   n = rows(y);
-  beta = (f' * R_inv * f)^-1 * f' * R_inv * y;
+  beta = (f' * (R\f))^-1 * f' * (R\y);
   temp = y - f * beta;
+  sigma_sq = 1 / n * temp' * (R\temp);
 
-  l = - 0.5 * (n * log(2 * pi * sigma_sq) + log(det(R)) + n); #from PhD JD Martin Eq 2.37
+  l = - 0.5 * (n * log(2 * pi * sigma_sq) + log(det(R)) + n); ##from PhD JD Martin Eq 2.37
 endfunction
 
 
-function y = krig_nonst(x, X, R, beta, xi, eta, y, f, sigma_sq)
-  r = scf_nonst_u(X, x, xi, eta, sigma_sq);
-  y = f' * beta + r' * R^-1 * (y - f * beta);
+function y = krig_nonst(x, X, R, beta, xi, eta, y, f)
+  r = scf_nonst_u(X, x, xi, eta);
+  y = f' * beta + r' * (R\(y - f * beta));
 endfunction

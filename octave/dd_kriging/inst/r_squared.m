@@ -1,4 +1,4 @@
-## Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+## Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 ##  
 ## This file is free software; as a special exception the author gives
 ## unlimited permission to copy and/or distribute it, with or without 
@@ -42,11 +42,11 @@ endfunction
 ## beta: the estimated beta parameters from MLE or BA MCMC
 function press = ssp(X, y, R, theta, beta)
   e = cv_error(X, y, R, theta, beta);
-#  H = hat_matrix(X);
+##  H = hat_matrix(X);
   press = 0;
   
   for i = 1:rows(e)
-    #press += (e(i) / (1 - H(i, i)))^2;
+    ##press += (e(i) / (1 - H(i, i)))^2;
     press += e(i)^2;
   endfor
 endfunction
@@ -97,7 +97,25 @@ function r_p = r_pred(X, y, theta, beta, nugget=0)
   y_s = [];
   
   for i = 1:rows(X)
-    y_s = [y_s; krig(X, [X(i,1), X(i,2)], R, beta, theta, y, f, nugget)(1)];
+    y_s = [y_s; krig([X(i,1), X(i,2)], X, R, beta, theta, y, f, nugget)(1)];
+  endfor
+
+  ttss = sst(y_s);
+  press = ssp(X, y_s, R, theta, beta);
+
+  r_p = 1 - press / ttss;
+endfunction
+
+function r_p = r_pred_nonst(X, y, xi, eta, beta, nugget=0)
+  x1_vec = X(:,1)';
+  x2_vec = X(:,2)';
+
+  R = scf_nonst_m(X, xi, eta, nugget);
+  f = ones(rows(X), 1);
+  y_s = [];
+  
+  for i = 1:rows(X)
+    y_s = [y_s; krig_nonst([X(i,1), X(i,2)], X, R, beta, xi, eta, y, f)(1)];
   endfor
 
   ttss = sst(y_s);

@@ -2,15 +2,17 @@
 # 2d-surrogate.gnu
 # create a surrogate model given the data.
 #
-# Usage: ./2d-surrogate <data-file> <minX> <maxX> <minY> <maxY> <Title>
+# Usage: ./2d-surrogate <data-file> <minX> <maxX> <minY> <maxY> <Title> <xlabel> <ylabel>
 
-USAGE="./2d-surrogate.gnu <data-file> <minX> <maxX> <minY> <maxY> <Title>";
+USAGE="./2d-surrogate.gnu <data-file> <minX> <maxX> <minY> <maxY> <Title> <xlabel> <ylabel>";
 DATAFILE=$1;
 MINX=$2;
 MAXX=$3;
 MINY=$4;
 MAXY=$5;
 TITLE=$6;
+XLABEL=$7;
+YLABEL=$8;
 
 # Check whether the command-line parameters are present
 if [ -z "$DATAFILE" ] ; then
@@ -59,6 +61,8 @@ unset key
 set view , , 1, 1.5
 set palette rgb 10,13,31
 set title "Kriging Metamodel $TITLE"
+set xlabel "$XLABEL"
+set ylabel "$YLABEL"
 
 splot "$DATAFILE.dat" w l
 EOF

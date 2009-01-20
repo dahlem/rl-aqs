@@ -1,4 +1,4 @@
-## Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+## Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 ##  
 ## This file is free software; as a special exception the author gives
 ## unlimited permission to copy and/or distribute it, with or without 
@@ -19,7 +19,7 @@
 ## This function implements the gaussian spatial correlation between
 ## two vectors and a correlation vector theta. The correlation vector
 ## theta correlates each dimension of the two vectors.
-function r = scf_gaussian(x, y, theta, nugget = 0)
+function r = scf_gaussian(x, y, theta)
   if (nargin < 3)
     usage("scf_gaussianv(x, y, theta, nugget)");
   endif
@@ -33,10 +33,9 @@ function r = scf_gaussian(x, y, theta, nugget = 0)
   endif
 
   r_v = e.^-(((y - x).^2) .* theta);
-#  r_v = e.^-(((y - x).^2) ./ theta);
-#  r_p = sum(r_v); # the R matrix is better conditioned
-  r_p = prod(r_v);
-  r = r_p .* (1 - nugget);
+##  r_v = e.^-(((y - x).^2) ./ theta);
+##  r_p = sum(r_v); # the R matrix is better conditioned
+  r = prod(r_v);
 endfunction
 
 
@@ -49,7 +48,9 @@ function R = scf_gaussianm(X, theta, nugget = 0)
     error("The parameter theta has to be positive");
   endif
 
-  R = eye(rows(X));
+  r = ones(rows(X), 1);
+  r = r + nugget;
+  R = diag(r);
 
   for i = 1:rows(R)
     for j = i+1:columns(R)
@@ -73,8 +74,7 @@ function Rd = scf_gaussianm_deriv(X, theta, deriv, nugget = 0)
 
   for i = 1:rows(Rd)
     for j = i+1:columns(Rd)
-      Rd(i, j) = - scf_gaussian(X(i,deriv), X(j,deriv), theta(deriv),
-				nugget) * \ 
+      Rd(i, j) = - scf_gaussian(X(i,deriv), X(j,deriv), theta(deriv), nugget) * \ 
 	  (X(i,deriv) - X(j,deriv))^2;
       Rd(j, i) = Rd(i, j);
     endfor
@@ -82,9 +82,9 @@ function Rd = scf_gaussianm_deriv(X, theta, deriv, nugget = 0)
 endfunction
 
 
-function r = scf_gaussianu(X, x, theta, nugget = 0)
-  if (nargin != 4)
-    usage("scf_gaussianu(X, x, theta, nugget)");
+function r = scf_gaussianu(X, x, theta)
+  if (nargin != 3)
+    usage("scf_gaussianu(X, x, theta)");
   endif
 
   if (theta <= 0)
@@ -98,7 +98,7 @@ function r = scf_gaussianu(X, x, theta, nugget = 0)
   r = zeros(rows(X), 1);
 
   for i = 1:rows(X)
-    r(i,:) = scf_gaussian(x, X(i,:), theta, nugget);
+    r(i,:) = scf_gaussian(x, X(i,:), theta);
   endfor
 endfunction
 
@@ -110,9 +110,9 @@ endfunction
 ## -------------------------------------------------
 ## This function implements the nonstationary version of the correlation
 ## function.
-function r = scf_nonst_corr(flm, fln, sigma_sq)
-  if (nargin < 3)
-    usage("scf_nonst_corr(flm, fln, sigma_sq)");
+function r = scf_nonst_corr(flm, fln)
+  if (nargin < 2)
+    usage("scf_nonst_corr(flm, fln)");
   endif
 
   if (columns(flm) != columns(fln))
@@ -121,16 +121,18 @@ function r = scf_nonst_corr(flm, fln, sigma_sq)
 
   exp = (flm - fln).^2;
   s = sum(exp);
-  r = sigma_sq * e^(-s);
+  r = e^(-s);
 endfunction
 
 
-function R = scf_nonst_m(X, xi, eta, sigma_sq)
+function R = scf_nonst_m(X, xi, eta, nugget)
   if (nargin != 4)
-    usage("scf_nonst_m(X, xi, eta, sigma_sq)");
+    usage("scf_nonst_m(X, xi, eta, nugget)");
   endif
 
-  R = eye(rows(X));
+  r = ones(rows(X), 1);
+  r = r + nugget;
+  R = diag(r);
   flm = zeros(1, columns(X));
   fln = zeros(1, columns(X));
 
@@ -140,7 +142,7 @@ function R = scf_nonst_m(X, xi, eta, sigma_sq)
 	flm(l) = mapping_func(X(i,l), xi(:,l), eta(:,l));
 	fln(l) = mapping_func(X(j,l), xi(:,l), eta(:,l));
       endfor
-      R(i, j) = scf_nonst_corr(flm, fln, sigma_sq);
+      R(i, j) = scf_nonst_corr(flm, fln);
       R(j, i) = R(i, j);
     endfor
   endfor
@@ -159,15 +161,32 @@ function glk = density_knot(xl, xil, etal, k_up)
 endfunction
 
 
-function glk = density_knot_integr(xl, xil, etal, k_up)
+function glk = density_knot_integr(xl, xm, xil, etal, k_up)
   glk = 0;
 
-  isInRange = ((xl <= xil(k_up)) & (xl >= xil((k_up) - 1)));
+  isInRange1 = ((xl <= xil(k_up)) & (xl >= xil((k_up) - 1)));
+  isInRange2 = ((xm <= xil(k_up)) & (xm >= xil((k_up) - 1)));
 
-  alk = (xil(k_up) .* etal((k_up)-1) - xil((k_up)-1) .* etal(k_up)) .* \
-      (xil(k_up) - xil((k_up)-1)).^-1;
-  blk = (etal(k_up) - etal((k_up)-1)) .* (xil(k_up) - xil(k_up-1)).^-1;;
-  glk = (alk .* xl + blk .* 1 / 2 .* xl.^2) .* (isInRange);
+  alk = (xil(k_up) .* etal((k_up)-1) - xil((k_up)-1) .* etal(k_up)) .\ \
+      (xil(k_up) - xil((k_up)-1));
+  blk = (etal(k_up) - etal((k_up)-1)) .\ (xil(k_up) - xil(k_up-1));
+  glk = (alk .* xl + blk .* 1 / 2 .* xl.^2) .* (isInRange1);
+  glm = (alk .* xm + blk .* 1 / 2 .* xm.^2) .* (isInRange2);
+
+  glk = glm - glk;
+endfunction
+
+
+function glk = density_knot_integr2(xl, xm, xil, etal, k_up)
+  glk = 0;
+
+  isInRange1 = ((xl <= xil(k_up)) & (xl >= xil((k_up) - 1)));
+  isInRange2 = ((xm <= xil(k_up)) & (xm >= xil((k_up) - 1)));
+
+  glk = (etal((k_up)-1) .* xl + etal(k_up) .* 1 / 2 .* xl.^2) .* (isInRange1);
+  glm = (etal((k_up)-1) .* xm + etal(k_up) .* 1 / 2 .* xm.^2) .* (isInRange2);
+
+  glk = glm - glk;
 endfunction
 
 
@@ -178,25 +197,23 @@ endfunction
 
 function fl = mapping_func(xl, xil, etal)
   fl = xil(1);
-  k = 0;
+  k = 1;
   
   for k = 2:rows(xil)
-    if (xl > xil(k))
+    if (xl < xil(k))
       break;
     else
-      fl += (density_knot_integr(xil(k), xil, etal, k) - \
-	     density_knot_integr(xil(k-1), xil, etal, k));
+      fl += density_knot_integr2(xil(k-1), xil(k), xil, etal, k);
     endif
   endfor
 
-  fl += (density_knot_integr(xl, xil, etal, k) - \
-	 density_knot_integr(xil(k-1), xil, etal, k));
+  fl += density_knot_integr2(xil(k-1), xl, xil, etal, k);
 endfunction
 
 
-function r = scf_nonst_u(X, x, xi, eta, sigma_sq)
-  if (nargin != 5)
-    usage("scf_nonst_u(X, x, xi, eta, sigma_sq)");
+function r = scf_nonst_u(X, x, xi, eta)
+  if (nargin != 4)
+    usage("scf_nonst_u(X, x, xi, eta)");
   endif
 
   if (columns(x) != columns(X))
@@ -213,6 +230,6 @@ function r = scf_nonst_u(X, x, xi, eta, sigma_sq)
     for l = 1:columns(X)
       fln(l) = mapping_func(X(i,l), xi(:,l), eta(:,l));
     endfor
-    r(i,:) = scf_nonst_corr(flx, fln, sigma_sq);
+    r(i,:) = scf_nonst_corr(flx, fln);
   endfor
 endfunction

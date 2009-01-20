@@ -1,4 +1,4 @@
-## Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+## Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 ##  
 ## This file is free software; as a special exception the author gives
 ## unlimited permission to copy and/or distribute it, with or without 
@@ -46,7 +46,7 @@ function rmse = rmse_avg(X, y, F, chain, n, xmax, xmin, nugget=0)
   
   S = lhs(n, xmin, xmax);
   for i = 1:n
-    mse_avg(i) = mse_average(X, S(i,:), y, f, chain, 0);
+    mse_avg(i) = mse_average(X, S(i,:), y, f, chain, nugget);
   endfor
 
   rmse = sqrt(mean(mse_avg));
@@ -71,6 +71,16 @@ function mse_avg = mse_average(X, x, y, F, chain, nugget=0)
   mse_avg = mean(mses);
 endfunction
 
+function mse_avg = mse_average_nonconst(X, x, y, F, chain, nugget=0)
+  mses = zeros(1, rows(chain.eta));
+  
+  for i = 1:rows(chain.eta)
+    mses(i) = mse_pred_nonconst(X, x, y, F, chain.eta(i,:), nugget);
+  endfor
+
+  mse_avg = mean(mses);
+endfunction
+
 
 ## calculate the estimate of the mean squared error of prediction from
 ## PHD Thesis JD Martin equation 2.31 and more detailed 4.9. This
@@ -83,8 +93,18 @@ endfunction
 ## theta: the estimated theta value from MCMC
 function mse_p = mse_pred(X, x, y, F, theta, nugget=0)
   R = scf_gaussianm(X, theta, nugget);
-  R_inv = R^-1;
-  r = scf_gaussianu(X, x, theta, nugget);
+  R_inv = inv(R);
+  r = scf_gaussianu(X, x, theta);
+  sigma_sq = (F' * R_inv * F)^-1;
+  z = 1 - F' * R_inv * r;
+
+  mse_p = sigma_sq * (1 - r' * R_inv * r) + sigma_sq * (z' * sigma_sq * z);
+endfunction
+
+function mse_p = mse_pred_nonconst(X, x, y, F, eta, xi, nugget=0)
+  R = scf_nonst_m(X, xi, eta, nugget);
+  R_inv = inv(R);
+  r = scf_nonst_u(X, x, xi, eta);
   sigma_sq = (F' * R_inv * F)^-1;
   z = 1 - F' * R_inv * r;
 

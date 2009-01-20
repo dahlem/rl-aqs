@@ -9,7 +9,7 @@ function g = prior_pick_sigma(sigma, alpha)
   if (alpha == 0)
     p = 1;
   else
-    p = gamma_rnd(alpha/2, 1) / (alpha/2);
+    p = gamrnd(alpha/2, 1) / (alpha/2);
   endif
 
   g = sigma/sqrt(p);

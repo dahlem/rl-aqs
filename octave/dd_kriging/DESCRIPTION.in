@@ -1,0 +1,13 @@
+Name: @PACKAGE@
+Version: @VERSION@
+Date: 2008-01-20
+Author: Dominik Dahlem
+Maintainer: Dominik Dahlem
+Title: Kriging
+Description: This compoment implements Kriging with bayesian parameter
+estimation using markov chain monte carlo techniques.
+Depends: octave (> 3.0)
+Categories: Misc
+Autoload: yes
+License: as is
+Url: http://octave.sf.net
