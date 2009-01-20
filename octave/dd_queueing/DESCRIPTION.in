@@ -1,0 +1,12 @@
+Name: @PACKAGE@
+Version: @VERSION@
+Date: 2008-01-20
+Author: Dominik Dahlem
+Maintainer: Dominik Dahlem
+Title: Queueing Systems Analysis
+Description: Analyse open queueing networks using Little's Law based
+on Jackson's Theorem
+Depends: octave (> 3.0)
+Autoload: yes
+License: as is
+Url: http://octave.sf.net
