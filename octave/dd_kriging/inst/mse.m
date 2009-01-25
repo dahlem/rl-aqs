@@ -71,11 +71,12 @@ function mse_avg = mse_average(X, x, y, F, chain, nugget=0)
   mse_avg = mean(mses);
 endfunction
 
-function mse_avg = mse_average_nonconst(X, x, y, F, chain, nugget=0)
-  mses = zeros(1, rows(chain.eta));
+function mse_avg = mse_average_nonconst(X, x, y, F, chain, xi, nugget=0)
+  [r,c1,c2] = size(chain.Eta);
+  mses = zeros(1, c2);
   
-  for i = 1:rows(chain.eta)
-    mses(i) = mse_pred_nonconst(X, x, y, F, chain.eta(i,:), nugget);
+  for i = 1:c2
+    mses(i) = mse_pred_nonconst(X, x, y, F, chain.Eta(:,:,i), xi, nugget);
   endfor
 
   mse_avg = mean(mses);
@@ -95,20 +96,21 @@ function mse_p = mse_pred(X, x, y, F, theta, nugget=0)
   R = scf_gaussianm(X, theta, nugget);
   R_inv = inv(R);
   r = scf_gaussianu(X, x, theta);
-  sigma_sq = (F' * R_inv * F)^-1;
-  z = 1 - F' * R_inv * r;
+  sigma_sq = inv(F' * R_inv * F);
+  rtemp = R_inv * r;
+  z = 1 - F' * rtemp;
 
-  mse_p = sigma_sq * (1 - r' * R_inv * r) + sigma_sq * (z' * sigma_sq * z);
+  mse_p = sigma_sq * (1 - r' * rtemp) + sigma_sq * (z' * sigma_sq * z);
 endfunction
 
 function mse_p = mse_pred_nonconst(X, x, y, F, eta, xi, nugget=0)
   R = scf_nonst_m(X, xi, eta, nugget);
-  R_inv = inv(R);
   r = scf_nonst_u(X, x, xi, eta);
-  sigma_sq = (F' * R_inv * F)^-1;
-  z = 1 - F' * R_inv * r;
+  sigma_sq = inv(F' * (R\F));
+  rtemp = (R\r);
+  z = 1 - F' * (rtemp);
 
-  mse_p = sigma_sq * (1 - r' * R_inv * r) + sigma_sq * (z' * sigma_sq * z);
+  mse_p = sigma_sq * (1 - r' * rtemp) + sigma_sq * (z' * sigma_sq * z);
 endfunction
 
 

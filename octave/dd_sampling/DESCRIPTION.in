@@ -6,6 +6,7 @@ Maintainer: Dominik Dahlem
 Title: Latin Hypercube Sampling
 Description: Implementation of the uniform LHS algorithm.
 Depends: octave (> 3.0)
+Categories: Misc
 Autoload: yes
 License: as is
 Url: http://octave.sf.net

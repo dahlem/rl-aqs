@@ -1,4 +1,4 @@
-## Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+## Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 ##  
 ## This file is free software; as a special exception the author gives
 ## unlimited permission to copy and/or distribute it, with or without 
@@ -27,7 +27,7 @@ function G = gss(k, T, mu, nu)
 
   for i = 1:2^k
     Q = gamrnd(mu * i * h / nu, nu);
-#    Q = gamrnd((mu^2) * h / nu, nu / mu);
+##    Q = gamrnd((mu^2) * h / nu, nu / mu);
     g = [i * h, G(i, 2) + Q];
     G = [G; g];
   endfor

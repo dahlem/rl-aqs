@@ -1,4 +1,4 @@
-## Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+## Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 ##  
 ## This file is free software; as a special exception the author gives
 ## unlimited permission to copy and/or distribute it, with or without 
@@ -50,7 +50,7 @@ endfunction
 
 function G = gbs(k, T, mu, nu)
   G = zeros(2^k + 1, 1);
-#  G(2^k + 1) = gamrnd((mu^2) * T / nu, nu / mu);
+##  G(2^k + 1) = gamrnd((mu^2) * T / nu, nu / mu);
   G(2^k + 1) = 1;
   
   for l = 1:k

@@ -1,4 +1,4 @@
-## Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+## Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 ##  
 ## This file is free software; as a special exception the author gives
 ## unlimited permission to copy and/or distribute it, with or without 
@@ -62,8 +62,8 @@ endfunction
 
 function plotBridge(G)
   plot(G.X(:,2), "color", [0,0,0])
-#  line(1:rows(G.alpha), G.alpha, "color", [1,0,0]);
-#  line(1:rows(G.beta), G.beta, "color", [0,0,1]);
+##  line(1:rows(G.alpha), G.alpha, "color", [1,0,0]);
+##  line(1:rows(G.beta), G.beta, "color", [0,0,1]);
 endfunction
 
 function p = testBeta(a, b, k)

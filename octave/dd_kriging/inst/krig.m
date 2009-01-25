@@ -39,7 +39,8 @@ function [l, beta, sigma_squared] = krig_likelihood(theta, X, y, f, nugget = 0)
 
   R = scf_gaussianm(X, theta, nugget);
   n = rows(y);
-  beta = (f' * (R\f))^-1 * f' * (R\y);
+  temp1 = f' * (R\f); 
+  beta = temp1\(f' * (R\y));
   temp = y - f * beta;
   sigma_squared = 1 / n * temp' * (R\temp);
   
@@ -47,21 +48,21 @@ function [l, beta, sigma_squared] = krig_likelihood(theta, X, y, f, nugget = 0)
 endfunction
 
 
-function l = likelihood(X, y, f, beta, sigma, theta, R, R_inv, nugget = 0)
+function l = likelihood(y, f, beta, sigma, R, R_inv, nugget = 0)
   n = rows(y);
   temp = y - f * beta;
   l = 1 / (sqrt((2 * pi * sigma)^n * det(R))) * exp(-(temp' * R_inv * temp) / (2 * sigma));
 endfunction
 
 
-function y = krig(x, X, R, beta, theta, y, f, nugget = 0)
-  r = scf_gaussianu(X, x, theta, nugget);
+function y = krig(x, X, R, beta, theta, y, f)
+  r = scf_gaussianu(X, x, theta);
   y = f' * beta + r' * (R\(y - f * beta));
 endfunction
 
 
-function y = krig1(x, X, R, beta, theta, y, f, nugget = 0)
-  r = scf_gaussianu(X, x, theta, nugget);
+function y = krig1(x, X, R, beta, theta, y, f)
+  r = scf_gaussianu(X, x, theta);
   y = f' * beta + r' * (R\(y - f * beta));
   y = y(1);
 endfunction

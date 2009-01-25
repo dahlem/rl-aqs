@@ -40,8 +40,8 @@ endfunction
 ## R: the correlation matrix of the input parameters
 ## theta: the estimated theta parameters from MLE or BA MCMC
 ## beta: the estimated beta parameters from MLE or BA MCMC
-function press = ssp(X, y, R, theta, beta)
-  e = cv_error(X, y, R, theta, beta);
+function press = ssp(X, y, R, beta)
+  e = cv_error(X, y, R, beta);
 ##  H = hat_matrix(X);
   press = 0;
   
@@ -65,8 +65,8 @@ endfunction
 ## R: the correlation matrix of the input parameters
 ## theta: the estimated theta parameters from MLE or BA MCMC
 ## beta: the estimated beta parameters from MLE or BA MCMC
-function e = cv_error(X, y, R, theta, beta)
-  R_inf = R^-1;
+function e = cv_error(X, y, R, beta)
+  R_inf = inv(R);
   f = ones(rows(X), 1);
   g = R_inf * y;
   w = R_inf * f;
@@ -101,7 +101,7 @@ function r_p = r_pred(X, y, theta, beta, nugget=0)
   endfor
 
   ttss = sst(y_s);
-  press = ssp(X, y_s, R, theta, beta);
+  press = ssp(X, y_s, R, beta);
 
   r_p = 1 - press / ttss;
 endfunction
@@ -119,7 +119,7 @@ function r_p = r_pred_nonst(X, y, xi, eta, beta, nugget=0)
   endfor
 
   ttss = sst(y_s);
-  press = ssp(X, y_s, R, theta, beta);
+  press = ssp(X, y_s, R, beta);
 
   r_p = 1 - press / ttss;
 endfunction

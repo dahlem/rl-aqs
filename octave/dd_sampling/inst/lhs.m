@@ -32,13 +32,13 @@ function S = deslhs(n, min, max)
   u = rand(n, nvar);
   S = zeros(n, nvar);
 
-  for j=1:nvar
-    # generate the random permutation of the integers 1...n
+  for (j=1:nvar)
+    ## generate the random permutation of the integers 1...n
     idx = randperm(n);
 
     P = (idx' - u(:,j)) / n;
 
-    # scale the random variable to [min, max]
+    ## scale the random variable to [min, max]
     S(:,j) = min(j) + P .* (max(j) - min(j));
   endfor
 endfunction

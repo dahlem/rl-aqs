@@ -32,10 +32,8 @@ function r = scf_gaussian(x, y, theta)
     error("The vectors x and y have to have the same dimension.");
   endif
 
-  r_v = e.^-(((y - x).^2) .* theta);
-##  r_v = e.^-(((y - x).^2) ./ theta);
-##  r_p = sum(r_v); # the R matrix is better conditioned
-  r = prod(r_v);
+  temp = sum(-(((y - x).^2) .* theta));
+  r = e^temp;
 endfunction
 
 
