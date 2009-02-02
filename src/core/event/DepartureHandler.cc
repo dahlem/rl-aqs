@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -136,16 +136,14 @@ void dcore::DepartureHandler::update(dcore::DepartureEvent *subject)
                 std::cout << "Schedule new arrival event: " << const_cast <const dcommon::Entry&> (*new_entry)
                           << std::endl;
 #endif /* NDEBUG_EVENTS */
-                new_entry->push(new_entry->getOrigin());
+                new_entry->pushEvent(new_entry->getOrigin());
                 m_queue->push(new_entry);
 
                 break;
             }
         }
     } else {
-        dcommon::StackIntSP eventPath = entry->getEventPath();
-
-        if (eventPath->empty()) {
+        if (entry->isEventQueueEmpty()) {
             // schedule leave event
             dcommon::Entry *new_entry = new dcommon::Entry(
                 const_cast <const dcommon::Entry&> (*entry));
@@ -159,7 +157,8 @@ void dcore::DepartureHandler::update(dcore::DepartureEvent *subject)
         } else {
             // schedule ack events
             boost::int32_t origin = entry->getDestination();
-            boost::int32_t destination = eventPath->top();
+            boost::int32_t destination = entry->popEvent();
+
             dcommon::Entry *new_entry = new dcommon::Entry(
                 const_cast <const dcommon::Entry&> (*entry));
 
@@ -169,7 +168,6 @@ void dcore::DepartureHandler::update(dcore::DepartureEvent *subject)
                       << std::endl;
 #endif /* NDEBUG_EVENTS */
             m_queue->push(new_entry);
-            eventPath->pop();
         }
     }
 }

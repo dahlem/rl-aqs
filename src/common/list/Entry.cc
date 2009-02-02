@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -31,6 +31,7 @@ dcommon::Entry::Entry(double del, double a, int d, int o, int t)
     id = uid;
     gid = uid;
     event_path = StackIntSP(new StackInt());
+    event_arrivals = StackDoubleSP(new StackDouble());
 }
 
 
@@ -45,7 +46,8 @@ dcommon::Entry::Entry(const Entry &p_entry)
     destination = p_entry.getDestination();
     origin = p_entry.getOrigin();
     type = p_entry.getType();
-    event_path = p_entry.getEventPath();
+    event_path = p_entry.event_path;
+    event_arrivals = p_entry.event_arrivals;
 }
 
 
@@ -69,10 +71,19 @@ bool dcommon::Entry::operator< (const dcommon::Entry& rhs)
 }
 
 
+void dcommon::Entry::pushArrival(double p_arrival)
+{
+    event_arrivals->push(p_arrival);
+}
+
+
 void dcommon::Entry::delayed(double p_delay, double p_newArrival, boost::int32_t p_type)
 {
     // update the delay
     delay += p_delay;
+
+    // remember the original arrival rate
+    pushArrival(arrival);
 
     // reschedule the arrival
     arrival = p_newArrival;
@@ -84,6 +95,9 @@ void dcommon::Entry::delayed(double p_delay, double p_newArrival, boost::int32_t
 
 void dcommon::Entry::service(double p_departure, boost::int32_t p_type)
 {
+    // remember the original arrival rate
+    pushArrival(arrival);
+
     // set the departure time
     arrival = p_departure;
 
@@ -151,20 +165,31 @@ int dcommon::Entry::getType() const
     return type;
 }
 
-void dcommon::Entry::push(int origin)
+void dcommon::Entry::pushEvent(int origin)
 {
     event_path->push(origin);
 }
 
-int dcommon::Entry::pop()
+int dcommon::Entry::popEvent()
 {
     int dest = event_path->top();
     event_path->pop();
+    event_arrivals->pop();
 
     return dest;
 }
 
-dcommon::StackIntSP dcommon::Entry::getEventPath() const
+bool dcommon::Entry::isEventQueueEmpty()
 {
-    return event_path;
+    return event_path->empty();
+}
+
+int dcommon::Entry::topEvent()
+{
+    return event_path->top();
+}
+
+double dcommon::Entry::topArrival()
+{
+    return event_arrivals->top();
 }

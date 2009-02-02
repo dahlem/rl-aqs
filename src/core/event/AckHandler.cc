@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -44,9 +44,8 @@ dcore::AckHandler::~AckHandler()
 void dcore::AckHandler::update(dcore::AckEvent *subject)
 {
     dcommon::Entry *entry = subject->getEvent();
-    dcommon::StackIntSP eventPath = entry->getEventPath();
 
-    if (eventPath->empty()) {
+    if (entry->isEventQueueEmpty()) {
         // schedule leave event
         dcommon::Entry *new_entry = new dcommon::Entry(
             const_cast <const dcommon::Entry&> (*entry));
@@ -56,9 +55,7 @@ void dcore::AckHandler::update(dcore::AckEvent *subject)
     } else {
         // schedule ack events
         boost::int32_t origin = entry->getDestination();
-        boost::int32_t destination = eventPath->top();
-
-        eventPath->pop();
+        boost::int32_t destination = entry->popEvent();
 
         dcommon::Entry *new_entry = new dcommon::Entry(
             const_cast <const dcommon::Entry&> (*entry));

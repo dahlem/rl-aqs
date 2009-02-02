@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -46,7 +46,9 @@ namespace common
 {
 
 typedef std::stack <int> StackInt;
+typedef std::stack <double> StackDouble;
 typedef boost::shared_ptr <StackInt> StackIntSP;
+typedef boost::shared_ptr <StackDouble> StackDoubleSP;
 
 
 static const std::string HEADER = "uid,id,arrivalTime,delay,origin,destination,type,eventPathSize";
@@ -92,10 +94,12 @@ public:
 
     int getType() const;
 
-    StackIntSP getEventPath() const;
+    bool isEventQueueEmpty();
+    void pushEvent(int);
+    int topEvent();
+    int popEvent();
 
-    void push(int);
-    int pop();
+    double topArrival();
 
     friend std::ostream& operator <<(std::ostream &p_os, const Entry &p_entry)
         {
@@ -113,6 +117,8 @@ private:
         {}
 
 
+    void pushArrival(double);
+
     static boost::uintmax_t uid;
     boost::uintmax_t id;
     double delay;
@@ -121,6 +127,7 @@ private:
     int origin;
     int type;
     StackIntSP event_path;
+    StackDoubleSP event_arrivals;
     boost::uintmax_t gid;
 
 };

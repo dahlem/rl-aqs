@@ -27,7 +27,6 @@ EXTRA_DIST = \
 	seeds_read.pbs.in \
 	struct_test.pbs.in \
 	$(srcdir)/bin \
-	$(srcdir)/graphs \
 	$(srcdir)/graphs_dense.sh \
 	$(srcdir)/graphs.sh \
 	$(srcdir)/m4/ac_gcov.m4 \
