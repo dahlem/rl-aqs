@@ -16,9 +16,9 @@
 ## Version: 0.1
 
 
-function [l, beta, sigma_squared] = krig_likelihood(theta, X, y, f, nugget = 0)
+function [l, beta, sigma_squared] = krig_likelihood(theta, X, y, F, nugget = 0)
   if (nargin != 5)
-    usage("krig_likelihood(theta, X, y, f, nugget)");
+    usage("krig_likelihood(theta, X, y, F, nugget)");
   endif
 
   if (theta <= 0)
@@ -29,7 +29,7 @@ function [l, beta, sigma_squared] = krig_likelihood(theta, X, y, f, nugget = 0)
     error("The vectors x and y have to have the same dimensions.");
   endif
 
-  if (rows(f) != rows(X))
+  if (rows(F) != rows(X))
     error("The vector f has to have the same dimension as matrix rows.");
   endif
 
@@ -39,32 +39,25 @@ function [l, beta, sigma_squared] = krig_likelihood(theta, X, y, f, nugget = 0)
 
   R = scf_gaussianm(X, theta, nugget);
   n = rows(y);
-  temp1 = f' * (R\f); 
-  beta = temp1\(f' * (R\y));
-  temp = y - f * beta;
+
+  beta = ((F' * (R\F))\F') * (R\y);
+  temp = y - F * beta;
   sigma_squared = 1 / n * temp' * (R\temp);
   
   l = - 0.5 * (n * log(2 * pi * sigma_squared) + log(det(R)) + n); ##from PhD JD Martin Eq 2.37
 endfunction
 
 
-function l = likelihood(y, f, beta, sigma, R, R_inv, nugget = 0)
+function l = likelihood(y, F, beta, sigma, R, R_inv, nugget = 0)
   n = rows(y);
-  temp = y - f * beta;
+  temp = y - F * beta;
   l = 1 / (sqrt((2 * pi * sigma)^n * det(R))) * exp(-(temp' * R_inv * temp) / (2 * sigma));
 endfunction
 
 
-function y = krig(x, X, R, beta, theta, y, f)
+function y = krig(x, X, R, beta, theta, y, F, FUN = @(x) 1)
   r = scf_gaussianu(X, x, theta);
-  y = f' * beta + r' * (R\(y - f * beta));
-endfunction
-
-
-function y = krig1(x, X, R, beta, theta, y, f)
-  r = scf_gaussianu(X, x, theta);
-  y = f' * beta + r' * (R\(y - f * beta));
-  y = y(1);
+  y = FUN(x) * beta + r' * (R\(y - F * beta));
 endfunction
 
 
@@ -72,7 +65,7 @@ endfunction
 ## From "A nonstationary covariance based kriging method for
 ## metamodeling in engineering design" by Xiong et. al.
 ## -------------------------------------------------
-function [l, beta, sigma_sq] = krig_nonst_likelihood(X, y, f, xi, eta, nugget=0)
+function [l, beta, sigma_sq] = krig_nonst_likelihood(X, y, F, xi, eta, nugget=0)
   if (nargin != 6)
     usage("krig_nonst_likelihood(X, y, f, xi, eta, nugget)");
   endif
@@ -81,21 +74,21 @@ function [l, beta, sigma_sq] = krig_nonst_likelihood(X, y, f, xi, eta, nugget=0)
     error("The vectors x and y have to have the same dimensions.");
   endif
 
-  if (rows(f) != rows(X))
+  if (rows(F) != rows(X))
     error("The vector f has to have the same dimension as matrix rows.");
   endif
 
   R = scf_nonst_m(X, xi, eta, nugget);
   n = rows(y);
-  beta = (f' * (R\f))^-1 * f' * (R\y);
-  temp = y - f * beta;
+  beta = ((F' * (R\F))\F') * (R\y);
+  temp = y - F * beta;
   sigma_sq = 1 / n * temp' * (R\temp);
 
   l = - 0.5 * (n * log(2 * pi * sigma_sq) + log(det(R)) + n); ##from PhD JD Martin Eq 2.37
 endfunction
 
 
-function y = krig_nonst(x, X, R, beta, xi, eta, y, f)
+function y = krig_nonst(x, X, R, beta, xi, eta, y, F, FUN = @(x) 1)
   r = scf_nonst_u(X, x, xi, eta);
-  y = f' * beta + r' * (R\(y - f * beta));
+  y = FUN(x) * beta + r' * (R\(y - F * beta));
 endfunction

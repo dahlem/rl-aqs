@@ -41,12 +41,12 @@ endfunction
 ## xmin: the minimum values for the input locations
 ## xmax: the maximum values for the input locations
 ## nugget: the nugget effect (smoothin)
-function rmse = rmse_avg(X, y, F, chain, n, xmax, xmin, nugget=0)
+function rmse = rmse_avg(X, y, F, chain, n, xmax, xmin, nugget=0, FUN)
   mse_avg = zeros(1, n);
   
   S = lhs(n, xmin, xmax);
   for i = 1:n
-    mse_avg(i) = mse_average(X, S(i,:), y, f, chain, nugget);
+    mse_avg(i) = mse_average(X, S(i,:), y, f, chain, nugget, FUN);
   endfor
 
   rmse = sqrt(mean(mse_avg));
@@ -61,11 +61,11 @@ endfunction
 ## F: the matrix of 1s
 ## chain: the sampled MCMC chain
 ## nugget: the nugget effect (smoothin)
-function mse_avg = mse_average(X, x, y, F, chain, nugget=0)
+function mse_avg = mse_average(X, x, y, F, chain, nugget=0, FUN)
   mses = zeros(1, rows(chain.theta));
   
   for i = 1:rows(chain.theta)
-    mses(i) = mse_pred(X, x, y, F, chain.theta(i,:), nugget);
+    mses(i) = mse_pred(X, x, y, F, chain.beta(:,i), chain.theta(i,:), nugget, FUN);
   endfor
 
   mse_avg = mean(mses);
@@ -92,30 +92,35 @@ endfunction
 ## y: the observed outputs
 ## F: the matrix of 1s
 ## theta: the estimated theta value from MCMC
-function mse_p = mse_pred(X, x, y, F, theta, nugget=0)
+function mse_p = mse_pred(X, x, y, F, beta, theta, nugget=0, FUN = @(x) 1)
   R = scf_gaussianm(X, theta, nugget);
-  R_inv = inv(R);
   r = scf_gaussianu(X, x, theta);
-  sigma_sq = inv(F' * R_inv * F);
-  rtemp = R_inv * r;
-  z = 1 - F' * rtemp;
+  n = rows(y);
+  
+  temp1 = (F' * (R\F));
+  beta = (temp1\F') * (R\y);
+  temp = y - F * beta;
+  sigma_sq = 1 / n * temp' * (R\temp);
 
-  mse_p = sigma_sq * (1 - r' * rtemp) + sigma_sq * (z' * sigma_sq * z);
+  rtemp = R\r;
+  z = FUN(x)' - F' * rtemp;
+
+  mse_p = sigma_sq * (1 - r' * rtemp) + sigma_sq * (z' * (temp1\z));
 endfunction
 
-function mse_p = mse_pred_nonconst(X, x, y, F, eta, xi, nugget=0)
+function mse_p = mse_pred_nonconst(X, x, y, F, beta, eta, xi, nugget=0, FUN = @(x) 1)
   R = scf_nonst_m(X, xi, eta, nugget);
   r = scf_nonst_u(X, x, xi, eta);
-  sigma_sq = inv(F' * (R\F));
-  rtemp = (R\r);
-  z = 1 - F' * (rtemp);
 
-  mse_p = sigma_sq * (1 - r' * rtemp) + sigma_sq * (z' * sigma_sq * z);
-endfunction
+  temp1 = (F' * (R\F));
+  beta = (temp1\F') * (R\y);
+  temp = y - F * beta;
+  sigma_sq = 1 / n * temp' * (R\temp);
 
+  rtemp = R\r;
+  z = FUN(x)' - F' * rtemp;
 
-function f = f(x)
-  f = 1;
+  mse_p = sigma_sq * (1 - r' * rtemp) + sigma_sq * (z' * (temp1\z));
 endfunction
 
 
@@ -128,13 +133,13 @@ endfunction
 ## x: the input location to be inspected
 ## y: the observed outputs
 ## F: the matrix of 1s
-function y_prob = y_sim(chain, X, x, y, F, nugget=0)
+function y_prob = y_sim(chain, X, x, y, F, nugget=0, FUN = @(x) 1)
   y_prob = [];
 
   for i = 1:columns(chain.beta)
     R = scf_gaussianm(X, chain.theta(i,:), nugget);
-    mean = krig(X, x, R, chain.beta(i), chain.theta(i,:), y, F, nugget)(1);
-    var = mse_pred(X, x, y, F, chain.theta(i,:), nugget);
+    mean = krig(X, x, R, chain.beta(i), chain.theta(i,:), y, F, nugget, FUN);
+    var = mse_pred(X, x, y, F, beta, chain.theta(i,:), nugget, FUN);
     y = normrnd(mean, var);
     y_prob = [y_prob; y];
   endfor
@@ -170,8 +175,8 @@ endfunction
 ## beta: the estimated beta value from MCMC
 ## theta: the estimated theta value from MCMC
 ## lambda: the shape parameter for the t-distribution
-function x = t_scale(y_p, var, X, x, F, R, y, beta, theta, lambda)
-  mean = krig(X, x, R, beta, theta, y, F)(1);
+function x = t_scale(y_p, var, X, x, F, R, y, beta, theta, lambda, FUN = @(x) 1)
+  mean = krig(X, x, R, beta, theta, y, F, FUN);
   b = sqrt(var) / lambda;
   x = (y_p - mean) / b;
 endfunction

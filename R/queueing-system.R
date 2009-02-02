@@ -16,7 +16,8 @@
 library(desGraph)
 
 dir <- dir(recursive=TRUE)
-filtered <- grep(".gml", dir)
+##filtered <- grep(".*soc.*gml", dir)
+filtered <- grep(".*rand.*gml", dir)
 
 df <- data.frame(boostVertex=rep(0, length(filtered)),
                  boostEdge=rep(0, length(filtered)),
@@ -47,10 +48,13 @@ for (i in filtered) {
   counter <- counter + 1
 }
 
-if (file.exists("../../results.dat") == TRUE) {
-  write.table(df, "system-results.dat", sep=",", col.names=FALSE, row.names=FALSE, append=TRUE, quote=FALSE)
+sysFile <- "system-results.dat"
+sysMeanFile <- "system-mean-results.dat"
+
+if (file.exists(sysFile) == TRUE) {
+  write.table(df, sysFile, sep=",", col.names=FALSE, row.names=FALSE, append=TRUE, quote=FALSE)
 } else {
-  write.table(df, "system-results.dat", sep=",", row.names=FALSE, append=TRUE, quote=FALSE)
+  write.table(df, sysFile, sep=",", row.names=FALSE, append=TRUE, quote=FALSE)
 }
 
 validFiles <- dir[filtered]
@@ -80,9 +84,9 @@ for (i in seq(1, numGraphs)) {
   dfmean$network[i] <- df$network[((i - 1) * numReplications + 1)]
 }
 
-if (file.exists("../../results.dat") == TRUE) {
-  write.table(dfmean, "system-mean-results.dat", sep=",", col.names=FALSE, row.names=FALSE, append=TRUE, quote=FALSE)
+if (file.exists(sysMeanFile) == TRUE) {
+  write.table(dfmean, sysMeanFile, sep=",", col.names=FALSE, row.names=FALSE, append=TRUE, quote=FALSE)
 } else {
-  write.table(dfmean, "system-mean-results.dat", sep=",", row.names=FALSE, append=TRUE, quote=FALSE)
+  write.table(dfmean, sysMeanFile, sep=",", row.names=FALSE, append=TRUE, quote=FALSE)
 }
 

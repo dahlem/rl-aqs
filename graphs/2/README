@@ -1,7 +1,0 @@
-These graphs were generated on the 14th/15th of July using an algorithm
-with the following characteristics:
-- stochastic preferential attachment to nodes with higher strength (service
-  rate)
-- the arrival rate is uniformly distributed between 0 and 10
-- the number of edges is uniformly distributed between 1 and {2,3,4,5,6}
-

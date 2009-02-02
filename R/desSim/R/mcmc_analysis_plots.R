@@ -4,7 +4,6 @@ des.ca.plot <- function(prefix="2d-shdf", ps=TRUE) {
   }
 
   ca <- read.table(paste(prefix, "-ca-model.dat", sep=""), sep=",", header=TRUE)
-  pS <- read.table(paste(prefix, "-ca-statP.dat", sep=""), sep=",", header=TRUE)
   eigen <- read.table(paste(prefix, "-ca-eigen.dat", sep=""), sep=",", header=TRUE)
   df <- data.frame(x=ca$x1, y=ca$x2, z=ca$y);
 
@@ -23,6 +22,7 @@ des.ca.plot <- function(prefix="2d-shdf", ps=TRUE) {
   MT <- t(M);
 
   if (!isRidge) {
+    pS <- read.table(paste(prefix, "-ca-statP.dat", sep=""), sep=",", header=TRUE)
     z1Intercept <- (M[1,2] * pS$x2 + M[1,1] * pS$x1) / M[1,1];
     z2Intercept <- (M[2,1] * pS$x1 + M[2,2] * pS$x2) / M[2,2];
     z1Slope <- M[1,2] / M[1,1];
@@ -97,6 +97,7 @@ des.ca.plot <- function(prefix="2d-shdf", ps=TRUE) {
   p <- p + opts(title="Canonical Form of the Second-order Model")
 
   if (!isRidge) {
+    pS <- read.table(paste(prefix, "-ca-statP.dat", sep=""), sep=",", header=TRUE)
     p <- p + geom_segment(x=pS$x1,y=minY,xend=pS$x1,yend=pS$x2,linetype=2,size=0.5,colour="gray40")
     p <- p + geom_text(x=pS$x1,y=minY,vjust=1.5,size=4,colour="gray40",aes(label="x1(S)"))
     p <- p + geom_segment(x=minX,y=pS$x2,xend=pS$x1,yend=pS$x2,linetype=2,size=0.5,colour="gray40")
@@ -117,18 +118,29 @@ des.ca.plot <- function(prefix="2d-shdf", ps=TRUE) {
 }
 
 
-des.kriging.mcmc.evo.plot <- function(prefix="2d-shdf") {
+des.kriging.mcmc.evo.plot <- function(prefix="2d-shdf", betas=1, thetas=2) {
   des.kriging.mcmc.posterior.plot(prefix)
-  des.kriging.mcmc.beta.plot(prefix)
+
+  for (i in 1:betas) {
+    des.kriging.mcmc.beta.plot(prefix, idx=as.character(i))
+  }
   des.kriging.mcmc.sigma.plot(prefix)
-  des.kriging.mcmc.theta.plot(prefix, idx="1")
-  des.kriging.mcmc.theta.plot(prefix, idx="2")
+  for (i in 1:betas) {
+    des.kriging.mcmc.theta.plot(prefix, idx=as.character(i))
+  }
 }
 
 
-des.nonst.kriging.mcmc.evo.plot <- function(prefix="2d-shdf") {
-  des.kriging.mcmc.beta.plot(prefix, "-nonst")
+des.nonst.kriging.mcmc.evo.plot <- function(prefix="2d-shdf", betas=1, etasr=1, etasc=1) {
+  for (i in 1:betas) {
+    des.kriging.mcmc.beta.plot(prefix, "-nonst", idx=as.character(i))
+  }
   des.kriging.mcmc.sigma.plot(prefix, "-nonst")
+  for (i in 1:etasr) {
+    for (j in 1:etasc) {
+      des.kriging.mcmc.eta.plot(prefix, i, j)
+    }
+  }
 }
 
 
@@ -153,18 +165,23 @@ des.kriging.mcmc.posterior.plot <- function(prefix="2d-shdf", ps=TRUE) {
 }
 
 
-des.kriging.mcmc.beta.plot <- function(prefix="2d-shdf", nonst="", ps=TRUE) {
+des.kriging.mcmc.beta.plot <- function(prefix="2d-shdf", nonst="", idx="1", ps=TRUE) {
   if (ps) {
-    postscript(paste(prefix, "-chain", nonst ,"-beta.eps", sep=""), onefile=FALSE)
+    postscript(paste(prefix, "-chain", nonst ,"-beta_", idx , ".eps", sep=""), onefile=FALSE)
   }
 
-  chain <- read.table(paste(prefix, "-chain", nonst ,"-beta.dat", sep=""), header=TRUE)
+  chain <- read.table(paste(prefix, "-chain", nonst ,"-beta_", idx , ".dat", sep=""), header=TRUE)
   df <- data.frame(x=1:length(chain$beta), y=chain$beta)
+
+  i <- as.numeric(idx)
+  ytitle <- bquote(paste(beta[.(i)]))
+  title <- bquote(paste("Evolution of ", beta[.(i)]))
+
   p <- ggplot(df, aes(x=x, y=y))
   p <- p + layer(geom = "line")
-  p <- p + scale_y_continuous(expression(beta))
+  p <- p + scale_y_continuous(ytitle)
   p <- p + scale_x_continuous("")
-  p <- p + opts(title=expression(paste("Evolution of ", beta)))
+  p <- p + opts(title=title)
   p <- p + theme_bw()
   print(p)
   
@@ -250,48 +267,75 @@ des.kriging.mcmc.eta.plot <- function(prefix="2d-shdf", dim="1", idx="1", ps=TRU
 }
 
 
-des.kriging.mcmc.mean.plot <- function(prefix="2d-shdf") {
+des.kriging.mcmc.mean.plot <- function(prefix="2d-shdf", betas=1, thetas=1) {
   des.kriging.mcmc.posterior.mean.plot(prefix)
-  des.kriging.mcmc.beta.mean.plot(prefix)
+
+  for (i in 1:betas) {
+    des.kriging.mcmc.beta.mean.plot(prefix, idx=as.character(i))
+  }
   des.kriging.mcmc.sigma.mean.plot(prefix)
-  des.kriging.mcmc.theta.mean.plot(prefix, idx="1")
-  des.kriging.mcmc.theta.mean.plot(prefix, idx="2")
+  for (i in 1:thetas) {
+    des.kriging.mcmc.theta.mean.plot(prefix, idx=as.character(i))
+  }
+}
+
+
+des.nonst.kriging.mcmc.mean.plot <- function(prefix="2d-shdf", betas=1, etasr=1, etasc=1) {
+  des.kriging.mcmc.posterior.mean.plot(prefix)
+
+  for (i in 1:betas) {
+    des.kriging.mcmc.beta.mean.plot(prefix, "-nonst", idx=as.character(i))
+  }
+  des.kriging.mcmc.sigma.mean.plot(prefix, "-nonst")
+  for (i in 1:etasr) {
+    for (j in 1:etasc) {
+      des.kriging.mcmc.eta.mean.plot(prefix, i, j)
+    }
+  }
 }
 
 
 des.kriging.mcmc.posterior.mean.plot <- function(prefix="2d-shdf", ps=TRUE) {
-  if (ps) {
-    postscript(paste(prefix, "-chain-posterior-mean.eps", sep=""), onefile=FALSE)
-  }
+  if (file.exists(paste(prefix, "-chain-posterior-mean.dat", sep=""))) {
+    if (ps) {
+      postscript(paste(prefix, "-chain-posterior-mean.eps", sep=""), onefile=FALSE)
+    }
 
-  chain <- read.table(paste(prefix, "-chain-posterior-mean.dat", sep=""), header=TRUE)
-  df <- data.frame(x=1:length(chain$mean_posterior), y=chain$mean_posterior)
-  p <- ggplot(df, aes(x=x, y=y))
-  p <- p + layer(geom = "line")
-  p <- p + scale_y_continuous(expression(paste("-log", p(theta))))
-  p <- p + scale_x_continuous("")
-  p <- p + opts(title=expression(paste("Equilibration of ", "-log", p(theta))))
-  p <- p + theme_bw()
-  print(p)
-  
-  if (ps) {
-    dev.off()
+    chain <- read.table(paste(prefix, "-chain-posterior-mean.dat", sep=""), header=TRUE)
+    df <- data.frame(x=1:length(chain$mean_posterior), y=chain$mean_posterior)
+    p <- ggplot(df, aes(x=x, y=y))
+    p <- p + layer(geom = "line")
+    p <- p + scale_y_continuous(expression(paste("-log", p(theta))))
+    p <- p + scale_x_continuous("")
+    p <- p + opts(title=expression(paste("Equilibration of ", "-log", p(theta))))
+    p <- p + theme_bw()
+    print(p)
+    
+    if (ps) {
+      dev.off()
+    }
   }
 }
 
 
-des.kriging.mcmc.beta.mean.plot <- function(prefix="2d-shdf", nonst="", ps=TRUE) {
+des.kriging.mcmc.beta.mean.plot <- function(prefix="2d-shdf", nonst="", idx="1", ps=TRUE) {
   if (ps) {
-    postscript(paste(prefix, "-chain", nonst ,"-beta-mean.eps", sep=""), onefile=FALSE)
+    postscript(paste(prefix, "-chain", nonst , "-beta_", idx , "-mean.eps", sep=""), onefile=FALSE)
   }
 
-  chain <- read.table(paste(prefix, "-chain", nonst ,"-beta-mean.dat", sep=""), header=TRUE)
+  chain <- read.table(paste(prefix, "-chain", nonst , "-beta_", idx , "-mean.dat", sep=""),
+                      header=TRUE, col.names=("mean_beta"))
   df <- data.frame(x=1:length(chain$mean_beta), y=chain$mean_beta)
+
+  i <- as.numeric(idx)
+  ytitle <- bquote(paste(bar(beta)[.(i)]))
+  title <- bquote(paste("Equilibration of ", bar(beta)[.(i)]))
+
   p <- ggplot(df, aes(x=x, y=y))
   p <- p + layer(geom = "line")
-  p <- p + scale_y_continuous(expression(bar(beta)))
+  p <- p + scale_y_continuous(ytitle)
   p <- p + scale_x_continuous("")
-  p <- p + opts(title=expression(paste("Equilibration of ", bar(beta))))
+  p <- p + opts(title=title)
   p <- p + theme_bw()
   print(p)
   
@@ -374,17 +418,25 @@ des.kriging.mcmc.eta.mean.plot <- function(prefix="2d-shdf", i, j, ps=TRUE) {
 }
 
 
-des.kriging.mcmc.autocorr.plots <- function(prefix="2d-shdf") {
+des.kriging.mcmc.autocorr.plots <- function(prefix="2d-shdf", betas=1, thetas=1) {
   mcmcanalysis <- read.csv(paste(prefix, "-autocorr.dat", sep=""), header=TRUE)
-  des.kriging.mcmc.autocorr.plot(prefix, var="beta", wopt=mcmcanalysis$wopt[1], ps=TRUE)
-  des.kriging.mcmc.autocorr.plot(prefix, var="sigma", wopt=mcmcanalysis$wopt[2], ps=TRUE)
-  des.kriging.mcmc.autocorr.plot(prefix, var="theta1", wopt=mcmcanalysis$wopt[3], ps=TRUE)
-  des.kriging.mcmc.autocorr.plot(prefix, var="theta2", wopt=mcmcanalysis$wopt[4], ps=TRUE)
 
-  des.kriging.mcmc.tauintvsw.plot(prefix, var="beta", wopt=mcmcanalysis$wopt[1], taui=mcmcanalysis$tauint[1], ps=TRUE)
-  des.kriging.mcmc.tauintvsw.plot(prefix, var="sigma", wopt=mcmcanalysis$wopt[2], taui=mcmcanalysis$tauint[2], ps=TRUE)
-  des.kriging.mcmc.tauintvsw.plot(prefix, var="theta1", wopt=mcmcanalysis$wopt[3], taui=mcmcanalysis$tauint[3], ps=TRUE)
-  des.kriging.mcmc.tauintvsw.plot(prefix, var="theta2", wopt=mcmcanalysis$wopt[4], taui=mcmcanalysis$tauint[4], ps=TRUE)
+  for (i in 1:betas) {
+    des.kriging.mcmc.autocorr.plot(prefix, var=paste("beta_", i, sep=""), wopt=mcmcanalysis$wopt[i], ps=TRUE)
+  }
+  
+  des.kriging.mcmc.autocorr.plot(prefix, var="sigma", wopt=mcmcanalysis$wopt[betas+1], ps=TRUE)
+  for (i in 1:thetas) {
+    des.kriging.mcmc.autocorr.plot(prefix, var=paste("theta", i, sep=""), wopt=mcmcanalysis$wopt[betas+i+1], ps=TRUE)
+  }
+
+  for (i in 1:betas) {
+    des.kriging.mcmc.tauintvsw.plot(prefix, var=paste("beta_", i, sep=""), wopt=mcmcanalysis$wopt[i], taui=mcmcanalysis$tauint[i], ps=TRUE)
+  }
+  des.kriging.mcmc.tauintvsw.plot(prefix, var="sigma", wopt=mcmcanalysis$wopt[2], taui=mcmcanalysis$tauint[betas+1], ps=TRUE)
+  for (i in 1:thetas) {
+    des.kriging.mcmc.tauintvsw.plot(prefix, var=paste("theta", i, sep=""), wopt=mcmcanalysis$wopt[betas+i+1], taui=mcmcanalysis$tauint[betas+i+1], ps=TRUE)
+  }
 }
 
 
@@ -413,6 +465,14 @@ des.kriging.mcmc.autocorr.plot <- function(prefix="2d-shdf", var="beta", wopt, p
   
   if (var == "beta") {
     p <- p + opts(title=expression(paste("Normalised Autocorrelation of ", beta)))
+  } else if (var == "beta_1") {
+    p <- p + opts(title=expression(paste("Normalised Autocorrelation of ", beta[1])))
+  } else if (var == "beta_2") {
+    p <- p + opts(title=expression(paste("Normalised Autocorrelation of ", beta[2])))
+  } else if (var == "beta_3") {
+    p <- p + opts(title=expression(paste("Normalised Autocorrelation of ", beta[3])))
+  } else if (var == "beta_4") {
+    p <- p + opts(title=expression(paste("Normalised Autocorrelation of ", beta[4])))
   } else if (var == "sigma") {
     p <- p + opts(title=expression(paste("Normalised Autocorrelation of ", sigma^2)))
   } else if (var == "theta1") {
@@ -495,6 +555,14 @@ des.kriging.mcmc.tauintvsw.plot <- function(prefix="2d-shdf", var="beta", wopt, 
 
   if (var == "beta") {
     p <- p + opts(title=expression(paste(tau[int], " with Statistical Errors of ", beta)))
+  } else if (var == "beta_1") {
+    p <- p + opts(title=expression(paste(tau[int], " with Statistical Errors of ", beta[1])))
+  } else if (var == "beta_2") {
+    p <- p + opts(title=expression(paste(tau[int], " with Statistical Errors of ", beta[2])))
+  } else if (var == "beta_3") {
+    p <- p + opts(title=expression(paste(tau[int], " with Statistical Errors of ", beta[3])))
+  } else if (var == "beta_4") {
+    p <- p + opts(title=expression(paste(tau[int], " with Statistical Errors of ", beta[4])))
   } else if (var == "sigma") {
     p <- p + opts(title=expression(paste(tau[int], " with Statistical Errors of ", sigma^2)))
   } else if (var == "theta1") {
@@ -552,26 +620,33 @@ des.kriging.nonst.mcmc.tauintvsw.plot <- function(prefix="2d-shdf", i, j, wopt, 
 }
 
 
-des.kriging.mcmc.likeli.plot <- function(prefix="2d-shdf", ps=TRUE) {
-  des.kriging.mcmc.beta.likeli.plot(prefix, ps);
+des.kriging.mcmc.likeli.plot <- function(prefix="2d-shdf", betas=1, thetas=2, ps=TRUE) {
+  for (i in 1:betas) {
+    des.kriging.mcmc.beta.likeli.plot(prefix, idx=as.character(i), ps);
+  }
   des.kriging.mcmc.sigma.likeli.plot(prefix, ps);
-  des.kriging.mcmc.theta.likeli.plot(prefix, idx=1, ps);
-  des.kriging.mcmc.theta.likeli.plot(prefix, idx=2, ps);
+  for (i in 1:thetas) {
+    des.kriging.mcmc.theta.likeli.plot(prefix, idx=as.character(i), ps);
+  }
 }
 
 
-des.kriging.mcmc.beta.likeli.plot <- function(prefix="2d-shdf", ps=TRUE) {
+des.kriging.mcmc.beta.likeli.plot <- function(prefix="2d-shdf", idx="1", ps=TRUE) {
   if (ps) {
-    postscript(paste(prefix, "-chain-beta-likelihood.eps", sep=""), onefile=FALSE)
+    postscript(paste(prefix, "-chain-beta_", idx, "-likelihood.eps", sep=""), onefile=FALSE)
   }
 
-  chain <- read.table(paste(prefix, "-chain-beta-likelihood.dat", sep=""), sep=",", header=TRUE)
+  chain <- read.table(paste(prefix, "-chain-beta_", idx , "-likelihood.dat", sep=""), sep=",", header=TRUE)
   df <- data.frame(y=chain$likelihood_beta/sum(chain$likelihood_beta),x=chain$beta)
+
+  i <- as.numeric(idx)
+  ytitle <- bquote(paste("L(", beta[.(i)], "|", y, ",", sigma^2, ",", theta, ")"))
+
   p <- ggplot(df, aes(x=x, y=y))
   p <- p + layer(geom = "line")
-  p <- p + scale_y_continuous(expression(paste("L(", beta, "|", y, ",", sigma^2, ",", theta, ")")))
-  p <- p + scale_x_continuous(expression(beta))
-  p <- p + opts(title=expression(paste("Likelihood over ", beta)))
+  p <- p + scale_y_continuous(ytitle)
+  p <- p + scale_x_continuous(expression(beta[.(i)]))
+  p <- p + opts(title=expression(paste("Likelihood over ", beta[.(i)])))
   p <- p + theme_bw()
   print(p)
   
@@ -652,27 +727,35 @@ des.kriging.nonst.mcmc.eta.likeli.plot <- function(prefix="2d-shdf", i, j, ps=TR
 }
 
 
-des.kriging.mcmc.marginal.plot <- function(prefix="2d-shdf", ps=TRUE) {
-  des.kriging.mcmc.beta.marginal.plot(prefix, ps, 3);
+des.kriging.mcmc.marginal.plot <- function(prefix="2d-shdf", betas, thetas, ps=TRUE) {
+
+  for (i in 1:betas) {
+    des.kriging.mcmc.beta.marginal.plot(prefix, idx=as.character(i), ps, 3);
+  }
   des.kriging.mcmc.sigma.marginal.plot(prefix, ps, 3);
-  des.kriging.mcmc.theta.marginal.plot(prefix, idx=1, ps, 1);
-  des.kriging.mcmc.theta.marginal.plot(prefix, idx=2, ps, 1);
+  for (i in 1:thetas) {
+    des.kriging.mcmc.theta.marginal.plot(prefix, idx=i, ps, 1);
+  }
 }
 
 
-des.kriging.mcmc.beta.marginal.plot <- function(prefix="2d-shdf", ps=TRUE, adj=1) {
+des.kriging.mcmc.beta.marginal.plot <- function(prefix="2d-shdf", idx="1", ps=TRUE, adj=1) {
   if (ps) {
-    postscript(paste(prefix, "-chain-beta-sampled.eps", sep=""), onefile=FALSE)
+    postscript(paste(prefix, "-chain-beta_", idx , "-sampled.eps", sep=""), onefile=FALSE)
   }
 
-  chain <- read.table(paste(prefix, "-chain-beta-sampled.dat", sep=""), header=TRUE)
+  chain <- read.table(paste(prefix, "-chain-beta_", idx, "-sampled.dat", sep=""), header=TRUE)
   df <- data.frame(x=chain$sampled_beta)
+
+  i <- as.numeric(idx)
+  ytitle <- bquote(paste("p(", beta[.(i)], ")"))
+
   p <- ggplot(df, aes(x=x))
   p <- p + geom_histogram(aes(y= ..density..))
   p <- p + geom_density(aes(y= ..density..), kernel="gaussian", adjust=adj, fill=NA, colour="black")
-  p <- p + scale_y_continuous(expression(paste("p(", beta, ")")))
-  p <- p + scale_x_continuous(expression(beta))
-  p <- p + opts(title=expression(paste("Marginal Probability of ", beta)))
+  p <- p + scale_y_continuous(ytitle)
+  p <- p + scale_x_continuous(expression(beta[.(i)]))
+  p <- p + opts(title=expression(paste("Marginal Probability of ", beta[.(i)])))
   p <- p + theme_bw()
   print(p)
   

@@ -40,8 +40,8 @@ endfunction
 ## R: the correlation matrix of the input parameters
 ## theta: the estimated theta parameters from MLE or BA MCMC
 ## beta: the estimated beta parameters from MLE or BA MCMC
-function press = ssp(X, y, R, beta)
-  e = cv_error(X, y, R, beta);
+function press = ssp(X, y, R, beta, FUN = @(x) 1)
+  e = cv_error(X, y, R, beta, FUN);
 ##  H = hat_matrix(X);
   press = 0;
   
@@ -65,18 +65,17 @@ endfunction
 ## R: the correlation matrix of the input parameters
 ## theta: the estimated theta parameters from MLE or BA MCMC
 ## beta: the estimated beta parameters from MLE or BA MCMC
-function e = cv_error(X, y, R, beta)
-  R_inf = inv(R);
-  f = ones(rows(X), 1);
+function e = cv_error(X, y, R, beta, FUN = @(x) 1)
+  R_inf = R^-1;
+  F = [];
+  for i = 1:rows(X)
+    F = [F; FUN(X(i,:))];
+  endfor
   g = R_inf * y;
-  w = R_inf * f;
-  Q = diag(ones(rows(X), 1));
+  w = R_inf * F;
   r_vec = diag(R_inf);
   
-  for i = 1:rows(Q)
-    Q(i,i) = r_vec(i)^-1;
-  endfor
-
+  Q = diag(r_vec.^-1);
   e = Q * (g - w * beta);
 endfunction
 
@@ -88,44 +87,44 @@ endfunction
 ## y: the vector of responses from the experiment
 ## theta: the estimated theta parameters from MLE or BA MCMC
 ## beta: the estimated beta parameters from MLE or BA MCMC
-function r_p = r_pred(X, y, theta, beta, nugget=0)
-  x1_vec = X(:,1)';
-  x2_vec = X(:,2)';
-
+function r_p = r_pred(X, y, theta, beta, nugget=0, FUN = @(x) 1)
   R = scf_gaussianm(X, theta, nugget);
-  f = ones(rows(X), 1);
+  F = [];
+  for i = 1:rows(X)
+    F = [F; FUN(X(i,:))];
+  endfor
   y_s = [];
   
   for i = 1:rows(X)
-    y_s = [y_s; krig([X(i,1), X(i,2)], X, R, beta, theta, y, f, nugget)(1)];
+    y_s = [y_s; krig(X(i,:), X, R, beta, theta, y, F, FUN)];
   endfor
 
   ttss = sst(y_s);
-  press = ssp(X, y_s, R, beta);
+  press = ssp(X, y_s, R, beta, FUN);
 
   r_p = 1 - press / ttss;
 endfunction
 
-function r_p = r_pred_nonst(X, y, xi, eta, beta, nugget=0)
-  x1_vec = X(:,1)';
-  x2_vec = X(:,2)';
-
+function r_p = r_pred_nonst(X, y, xi, eta, beta, nugget=0, FUN = @(x) 1)
   R = scf_nonst_m(X, xi, eta, nugget);
-  f = ones(rows(X), 1);
+  F = [];
+  for i = 1:rows(X)
+    F = [F; FUN(X(i,:))];
+  endfor
   y_s = [];
   
   for i = 1:rows(X)
-    y_s = [y_s; krig_nonst([X(i,1), X(i,2)], X, R, beta, xi, eta, y, f)(1)];
+    y_s = [y_s; krig_nonst([X(i,1), X(i,2)], X, R, beta, xi, eta, y, f, FUN)];
   endfor
 
   ttss = sst(y_s);
-  press = ssp(X, y_s, R, beta);
+  press = ssp(X, y_s, R, beta, FUN);
 
   r_p = 1 - press / ttss;
 endfunction
 
 
-function r_pa = r_predadj(X, y, theta, beta, nugget=0)
-  r_p = r_pred(X, y, theta, beta, nugget);
+function r_pa = r_predadj(X, y, theta, beta, nugget=0, FUN = @(x) 1)
+  r_p = r_pred(X, y, theta, beta, nugget, FUN);
   r_pa = 1 - ((rows(y) - 1) / (rows(y) - columns(theta))) * (1 - r_p);
 endfunction

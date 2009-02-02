@@ -13,9 +13,11 @@
 ## Keywords: plotting
 ## Created: 12.01.2009
 
-des.network.radial.plot <- function(data, filename, ps=TRUE) {
+des.network.radial.plot <- function(data, filename, ps=TRUE, width=7, height=7, pts=12, fontsize=12) {
   if (ps) {
-    postscript(filename, onefile=FALSE, paper="special", width=7, height=7)
+    par(mar=rep(0,4))
+    postscript(filename, onefile=FALSE, horizontal=FALSE,
+               paper="special", width=width, height=height, pointsize=pts)
   }
 
   a <- as.character(max(data$degree))
@@ -32,8 +34,11 @@ des.network.radial.plot <- function(data, filename, ps=TRUE) {
   p <- p + scale_y_continuous("In-Degree", breaks=breaks, labels=labels)
   p <- p + scale_x_continuous("")
   p <- p + theme_bw()
-  p <- p + opts(title="Radial Plot of the Vertex In-Degree",
-                axis.text.x=theme_blank())
+  p <- p + opts(axis.text.x=theme_blank())
+##   p <- p + opts(title="Radial Plot of the Vertex In-Degree",
+##                 axis.text.x=theme_blank(),
+##                 plot.title=theme_text(size=fontsize, vjust=0.1))
+
   print(p)
 
   if (ps) {
@@ -58,5 +63,5 @@ for (i in filtered) {
 
   filename <- paste(strsplit(dir[i], ".gml")[[1]][1], ".eps", sep="")
 
-  des.network.radial.plot(df, filename)
+  des.network.radial.plot(df, filename, width=2.8, height=2.8, pts=8)
 }

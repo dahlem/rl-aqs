@@ -1,9 +1,9 @@
 ## Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
-##  
+##
 ## This file is free software; as a special exception the author gives
-## unlimited permission to copy and/or distribute it, with or without 
+## unlimited permission to copy and/or distribute it, with or without
 ## modifications, as long as this notice is preserved.
-## 
+##
 ## This program is distributed in the hope that it will be useful, but
 ## WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 ## implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
@@ -72,8 +72,8 @@ function Rd = scf_gaussianm_deriv(X, theta, deriv, nugget = 0)
 
   for i = 1:rows(Rd)
     for j = i+1:columns(Rd)
-      Rd(i, j) = - scf_gaussian(X(i,deriv), X(j,deriv), theta(deriv), nugget) * \ 
-	  (X(i,deriv) - X(j,deriv))^2;
+      Rd(i, j) = - scf_gaussian(X(i,deriv), X(j,deriv), theta(deriv), nugget) * \
+          (X(i,deriv) - X(j,deriv))^2;
       Rd(j, i) = Rd(i, j);
     endfor
   endfor
@@ -137,8 +137,8 @@ function R = scf_nonst_m(X, xi, eta, nugget)
   for i = 1:rows(R)
     for j = i+1:columns(R)
       for l = 1:columns(X)
-	flm(l) = mapping_func(X(i,l), xi(:,l), eta(:,l));
-	fln(l) = mapping_func(X(j,l), xi(:,l), eta(:,l));
+        flm(l) = mapping_func(X(i,l), xi(:,l), eta(:,l));
+        fln(l) = mapping_func(X(j,l), xi(:,l), eta(:,l));
       endfor
       R(i, j) = scf_nonst_corr(flm, fln);
       R(j, i) = R(i, j);
@@ -151,7 +151,7 @@ function glk = density_knot(xl, xil, etal, k_up)
   glk = 0;
 
   isInRange = ((xl <= xil(k_up)) & (xl >= xil((k_up) - 1)));
-  
+
   alk = (xil(k_up) .* etal((k_up)-1) - xil((k_up)-1) .* etal(k_up)) .* \
       (xil(k_up) - xil((k_up)-1)).^-1;
   blk = (etal(k_up) - etal((k_up)-1)) .* (xil(k_up) - xil((k_up)-1)).^-1;;
@@ -162,29 +162,21 @@ endfunction
 function glk = density_knot_integr(xl, xm, xil, etal, k_up)
   glk = 0;
 
-  isInRange1 = ((xl <= xil(k_up)) & (xl >= xil((k_up) - 1)));
-  isInRange2 = ((xm <= xil(k_up)) & (xm >= xil((k_up) - 1)));
-
   alk = (xil(k_up) .* etal((k_up)-1) - xil((k_up)-1) .* etal(k_up)) .\ \
       (xil(k_up) - xil((k_up)-1));
   blk = (etal(k_up) - etal((k_up)-1)) .\ (xil(k_up) - xil(k_up-1));
-  glk = (alk .* xl + blk .* 1 / 2 .* xl.^2) .* (isInRange1);
-  glm = (alk .* xm + blk .* 1 / 2 .* xm.^2) .* (isInRange2);
+  glk = (alk .* xl + blk .* 1 / 2 .* xl.^2);
+  glm = (alk .* xm + blk .* 1 / 2 .* xm.^2);
 
   glk = glm - glk;
 endfunction
 
 
-function glk = density_knot_integr2(xl, xm, xil, etal, k_up)
-  glk = 0;
+function glk = density_knot_integr2(xl, xm, etal, k_up)
+  glk = (etal(k_up-1) .* xm + etal(k_up) .* 1 / 2 .* xm.^2);
+  glm = (etal(k_up-1) .* xl + etal(k_up) .* 1 / 2 .* xl.^2);
 
-  isInRange1 = ((xl <= xil(k_up)) & (xl >= xil((k_up) - 1)));
-  isInRange2 = ((xm <= xil(k_up)) & (xm >= xil((k_up) - 1)));
-
-  glk = (etal((k_up)-1) .* xl + etal(k_up) .* 1 / 2 .* xl.^2) .* (isInRange1);
-  glm = (etal((k_up)-1) .* xm + etal(k_up) .* 1 / 2 .* xm.^2) .* (isInRange2);
-
-  glk = glm - glk;
+  glk = glk - glm;
 endfunction
 
 
@@ -193,19 +185,78 @@ function gl = density(xl, xil, etal)
 endfunction
 
 
+function glk = density_knot_integr2_deriv(xl, xm, etal, curL, curK, l, k)
+  glk = glm = 0;
+
+  if (curL == l)
+    if (k == (curK - 1))
+      glk = xm;
+      glm = xl;
+    elseif (k == curK)
+      glk = xm * eta(curK);
+      glm = xl * eta(curK - 1);
+    endif
+  endif
+
+  glk = glk - glm;
+endfunction
+
+
+
+## curl is the current dimension
+## l identifies the derivate of the l-th dimension
+## k identifies the derivate on the k-th knot
+function fl = mapping_func_deriv(xl, xil, etal, curL, l, k)
+  fl = 0;
+  curK = 1;
+
+  for curK = 2:rows(xil)
+    if (xl < xil(curK))
+      break;
+    else
+      fl += density_knot_integr2_deriv(xil(curK-1), xil(curK), etal, \
+                                       curL, curK, l, k);
+    endif
+  endfor
+
+  fl += density_knot_integr2_deriv(xil(curK-1), xl, etal, curL, curK, l, k);
+endfunction
+
+
+function R = scf_nonst_m_deriv(X, eta, xi, l, k, nugget)
+  r = ones(rows(X), 1);
+  r = r + nugget;
+  R = diag(r);
+  flm = zeros(1, columns(X));
+  fln = zeros(1, columns(X));
+
+  for i = 1:rows(R)
+    for j = i+1:columns(R)
+      for curL = 1:columns(X)
+        flm(curL) = mapping_func_deriv(X(i,curL), xi(:,curL), \
+                                       eta(:,curL), curL, l, k);
+        fln(curL) = mapping_func_deriv(X(j,curL), xi(:,curL), eta(:,curL), \
+                                       curL, l, k);
+      endfor
+      R(i, j) = scf_nonst_corr(flm, fln);
+      R(j, i) = R(i, j);
+    endfor
+  endfor
+endfunction
+
+
 function fl = mapping_func(xl, xil, etal)
   fl = xil(1);
   k = 1;
-  
+
   for k = 2:rows(xil)
     if (xl < xil(k))
       break;
     else
-      fl += density_knot_integr2(xil(k-1), xil(k), xil, etal, k);
+      fl += density_knot_integr2(xil(k-1), xil(k), etal, k);
     endif
   endfor
-
-  fl += density_knot_integr2(xil(k-1), xl, xil, etal, k);
+  fl += density_knot_integr2(xil(k-1), xl, etal, k);
 endfunction
 
 
