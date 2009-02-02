@@ -112,6 +112,24 @@ enum vertex_expected_average_number_event_t { vertex_expected_average_number_eve
 enum vertex_last_event_time_t { vertex_last_event_time = 1122 };
 
 
+/** @enum vertex_num_events_processed_t
+ * This enum extends the vertex properties by a number of a events processed attribute.
+ */
+enum vertex_num_events_processed_t { vertex_num_events_processed = 1123 };
+
+
+/** @enum vertex_mean_delay_t
+ * This enum extends the vertex properties by a mean delay attribute.
+ */
+enum vertex_mean_delay_t { vertex_mean_delay = 1124 };
+
+
+/** @enum vertex_svar_delay_t
+ * This enum extends the vertex properties by a sample variance of the delay attribute.
+ */
+enum vertex_svar_delay_t { vertex_svar_delay = 1125 };
+
+
 /** @enum graph_generator_t
  * This enum extends the graph properties by a generator argument
  */
@@ -133,6 +151,9 @@ namespace boost
     BOOST_INSTALL_PROPERTY(vertex, utilisation);
     BOOST_INSTALL_PROPERTY(vertex, expected_average_number_event);
     BOOST_INSTALL_PROPERTY(vertex, last_event_time);
+    BOOST_INSTALL_PROPERTY(vertex, num_events_processed);
+    BOOST_INSTALL_PROPERTY(vertex, mean_delay);
+    BOOST_INSTALL_PROPERTY(vertex, svar_delay);
     BOOST_INSTALL_PROPERTY(graph, generator);
 }
 
@@ -200,10 +221,25 @@ typedef boost::property <vertex_expected_average_number_event_t, double, VertexQ
  */
 typedef boost::property <vertex_last_event_time_t, double, VertexExpectedAverageNumberEventProperty> VertexLastEventTimeProperty;
 
+/** @typedef VertexNumProcessedEventsProperty
+ * Specifies the property for the number of processed events attribute of a vertex
+ */
+typedef boost::property <vertex_num_events_processed_t, int, VertexLastEventTimeProperty> VertexNumProcessedEventsProperty;
+
+/** @typedef VertexMeanDelayProperty
+ * Specifies the property for the mean delay of a vertex
+ */
+typedef boost::property <vertex_mean_delay_t, double, VertexNumProcessedEventsProperty> VertexMeanDelayProperty;
+
+/** @typedef VertexSVarDelayProperty
+ * Specifies the property for the sample variance of the delay attribute of a vertex
+ */
+typedef boost::property <vertex_svar_delay_t, double, VertexMeanDelayProperty> VertexSVarDelayProperty;
+
 /** @typedef VertexProperties
  * This type definition assembles all the properties for the vertices of the graph
  */
-typedef boost::property <boost::vertex_index_t, int, VertexLastEventTimeProperty> VertexProperties;
+typedef boost::property <boost::vertex_index_t, int, VertexSVarDelayProperty> VertexProperties;
 
 /** @typedef EdgeWeightProperty
  * Specifies the property for the edge weight
@@ -304,6 +340,21 @@ typedef boost::property_map <Graph, vertex_expected_average_number_event_t>::typ
  * Specifies the map that stores the vertex last event time attribute
  */
 typedef boost::property_map <Graph, vertex_last_event_time_t>::type VertexLastEventTimeMap;
+
+/** @typedef VertexNumEventsProcessedMap
+ * Specifies the map that stores the vertex number of processed events attribute
+ */
+typedef boost::property_map <Graph, vertex_num_events_processed_t>::type VertexNumEventsProcessedMap;
+
+/** @typedef VertexMeanDelayMap
+ * Specifies the map that stores the vertex mean delay attribute
+ */
+typedef boost::property_map <Graph, vertex_mean_delay_t>::type VertexMeanDelayMap;
+
+/** @typedef VertexSVarDelayMap
+ * Specifies the map that stores the vertex sample variance of the deleay attribute
+ */
+typedef boost::property_map <Graph, vertex_svar_delay_t>::type VertexSVarDelayMap;
 
 /** @typedef EdgeWeightMap
  * Specifies the edge weight property
@@ -411,6 +462,9 @@ const std::string BDT                               = "Bdt";
 const std::string QDT                               = "Qdt";
 const std::string LAST_EVENT_TIME                   = "last_event_time";
 const std::string EXPECTED_AVERAGE_NUMBER_EVENT     = "expected_average_number_event";
+const std::string NUM_EVENTS_PROCESSED              = "num_events_processed";
+const std::string MEAN_DELAY                        = "mean_delay";
+const std::string SVAR_DELAY                        = "svar_delay";
 const std::string GRAPH_GENERATOR                   = "graph_generator";
 
 

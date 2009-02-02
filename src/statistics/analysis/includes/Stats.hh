@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This file is free software; as a special exception the author gives
 // unlimited permission to copy and/or distribute it, with or without
@@ -54,6 +54,21 @@ public:
      * @return double the new sample mean
      */
     static double ssd(int p_n, double p_xbar, double p_sd, double p_x);
+
+
+    /** @fn bool isInPos(const double, const double, const int, const double)
+     * Calculate whether a datum is within a given half-interval from the mean. The
+     * method uses the t-distribution to account for broader tails when the sample size
+     * is small.
+     *
+     * @param const double the new datum
+     * @param const double the mean
+     * @param const double the sample variance
+     * @param const int the size of the sample
+     * @param const double the alpha value
+     */
+    static bool isInPos(const double, const double, const double, const int, const double);
+    static bool isInNeg(const double, const double, const double, const int, const double);
 
 
 private:

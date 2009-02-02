@@ -177,6 +177,9 @@ boost::dynamic_properties GraphUtil::getProperties(tGraphSP p_graph)
     dp.property(QDT, get(vertex_Qdt, *p_graph));
     dp.property(LAST_EVENT_TIME, get(vertex_last_event_time, *p_graph));
     dp.property(EXPECTED_AVERAGE_NUMBER_EVENT, get(vertex_expected_average_number_event, *p_graph));
+    dp.property(NUM_EVENTS_PROCESSED, get(vertex_num_events_processed, *p_graph));
+    dp.property(MEAN_DELAY, get(vertex_mean_delay, *p_graph));
+    dp.property(SVAR_DELAY, get(vertex_svar_delay, *p_graph));
 
     boost::ref_property_map<Graph*, boost::uint16_t>
         graphGenerator(get_property(*p_graph, graph_generator));
