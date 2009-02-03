@@ -173,7 +173,7 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
 {
     boost::uint16_t sim_num, rep_num, num_vertices;
     boost::uint16_t net_size, max_edges;
-    double edge_prob;
+    double edge_prob, rl_q_alpha, rl_q_beta, rl_q_lambda;
 
     // receive the input arguments via mpi
 #ifdef HAVE_MPI
@@ -201,14 +201,18 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
         net_size = simArgs.net_size;
         max_edges = simArgs.max_edges;
         edge_prob = simArgs.edge_prob;
-
+        rl_q_alpha = simArgs.rl_q_alpha;
+        rl_q_beta = simArgs.rl_q_beta;
+        rl_q_lambda = simArgs.rl_q_lambda;
 #else
         sim_num = desArgs->sim_num;
         rep_num = desArgs->rep_num;
         net_size = desArgs->net_size;
         max_edges = desArgs->max_edges;
         edge_prob = desArgs->edge_prob;
-
+        rl_q_alpha = desArgs->rl_q_alpha;
+        rl_q_beta = desArgs->rl_q_beta;
+        rl_q_lambda = desArgs->rl_q_lambda;
 #endif /* HAVE_MPI */
 
         dnet::tGraphSP graph(new dnet::Graph);
@@ -437,7 +441,7 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
             tRLResponseHandlerSP rlResponseHandler(
                 new RLResponseHandler(
                     graph, desArgs->response_alpha, desArgs->response_reward, desArgs->response_levels,
-                    desArgs->rl_q_alpha, desArgs->rl_q_beta, desArgs->rl_q_lambda));
+                    rl_q_alpha, rl_q_beta, rl_q_lambda));
             tResponseStatsHandlerSP responseStatsHandler(
                 new ResponseStatsHandler(graph));
             ackEvent->attach(rlResponseHandler);

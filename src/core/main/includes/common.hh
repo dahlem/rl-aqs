@@ -70,6 +70,9 @@ typedef struct {
     double edge_prob;           /* probability of edge (u,v) */
     double boost_arrival;       /* boost arrival rate */
     double boost_edge;          /* boost edge weight */
+    double rl_q_alpha;          /* q-learning rate */
+    double rl_q_beta;           /* reward discount rate */
+    double rl_q_lambda;         /* action value discount rate */
 } tSimArgsMPI;
 
 
