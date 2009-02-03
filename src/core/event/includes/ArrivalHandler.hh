@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -30,9 +30,6 @@
 #include <boost/shared_ptr.hpp>
 
 
-#include "ArrivalEvent.hh"
-namespace dcore = des::core;
-
 #include "Observer.hh"
 namespace design = des::design;
 
@@ -45,6 +42,9 @@ namespace dnet = des::network;
 #include "CRN.hh"
 namespace dsample = des::sampling;
 
+#include "ArrivalEvent.hh"
+
+
 
 namespace des
 {
@@ -56,13 +56,13 @@ typedef boost::shared_array <boost::int32_t> Int32SA;
 /** @class ArrivalHandler
  * The class @code{ArrivalHandler} handles arrival events in the DES.
  */
-class ArrivalHandler : public design::Observer<dcore::ArrivalEvent>
+class ArrivalHandler : public design::Observer<ArrivalEvent>
 {
 public:
     ArrivalHandler(dcommon::tQueueSP p_queue, dnet::tGraphSP p_graph,  Int32SA p_service_ids);
     ~ArrivalHandler();
 
-    void update(dcore::ArrivalEvent *subject);
+    void update(ArrivalEvent *subject);
 
 private:
     dcommon::tQueueSP m_queue;

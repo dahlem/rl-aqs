@@ -1,4 +1,4 @@
-# Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+# Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 #  
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without 
@@ -34,7 +34,8 @@ libcoreevent_la_SOURCES =                                                  \
 	UtilisationHandler.cc                                              \
 	ExpectedAverageEventInQueueHandler.cc                              \
 	LogGraphHandler.cc                                                 \
-	DepartureHandler.cc
+	DepartureHandler.cc                                                \
+	ResponseStatsHandler.cc
 
 libcoreevent_la_CPPFLAGS =                                                 \
 	$(BOOST_CPPFLAGS)                                                  \

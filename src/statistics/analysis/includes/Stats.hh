@@ -41,19 +41,19 @@ public:
      */
     static double mean(int p_n, double p_xbar, double p_x);
 
-    /** @fn double ssd(int p_n, double p_xbar, double p_sd, double p_x)
-     * Calculate the running sum of squared deviations. In order to calculate
-     * the sample variance divide the SSD by the number of data points, i.e.,
-     * \f$ \sigma^2 = ssd / p_n \f$. And consequently the sample standard deviation
+    /** @fn double variance(double p_xbar_old, double p_xbar_new, double p_var, double p_x)
+     * Calculate the running variance. In order to calculate
+     * the sample variance divide the variance by the number of data points minus one, i.e.,
+     * \f$ sample \sigma^2 = \sigma^2 / (p_n - 1) \f$. And consequently the sample standard deviation
      * is the square root of the variance.
      *
-     * @param int the running number of data points
-     * @param double the running sample mean
-     * @param double the running sum of squared deviations
+     * @param double the old running sample mean
+     * @param double the new running sample mean
+     * @param double the running variance
      * @param double the new data point
-     * @return double the new sample mean
+     * @return double the new variance
      */
-    static double ssd(int p_n, double p_xbar, double p_sd, double p_x);
+    static double variance(double p_xbar_old, double p_xbar_new, double p_var, double p_x);
 
 
     /** @fn bool isInPos(const double, const double, const int, const double)

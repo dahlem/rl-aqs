@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,29 +17,34 @@
 /** @file NumEventsHandler.cc
  * Implementation of a basic numEvents handler.
  */
-#include "events.hh"
-#include "NumEventsHandler.hh"
-namespace dcore = des::core;
-
 #include "Entry.hh"
 namespace dcommon = des::common;
 
-#include "WEvonet.hh"
+#include "DirectedGraph.hh"
 namespace dnet = des::network;
 
+#include "events.hh"
+#include "NumEventsHandler.hh"
 
-dcore::NumEventsHandler::NumEventsHandler(dnet::tGraphSP p_graph)
+
+namespace des
+{
+namespace core
+{
+
+
+NumEventsHandler::NumEventsHandler(dnet::tGraphSP p_graph)
     : m_graph(p_graph)
 {
     vertex_num_events_map = get(vertex_num_events, *m_graph);
 }
 
 
-dcore::NumEventsHandler::~NumEventsHandler()
+NumEventsHandler::~NumEventsHandler()
 {}
 
 
-void dcore::NumEventsHandler::update(dcore::ArrivalEvent *subject)
+void NumEventsHandler::update(ArrivalEvent *subject)
 {
     dcommon::Entry *entry = subject->getEvent();
     dnet::Vertex vertex = boost::vertex(entry->getDestination(), *m_graph);
@@ -49,4 +54,8 @@ void dcore::NumEventsHandler::update(dcore::ArrivalEvent *subject)
         (entry->getType() == ARRIVAL_EVENT)) {
         vertex_num_events_map[vertex]++;
     }
+}
+
+
+}
 }

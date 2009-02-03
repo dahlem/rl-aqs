@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -29,11 +29,6 @@
 
 #include <gsl/gsl_randist.h>
 
-#include "events.hh"
-#include "ArrivalEvent.hh"
-#include "ArrivalHandler.hh"
-namespace dcore = des::core;
-
 #include "Entry.hh"
 #include "LadderQueue.hh"
 namespace dcommon = des::common;
@@ -48,8 +43,19 @@ namespace dsample = des::sampling;
 namespace dstats = des::statistics;
 
 
-dcore::ArrivalHandler::ArrivalHandler(dcommon::tQueueSP p_queue,
-                                      dnet::tGraphSP p_graph, Int32SA p_service_ids)
+#include "events.hh"
+#include "ArrivalEvent.hh"
+#include "ArrivalHandler.hh"
+
+
+namespace des
+{
+namespace core
+{
+
+
+ArrivalHandler::ArrivalHandler(dcommon::tQueueSP p_queue,
+                               dnet::tGraphSP p_graph, Int32SA p_service_ids)
     : m_queue(p_queue), m_graph(p_graph), m_service_ids(p_service_ids)
 {
     vertex_busy_map = get(vertex_busy, *m_graph);
@@ -61,11 +67,11 @@ dcore::ArrivalHandler::ArrivalHandler(dcommon::tQueueSP p_queue,
 }
 
 
-dcore::ArrivalHandler::~ArrivalHandler()
+ArrivalHandler::~ArrivalHandler()
 {}
 
 
-void dcore::ArrivalHandler::update(dcore::ArrivalEvent *subject)
+void ArrivalHandler::update(ArrivalEvent *subject)
 {
     dcommon::Entry *entry;
     dnet::Vertex vertex;
@@ -106,7 +112,7 @@ void dcore::ArrivalHandler::update(dcore::ArrivalEvent *subject)
 #endif /* NDEBUG_EVENTS */
 
         // delay the event
-        new_entry->delayed(delay, departure, dcore::DEPARTURE_EVENT);
+        new_entry->delayed(delay, departure, DEPARTURE_EVENT);
     } else {
         // enqueue a departure event into the queue with a stochastic service time
         departure = entry->getArrival() + service_time;
@@ -119,7 +125,7 @@ void dcore::ArrivalHandler::update(dcore::ArrivalEvent *subject)
         vertex_busy_map[vertex] = true;
 
         // service the event
-        new_entry->service(departure, dcore::DEPARTURE_EVENT);
+        new_entry->service(departure, DEPARTURE_EVENT);
     }
 
 #ifndef NDEBUG_EVENTS
@@ -144,4 +150,8 @@ void dcore::ArrivalHandler::update(dcore::ArrivalEvent *subject)
 #endif /* NDEBUG_EVENTS */
 
     m_queue->push(new_entry);
+}
+
+
+}
 }

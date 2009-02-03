@@ -18,26 +18,22 @@
 #include <gsl/gsl_statistics.h>
 
 #include "Stats.hh"
-using des::statistics::Stats;
+
+
+namespace des
+{
+namespace statistics
+{
 
 
 double Stats::mean(int p_n, double p_xbar, double p_x)
 {
-    double d;
-
-    d = p_x - p_xbar;
-
-    return p_xbar + d / p_n;
+    return p_xbar + (p_x - p_xbar) / p_n;
 }
 
-
-double Stats::ssd(int p_n, double p_xbar, double p_sd, double p_x)
+double Stats::variance(double p_xbar_old, double p_xbar_new, double p_var, double p_x)
 {
-    double d;
-
-    d = p_x - p_xbar;
-
-    return (p_sd + d * d * (p_n - 1) / p_n);
+    return p_var + (p_x - p_xbar_old) * (p_x - p_xbar_new);
 }
 
 
@@ -90,4 +86,8 @@ bool Stats::isInNeg(const double p_dat, const double p_mean, const double p_svar
         return false;
     }
 
+}
+
+
+}
 }

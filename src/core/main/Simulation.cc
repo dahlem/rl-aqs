@@ -64,6 +64,7 @@
 #include "PreAnyEvent.hh"
 #include "ProcessedEventsHandler.hh"
 #include "Report.hh"
+#include "ResponseStatsHandler.hh"
 #include "Simulation.hh"
 #include "UnprocessedEventsHandler.hh"
 #include "UtilisationHandler.hh"
@@ -429,6 +430,13 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
         arrivalEvent->attach(arrivalHandler);
 
         departureEvent->attach(departureHandler);
+
+        // configure reinforcement learning
+        if (desArgs->rl) {
+            tResponseStatsHandlerSP responseStatsHandler(
+                new ResponseStatsHandler(graph));
+            ackEvent->attach(responseStatsHandler);
+        }
 
         ackEvent->attach(ackHandler);
 

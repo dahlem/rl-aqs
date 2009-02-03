@@ -131,6 +131,11 @@ CL::CL()
             std::numeric_limits<double>::max()), "set the max. rate to boost the edge weight.")
         ;
 
+    po::options_description opt_rl("RL Configuration");
+    opt_rl.add_options()
+        (RL.c_str(), po::value <bool>()->default_value(false), "Enable Reinforcement Learning.")
+        ;
+
     po::options_description opt_debug("Debug Configuration");
     opt_debug.add_options()
         (TRACE.c_str(), po::value <bool>()->default_value(false), "Set debugging.")
@@ -144,6 +149,7 @@ CL::CL()
     opt_desc->add(opt_rand);
     opt_desc->add(opt_ci);
     opt_desc->add(opt_lhs);
+    opt_desc->add(opt_rl);
     opt_desc->add(opt_debug);
 }
 
@@ -373,8 +379,14 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
         std::cout << "Maximum probability of having in edge (u,v) set to " << desArgs->max_edge_prob << "." << std::endl;
     }
 
-    std::cout << std::endl << "6) Output Files" << std::endl;
 
+    std::cout << std::endl << "6) Reinforcement Learning Configuration" << std::endl;
+    if (vm.count(RL.c_str())) {
+        desArgs->rl = vm[RL.c_str()].as <bool>();
+    }
+    std::cout << "RL enabled: " << desArgs->rl << std::endl;
+
+    std::cout << std::endl << "7) Output Files" << std::endl;
     desArgs->events_unprocessed = "events_unprocessed.dat";
     desArgs->events_processed = "events_processed.dat";
 

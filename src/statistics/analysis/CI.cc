@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2007-2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This file is free software; as a special exception the author gives
 // unlimited permission to copy and/or distribute it, with or without
@@ -18,10 +18,12 @@
 #include <gsl/gsl_statistics.h>
 
 #include "CI.hh"
-using des::statistics::CI;
-
 #include "Stats.hh"
-using des::statistics::Stats;
+
+namespace des
+{
+namespace statistics
+{
 
 
 
@@ -45,7 +47,7 @@ bool CI::isConfidentWithPrecision(
     double p_error)
 {
     double mean = Stats::mean(p_size, p_xbar, p_x);
-    double sv = Stats::ssd(p_size, p_xbar, p_sd, p_x) / (p_size - 1);
+    double sv = Stats::variance(p_xbar, mean, p_sd, p_x) / (p_size - 1);
 
     return CI::isConfidentWithPrecision(mean, sv, p_size, p_alpha, p_error);
 }
@@ -77,4 +79,8 @@ bool CI::isConfidentWithPrecision(
     } else {
         return false;
     }
+}
+
+
+}
 }

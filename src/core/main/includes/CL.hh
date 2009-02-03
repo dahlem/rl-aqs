@@ -82,6 +82,8 @@ const std::string MIN_BOOST_EDGE = "min_boost_edge";
 const std::string MAX_BOOST_EDGE = "max_boost_edge";
 const std::string GENERATOR = "graph_generator";
 
+const std::string RL = "rl";
+
 
 /** @typedef tOptDescSP
  * Specifies shared pointer to the boost options description
@@ -137,6 +139,8 @@ struct desArgs_t {
     double edge_prob;               /* probability of vertices connecting */
     double min_edge_prob;           /* min. probability of vertices connecting */
     double max_edge_prob;           /* max. probability of vertices connecting */
+
+    bool rl;                        /* switch to enable reinforcement learning */
 
     friend std::ostream& operator <<(std::ostream &p_os, const desArgs_t &desArgs)
         {
