@@ -436,7 +436,8 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
         if (desArgs->rl) {
             tRLResponseHandlerSP rlResponseHandler(
                 new RLResponseHandler(
-                    graph, desArgs->response_alpha, desArgs->response_reward, desArgs->response_levels));
+                    graph, desArgs->response_alpha, desArgs->response_reward, desArgs->response_levels,
+                    desArgs->rl_q_alpha, desArgs->rl_q_beta, desArgs->rl_q_lambda));
             tResponseStatsHandlerSP responseStatsHandler(
                 new ResponseStatsHandler(graph));
             ackEvent->attach(rlResponseHandler);

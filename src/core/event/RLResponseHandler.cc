@@ -46,8 +46,10 @@ namespace core
 
 
 RLResponseHandler::RLResponseHandler(dnet::tGraphSP p_graph, boost::shared_array<double> p_alpha,
-                                     boost::shared_array<double> p_r, boost::uint16_t p_levels)
-    : m_graph(p_graph), m_alpha(p_alpha), m_r(p_r), m_levels(p_levels)
+                                     boost::shared_array<double> p_r, boost::uint16_t p_levels,
+                                     double p_q_alpha, double p_q_beta, double p_q_lambda)
+    : m_graph(p_graph), m_alpha(p_alpha), m_r(p_r), m_levels(p_levels),
+      m_q_alpha(p_q_alpha), m_q_beta(p_q_beta), m_q_lambda(p_q_lambda)
 {
     vertex_var_response_map = get(vertex_var_response, *m_graph);
     vertex_mean_response_map = get(vertex_mean_response, *m_graph);

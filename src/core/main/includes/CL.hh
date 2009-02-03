@@ -84,6 +84,9 @@ const std::string MAX_BOOST_EDGE = "max_boost_edge";
 const std::string GENERATOR = "graph_generator";
 
 const std::string RL = "rl";
+const std::string RL_Q_ALPHA = "rl_q_alpha";
+const std::string RL_Q_BETA = "rl_q_beta";
+const std::string RL_Q_LAMBDA = "rl_q_lambda";
 const std::string RL_RESPONSE_ALPHA = "rl_response_alphas";
 const std::string RL_RESPONSE_REWARD = "rl_response_rewards";
 
@@ -147,6 +150,9 @@ struct desArgs_t {
     boost::shared_array<double> response_alpha;     /* the response levels for the reward model */
     boost::shared_array<double> response_reward;    /* the response rewards for the reward model */
     boost::uint16_t response_levels;                /* number of response levels */
+    double rl_q_alpha;                              /* q-learning rate */
+    double rl_q_beta;                               /* reward discount rate */
+    double rl_q_lambda;                             /* action value discount rate */
 
     friend std::ostream& operator <<(std::ostream &p_os, const desArgs_t &desArgs)
         {
@@ -164,7 +170,10 @@ struct desArgs_t {
                  << desArgs.net_size << ","
                  << desArgs.max_edges << ","
                  << desArgs.edge_prob << ","
-                 << desArgs.edge_fixed;
+                 << desArgs.edge_fixed << ","
+                 << desArgs.rl_q_alpha << ","
+                 << desArgs.rl_q_beta << ","
+                 << desArgs.rl_q_lambda;
 
             return p_os;
         }

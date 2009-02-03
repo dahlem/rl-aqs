@@ -141,6 +141,9 @@ CL::CL()
         (RL.c_str(), po::value <bool>()->default_value(false), "Enable Reinforcement Learning.")
         (RL_RESPONSE_ALPHA.c_str(), po::value <std::string>(), "Reward Levels for response Time.")
         (RL_RESPONSE_REWARD.c_str(), po::value <std::string>(), "Reward Scalars above respective levels.")
+        (RL_Q_ALPHA.c_str(), po::value <double>(), "Learning Rate.")
+        (RL_Q_BETA.c_str(), po::value <double>(), "Reward discount Rate.")
+        (RL_Q_LAMBDA.c_str(), po::value <double>(), "Action-value Rate.")
        ;
 
     po::options_description opt_debug("Debug Configuration");
@@ -455,6 +458,18 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
             }
             std::cout << std::endl;
         }
+        if (vm.count(RL_Q_ALPHA.c_str())) {
+            desArgs->rl_q_alpha = vm[RL_Q_ALPHA.c_str()].as <double>();
+        }
+        std::cout << "Learning Rate: " << desArgs->rl_q_alpha << "." << std::endl;
+        if (vm.count(RL_Q_BETA.c_str())) {
+            desArgs->rl_q_beta = vm[RL_Q_BETA.c_str()].as <double>();
+        }
+        std::cout << "Reward Discount Rate: " << desArgs->rl_q_beta << "." << std::endl;
+        if (vm.count(RL_Q_LAMBDA.c_str())) {
+            desArgs->rl_q_lambda = vm[RL_Q_LAMBDA.c_str()].as <double>();
+        }
+        std::cout << "Action-Value Discount Rate: " << desArgs->rl_q_lambda << "." << std::endl;
     }
 
     std::cout << std::endl << "7) Output Files" << std::endl;

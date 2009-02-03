@@ -54,7 +54,8 @@ class RLResponseHandler : public design::Observer<AckEvent>
 {
 public:
     RLResponseHandler(dnet::tGraphSP p_graph, boost::shared_array<double> p_alpha,
-                      boost::shared_array<double> p_r, boost::uint16_t p_levels);
+                      boost::shared_array<double> p_r, boost::uint16_t p_levels,
+                      double p_q_alpha, double p_q_beta, double p_q_lambda);
     
     ~RLResponseHandler();
 
@@ -65,6 +66,9 @@ private:
     boost::shared_array<double> m_alpha;
     boost::shared_array<double> m_r;
     boost::uint16_t m_levels;
+    double m_q_alpha;
+    double m_q_beta;
+    double m_q_lambda;
     
     // derived fields
     dnet::VertexVarResponseMap vertex_var_response_map;
