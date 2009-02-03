@@ -130,10 +130,16 @@ enum vertex_mean_response_t { vertex_mean_response = 1124 };
 enum vertex_var_response_t { vertex_var_response = 1125 };
 
 
+/** @enum vertex_q_val_t
+ * This enum extends the vertex properties by a q-value attribute.
+ */
+enum vertex_q_val_t { vertex_q_val = 1126 };
+
+
 /** @enum graph_generator_t
  * This enum extends the graph properties by a generator argument
  */
-enum graph_generator_t { graph_generator = 1123 };
+enum graph_generator_t { graph_generator = 1127 };
 
 
 // install the vertex service rate property
@@ -154,6 +160,7 @@ namespace boost
     BOOST_INSTALL_PROPERTY(vertex, num_events_processed);
     BOOST_INSTALL_PROPERTY(vertex, mean_response);
     BOOST_INSTALL_PROPERTY(vertex, var_response);
+    BOOST_INSTALL_PROPERTY(vertex, q_val);
     BOOST_INSTALL_PROPERTY(graph, generator);
 }
 
@@ -236,10 +243,15 @@ typedef boost::property <vertex_mean_response_t, double, VertexNumProcessedEvent
  */
 typedef boost::property <vertex_var_response_t, double, VertexMeanResponseProperty> VertexVarResponseProperty;
 
+/** @typedef VertexQValueProperty
+ * Specifies the property for the q-value attribute of a vertex
+ */
+typedef boost::property <vertex_q_val_t, double, VertexVarResponseProperty> VertexQValueProperty;
+
 /** @typedef VertexProperties
  * This type definition assembles all the properties for the vertices of the graph
  */
-typedef boost::property <boost::vertex_index_t, int, VertexVarResponseProperty> VertexProperties;
+typedef boost::property <boost::vertex_index_t, int, VertexQValueProperty> VertexProperties;
 
 /** @typedef EdgeWeightProperty
  * Specifies the property for the edge weight
@@ -356,6 +368,11 @@ typedef boost::property_map <Graph, vertex_mean_response_t>::type VertexMeanResp
  */
 typedef boost::property_map <Graph, vertex_var_response_t>::type VertexVarResponseMap;
 
+/** @typedef VertexQValueMap
+ * Specifies the map that stores the vertex q-value attribute
+ */
+typedef boost::property_map <Graph, vertex_q_val_t>::type VertexQValueMap;
+
 /** @typedef EdgeWeightMap
  * Specifies the edge weight property
  */
@@ -465,6 +482,7 @@ const std::string EXPECTED_AVERAGE_NUMBER_EVENT     = "expected_average_number_e
 const std::string NUM_EVENTS_PROCESSED              = "num_events_processed";
 const std::string MEAN_RESPONSE                     = "mean_response";
 const std::string VAR_RESPONSE                      = "var_response";
+const std::string Q_VALUE                           = "q_value";
 const std::string GRAPH_GENERATOR                   = "graph_generator";
 
 

@@ -180,6 +180,7 @@ boost::dynamic_properties GraphUtil::getProperties(tGraphSP p_graph)
     dp.property(NUM_EVENTS_PROCESSED, get(vertex_num_events_processed, *p_graph));
     dp.property(MEAN_RESPONSE, get(vertex_mean_response, *p_graph));
     dp.property(VAR_RESPONSE, get(vertex_var_response, *p_graph));
+    dp.property(Q_VALUE, get(vertex_q_val, *p_graph));
 
     boost::ref_property_map<Graph*, boost::uint16_t>
         graphGenerator(get_property(*p_graph, graph_generator));

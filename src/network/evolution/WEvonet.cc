@@ -97,6 +97,8 @@ tGraphSP WEvonet::createBBVGraph(boost::uint32_t p_size, boost::uint32_t max_edg
         = get(vertex_mean_response, *g);
     VertexVarResponseMap vertex_var_response_map
         = get(vertex_var_response, *g);
+    VertexQValueMap vertex_q_val_map
+        = get(vertex_q_val, *g);
 
     // set the graph properties
     boost::set_property(*g, graph_generator, 1);
@@ -119,6 +121,7 @@ tGraphSP WEvonet::createBBVGraph(boost::uint32_t p_size, boost::uint32_t max_edg
     vertex_num_events_processed_map[v1] = 0;
     vertex_mean_response_map[v1] = 0.0;
     vertex_var_response_map[v1] = 0.0;
+    vertex_q_val_map[v1] = 0.0;
 
     advance(p_size - 1, g, num_edges_rng, uniform_rng, vertex_arrival_rng,
             fixed_edge_weight, max_arrival_rate, boost_arrival, boost_edge, max_edges);
@@ -165,6 +168,8 @@ void WEvonet::advance(boost::uint32_t p_steps, tGraphSP g,
         = get(vertex_mean_response, *g);
     VertexVarResponseMap vertex_var_response_map
         = get(vertex_var_response, *g);
+    VertexQValueMap vertex_q_val_map
+        = get(vertex_q_val, *g);
 
     double accum_service_rate;
     size_t vertices;
@@ -218,6 +223,7 @@ void WEvonet::advance(boost::uint32_t p_steps, tGraphSP g,
         vertex_num_events_processed_map[v] = 0;
         vertex_mean_response_map[v] = 0.0;
         vertex_var_response_map[v] = 0.0;
+        vertex_q_val_map[v] = 0.0;
 
         // select vertices to connect to
         boost::uint32_t edges = 0;
