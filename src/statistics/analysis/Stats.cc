@@ -37,7 +37,7 @@ double Stats::variance(double p_xbar_old, double p_xbar_new, double p_var, doubl
 }
 
 
-bool Stats::isInPos(const double p_dat, const double p_mean, const double p_svar,
+bool Stats::isAbove(const double p_dat, const double p_mean, const double p_svar,
                     const int p_size, const double p_alpha)
 {
     if (p_size < 2) {
@@ -52,9 +52,9 @@ bool Stats::isInPos(const double p_dat, const double p_mean, const double p_svar
     double t = gsl_cdf_tdist_Pinv(nu, df);
     double ciHalfLength = 0.0;
 
-    ciHalfLength = t * sqrt(p_svar / p_size);
+    ciHalfLength = p_mean + t * sqrt(p_svar / p_size);
 
-    if ((p_dat >= p_mean) && (p_dat < (p_mean + ciHalfLength))) {
+    if (p_dat > ciHalfLength) {
         return true;
     } else {
         return false;
@@ -63,7 +63,7 @@ bool Stats::isInPos(const double p_dat, const double p_mean, const double p_svar
 }
 
 
-bool Stats::isInNeg(const double p_dat, const double p_mean, const double p_svar,
+bool Stats::isBelow(const double p_dat, const double p_mean, const double p_svar,
                     const int p_size, const double p_alpha)
 {
     if (p_size < 2) {
@@ -78,9 +78,9 @@ bool Stats::isInNeg(const double p_dat, const double p_mean, const double p_svar
     double t = gsl_cdf_tdist_Pinv(nu, df);
     double ciHalfLength = 0.0;
 
-    ciHalfLength = t * sqrt(p_svar / p_size);
+    ciHalfLength = p_mean - t * sqrt(p_svar / p_size);
 
-    if ((p_dat <= p_mean) && (p_dat > (p_mean - ciHalfLength))) {
+    if (p_dat < ciHalfLength) {
         return true;
     } else {
         return false;

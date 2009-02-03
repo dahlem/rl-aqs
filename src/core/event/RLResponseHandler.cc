@@ -14,8 +14,8 @@
 // along with this program	  ; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-/** @file ResponseStatsHandler.cc
- * Implementation of a basic responseStats handler.
+/** @file RLResponseHandler.cc
+ * Implementation of a basic RLResponse handler.
  */
 #if HAVE_CONFIG_H
 # include <config.h>
@@ -36,7 +36,7 @@ namespace dstats = des::statistics;
 
 #include "events.hh"
 #include "AckEvent.hh"
-#include "ResponseStatsHandler.hh"
+#include "RLResponseHandler.hh"
 
 
 namespace des
@@ -45,8 +45,9 @@ namespace core
 {
 
 
-ResponseStatsHandler::ResponseStatsHandler(dnet::tGraphSP p_graph)
-    : m_graph(p_graph)
+RLResponseHandler::RLResponseHandler(dnet::tGraphSP p_graph, boost::shared_array<double> p_alpha,
+                                     boost::shared_array<double> p_r, boost::uint16_t p_levels)
+    : m_graph(p_graph), m_alpha(p_alpha), m_r(p_r), m_levels(p_levels)
 {
     vertex_var_response_map = get(vertex_var_response, *m_graph);
     vertex_mean_response_map = get(vertex_mean_response, *m_graph);
@@ -54,50 +55,54 @@ ResponseStatsHandler::ResponseStatsHandler(dnet::tGraphSP p_graph)
 }
 
 
-ResponseStatsHandler::~ResponseStatsHandler()
+RLResponseHandler::~RLResponseHandler()
 {}
 
 
-void ResponseStatsHandler::update(AckEvent *subject)
+void RLResponseHandler::update(AckEvent *subject)
 {
     dcommon::Entry *entry = subject->getEvent();
 
 #ifndef NDEBUG_EVENTS
-    std::cout << "** ResponseStats for vertex: " << entry->getDestination() << std::endl;
+    std::cout << "** RLResponse for vertex: " << entry->getDestination() << std::endl;
     std::cout << "Event: " << const_cast <const dcommon::Entry&> (*entry) << std::endl;
 #endif /* NDEBUG_EVENTS */
 
     dnet::Vertex vertex = boost::vertex(entry->getDestination(), *m_graph);
     double size = vertex_num_events_processed_map[vertex];
-    double xbar = vertex_mean_response_map[vertex];
-    double var = vertex_var_response_map[vertex];
-    double x = entry->getArrival() - entry->topArrival();
 
+    // only learn, if we have a properly sample size
+    if (size > 1) {
+        double xbar = vertex_mean_response_map[vertex];
+        double var = vertex_var_response_map[vertex] / (size - 1);
+        double x = entry->getArrival() - entry->topArrival();
+        bool done = false;
+        double reward = 0.0;
+        
+        // check below mean
+        for (int i = (m_levels - 1); i >= 0; --i) {
+            if (dstats::Stats::isBelow(x, xbar, var, size, m_alpha[i])) {
+                reward = - m_r[i];
+                done = true;
+                break;
+            }
+        }
+
+        if (!done) {
+            // check below mean
+            for (int i = (m_levels - 1); i >= 0; --i) {
+                if (dstats::Stats::isAbove(x, xbar, var, size, m_alpha[i])) {
+                    reward = m_r[i];
+                    break;
+                }
+            }
+        }
 #ifndef NDEBUG_EVENTS
-    std::cout << "old stats -- size: " << size << ", xbar: " << xbar << ", var: " << var
-              << ", x: " << x << std::endl;
-#endif /* NDEBUG_EVENTS */
-
-    double mean = 0.0;
-    double sv = 0.0;
-    size++;
-
-    if (size < 2) {
-        mean = x;
+        std::cout << "Reward: " << reward << std::endl;
     } else {
-        mean = dstats::Stats::mean(size, xbar, x);
-        sv = dstats::Stats::variance(xbar, mean, var, x) / (size - 1);
-    }
-
-#ifndef NDEBUG_EVENTS
-    std::cout << "new stats -- mean: " << mean << ", var: " << sv << ", size: "
-              << size << std::endl;
+        std::cout << "Sample size too small: " << size << std::endl;
 #endif /* NDEBUG_EVENTS */
-
-    // update the delay statistics
-    vertex_num_events_processed_map[vertex] = size;
-    vertex_mean_response_map[vertex] = mean;
-    vertex_var_response_map[vertex] = sv;
+    }
 }
 
 

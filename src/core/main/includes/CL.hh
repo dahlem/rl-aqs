@@ -30,6 +30,7 @@
 #include <string>
 
 #include <boost/cstdint.hpp>
+#include <boost/shared_array.hpp>
 #include <boost/shared_ptr.hpp>
 
 #include <boost/program_options/options_description.hpp>
@@ -83,6 +84,8 @@ const std::string MAX_BOOST_EDGE = "max_boost_edge";
 const std::string GENERATOR = "graph_generator";
 
 const std::string RL = "rl";
+const std::string RL_RESPONSE_ALPHA = "rl_response_alphas";
+const std::string RL_RESPONSE_REWARD = "rl_response_rewards";
 
 
 /** @typedef tOptDescSP
@@ -141,6 +144,9 @@ struct desArgs_t {
     double max_edge_prob;           /* max. probability of vertices connecting */
 
     bool rl;                        /* switch to enable reinforcement learning */
+    boost::shared_array<double> response_alpha;     /* the response levels for the reward model */
+    boost::shared_array<double> response_reward;    /* the response rewards for the reward model */
+    boost::uint16_t response_levels;                /* number of response levels */
 
     friend std::ostream& operator <<(std::ostream &p_os, const desArgs_t &desArgs)
         {

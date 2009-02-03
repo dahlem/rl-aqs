@@ -17,6 +17,9 @@
 /** @file ArrivalHandler.hh
  * This header file specifies the arrival handler subject.
  */
+#if HAVE_CONFIG_H
+# include <config.h>
+#endif
 
 #ifndef __ARRIVALHANDLER_HH__
 #define __ARRIVALHANDLER_HH__

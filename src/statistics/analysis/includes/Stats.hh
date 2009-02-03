@@ -56,7 +56,7 @@ public:
     static double variance(double p_xbar_old, double p_xbar_new, double p_var, double p_x);
 
 
-    /** @fn bool isInPos(const double, const double, const int, const double)
+    /** @fn bool isAbove(const double, const double, const int, const double)
      * Calculate whether a datum is within a given half-interval from the mean. The
      * method uses the t-distribution to account for broader tails when the sample size
      * is small.
@@ -67,8 +67,8 @@ public:
      * @param const int the size of the sample
      * @param const double the alpha value
      */
-    static bool isInPos(const double, const double, const double, const int, const double);
-    static bool isInNeg(const double, const double, const double, const int, const double);
+    static bool isAbove(const double, const double, const double, const int, const double);
+    static bool isBelow(const double, const double, const double, const int, const double);
 
 
 private:

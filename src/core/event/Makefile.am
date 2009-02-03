@@ -35,7 +35,8 @@ libcoreevent_la_SOURCES =                                                  \
 	ExpectedAverageEventInQueueHandler.cc                              \
 	LogGraphHandler.cc                                                 \
 	DepartureHandler.cc                                                \
-	ResponseStatsHandler.cc
+	ResponseStatsHandler.cc                                            \
+	RLResponseHandler.cc
 
 libcoreevent_la_CPPFLAGS =                                                 \
 	$(BOOST_CPPFLAGS)                                                  \

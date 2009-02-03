@@ -27,11 +27,16 @@
 # define __STDC_CONSTANT_MACROS
 #endif /* __STDC_CONSTANT_MACROS */
 
+#include <algorithm>
 #include <iostream>
 #include <limits>
 #include <string>
+#include <vector>
 
 #include <boost/cstdint.hpp>
+#include <boost/foreach.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/tokenizer.hpp>
 
 #include <boost/filesystem.hpp>
 namespace fs = boost::filesystem;
@@ -134,7 +139,9 @@ CL::CL()
     po::options_description opt_rl("RL Configuration");
     opt_rl.add_options()
         (RL.c_str(), po::value <bool>()->default_value(false), "Enable Reinforcement Learning.")
-        ;
+        (RL_RESPONSE_ALPHA.c_str(), po::value <std::string>(), "Reward Levels for response Time.")
+        (RL_RESPONSE_REWARD.c_str(), po::value <std::string>(), "Reward Scalars above respective levels.")
+       ;
 
     po::options_description opt_debug("Debug Configuration");
     opt_debug.add_options()
@@ -385,6 +392,70 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
         desArgs->rl = vm[RL.c_str()].as <bool>();
     }
     std::cout << "RL enabled: " << desArgs->rl << std::endl;
+    if (desArgs->rl) {
+        if (!(vm.count(RL_RESPONSE_ALPHA.c_str())
+              && vm.count(RL_RESPONSE_REWARD.c_str()))) {
+            std::cerr << "Error: Response alpha levels and rewards have to be specified!" << std::endl;
+            return EXIT_FAILURE;
+        } else {
+            desArgs->response_levels = 0;
+            boost::char_separator<char> sep(",");
+            boost::tokenizer<boost::char_separator <char> >
+                tokens(vm[RL_RESPONSE_ALPHA.c_str()].as <std::string>(), sep);
+            BOOST_FOREACH(std::string t, tokens) {
+                desArgs->response_levels++;
+            }
+
+            boost::uint16_t levels = 0;
+            boost::tokenizer<boost::char_separator <char> >
+                tokens2(vm[RL_RESPONSE_REWARD.c_str()].as <std::string>(), sep);
+            BOOST_FOREACH(std::string t, tokens2) {
+                levels++;
+            }
+
+            if (desArgs->response_levels != levels) {
+                std::cerr << "Error: Response alpha levels and rewards have to match!" << std::endl;
+                return EXIT_FAILURE;
+            }
+        }
+
+        if (vm.count(RL_RESPONSE_ALPHA.c_str())) {
+            boost::char_separator<char> sep(",");
+            boost::tokenizer<boost::char_separator <char> >
+                tokens(vm[RL_RESPONSE_ALPHA.c_str()].as <std::string>(), sep);
+            desArgs->response_alpha = boost::shared_array<double> (
+                new double [desArgs->response_levels]);
+            boost::uint16_t i = 0;
+            for (boost::tokenizer<boost::char_separator <char> >::iterator beg = tokens.begin(); beg != tokens.end(); ++beg) {
+                desArgs->response_alpha[i] = boost::lexical_cast<double>(*beg);
+                ++i;
+            }
+
+            std::cout << "Response alphas: ";
+            for (int i = 0; i < desArgs->response_levels; ++i) {
+                std::cout << desArgs->response_alpha[i] << " ";
+            }
+            std::cout << std::endl;
+        }
+        if (vm.count(RL_RESPONSE_REWARD.c_str())) {
+            boost::char_separator<char> sep(",");
+            boost::tokenizer<boost::char_separator <char> >
+                tokens(vm[RL_RESPONSE_REWARD.c_str()].as <std::string>(), sep);
+            desArgs->response_reward = boost::shared_array<double> (
+                new double [desArgs->response_levels]);
+            boost::uint16_t i = 0;
+            for (boost::tokenizer<boost::char_separator <char> >::iterator beg = tokens.begin(); beg != tokens.end(); ++beg) {
+                desArgs->response_reward[i] = boost::lexical_cast<double>(*beg);
+                ++i;
+            }
+
+            std::cout << "Response rewards: ";
+            for (int i = 0; i < desArgs->response_levels; ++i) {
+                std::cout << desArgs->response_reward[i] << " ";
+            }
+            std::cout << std::endl;
+        }
+    }
 
     std::cout << std::endl << "7) Output Files" << std::endl;
     desArgs->events_unprocessed = "events_unprocessed.dat";

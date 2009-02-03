@@ -65,6 +65,7 @@
 #include "ProcessedEventsHandler.hh"
 #include "Report.hh"
 #include "ResponseStatsHandler.hh"
+#include "RLResponseHandler.hh"
 #include "Simulation.hh"
 #include "UnprocessedEventsHandler.hh"
 #include "UtilisationHandler.hh"
@@ -433,8 +434,12 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
 
         // configure reinforcement learning
         if (desArgs->rl) {
+            tRLResponseHandlerSP rlResponseHandler(
+                new RLResponseHandler(
+                    graph, desArgs->response_alpha, desArgs->response_reward, desArgs->response_levels));
             tResponseStatsHandlerSP responseStatsHandler(
                 new ResponseStatsHandler(graph));
+            ackEvent->attach(rlResponseHandler);
             ackEvent->attach(responseStatsHandler);
         }
 
