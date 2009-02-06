@@ -51,7 +51,8 @@ public:
     ~EpsilonGreedy()
         {}
 
-    virtual boost::uint16_t operator() (tValuesVecSP p_values);
+    virtual boost::uint16_t operator() (
+        boost::uint16_t p_source, tValuesVecSP p_values, PAttrSP p_attr = PAttrSP());
 
 private:
     double m_epsilon;

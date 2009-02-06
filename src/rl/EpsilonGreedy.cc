@@ -36,15 +36,6 @@ namespace des
 namespace rl
 {
 
-bool val_greater(tValues const& v1, tValues const& v2)
-{
-    if (v1.second > v2.second) {
-        return true;
-    }
-
-    return false;
-}
-
 
 
 EpsilonGreedy::EpsilonGreedy(
@@ -55,7 +46,8 @@ EpsilonGreedy::EpsilonGreedy(
 {}
 
 
-boost::uint16_t EpsilonGreedy::operator() (tValuesVecSP p_values)
+boost::uint16_t EpsilonGreedy::operator() (
+    boost::uint16_t p_source, tValuesVecSP p_values, PAttrSP p_attr)
 {
     double epsilon = 0.0;
     boost::uint16_t action = 0;

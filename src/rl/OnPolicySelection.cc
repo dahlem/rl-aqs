@@ -70,7 +70,7 @@ boost::int32_t OnPolicySelection::operator() (boost::int32_t p_source)
             values->push_back(value);
         }
 
-        destination = (*m_policy)(values);
+        destination = (*m_policy)(p_source, values);
     }
     
 #ifndef NDEBUG_EVENTS

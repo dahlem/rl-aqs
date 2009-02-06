@@ -14,23 +14,26 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-/** @file Policy.hh
- * Declaration of an abstract policy class
+/** @file CL.hh
+ * Declaration of the methods for the command-line parsing of the main
+ * routine for DES.
  *
  * @author Dominik Dahlem
  */
-#ifndef __DES_RL_POLICY_HH__
-#define __DES_RL_POLICY_HH__
+#ifndef __DES_RL_BOLTZMANN_HH__
+#define __DES_RL_BOLTZMANN_HH__
 
 #ifndef __STDC_CONSTANT_MACROS
 # define __STDC_CONSTANT_MACROS
 #endif /* __STDC_CONSTANT_MACROS */
 
-#include <utility>
-#include <vector>
 
-#include <boost/cstdint.hpp>
-#include <boost/shared_ptr.hpp>
+#include <gsl/gsl_randist.h>
+
+#include "CRN.hh"
+namespace dsample = des::sampling;
+
+#include "Policy.hh"
 
 
 namespace des
@@ -38,41 +41,36 @@ namespace des
 namespace rl
 {
 
+struct PBoltzmannAttr : public PAttr
+{
+    double tau;
+};
 
-typedef std::pair<boost::uint16_t, double> tValues;
-typedef std::vector<tValues> tValuesVec;
-typedef boost::shared_ptr<tValuesVec> tValuesVecSP;
-
-
-bool val_greater(tValues const& v1, tValues const& v2);
-
-
-struct PAttr
-{};
-
-typedef boost::shared_ptr<PAttr> PAttrSP;
+typedef boost::shared_ptr<PBoltzmannAttr> PBoltzmannAttrSP;
 
 
-class Policy
+class BoltzmannPolicy : public Policy
 {
 public:
-    Policy()
-        {}
-
-    virtual ~Policy()
+    BoltzmannPolicy(
+        double p_tau,
+        dsample::tGslRngSP p_uniform_rng);
+    ~BoltzmannPolicy()
         {}
 
     virtual boost::uint16_t operator() (
-        boost::uint16_t p_source, tValuesVecSP p_values, PAttrSP p_attr = PAttrSP()) = 0;
+        boost::uint16_t p_source, tValuesVecSP p_values, PBoltzmannAttrSP p_attr = PBoltzmannAttrSP());
+
+private:
+    double m_tau;
+    dsample::tGslRngSP m_uniform_rng;
 
 };
 
-typedef boost::shared_ptr<Policy> tPolicySP;
-
 
 }
 }
 
 
 
-#endif /* __DES_RL_POLICY_HH__ */
+#endif /* __DES_RL_BOLTZMANN_HH__ */

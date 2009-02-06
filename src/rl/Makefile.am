@@ -11,7 +11,9 @@
 noinst_LTLIBRARIES = librl.la
 
 librl_la_SOURCES =                                                      \
+	Policy.cc                                                       \
 	EpsilonGreedy.cc                                                \
+	BoltzmannPolicy.cc                                              \
 	RandomSelection.cc                                              \
 	OnPolicySelection.cc
 
@@ -25,6 +27,7 @@ librl_la_CPPFLAGS =                                                     \
 	-I./includes
 
 librl_la_LIBADD =                                                       \
+	-lm                                                             \
 	$(BOOST_LDFLAGS)                                                \
 	$(GSL_LIBS)                                                     \
 	$(top_srcdir)/src/sampling/common/libsamplingcommon.la

@@ -108,13 +108,12 @@ void RLResponseHandler::update(AckEvent *subject)
             values->push_back(value);
         }
 
-        newAction = (*m_policy)(values);
+        newAction = (*m_policy)(entry->getDestination(), values);
 #ifndef NDEBUG_EVENTS
         std::cout << "New Action: " << newAction << std::endl;
 #endif /* NDEBUG_EVENTS */
     
         // calculate new q-value
-        // (*(m_actionValues.get()))[newAction]
         dnet::Edge oldE = boost::edge(
             vertex, boost::vertex(entry->getOrigin(), *m_graph), *m_graph).first;
         dnet::Edge newE = boost::edge(
