@@ -141,10 +141,17 @@ CL::CL()
         (RL.c_str(), po::value <bool>()->default_value(false), "Enable Reinforcement Learning.")
         (RL_RESPONSE_ALPHA.c_str(), po::value <std::string>(), "Reward Levels for response Time.")
         (RL_RESPONSE_REWARD.c_str(), po::value <std::string>(), "Reward Scalars above respective levels.")
-        (RL_Q_ALPHA.c_str(), po::value <double>(), "Learning Rate.")
-        (RL_Q_BETA.c_str(), po::value <double>(), "Reward discount Rate.")
-        (RL_Q_LAMBDA.c_str(), po::value <double>(), "Action-value Rate.")
+        (RL_Q_ALPHA.c_str(), po::value <double>()->default_value(0.1), "Learning Rate.")
+        (RL_Q_LAMBDA.c_str(), po::value <double>()->default_value(0.1), "Action-value Rate.")
+        (RL_POLICY.c_str(), po::value <boost::uint16_t>()->default_value(
+            1), "Policy (1=epsilon-greedy).")
        ;
+
+    po::options_description opt_rl_policy_epsilon("RL Epsilon Policy Configuration");
+    opt_rl_policy_epsilon.add_options()
+        (RL_POLICY_EPSILON.c_str(), po::value <double>()->default_value(
+            0.1), "Epsilon-greedy value.")
+        ;
 
     po::options_description opt_debug("Debug Configuration");
     opt_debug.add_options()
@@ -160,6 +167,7 @@ CL::CL()
     opt_desc->add(opt_ci);
     opt_desc->add(opt_lhs);
     opt_desc->add(opt_rl);
+    opt_desc->add(opt_rl_policy_epsilon);
     opt_desc->add(opt_debug);
 }
 
@@ -396,11 +404,14 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
     }
     std::cout << "RL enabled: " << desArgs->rl << std::endl;
     if (desArgs->rl) {
-        if (!(vm.count(RL_RESPONSE_ALPHA.c_str())
-              && vm.count(RL_RESPONSE_REWARD.c_str()))) {
+        if ((!vm.count(RL_RESPONSE_ALPHA.c_str())
+              && vm.count(RL_RESPONSE_REWARD.c_str()))
+            || (vm.count(RL_RESPONSE_ALPHA.c_str())
+                && !vm.count(RL_RESPONSE_REWARD.c_str()))) {
             std::cerr << "Error: Response alpha levels and rewards have to be specified!" << std::endl;
             return EXIT_FAILURE;
-        } else {
+        } else if (vm.count(RL_RESPONSE_ALPHA.c_str())
+                   && vm.count(RL_RESPONSE_REWARD.c_str())) {
             desArgs->response_levels = 0;
             boost::char_separator<char> sep(",");
             boost::tokenizer<boost::char_separator <char> >
@@ -420,57 +431,62 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
                 std::cerr << "Error: Response alpha levels and rewards have to match!" << std::endl;
                 return EXIT_FAILURE;
             }
+            if (vm.count(RL_RESPONSE_ALPHA.c_str())) {
+                boost::char_separator<char> sep(",");
+                boost::tokenizer<boost::char_separator <char> >
+                    tokens(vm[RL_RESPONSE_ALPHA.c_str()].as <std::string>(), sep);
+                desArgs->response_alpha = boost::shared_array<double> (
+                    new double [desArgs->response_levels]);
+                boost::uint16_t i = 0;
+                for (boost::tokenizer<boost::char_separator <char> >::iterator beg = tokens.begin(); beg != tokens.end(); ++beg) {
+                    desArgs->response_alpha[i] = boost::lexical_cast<double>(*beg);
+                    ++i;
+                }
+
+                std::cout << "Response alphas: ";
+                for (int i = 0; i < desArgs->response_levels; ++i) {
+                    std::cout << desArgs->response_alpha[i] << " ";
+                }
+                std::cout << std::endl;
+            }
+            if (vm.count(RL_RESPONSE_REWARD.c_str())) {
+                boost::char_separator<char> sep(",");
+                boost::tokenizer<boost::char_separator <char> >
+                    tokens(vm[RL_RESPONSE_REWARD.c_str()].as <std::string>(), sep);
+                desArgs->response_reward = boost::shared_array<double> (
+                    new double [desArgs->response_levels]);
+                boost::uint16_t i = 0;
+                for (boost::tokenizer<boost::char_separator <char> >::iterator beg = tokens.begin(); beg != tokens.end(); ++beg) {
+                    desArgs->response_reward[i] = boost::lexical_cast<double>(*beg);
+                    ++i;
+                }
+
+                std::cout << "Response rewards: ";
+                for (int i = 0; i < desArgs->response_levels; ++i) {
+                    std::cout << desArgs->response_reward[i] << " ";
+                }
+                std::cout << std::endl;
+            }
         }
 
-        if (vm.count(RL_RESPONSE_ALPHA.c_str())) {
-            boost::char_separator<char> sep(",");
-            boost::tokenizer<boost::char_separator <char> >
-                tokens(vm[RL_RESPONSE_ALPHA.c_str()].as <std::string>(), sep);
-            desArgs->response_alpha = boost::shared_array<double> (
-                new double [desArgs->response_levels]);
-            boost::uint16_t i = 0;
-            for (boost::tokenizer<boost::char_separator <char> >::iterator beg = tokens.begin(); beg != tokens.end(); ++beg) {
-                desArgs->response_alpha[i] = boost::lexical_cast<double>(*beg);
-                ++i;
-            }
-
-            std::cout << "Response alphas: ";
-            for (int i = 0; i < desArgs->response_levels; ++i) {
-                std::cout << desArgs->response_alpha[i] << " ";
-            }
-            std::cout << std::endl;
-        }
-        if (vm.count(RL_RESPONSE_REWARD.c_str())) {
-            boost::char_separator<char> sep(",");
-            boost::tokenizer<boost::char_separator <char> >
-                tokens(vm[RL_RESPONSE_REWARD.c_str()].as <std::string>(), sep);
-            desArgs->response_reward = boost::shared_array<double> (
-                new double [desArgs->response_levels]);
-            boost::uint16_t i = 0;
-            for (boost::tokenizer<boost::char_separator <char> >::iterator beg = tokens.begin(); beg != tokens.end(); ++beg) {
-                desArgs->response_reward[i] = boost::lexical_cast<double>(*beg);
-                ++i;
-            }
-
-            std::cout << "Response rewards: ";
-            for (int i = 0; i < desArgs->response_levels; ++i) {
-                std::cout << desArgs->response_reward[i] << " ";
-            }
-            std::cout << std::endl;
-        }
         if (vm.count(RL_Q_ALPHA.c_str())) {
             desArgs->rl_q_alpha = vm[RL_Q_ALPHA.c_str()].as <double>();
         }
         std::cout << "Learning Rate: " << desArgs->rl_q_alpha << "." << std::endl;
-        if (vm.count(RL_Q_BETA.c_str())) {
-            desArgs->rl_q_beta = vm[RL_Q_BETA.c_str()].as <double>();
-        }
-        std::cout << "Reward Discount Rate: " << desArgs->rl_q_beta << "." << std::endl;
         if (vm.count(RL_Q_LAMBDA.c_str())) {
             desArgs->rl_q_lambda = vm[RL_Q_LAMBDA.c_str()].as <double>();
         }
         std::cout << "Action-Value Discount Rate: " << desArgs->rl_q_lambda << "." << std::endl;
+        if (vm.count(RL_POLICY.c_str())) {
+            desArgs->rl_policy = vm[RL_POLICY.c_str()].as <boost::uint16_t>();
+        }
+        std::cout << "RL Selection Policy: " << desArgs->rl_policy << "." << std::endl;
     }
+
+    if (vm.count(RL_POLICY_EPSILON.c_str())) {
+        desArgs->rl_policy_epsilon = vm[RL_POLICY_EPSILON.c_str()].as <double>();
+    }
+    std::cout << "RL Epsilon: " << desArgs->rl_policy_epsilon << "." << std::endl;
 
     std::cout << std::endl << "7) Output Files" << std::endl;
     desArgs->events_unprocessed = "events_unprocessed.dat";

@@ -118,22 +118,22 @@ enum vertex_last_event_time_t { vertex_last_event_time = 1122 };
 enum vertex_num_events_processed_t { vertex_num_events_processed = 1123 };
 
 
-/** @enum vertex_mean_response_t
+/** @enum vertex_mean_reward_t
  * This enum extends the vertex properties by a mean delay attribute.
  */
-enum vertex_mean_response_t { vertex_mean_response = 1124 };
+enum vertex_mean_reward_t { vertex_mean_reward = 1124 };
 
 
-/** @enum vertex_var_response_t
- * This enum extends the vertex properties by a sample variance of the delay attribute.
- */
-enum vertex_var_response_t { vertex_var_response = 1125 };
-
-
-/** @enum vertex_q_val_t
+/** @enum edge_q_val_t
  * This enum extends the vertex properties by a q-value attribute.
  */
-enum vertex_q_val_t { vertex_q_val = 1126 };
+enum edge_q_val_t { edge_q_val = 1125 };
+
+
+/** @enum edge_index_t
+ * This enum extends the edge properties by an index attribute
+ */
+enum edge_eindex_t { edge_eindex = 1126 };
 
 
 /** @enum graph_generator_t
@@ -142,26 +142,33 @@ enum vertex_q_val_t { vertex_q_val = 1126 };
 enum graph_generator_t { graph_generator = 1127 };
 
 
+/** @enum vertex_next_action_t
+ * This enum extends the vertex properties by a next action argument
+ */
+enum vertex_next_action_t { vertex_next_action = 1128 };
+
+
 // install the vertex service rate property
 namespace boost
 {
-    BOOST_INSTALL_PROPERTY(vertex, service_rate);
-    BOOST_INSTALL_PROPERTY(vertex, arrival_rate);
-    BOOST_INSTALL_PROPERTY(vertex, busy);
-    BOOST_INSTALL_PROPERTY(vertex, time_service_ends);
-    BOOST_INSTALL_PROPERTY(vertex, number_in_queue);
-    BOOST_INSTALL_PROPERTY(vertex, average_delay_in_queue);
-    BOOST_INSTALL_PROPERTY(vertex, num_events);
-    BOOST_INSTALL_PROPERTY(vertex, Bdt);
-    BOOST_INSTALL_PROPERTY(vertex, Qdt);
-    BOOST_INSTALL_PROPERTY(vertex, utilisation);
-    BOOST_INSTALL_PROPERTY(vertex, expected_average_number_event);
-    BOOST_INSTALL_PROPERTY(vertex, last_event_time);
-    BOOST_INSTALL_PROPERTY(vertex, num_events_processed);
-    BOOST_INSTALL_PROPERTY(vertex, mean_response);
-    BOOST_INSTALL_PROPERTY(vertex, var_response);
-    BOOST_INSTALL_PROPERTY(vertex, q_val);
-    BOOST_INSTALL_PROPERTY(graph, generator);
+BOOST_INSTALL_PROPERTY(vertex, service_rate);
+BOOST_INSTALL_PROPERTY(vertex, arrival_rate);
+BOOST_INSTALL_PROPERTY(vertex, busy);
+BOOST_INSTALL_PROPERTY(vertex, time_service_ends);
+BOOST_INSTALL_PROPERTY(vertex, number_in_queue);
+BOOST_INSTALL_PROPERTY(vertex, average_delay_in_queue);
+BOOST_INSTALL_PROPERTY(vertex, num_events);
+BOOST_INSTALL_PROPERTY(vertex, Bdt);
+BOOST_INSTALL_PROPERTY(vertex, Qdt);
+BOOST_INSTALL_PROPERTY(vertex, utilisation);
+BOOST_INSTALL_PROPERTY(vertex, expected_average_number_event);
+BOOST_INSTALL_PROPERTY(vertex, last_event_time);
+BOOST_INSTALL_PROPERTY(vertex, num_events_processed);
+BOOST_INSTALL_PROPERTY(vertex, mean_reward);
+BOOST_INSTALL_PROPERTY(vertex, next_action);
+BOOST_INSTALL_PROPERTY(graph, generator);
+BOOST_INSTALL_PROPERTY(edge, q_val);
+BOOST_INSTALL_PROPERTY(edge, eindex);
 }
 
 
@@ -233,30 +240,35 @@ typedef boost::property <vertex_last_event_time_t, double, VertexExpectedAverage
  */
 typedef boost::property <vertex_num_events_processed_t, int, VertexLastEventTimeProperty> VertexNumProcessedEventsProperty;
 
-/** @typedef VertexMeanResponseProperty
+/** @typedef VertexMeanRewardProperty
  * Specifies the property for the mean delay of a vertex
  */
-typedef boost::property <vertex_mean_response_t, double, VertexNumProcessedEventsProperty> VertexMeanResponseProperty;
+typedef boost::property <vertex_mean_reward_t, double, VertexNumProcessedEventsProperty> VertexMeanRewardProperty;
 
-/** @typedef VertexVarResponseProperty
- * Specifies the property for the sample variance of the delay attribute of a vertex
+/** @typedef VertexNextActionProperty
+ * Specifies the property for the next action of a vertex
  */
-typedef boost::property <vertex_var_response_t, double, VertexMeanResponseProperty> VertexVarResponseProperty;
-
-/** @typedef VertexQValueProperty
- * Specifies the property for the q-value attribute of a vertex
- */
-typedef boost::property <vertex_q_val_t, double, VertexVarResponseProperty> VertexQValueProperty;
+typedef boost::property <vertex_next_action_t, int, VertexMeanRewardProperty> VertexNextActionProperty;
 
 /** @typedef VertexProperties
  * This type definition assembles all the properties for the vertices of the graph
  */
-typedef boost::property <boost::vertex_index_t, int, VertexQValueProperty> VertexProperties;
+typedef boost::property <boost::vertex_index_t, int, VertexNextActionProperty> VertexProperties;
 
 /** @typedef EdgeWeightProperty
  * Specifies the property for the edge weight
  */
 typedef boost::property <boost::edge_weight_t, double> EdgeWeightProperty;
+
+/** @typedef EdgeQValueProperty
+ * Specifies the property for the probability of using edge i
+ */
+typedef boost::property <edge_q_val_t, double, EdgeWeightProperty> EdgeQValueProperty;
+
+/** @typedef EdgeIndexProperty
+ * Specifies the property for the edge index
+ */
+typedef boost::property <edge_eindex_t, int, EdgeQValueProperty> EdgeIndexProperty;
 
 /** @typedef GraphGeneratorProperty
  * Specifies the property for the edge weight
@@ -275,7 +287,7 @@ typedef boost::adjacency_list<boost::setS,
                               boost::listS,
                               boost::directedS,
                               VertexProperties,
-                              EdgeWeightProperty,
+                              EdgeIndexProperty,
                               GraphGeneratorProperty> Graph;
 
 /** @typedef Vertex
@@ -358,20 +370,25 @@ typedef boost::property_map <Graph, vertex_last_event_time_t>::type VertexLastEv
  */
 typedef boost::property_map <Graph, vertex_num_events_processed_t>::type VertexNumEventsProcessedMap;
 
-/** @typedef VertexMeanResponseMap
+/** @typedef VertexMeanRewardMap
  * Specifies the map that stores the vertex mean delay attribute
  */
-typedef boost::property_map <Graph, vertex_mean_response_t>::type VertexMeanResponseMap;
+typedef boost::property_map <Graph, vertex_mean_reward_t>::type VertexMeanRewardMap;
 
-/** @typedef VertexVarResponseMap
- * Specifies the map that stores the vertex sample variance of the deleay attribute
+/** @typedef VertexNextActionMap
+ * Specifies the map that stores the vertex next action attribute
  */
-typedef boost::property_map <Graph, vertex_var_response_t>::type VertexVarResponseMap;
+typedef boost::property_map <Graph, vertex_next_action_t>::type VertexNextActionMap;
 
-/** @typedef VertexQValueMap
- * Specifies the map that stores the vertex q-value attribute
+/** @typedef EdgeQValueMap
+ * Specifies the map that stores the edge q-value attribute
  */
-typedef boost::property_map <Graph, vertex_q_val_t>::type VertexQValueMap;
+typedef boost::property_map <Graph, edge_q_val_t>::type EdgeQValueMap;
+
+/** @typedef EdgeIndexMap
+ * Specifies the map that stores the edge index attribute
+ */
+typedef boost::property_map <Graph, edge_eindex_t>::type EdgeIndexMap;
 
 /** @typedef EdgeWeightMap
  * Specifies the edge weight property
@@ -480,9 +497,10 @@ const std::string QDT                               = "Qdt";
 const std::string LAST_EVENT_TIME                   = "last_event_time";
 const std::string EXPECTED_AVERAGE_NUMBER_EVENT     = "expected_average_number_event";
 const std::string NUM_EVENTS_PROCESSED              = "num_events_processed";
-const std::string MEAN_RESPONSE                     = "mean_response";
-const std::string VAR_RESPONSE                      = "var_response";
+const std::string MEAN_REWARD                       = "mean_reward";
 const std::string Q_VALUE                           = "q_value";
+const std::string EDGE_INDEX                        = "eindex";
+const std::string NEXT_ACTION                       = "next_action";
 const std::string GRAPH_GENERATOR                   = "graph_generator";
 
 

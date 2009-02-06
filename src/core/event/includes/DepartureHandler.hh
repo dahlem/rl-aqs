@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -26,7 +26,6 @@
 #endif /* __STDC_CONSTANT_MACROS */
 
 #include <boost/cstdint.hpp>
-#include <boost/shared_array.hpp>
 #include <boost/shared_ptr.hpp>
 
 
@@ -39,19 +38,17 @@ namespace dcommon = des::common;
 #include "Observer.hh"
 namespace design = des::design;
 
-#include "WEvonet.hh"
+#include "DirectedGraph.hh"
 namespace dnet = des::network;
 
-#include "CRN.hh"
-namespace dsample = des::sampling;
+#include "Selection.hh"
+namespace drl = des::rl;
 
 
 namespace des
 {
 namespace core
 {
-
-typedef boost::shared_array <boost::int32_t> Int32SA;
 
 
 /** @class DepartureHandler
@@ -60,7 +57,7 @@ typedef boost::shared_array <boost::int32_t> Int32SA;
 class DepartureHandler : public design::Observer<dcore::DepartureEvent>
 {
 public:
-    DepartureHandler(dcommon::tQueueSP p_queue, dnet::tGraphSP p_graph, Int32SA p_depart_uniform_ids);
+    DepartureHandler(dcommon::tQueueSP p_queue, dnet::tGraphSP p_graph, drl::tSelectionSP p_selection);
     ~DepartureHandler();
 
     void update(dcore::DepartureEvent *subject);
@@ -68,11 +65,10 @@ public:
 private:
     dcommon::tQueueSP m_queue;
     dnet::tGraphSP m_graph;
-    Int32SA m_depart_uniform_ids;
+    drl::tSelectionSP m_selection;
+
     dnet::VertexBusyMap vertex_busy_map;
     dnet::VertexNumberInQueueMap vertex_number_in_queue_map;
-    dnet::VertexIndexMap vertex_index_map;
-    dnet::EdgeWeightMap edge_weight_map;
 };
 
 

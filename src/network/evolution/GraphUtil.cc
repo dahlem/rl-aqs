@@ -178,9 +178,10 @@ boost::dynamic_properties GraphUtil::getProperties(tGraphSP p_graph)
     dp.property(LAST_EVENT_TIME, get(vertex_last_event_time, *p_graph));
     dp.property(EXPECTED_AVERAGE_NUMBER_EVENT, get(vertex_expected_average_number_event, *p_graph));
     dp.property(NUM_EVENTS_PROCESSED, get(vertex_num_events_processed, *p_graph));
-    dp.property(MEAN_RESPONSE, get(vertex_mean_response, *p_graph));
-    dp.property(VAR_RESPONSE, get(vertex_var_response, *p_graph));
-    dp.property(Q_VALUE, get(vertex_q_val, *p_graph));
+    dp.property(MEAN_REWARD, get(vertex_mean_reward, *p_graph));
+    dp.property(Q_VALUE, get(edge_q_val, *p_graph));
+    dp.property(EDGE_INDEX, get(edge_eindex, *p_graph));
+    dp.property(NEXT_ACTION, get(vertex_next_action, *p_graph));
 
     boost::ref_property_map<Graph*, boost::uint16_t>
         graphGenerator(get_property(*p_graph, graph_generator));

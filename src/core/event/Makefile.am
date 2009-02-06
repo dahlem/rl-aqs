@@ -42,6 +42,7 @@ libcoreevent_la_CPPFLAGS =                                                 \
 	$(BOOST_CPPFLAGS)                                                  \
 	$(GSL_CFLAGS)                                                      \
 	-I./includes                                                       \
+	-I$(top_srcdir)/src/rl/includes                                    \
 	-I$(top_srcdir)/src/design/pattern/includes                        \
 	-I$(top_srcdir)/src/statistics/analysis/includes                   \
 	-I$(top_srcdir)/src/sampling/crn/includes                          \
@@ -60,6 +61,7 @@ libcoreevent_la_LIBADD =                                                   \
 	$(top_srcdir)/src/sampling/common/libsamplingcommon.la             \
 	$(top_srcdir)/src/statistics/analysis/libstatisticsanalysis.la     \
 	$(top_srcdir)/src/network/evolution/libnetevo.la                   \
+	$(top_srcdir)/src/rl/librl.la                                      \
 	$(top_srcdir)/src/common/queue/libcommonqueue.la
 
 include_HEADERS = includes

@@ -25,15 +25,7 @@
 # include <iostream>
 #endif /* NDEBUG_EVENTS */
 
-#include <cstdlib>
-#include <vector>
-
-#include <gsl/gsl_randist.h>
-
-#include <boost/foreach.hpp>
 #include <boost/graph/adjacency_list.hpp>
-#include <boost/pending/indirect_cmp.hpp>
-#include <boost/pending/integer_range.hpp>
 
 #include "events.hh"
 #include "DepartureEvent.hh"
@@ -47,19 +39,17 @@ namespace dcommon = des::common;
 #include "WEvonet.hh"
 namespace dnet = des::network;
 
-#include "CRN.hh"
-namespace dsample = des::sampling;
+#include "Selection.hh"
+namespace drl = des::rl;
 
 
 dcore::DepartureHandler::DepartureHandler(dcommon::tQueueSP p_queue,
                                           dnet::tGraphSP p_graph,
-                                          Int32SA p_depart_uniform_ids)
-    : m_queue(p_queue), m_graph(p_graph), m_depart_uniform_ids(p_depart_uniform_ids)
+                                          drl::tSelectionSP p_selection)
+    : m_queue(p_queue), m_graph(p_graph), m_selection(p_selection)
 {
     vertex_busy_map = get(vertex_busy, *m_graph);
     vertex_number_in_queue_map = get(vertex_number_in_queue, *m_graph);
-    vertex_index_map = get(boost::vertex_index, *m_graph);
-    edge_weight_map = get(boost::edge_weight, *m_graph);
 }
 
 
@@ -69,7 +59,6 @@ dcore::DepartureHandler::~DepartureHandler()
 
 void dcore::DepartureHandler::update(dcore::DepartureEvent *subject)
 {
-    dnet::OutEdgeIterator out_edge_it, out_edge_it_end;
     dcommon::Entry *entry = subject->getEvent();
     dnet::Vertex vertex = boost::vertex(entry->getDestination(), *m_graph);
 
@@ -95,53 +84,24 @@ void dcore::DepartureHandler::update(dcore::DepartureEvent *subject)
         boost::out_degree(vertex, *m_graph);
 
     if (degree > 0) {
-        tie(out_edge_it, out_edge_it_end) = boost::out_edges(vertex, *m_graph);
+        dcommon::Entry *new_entry = new dcommon::Entry(
+            const_cast <const dcommon::Entry&> (*entry));
 
-        std::vector <dnet::Edge> edges(degree);
-        std::vector <double> edge_weights;
-        std::vector <int> sorted_edge_weights(degree);
-        boost::integer_range <int> range(0, degree);
+        boost::int32_t destination = (*m_selection)(entry->getDestination());
 
-        // copy the edges into a vector
-        std::copy(out_edge_it, out_edge_it_end, edges.begin());
-
-        // copy the index range into the service_rate_order vector
-        std::copy(range.begin(), range.end(), sorted_edge_weights.begin());
-
-        BOOST_FOREACH(dnet::Edge e, (boost::out_edges(vertex, *m_graph))) {
-            edge_weights.push_back(edge_weight_map[e]);
-        }
-
-        // sort the sorted_edge_weights according to the edge_weights in ascending order
-        std::sort(sorted_edge_weights.begin(), sorted_edge_weights.end(),
-                  boost::indirect_cmp <double*, std::greater <double> >(&edge_weights[0]));
-
-        double temp = 0.0;
-        dsample::tGslRngSP depart_uniform_rng = dsample::CRN::getInstance().get(
-            m_depart_uniform_ids[entry->getDestination()]);
-        double u = gsl_rng_uniform(depart_uniform_rng.get());
-
-        for (boost::uint32_t e = 0; e < degree; ++e) {
-            dnet::Edge edge = edges[sorted_edge_weights[e]];
-            temp += edge_weights[e];
-
-            if (u < temp) {
-                // schedule an internal arrival event
-                boost::int32_t destination = vertex_index_map[target(edges[e], *m_graph)];
-                dcommon::Entry *new_entry = new dcommon::Entry(
-                    const_cast <const dcommon::Entry&> (*entry));
-
-                new_entry->depart(destination, dcore::ARRIVAL_EVENT);
+        if (destination < 0) {
 #ifndef NDEBUG_EVENTS
-                std::cout << "Schedule new arrival event: " << const_cast <const dcommon::Entry&> (*new_entry)
-                          << std::endl;
+            std::cout << "Error: Negative destination!!!" << std::endl;
 #endif /* NDEBUG_EVENTS */
-                new_entry->pushEvent(new_entry->getOrigin());
-                m_queue->push(new_entry);
-
-                break;
-            }
         }
+
+        new_entry->depart(destination, dcore::ARRIVAL_EVENT);
+#ifndef NDEBUG_EVENTS
+        std::cout << "Schedule new arrival event: " << const_cast <const dcommon::Entry&> (*new_entry)
+                  << std::endl;
+#endif /* NDEBUG_EVENTS */
+        new_entry->pushEvent(new_entry->getOrigin());
+        m_queue->push(new_entry);
     } else {
         if (entry->isEventQueueEmpty()) {
             // schedule leave event

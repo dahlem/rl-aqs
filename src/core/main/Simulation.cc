@@ -73,6 +73,13 @@
 #include "Results.hh"
 namespace dio = des::io;
 
+#include "EpsilonGreedy.hh"
+#include "OnPolicySelection.hh"
+#include "Policy.hh"
+#include "RandomSelection.hh"
+#include "Selection.hh"
+namespace drl = des::rl;
+
 #include "CRN.hh"
 #include "Seeds.hh"
 namespace dsample = des::sampling;
@@ -173,7 +180,7 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
 {
     boost::uint16_t sim_num, rep_num, num_vertices;
     boost::uint16_t net_size, max_edges;
-    double edge_prob, rl_q_alpha, rl_q_beta, rl_q_lambda;
+    double edge_prob, rl_q_alpha, rl_q_lambda, rl_policy_epsilon;
 
     // receive the input arguments via mpi
 #ifdef HAVE_MPI
@@ -202,8 +209,8 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
         max_edges = simArgs.max_edges;
         edge_prob = simArgs.edge_prob;
         rl_q_alpha = simArgs.rl_q_alpha;
-        rl_q_beta = simArgs.rl_q_beta;
         rl_q_lambda = simArgs.rl_q_lambda;
+        rl_policy_epsilon = simArgs.rl_policy_epsilon;
 #else
         sim_num = desArgs->sim_num;
         rep_num = desArgs->rep_num;
@@ -211,8 +218,8 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
         max_edges = desArgs->max_edges;
         edge_prob = desArgs->edge_prob;
         rl_q_alpha = desArgs->rl_q_alpha;
-        rl_q_beta = desArgs->rl_q_beta;
         rl_q_lambda = desArgs->rl_q_lambda;
+        rl_policy_epsilon = desArgs->rl_policy_epsilon;
 #endif /* HAVE_MPI */
 
         dnet::tGraphSP graph(new dnet::Graph);
@@ -227,6 +234,8 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
                           << "!" << std::endl;
 #ifdef HAVE_MPI
                 MPI_Abort(MPI_COMM_WORLD, 917);
+#else
+                exit(0);
 #endif /* HAVE_MPI */
 
             }
@@ -390,8 +399,6 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
 
         tArrivalHandlerSP arrivalHandler(
             new ArrivalHandler(queue, graph, serviceCRNs));
-        tDepartureHandlerSP departureHandler(
-            new DepartureHandler(queue, graph, departureCRNs));
         tNumEventsHandlerSP numEventsHandler(
             new NumEventsHandler(graph));
         tLastEventHandlerSP lastEventHandler(
@@ -434,18 +441,47 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
         arrivalEvent->attach(numEventsHandler);
         arrivalEvent->attach(arrivalHandler);
 
-        departureEvent->attach(departureHandler);
-
         // configure reinforcement learning
         if (desArgs->rl) {
+            drl::tPolicySP pol;
+
+            if (desArgs->rl_policy == 1) {
+                boost::uint32_t seed = dsample::Seeds::getInstance().getSeed();
+                boost::uint32_t pol_epsilon_rng_index
+                    = dsample::CRN::getInstance().init(seed);
+                dsample::CRN::getInstance().log(seed, "epsilon policy");
+                dsample::tGslRngSP r1
+                    = dsample::CRN::getInstance().get(pol_epsilon_rng_index);
+
+                boost::uint32_t pol_uniform_rng_index
+                    = dsample::CRN::getInstance().init(seed);
+                dsample::CRN::getInstance().log(seed, "epsilon uniform");
+                dsample::tGslRngSP r2
+                    = dsample::CRN::getInstance().get(pol_uniform_rng_index);
+
+                pol = drl::tPolicySP(new drl::EpsilonGreedy(desArgs->rl_policy_epsilon, r1, r2));
+            }
+
+            // configure the on-policy selection
+            drl::tSelectionSP selection = drl::tSelectionSP(
+                new drl::OnPolicySelection(pol, graph));
+            tDepartureHandlerSP departureHandler(
+                new DepartureHandler(queue, graph, selection));
+            departureEvent->attach(departureHandler);
+
+            // configure the simple on-policy SARSA control RL handler
             tRLResponseHandlerSP rlResponseHandler(
                 new RLResponseHandler(
                     graph, desArgs->response_alpha, desArgs->response_reward, desArgs->response_levels,
-                    rl_q_alpha, rl_q_beta, rl_q_lambda));
-            tResponseStatsHandlerSP responseStatsHandler(
-                new ResponseStatsHandler(graph));
+                    rl_q_alpha, rl_q_lambda, pol));
             ackEvent->attach(rlResponseHandler);
-            ackEvent->attach(responseStatsHandler);
+        } else {
+            drl::tPolicySP pol = drl::tPolicySP();
+            drl::tSelectionSP selection = drl::tSelectionSP(
+                new drl::RandomSelection(pol, graph, departureCRNs));
+            tDepartureHandlerSP departureHandler(
+                new DepartureHandler(queue, graph, selection));
+            departureEvent->attach(departureHandler);
         }
 
         ackEvent->attach(ackHandler);

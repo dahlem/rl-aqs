@@ -71,8 +71,8 @@ typedef struct {
     double boost_arrival;       /* boost arrival rate */
     double boost_edge;          /* boost edge weight */
     double rl_q_alpha;          /* q-learning rate */
-    double rl_q_beta;           /* reward discount rate */
     double rl_q_lambda;         /* action value discount rate */
+    double rl_policy_epsilon;   /* rl policy epsilon-greedy value */
 } tSimArgsMPI;
 
 

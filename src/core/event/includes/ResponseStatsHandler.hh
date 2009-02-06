@@ -20,6 +20,8 @@
 #ifndef __DELAYSTATSHANDLER_HH__
 #define __DELAYSTATSHANDLER_HH__
 
+#include <vector>
+
 #include <boost/shared_ptr.hpp>
 
 
@@ -52,8 +54,7 @@ private:
     dnet::tGraphSP m_graph;
 
     // derived fields
-    dnet::VertexVarResponseMap vertex_var_response_map;
-    dnet::VertexMeanResponseMap vertex_mean_response_map;
+    dnet::VertexMeanRewardMap vertex_mean_response_map;
     dnet::VertexNumEventsProcessedMap vertex_num_events_processed_map;
 };
 

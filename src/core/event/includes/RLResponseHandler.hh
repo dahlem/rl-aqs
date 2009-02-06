@@ -39,6 +39,10 @@ namespace design = des::design;
 #include "DirectedGraph.hh"
 namespace dnet = des::network;
 
+#include "Policy.hh"
+namespace drl = des::rl;
+
+
 #include "AckEvent.hh"
 
 
@@ -46,6 +50,9 @@ namespace des
 {
 namespace core
 {
+
+typedef boost::shared_ptr <std::vector<double> > tDoubleVecSP;
+
 
 /** @class RLResponseHandler
  * The class @code{RLResponseHandler} handles the RL update statistic.
@@ -55,7 +62,7 @@ class RLResponseHandler : public design::Observer<AckEvent>
 public:
     RLResponseHandler(dnet::tGraphSP p_graph, boost::shared_array<double> p_alpha,
                       boost::shared_array<double> p_r, boost::uint16_t p_levels,
-                      double p_q_alpha, double p_q_beta, double p_q_lambda);
+                      double p_q_alpha, double p_q_lambda, drl::tPolicySP p_policy);
     
     ~RLResponseHandler();
 
@@ -67,13 +74,16 @@ private:
     boost::shared_array<double> m_r;
     boost::uint16_t m_levels;
     double m_q_alpha;
-    double m_q_beta;
     double m_q_lambda;
+    drl::tPolicySP m_policy;
     
     // derived fields
-    dnet::VertexVarResponseMap vertex_var_response_map;
-    dnet::VertexMeanResponseMap vertex_mean_response_map;
-    dnet::VertexNumEventsProcessedMap vertex_num_events_processed_map;
+    dnet::EdgeIndexMap edge_index_map;
+    dnet::VertexNextActionMap vertex_next_action_map;
+    dnet::VertexIndexMap vertex_index_map;
+    dnet::EdgeQValueMap edge_q_val_map;
+
+    tDoubleVecSP m_actionValues;
 };
 
 

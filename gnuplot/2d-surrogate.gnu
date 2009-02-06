@@ -54,6 +54,8 @@ set style data lines
 set contour base
 set cntrparam levels 10
 set pm3d
+set grid nopolar
+set grid xtics ytics ztics
 
 unset key
 
