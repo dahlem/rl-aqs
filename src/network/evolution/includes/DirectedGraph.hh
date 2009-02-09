@@ -65,7 +65,7 @@ enum vertex_time_service_ends_t { vertex_time_service_ends = 1114 };
 
 
 /** @enum vertex_number_in_queue_t
- * This enum extends the vertex properties by a time in queue attribute.
+ * This enum extends the vertex properties by a number in queue attribute.
  */
 enum vertex_number_in_queue_t { vertex_number_in_queue = 1115 };
 

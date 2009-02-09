@@ -97,7 +97,7 @@ const std::string RL_POLICY_EPSILON = "rl_policy_epsilon";
  */
 typedef boost::shared_ptr <po::options_description> tOptDescSP;
 
-static const std::string ARGS_HEADER = "stop_time,generations,graphs,max_arrival,boost_arrival,boost_edge,confidence,alpha,error,initial_reps,network_type,network_size,max_edges,edgeProb,edgeDiffusion";
+static const std::string ARGS_HEADER = "stop_time,generations,graphs,max_arrival,boost_arrival,boost_edge,confidence,alpha,error,initial_reps,network_type,network_size,max_edges,edgeProb,edgeDiffusion,rlq_alpha,rlq_lambda,rlq_policy,rlq_policy_epsilon";
 
 /** @struct
  * structure specifying the command line variables.

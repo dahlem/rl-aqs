@@ -65,10 +65,12 @@ des.queueing.jackson.pf <- function(graph) {
 }
 
 ## average number of times that a job visits node i
-des.queueing.upsilon.vec <- function(graph) {
+des.queueing.upsilon.vec <- function(graph, Q=NULL) {
   gamma <- get.vertex.attribute(graph, "arrival_rate")
   gamma1 <- gamma / sum(gamma)
-  Q <- des.queueing.Q.matrix(graph)
+  if (is.null(Q)) {
+    Q <- des.queueing.Q.matrix(graph)
+  }
   I <- diag(vcount(graph))
   temp <- I - Q
   upsilon <- gamma1 %*% solve(temp)
@@ -77,19 +79,21 @@ des.queueing.upsilon.vec <- function(graph) {
 }
 
 ## average number of times that a job visits node i
-des.queueing.upsilon.vec1 <- function(graph) {
+des.queueing.upsilon.vec1 <- function(graph, Q=NULL) {
   gamma <- get.vertex.attribute(graph, "arrival_rate")
-  lambda <- des.queueing.lambda.vec(graph)
+  lambda <- des.queueing.lambda.vec(graph, Q)
   upsilon <- lambda / sum(gamma)
   
   return(upsilon)
 }
 
 ## average waiting time
-des.queueing.r.vec <- function(graph) {
-  Q <- des.queueing.Q.matrix(graph)
+des.queueing.r.vec <- function(graph, Q=NULL) {
+  if (is.null(Q)) {
+    Q <- des.queueing.Q.matrix(graph)
+  }
   I <- diag(vcount(graph))
-  w <- des.queueing.w.vec(graph)
+  w <- des.queueing.w.vec(graph, Q)
   temp <- I - Q
   r <- w %*% solve(temp)
 
@@ -97,8 +101,8 @@ des.queueing.r.vec <- function(graph) {
 }
 
 ## average response times
-des.queueing.w.vec <- function(graph) {
-  lambda <- des.queueing.lambda.vec(graph)
+des.queueing.w.vec <- function(graph, Q=NULL) {
+  lambda <- des.queueing.lambda.vec(graph, Q)
   mu <- V(graph)$service_rate
   w <- 1 / (mu - lambda)
   
@@ -106,30 +110,30 @@ des.queueing.w.vec <- function(graph) {
 }
 
 ## retuns waiting time
-des.queueing.W.vec <- function(graph) {
+des.queueing.W.vec <- function(graph, Q=NULL) {
   gamma <- get.vertex.attribute(graph, "arrival_rate")
-  L <- des.queueing.L(graph)
+  L <- des.queueing.L(graph, Q)
   W <- 1 / sum(gamma) * L
 }
 
 ## return mean number of jobs in the system
-des.queueing.L <- function(graph) {
-  L <- sum(des.queueing.L.vec(graph))
+des.queueing.L <- function(graph, Q=NULL) {
+  L <- sum(des.queueing.L.vec(graph, Q))
 
   return(L)
 }
 
 ## returns number of jobs at vertex i
-des.queueing.L.vec <- function(graph) {
-  rho <- des.queueing.rho.vec(graph)
+des.queueing.L.vec <- function(graph, Q=NULL) {
+  rho <- des.queueing.rho.vec(graph, Q)
   L <- rho / (1 - rho)
 
   return(L)
 }
 
 ## returns utilisation
-des.queueing.rho.vec <- function(graph) {
-  lambda <- des.queueing.lambda.vec(graph)
+des.queueing.rho.vec <- function(graph, Q=NULL) {
+  lambda <- des.queueing.lambda.vec(graph, Q)
   mu <- V(graph)$service_rate
   rho <- lambda / mu
 
@@ -137,9 +141,11 @@ des.queueing.rho.vec <- function(graph) {
 }
 
 ## returns total arrival rate
-des.queueing.lambda.vec <- function(graph) {
+des.queueing.lambda.vec <- function(graph, Q=NULL) {
   gamma <- get.vertex.attribute(graph, "arrival_rate")
-  Q <- des.queueing.Q.matrix(graph)
+  if (is.null(Q)) {
+    Q <- des.queueing.Q.matrix(graph)
+  }
   I <- diag(vcount(graph))
   temp <- I - Q
   lambda <- gamma %*% solve(temp)

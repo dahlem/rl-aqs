@@ -68,7 +68,7 @@ for (g in graphs$V1) {
   }
 
   
-  sigma <- sum(result)
+  sigma <- sqrt(sum(result)/(length(E(graph))-1))
   sigmas <- append(sigmas, sigma)
 }
 

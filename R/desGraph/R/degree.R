@@ -1,4 +1,4 @@
-## Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+## Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 ##
 ## This file is free software; as a special exception the author gives
 ## unlimited permission to copy and/or distribute it, with or without
@@ -88,7 +88,7 @@ des.graph.degree.assortivity.sigma <- function(graph) {
     sigma <- sigma + (ri - r)^2
   }
 
-  return (sigma)
+  return (sqrt(sigma/(length(E(graph)) - 1)))
 }
 
 

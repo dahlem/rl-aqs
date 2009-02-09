@@ -69,34 +69,47 @@ des.queueing.arrival.power.law.plot <- function(qts, graphs, factor, ps=TRUE) {
     nodes[i+1] <- nodes[i] + vcount(graphs[[i]])
   }
   
-  df <- data.frame(lambda=rep(0, nodes[length(graphs) + 1]),
-                   rank=rep(0, nodes[length(graphs) + 1]),
-                   size=rep(0, nodes[length(graphs) + 1]))
+  df <- data.frame(lambda=c(), counts=c(), size=c())
 
   for (i in seq(1, length(qts))) {
     lambda <- qts[[i]]$lambda
-    rank <- rank(lambda)
-    df$lambda[(nodes[i] + 1):(nodes[i+1])] = lambda
-    df$rank[(nodes[i] + 1):(nodes[i+1])] = rank
-    df$size[(nodes[i] + 1):(nodes[i+1])] <- rep(vcount(graphs[[i]]), vcount(graphs[[i]]))
+    n <- length(lambda)
+    vals <- seq(0,ceiling(max(lambda)), ceiling(max(lambda)) / 10000)
+    y <- hist(lambda, breaks = vals, plot = FALSE)$counts
+    
+    df <- rbind(df,
+                data.frame(lambda=vals[-1],
+                           counts=y,
+                           size=rep(vcount(graphs[[i]]), length(y))))
   }
 
-  p <- ggplot(df, aes(x=rank,y=lambda))
+  ## only take the bins that actually have values
+  df <- df[df$counts > 0,]
+
+  ## add the cumulative frequency
+  df <- cbind(df, cumFreq=(df$counts/sum(df$counts)))
+  
+  p <- ggplot()
   if (!is.null(factor)) {
     if (factor == "size") {
       p <- p + geom_point(aes(shape = factor(size)))
     } else if (factor == "max_edges") {
     } else {
-      p <- p + layer(geom = "point")
+      p <- p + geom_point(data=df, aes(x=lambda, y=cumFreq))
     }
   } else {
-    p <- p + layer(geom = "point")
+    p <- p + geom_point(data=df, aes(x=lambda, y=cumFreq))
+    if (fit) {
+      pl <- plfit(df$lambda)
+      dfPL <- data.frame(x=pl$xmin:max(df$lambda),y=10*(pl$xmin:max(df$lambda))^(-pl$alpha))
+      dfPL <- dfPL[dfPL$y < max(df$cumFreq) & dfPL$y > min(df$cumFreq),]
+      p <- p + geom_line(data=dfPL, aes(x=x,y=y))
+    }
   }
   p <- p + coord_trans(x = "log10", y = "log10")
-  p <- p + scale_y_continuous("Total Arrival Rates")
-  p <- p + scale_x_continuous("Rank")
+  p <- p + scale_y_continuous("Cumulative Frequency")
+  p <- p + scale_x_continuous("Arrival Rates")
   p <- p + theme_bw()
-  p <- p + opts(title="Total Vertex Poisson Arrival Rates by Rank")
   p <- p + scale_shape("Network Size")
   print(p)
 
@@ -141,21 +154,23 @@ des.queueing.degree.power.law.plot <- function(qts, graphs, factor, ps=TRUE) {
     nodes[i+1] <- nodes[i] + vcount(graphs[[i]])
   }
   
-  df <- data.frame(degree=rep(0, nodes[length(graphs) + 1]),
-                   rank=rep(0, nodes[length(graphs) + 1]),
-                   size=rep(0, nodes[length(graphs) + 1]))
+  df <- data.frame(degree=c(), cumFreq=c(), size=c())
 
   for (i in seq(1, length(qts))) {
     degree <- degree(graphs[[i]], mode="in")
-    rank <- rank(degree)
-    df$degree[(nodes[i] + 1):(nodes[i+1])] = degree
-    df$rank[(nodes[i] + 1):(nodes[i+1])] = rank
-    df$size[(nodes[i] + 1):(nodes[i+1])] <- rep(vcount(graphs[[i]]), vcount(graphs[[i]]))
+    x <- sort(degree)
+    n <- length(x)
+    vals <- unique(x)
+    y <- tabulate(match(x, vals))/n
+    df <- rbind(df,
+                data.frame(degree=vals,
+                           cumFreq=y,
+                           size=rep(vcount(graphs[[i]]), length(y))))
   }
 
   df <- df[df$degree > 0,]
 
-  p <- ggplot(df, aes(x=rank,y=degree))
+  p <- ggplot(df, aes(x=degree, y=cumFreq))
   if (!is.null(factor)) {
     if (factor == "size") {
       p <- p + geom_point(aes(shape = factor(size)))
@@ -167,10 +182,9 @@ des.queueing.degree.power.law.plot <- function(qts, graphs, factor, ps=TRUE) {
     p <- p + layer(geom = "point")
   }
   p <- p + coord_trans(x = "log10", y = "log10")
-  p <- p + scale_y_continuous("Vertex In-Degree")
-  p <- p + scale_x_continuous("Rank")
+  p <- p + scale_y_continuous("Cumulative Frequency")
+  p <- p + scale_x_continuous("Vertex In-Degree")
   p <- p + theme_bw()
-  p <- p + opts(title="Vertex In-Degree by Rank")
   p <- p + scale_shape("Network Size")
   print(p)
 
@@ -205,7 +219,7 @@ des.queueing.average.response.hist.plot <- function(qts, graphs, ps=TRUE) {
   }
 }
 
-des.queueing.average.response.power.law.plot <- function(qts, graphs, factor, ps=TRUE) {
+des.queueing.average.response.power.law.plot <- function(qts, graphs, factor, ps=TRUE, fit=FALSE) {
   if (ps) {
     postscript("queueing-average-response-power-law-plot.eps", onefile=FALSE)
   }
@@ -215,34 +229,47 @@ des.queueing.average.response.power.law.plot <- function(qts, graphs, factor, ps
     nodes[i+1] <- nodes[i] + vcount(graphs[[i]])
   }
   
-  df <- data.frame(response=rep(0, nodes[length(graphs) + 1]),
-                   rank=rep(0, nodes[length(graphs) + 1]),
-                   size=rep(0, nodes[length(graphs) + 1]))
+  df <- data.frame(response=c(), cumFreq=c(), size=c())
 
   for (i in seq(1, length(qts))) {
     response <- qts[[i]]$w
-    rank <- rank(response)
-    df$response[(nodes[i] + 1):(nodes[i+1])] = response
-    df$rank[(nodes[i] + 1):(nodes[i+1])] = rank
-    df$size[(nodes[i] + 1):(nodes[i+1])] <- rep(vcount(graphs[[i]]), vcount(graphs[[i]]))
+    n <- length(response)
+    vals <- seq(0,ceiling(max(response)), ceiling(max(response)) / 10000)
+    y <- hist(response, breaks = vals, plot = FALSE)$counts
+    
+    df <- rbind(df,
+                data.frame(response=vals[-1],
+                           counts=y,
+                           size=rep(vcount(graphs[[i]]), length(y))))
   }
 
-  p <- ggplot(df, aes(x=rank,y=response))
+  ## only take the bins that actually have values
+  df <- df[df$counts > 0,]
+
+  ## add the cumulative frequency
+  df <- cbind(df, cumFreq=(df$counts/sum(df$counts)))
+  
+  p <- ggplot()
   if (!is.null(factor)) {
     if (factor == "size") {
       p <- p + geom_point(aes(shape = factor(size)))
     } else if (factor == "max_edges") {
     } else {
-      p <- p + layer(geom = "point")
+      p <- p + geom_point(data=df, aes(x=response, y=cumFreq))
     }
   } else {
-    p <- p + layer(geom = "point")
+    p <- p + geom_point(data=df, aes(x=response, y=cumFreq))
+    if (fit) {
+      pl <- plfit(df$response)
+      dfPL <- data.frame(x=pl$xmin:max(df$response),y=10*(pl$xmin:max(df$response))^(-pl$alpha+1))
+      dfPL <- dfPL[dfPL$y < max(df$cumFreq) & dfPL$y > min(df$cumFreq),]
+      p <- p + geom_line(data=dfPL, aes(x=x,y=y))
+    }
   }
   p <- p + coord_trans(x = "log10", y = "log10")
-  p <- p + scale_y_continuous("Average Response Time")
-  p <- p + scale_x_continuous("Rank")
+  p <- p + scale_y_continuous("Cumulative Frequency")
+  p <- p + scale_x_continuous("Average Response Time")
   p <- p + theme_bw()
-  p <- p + opts(title="Average Response Times by Rank")
   p <- p + scale_shape("Network Size")
   print(p)
 
@@ -252,7 +279,7 @@ des.queueing.average.response.power.law.plot <- function(qts, graphs, factor, ps
 }
 
 
-des.queueing.service.power.law.plot <- function(qts, graphs, factor, ps=TRUE) {
+des.queueing.service.power.law.plot <- function(qts, graphs, factor, ps=TRUE, fit=FALSE) {
   if (ps) {
     postscript("queueing-total-service-power-law-plot.eps", onefile=FALSE)
   }
@@ -262,34 +289,47 @@ des.queueing.service.power.law.plot <- function(qts, graphs, factor, ps=TRUE) {
     nodes[i+1] <- nodes[i] + vcount(graphs[[i]])
   }
   
-  df <- data.frame(mu=rep(0, nodes[length(graphs) + 1]),
-                   rank=rep(0, nodes[length(graphs) + 1]),
-                   size=rep(0, nodes[length(graphs) + 1]))
+  df <- data.frame(mu=c(), counts=c(), size=c())
 
   for (i in seq(1, length(qts))) {
     mu <- qts[[i]]$mu
-    rank <- rank(mu)
-    df$mu[(nodes[i] + 1):(nodes[i+1])] = mu
-    df$rank[(nodes[i] + 1):(nodes[i+1])] = rank
-    df$size[(nodes[i] + 1):(nodes[i+1])] <- rep(vcount(graphs[[i]]), vcount(graphs[[i]]))
+    n <- length(mu)
+    vals <- seq(0,ceiling(max(mu)), ceiling(max(mu)) / 10000)
+    y <- hist(mu, breaks = vals, plot = FALSE)$counts
+    
+    df <- rbind(df,
+                data.frame(mu=vals[-1],
+                           counts=y,
+                           size=rep(vcount(graphs[[i]]), length(y))))
   }
 
-  p <- ggplot(df, aes(x=rank,y=mu))
+  ## only take the bins that actually have values
+  df <- df[df$counts > 0,]
+
+  ## add the cumulative frequency
+  df <- cbind(df, cumFreq=(df$counts/sum(df$counts)))
+  
+  p <- ggplot()
   if (!is.null(factor)) {
     if (factor == "size") {
       p <- p + geom_point(aes(shape = factor(size)))
     } else if (factor == "max_edges") {
     } else {
-      p <- p + layer(geom = "point")
+      p <- p + geom_point(data=df, aes(x=mu, y=cumFreq))
     }
   } else {
-    p <- p + layer(geom = "point")
+    p <- p + geom_point(data=df, aes(x=mu, y=cumFreq))
+    if (fit) {
+      pl <- plfit(df$mu)
+      dfPL <- data.frame(x=pl$xmin:max(df$mu),y=10*(pl$xmin:max(df$mu))^(-pl$alpha+1))
+      dfPL <- dfPL[dfPL$y < max(df$cumFreq) & dfPL$y > min(df$cumFreq),]
+      p <- p + geom_line(data=dfPL, aes(x=x,y=y))
+    }
   }
   p <- p + coord_trans(x = "log10", y = "log10")
-  p <- p + scale_y_continuous("Service Rates")
-  p <- p + scale_x_continuous("Rank")
+  p <- p + scale_y_continuous("Cumulative Frequency")
+  p <- p + scale_x_continuous("Service Rate")
   p <- p + theme_bw()
-  p <- p + opts(title="Exponential Rates by Rank")
   p <- p + scale_shape("Network Size")
   print(p)
 
@@ -635,3 +675,15 @@ if (factored == TRUE) {
 } else {
   des.queueing.main(qts, graphs)
 }
+
+
+
+degree <- degree(graph, mode="in")
+x <- sort(degree)
+n <- length(x)
+vals <- unique(x)
+y <- tabulate(match(x, vals))/n
+df <- data.frame(vals, y)
+p <- ggplot(df[df$vals>0,], aes(x=vals, y=y))
+p <- p + layer(geom = "point")
+p <- p + coord_trans(x = "log10", y = "log10")
