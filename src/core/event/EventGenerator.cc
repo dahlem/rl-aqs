@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -37,21 +37,26 @@ namespace dcommon = des::common;
 #include "EventGenerator.hh"
 namespace dcore = des::core;
 
+#include "DirectedGraph.hh"
+namespace dnet = des::network;
+
 
 
 void dcore::EventGenerator::generate(
+    dnet::tGraphSP p_graph,
     dcommon::tQueueSP p_queue,
     dsample::tGslRngSP arrival_rng,
     boost::int32_t destination,
     double arrival_rate,
     double stop_time)
 {
-    generate(p_queue, arrival_rng, destination,
+    generate(p_graph, p_queue, arrival_rng, destination,
              arrival_rate, 0.0, stop_time);
 }
 
 
 void dcore::EventGenerator::generate(
+    dnet::tGraphSP p_graph,
     dcommon::tQueueSP p_queue,
     dsample::tGslRngSP arrival_rng,
     boost::int32_t destination,
@@ -60,6 +65,22 @@ void dcore::EventGenerator::generate(
     double stop_time)
 {
     double cur_arrival, new_arrival;
+
+    // if start time is larger than 0, then we assume this
+    // time is unprocessed (last event that wasn't put into the queue in
+    // a previous event generation iteration).
+    if (start_time > 0.0) {
+        if (start_time <= stop_time) {
+            dcommon::Entry *entry = new dcommon::Entry(
+                0.0,
+                start_time,
+                destination,
+                dcore::EXTERNAL_EVENT,
+                dcore::ARRIVAL_EVENT);
+
+            p_queue->push(entry);
+        }
+    }
 
     cur_arrival = -dsample::Rng::poiss(
         arrival_rate, gsl_rng_uniform(arrival_rng.get()));
@@ -84,6 +105,10 @@ void dcore::EventGenerator::generate(
             p_queue->push(entry);
             cur_arrival -= new_arrival;
         } else {
+            dnet::VertexNextEventTimeMap vertex_next_event_time_map =
+                get(vertex_next_event_time, *p_graph);
+            dnet::Vertex vertex = boost::vertex(destination, *p_graph);
+
             // enqueue the last arrival event
             dcommon::Entry *entry = new dcommon::Entry(
                 0.0,
@@ -93,11 +118,15 @@ void dcore::EventGenerator::generate(
                 dcore::LAST_ARRIVAL_EVENT);
 
             p_queue->push(entry);
+
+            // store the event that could not be pushed into the queue
+            // if event phases are enabled this value will be picked up.
+            // (see first if statement)
+            vertex_next_event_time_map[vertex] = (cur_arrival - new_arrival);
+
             break;
         }
     }
-
-    cur_arrival = 0;
 }
 
 

@@ -90,6 +90,9 @@ void dcore::DepartureHandler::update(dcore::DepartureEvent *subject)
         boost::int32_t destination = (*m_selection)(entry->getDestination());
 
         if (destination < 0) {
+            std::cout << "Error: Negative destination!!!" << std::endl;
+            std::cout << const_cast <const dcommon::Entry&> (*entry) << std::endl;
+            std::cout << "out-degree: " << degree << std::endl;
 #ifndef NDEBUG_EVENTS
             std::cout << "Error: Negative destination!!!" << std::endl;
 #endif /* NDEBUG_EVENTS */

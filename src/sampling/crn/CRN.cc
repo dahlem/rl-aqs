@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2007-2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This file is free software; as a special exception the author gives
 // unlimited permission to copy and/or distribute it, with or without
@@ -15,7 +15,9 @@
 # include <config.h>
 #endif
 
-#include <iostream>
+#ifndef NDEBUG_SAMPLING
+# include <iostream>
+#endif /* NDEBUG */
 
 #include <gsl/gsl_rng.h>
 
@@ -51,6 +53,10 @@ dsample::tGslRngSP dsample::CRN::get(const boost::uint32_t p_rng) throw (Samplin
     if (p_rng < m_gslRngs.size()) {
         return m_gslRngs[p_rng];
     } else {
+#ifndef NDEBUG_SAMPLING
+        std::cout << "Requested rng " << p_rng << ", while the size of the RNG vector is "
+                  << m_gslRngs.size() << std::endl;
+#endif /* NDEBUG */
         throw SamplingException(SamplingException::UNKNOWN_INDEX);
     }
 }
@@ -58,7 +64,7 @@ dsample::tGslRngSP dsample::CRN::get(const boost::uint32_t p_rng) throw (Samplin
 
 void dsample::CRN::log(const boost::intmax_t p_seed, std::string eventType)
 {
-#ifndef NDEBUG
+#ifndef NDEBUG_SAMPLING
     std::cout << "Use seed " << p_seed << " for the " << eventType << "." << std::endl;
     std::cout.flush();
 #endif /* NDEBUG */
@@ -68,7 +74,7 @@ void dsample::CRN::log(const boost::intmax_t p_seed, std::string eventType)
 void dsample::CRN::log(const boost::intmax_t p_min, const boost::intmax_t p_max,
                        std::string eventType)
 {
-#ifndef NDEBUG
+#ifndef NDEBUG_SAMPLING
     std::cout << "Use seed indeces [" << p_min << ", " << p_max << "] for the " << eventType << "." << std::endl;
     std::cout.flush();
 #endif /* NDEBUG */

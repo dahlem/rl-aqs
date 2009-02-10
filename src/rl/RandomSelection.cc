@@ -97,17 +97,23 @@ boost::int32_t RandomSelection::operator() (boost::int32_t p_source)
 #endif /* NDEBUG_EVENTS */
         for (boost::uint32_t e = 0; e < degree; ++e) {
             dnet::Edge edge = edges[sorted_edge_weights[e]];
-            temp += edge_weights[e];
+            temp += edge_weights[sorted_edge_weights[e]];
 
 #ifndef NDEBUG_EVENTS
             std::cout << "Accum. weight: " << temp << std::endl;
 #endif /* NDEBUG_EVENTS */
             if (u < temp) {
                 // schedule an internal arrival event
-                destination = vertex_index_map[target(edges[e], *m_graph)];
+                destination = vertex_index_map[target(edge, *m_graph)];
 
                 break;
             }
+        }
+
+        // in some rare occasion, the above could finish without finding the destination
+        // so we return the last element in the list
+        if (destination == -1) {
+            destination = vertex_index_map[target(edges[degree - 1], *m_graph)];
         }
     }
 #ifndef NDEBUG_EVENTS

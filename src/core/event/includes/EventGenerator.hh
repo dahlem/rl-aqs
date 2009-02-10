@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -29,6 +29,9 @@ namespace dsample = des::sampling;
 #include "LadderQueue.hh"
 namespace dcommon = des::common;
 
+#include "DirectedGraph.hh"
+namespace dnet = des::network;
+
 
 
 
@@ -48,6 +51,7 @@ private:
 
 public:
     static void generate(
+        dnet::tGraphSP p_graph,
         dcommon::tQueueSP p_queue,
         dsample::tGslRngSP arrival_rng,
         boost::int32_t destination,
@@ -55,6 +59,7 @@ public:
         double stop_time);
 
     static void generate(
+        dnet::tGraphSP p_graph,
         dcommon::tQueueSP p_queue,
         dsample::tGslRngSP arrival_rng,
         boost::int32_t destination,

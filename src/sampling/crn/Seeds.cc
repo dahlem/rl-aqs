@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2007-2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This file is free software; as a special exception the author gives
 // unlimited permission to copy and/or distribute it, with or without
@@ -150,10 +150,10 @@ const boost::uint32_t Seeds::getSeed() throw (SamplingException)
     }
 #endif /* HAVE_MPI */
 
-#ifndef NDEBUG
+#ifndef NDEBUG_SAMPLING
     std::cout << "Return seed: " << newSeed << std::endl;
     std::cout.flush();
-#endif /* NDEBUG */
+#endif /* NDEBUG_SAMPLING */
 
     return newSeed;
 }

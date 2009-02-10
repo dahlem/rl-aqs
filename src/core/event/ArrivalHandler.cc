@@ -21,7 +21,7 @@
 # include <config.h>
 #endif
 
-#ifndef NDEBUG_EVENTS
+#if !defined(NDEBUG_EVENTS) || !defined(NDEBUG_SAMPLING)
 # include <iostream>
 #endif /* NDEBUG_EVENTS */
 
@@ -64,6 +64,14 @@ ArrivalHandler::ArrivalHandler(dcommon::tQueueSP p_queue,
     vertex_time_service_ends_map = get(vertex_time_service_ends, *m_graph);
     vertex_num_events_map = get(vertex_num_events, *m_graph);
     vertex_average_delay_in_queue_map = get(vertex_average_delay_in_queue, *m_graph);
+
+#ifndef NDEBUG_SAMPLING
+    std::cout << "Service seed: ";
+    for (boost::uint32_t i = 0; i < boost::num_vertices(*m_graph); ++i) {
+        std::cout << m_service_ids[i] << ", ";
+    }
+    std::cout << std::endl << std::cout.flush();
+#endif /* NDEBUG_SAMPLING */
 }
 
 
@@ -82,11 +90,22 @@ void ArrivalHandler::update(ArrivalEvent *subject)
     entry = subject->getEvent();
     vertex = boost::vertex(entry->getDestination(), *m_graph);
 
-    dsample::tGslRngSP service_rng = dsample::CRN::getInstance().get(
-        m_service_ids[entry->getDestination()]);
+    try {
+        dsample::tGslRngSP service_rng = dsample::CRN::getInstance().get(
+            m_service_ids[entry->getDestination()]);
+        service_time = gsl_ran_exponential(service_rng.get(),
+                                           1 / vertex_service_map[vertex]);
+    } catch (dsample::SamplingException &se) {
+#ifndef NDEBUG_EVENTS
+        std::cout << "Exception: " << se.what() << std::endl;
+        std::cout << "Event Processed: "
+                  << const_cast <const dcommon::Entry&> (*entry)
+                  << std::endl;
+#endif /* NDEBUG_EVENTS */
 
-    service_time = gsl_ran_exponential(service_rng.get(),
-                                       1 / vertex_service_map[vertex]);
+        throw;
+    }
+
 
     dcommon::Entry *new_entry = new dcommon::Entry(
         const_cast <const dcommon::Entry&> (*entry));

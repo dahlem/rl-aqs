@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -26,6 +26,9 @@
 
 #include "Entry.hh"
 namespace dcommon = des::common;
+
+#include "DirectedGraph.hh"
+namespace dnet = des::network;
 
 #include "GenerateEventHandler.hh"
 #include "EventGenerator.hh"
@@ -57,6 +60,14 @@ dcore::GenerateEventHandler::GenerateEventHandler(
     for (boost::int32_t i = 0; i < vertices; ++i) {
         m_currentGeneration[i] = 1;
     }
+
+#ifndef NDEBUG_SAMPLING
+    std::cout << "Arrival seeds: ";
+    for (int i = 0; i < vertices; ++i) {
+        std::cout << m_arrivalRngs[i] << ", ";
+    }
+    std::cout << std::endl << std::cout.flush();
+#endif /* NDEBUG_SAMPLING */
 }
 
 
@@ -74,6 +85,7 @@ void dcore::GenerateEventHandler::update(dcore::LastArrivalEvent *subject)
         // increment the current generation for the destination vertex
         if (m_interval * (m_currentGeneration[dest] + 1) <= m_stopTime) {
             m_currentGeneration[dest]++;
+
             double stopTime = m_currentGeneration[dest] * m_interval;
             int count = 0;
 
@@ -96,17 +108,20 @@ void dcore::GenerateEventHandler::update(dcore::LastArrivalEvent *subject)
 
             for (; filter_iter_first != filter_iter_last; ++filter_iter_first) {
                 if (count == 0) {
+                    dnet::VertexNextEventTimeMap vertex_next_event_time_map =
+                        get(vertex_next_event_time, *m_graph);
                     dnet::VertexArrivalRateMap vertex_arrival_props_map =
                         get(vertex_arrival_rate, *m_graph);
                     // generate a single event
                     double arrival_rate = vertex_arrival_props_map[*filter_iter_first];
+                    double startTime = vertex_next_event_time_map[*filter_iter_first];
 
                     // generate the events
                     arrival_rng = dsample::CRN::getInstance().get(
                         m_arrivalRngs[dest]);
-                    dcore::EventGenerator::generate(m_queue, arrival_rng,
+                    dcore::EventGenerator::generate(m_graph, m_queue, arrival_rng,
                                                     dest, arrival_rate,
-                                                    entry->getArrival(), stopTime);
+                                                    startTime, stopTime);
                 } else {
                     std::cout << "Error: Expected a vertex!" << std::endl;
                     break;
@@ -114,6 +129,24 @@ void dcore::GenerateEventHandler::update(dcore::LastArrivalEvent *subject)
 
                 count++;
             }
+
+
+//             double stopTime = m_currentGeneration[dest] * m_interval;
+//             dnet::Vertex vertex = boost::vertex(entry->getDestination(), *m_graph);
+//             dnet::VertexArrivalRateMap vertex_arrival_props_map =
+//                 get(vertex_arrival_rate, *m_graph);
+//             dnet::VertexNextEventTimeMap vertex_next_event_time_map =
+//                 get(vertex_next_event_time, *m_graph);
+//             // generate a single event
+//             double arrival_rate = vertex_arrival_props_map[vertex];
+//             double startTime = vertex_next_event_time_map[vertex];
+
+//             // generate the events
+//             dsample::tGslRngSP arrival_rng = dsample::CRN::getInstance().get(
+//                 m_arrivalRngs[dest]);
+//             dcore::EventGenerator::generate(m_graph, m_queue, arrival_rng,
+//                                             dest, arrival_rate,
+//                                             startTime, stopTime);
         }
     }
 }

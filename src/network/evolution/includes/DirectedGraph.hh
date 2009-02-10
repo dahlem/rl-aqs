@@ -148,6 +148,13 @@ enum graph_generator_t { graph_generator = 1127 };
 enum vertex_next_action_t { vertex_next_action = 1128 };
 
 
+/** @enum vertex_next_event_time_t
+ * This enum extends the vertex properties by a next event time argument,
+ * which is used when event generation phases are enabled.
+ */
+enum vertex_next_event_time_t { vertex_next_event_time = 1129 };
+
+
 // install the vertex service rate property
 namespace boost
 {
@@ -166,6 +173,7 @@ BOOST_INSTALL_PROPERTY(vertex, last_event_time);
 BOOST_INSTALL_PROPERTY(vertex, num_events_processed);
 BOOST_INSTALL_PROPERTY(vertex, mean_reward);
 BOOST_INSTALL_PROPERTY(vertex, next_action);
+BOOST_INSTALL_PROPERTY(vertex, next_event_time);
 BOOST_INSTALL_PROPERTY(graph, generator);
 BOOST_INSTALL_PROPERTY(edge, q_val);
 BOOST_INSTALL_PROPERTY(edge, eindex);
@@ -250,10 +258,15 @@ typedef boost::property <vertex_mean_reward_t, double, VertexNumProcessedEventsP
  */
 typedef boost::property <vertex_next_action_t, int, VertexMeanRewardProperty> VertexNextActionProperty;
 
+/** @typedef VertexNextEventTimeProperty
+ * Specifies the property for the next event time of a vertex
+ */
+typedef boost::property <vertex_next_event_time_t, double, VertexNextActionProperty> VertexNextEventTimeProperty;
+
 /** @typedef VertexProperties
  * This type definition assembles all the properties for the vertices of the graph
  */
-typedef boost::property <boost::vertex_index_t, int, VertexNextActionProperty> VertexProperties;
+typedef boost::property <boost::vertex_index_t, int, VertexNextEventTimeProperty> VertexProperties;
 
 /** @typedef EdgeWeightProperty
  * Specifies the property for the edge weight
@@ -380,6 +393,11 @@ typedef boost::property_map <Graph, vertex_mean_reward_t>::type VertexMeanReward
  */
 typedef boost::property_map <Graph, vertex_next_action_t>::type VertexNextActionMap;
 
+/** @typedef VertexNextEventTimeMap
+ * Specifies the map that stores the vertex next event time attribute
+ */
+typedef boost::property_map <Graph, vertex_next_event_time_t>::type VertexNextEventTimeMap;
+
 /** @typedef EdgeQValueMap
  * Specifies the map that stores the edge q-value attribute
  */
@@ -502,6 +520,7 @@ const std::string Q_VALUE                           = "q_value";
 const std::string EDGE_INDEX                        = "eindex";
 const std::string NEXT_ACTION                       = "next_action";
 const std::string GRAPH_GENERATOR                   = "graph_generator";
+const std::string NEXT_EVENT_TIME                   = "next_event_time";
 
 
     }

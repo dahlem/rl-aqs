@@ -367,7 +367,7 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
                 arrival_rng = dsample::CRN::getInstance().get(
                     arrivalCRNs[destination]);
                 EventGenerator::generate(
-                    queue, arrival_rng, destination, arrival_rate, stopTimeAdj);
+                    graph, queue, arrival_rng, destination, arrival_rate, stopTimeAdj);
             }
 
             if (desArgs->graph_rate > 1) {

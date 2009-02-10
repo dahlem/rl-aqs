@@ -97,6 +97,8 @@ tGraphSP WEvonet::createBBVGraph(boost::uint32_t p_size, boost::uint32_t max_edg
         = get(vertex_mean_reward, *g);
     VertexNextActionMap vertex_next_action_map
         = get(vertex_next_action, *g);
+    VertexNextEventTimeMap vertex_next_event_time_map
+        = get(vertex_next_event_time, *g);
 
     // set the graph properties
     boost::set_property(*g, graph_generator, 1);
@@ -119,6 +121,7 @@ tGraphSP WEvonet::createBBVGraph(boost::uint32_t p_size, boost::uint32_t max_edg
     vertex_num_events_processed_map[v1] = 0;
     vertex_mean_reward_map[v1] = 0.0;
     vertex_next_action_map[v1] = -1;
+    vertex_next_event_time_map[v1] = 0.0;
 
     advance(p_size - 1, g, num_edges_rng, uniform_rng, vertex_arrival_rng,
             fixed_edge_weight, max_arrival_rate, boost_arrival, boost_edge, max_edges);
@@ -169,6 +172,8 @@ void WEvonet::advance(boost::uint32_t p_steps, tGraphSP g,
         = get(edge_q_val, *g);
     EdgeIndexMap edge_index_map
         = get(edge_eindex, *g);
+    VertexNextEventTimeMap vertex_next_event_time_map
+        = get(vertex_next_event_time, *g);
 
     double accum_service_rate;
     size_t vertices;
@@ -200,7 +205,7 @@ void WEvonet::advance(boost::uint32_t p_steps, tGraphSP g,
         // copy the service rates into a vector
         std::copy(service_it, service_it_end, service_rates.begin());
 
-        // sort the service_rate_order according to the service_rates in ascending order
+        // sort the service_rate_order according to the service_rates in descending order
         std::sort(service_rate_order.begin(), service_rate_order.end(),
                   boost::indirect_cmp <double*, std::greater <double> >(&service_rates[0]));
 
@@ -222,6 +227,7 @@ void WEvonet::advance(boost::uint32_t p_steps, tGraphSP g,
         vertex_num_events_processed_map[v] = 0;
         vertex_mean_reward_map[v] = 0.0;
         vertex_next_action_map[v] = -1;
+        vertex_next_event_time_map[v] = 0.0;
 
         // select vertices to connect to
         boost::uint32_t edges = 0;

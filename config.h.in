@@ -123,6 +123,9 @@
 /* define queue debugging, if disabled */
 #undef NDEBUG_QUEUE
 
+/* define sampling debugging, if disabled */
+#undef NDEBUG_SAMPLING
+
 /* Name of package */
 #undef PACKAGE
 

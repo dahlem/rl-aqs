@@ -119,6 +119,15 @@ if test "x$NETDEBUGGING" = xno; then
   AC_DEFINE(NDEBUG_NETWORK, 1, [define network debugging, if disabled])
 fi
 
+# Check for sampling debug
+AC_ARG_ENABLE(debug-sampling, AS_HELP_STRING(
+		     [--enable-debug-sampling], 
+		     [enable sampling debugging @<:@default=no@:>@]), 
+		     [SAMPLINGDEBUGGING=$enableval], [SAMPLINGDEBUGGING=no])
+if test "x$SAMPLINGDEBUGGING" = xno; then
+  AC_DEFINE(NDEBUG_SAMPLING, 1, [define sampling debugging, if disabled])
+fi
+
 # Check for debug
 AC_ARG_ENABLE(debug, AS_HELP_STRING(
 		     [--enable-debug], 

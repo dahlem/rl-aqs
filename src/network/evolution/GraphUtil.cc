@@ -182,6 +182,7 @@ boost::dynamic_properties GraphUtil::getProperties(tGraphSP p_graph)
     dp.property(Q_VALUE, get(edge_q_val, *p_graph));
     dp.property(EDGE_INDEX, get(edge_eindex, *p_graph));
     dp.property(NEXT_ACTION, get(vertex_next_action, *p_graph));
+    dp.property(NEXT_EVENT_TIME, get(vertex_next_event_time, *p_graph));
 
     boost::ref_property_map<Graph*, boost::uint16_t>
         graphGenerator(get_property(*p_graph, graph_generator));
