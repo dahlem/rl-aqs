@@ -17,12 +17,12 @@
 ## mode 1: based on qval
 ##      2: based on weight
 ##      3: based on shortest paths
-des.ica <- function(graphs, mode) {
+des.ica <- function(graphs, mode, thres, greedy) {
   X <- matrix()
   vertices <- c()
   
   for (i in 1:length(graphs)) {
-    graphInfo <- des.graph.info(graphs[[i]], mode=mode, TRUE)
+    graphInfo <- des.graph.info(graphs[[i]], mode=mode, thres, greedy)
 
     if (i == 1) {
       ## allocate enough columns for each vertex we are interested in

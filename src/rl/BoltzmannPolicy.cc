@@ -50,13 +50,13 @@ BoltzmannPolicy::BoltzmannPolicy(
 
 
 boost::uint16_t BoltzmannPolicy::operator() (
-    boost::uint16_t p_source, tValuesVecSP p_values, PBoltzmannAttrSP p_attr)
+    boost::uint16_t p_source, tValuesVecSP p_values, PAttrSP p_attr)
 {
 #ifndef NDEBUG_EVENTS
     std::cout << "** Boltzmann Policy" << std::endl;
 #endif /* NDEBUG_EVENTS */
 
-    boost::uint16_t action = 0;
+    boost::int16_t action = -1;
 
     if (p_values->size() > 1) {
         double tau = m_tau;
@@ -73,11 +73,11 @@ boost::uint16_t BoltzmannPolicy::operator() (
 
         // calculate the denominator, i.e. sum of all exps
         double denominator = accumulate(exps.begin(), exps.end(), 0);
-        
+
         tValuesVec probabilities;
         for (boost::uint16_t i = 0; i < exps.size(); ++i) {
             tValues prob;
-            
+
             prob.first = (*(p_values.get()))[i].first;
             prob.second = exps[i]/denominator;
             probabilities.push_back(prob);
@@ -88,7 +88,7 @@ boost::uint16_t BoltzmannPolicy::operator() (
 
         double u = gsl_rng_uniform(m_uniform_rng.get());
         double temp = 0.0;
-        
+
         for (tValuesVec::iterator it = probabilities.begin(); it != probabilities.end(); ++it) {
             temp += (*it).second;
 
@@ -100,6 +100,12 @@ boost::uint16_t BoltzmannPolicy::operator() (
                 action = (*it).first;
                 break;
             }
+        }
+
+        // in some rare occasion, the above could finish without finding the destination
+        // so we return the last element in the list
+        if (action == -1) {
+            action = probabilities[probabilities.size() - 1].first;
         }
     } else if (p_values->size() == 1) {
         action = p_values->front().first;

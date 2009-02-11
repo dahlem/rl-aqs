@@ -1,0 +1,11 @@
+Package: desStats
+Version: @VERSION@
+Date: 2009-02-11
+Title: Statistics Utilities
+Author: Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+Maintainer: Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+Depends: R (>= 2.6), 
+Description: Statistical utility functions
+License: GPL-2
+URL: http://www.r-project.org
+     

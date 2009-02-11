@@ -90,6 +90,7 @@ const std::string RL_RESPONSE_ALPHA = "rl_response_alphas";
 const std::string RL_RESPONSE_REWARD = "rl_response_rewards";
 const std::string RL_POLICY = "rl_policy";
 const std::string RL_POLICY_EPSILON = "rl_policy_epsilon";
+const std::string RL_POLICY_BOLTZMANN_T = "rl_policy_boltzmann_t";
 
 
 /** @typedef tOptDescSP
@@ -97,7 +98,7 @@ const std::string RL_POLICY_EPSILON = "rl_policy_epsilon";
  */
 typedef boost::shared_ptr <po::options_description> tOptDescSP;
 
-static const std::string ARGS_HEADER = "stop_time,generations,graphs,max_arrival,boost_arrival,boost_edge,confidence,alpha,error,initial_reps,network_type,network_size,max_edges,edgeProb,edgeDiffusion,rlq_alpha,rlq_lambda,rlq_policy,rlq_policy_epsilon";
+static const std::string ARGS_HEADER = "stop_time,generations,graphs,max_arrival,boost_arrival,boost_edge,confidence,alpha,error,initial_reps,network_type,network_size,max_edges,edgeProb,edgeDiffusion,rl,rlq_alpha,rlq_lambda,rl_policy,rl_policy_epsilon,rl_policy_boltzmann_t";
 
 /** @struct
  * structure specifying the command line variables.
@@ -155,7 +156,7 @@ struct desArgs_t {
     double rl_q_lambda;                             /* action value discount rate */
     boost::uint16_t rl_policy;                      /* policy */
     double rl_policy_epsilon;                       /* epsilon-greedy */
-
+    double rl_policy_boltzmann_t;                   /* the temperature value for boltzmann */
 
     friend std::ostream& operator <<(std::ostream &p_os, const desArgs_t &desArgs)
         {
@@ -174,10 +175,12 @@ struct desArgs_t {
                  << desArgs.max_edges << ","
                  << desArgs.edge_prob << ","
                  << desArgs.edge_fixed << ","
+                 << desArgs.rl << ","
                  << desArgs.rl_q_alpha << ","
                  << desArgs.rl_q_lambda << ","
                  << desArgs.rl_policy << ","
-                 << desArgs.rl_policy_epsilon;
+                 << desArgs.rl_policy_epsilon << ","
+                 << desArgs.rl_policy_boltzmann_t;
 
             return p_os;
         }

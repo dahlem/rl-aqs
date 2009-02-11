@@ -33,29 +33,20 @@ des.steady.power.law.degree <- function(prefix, graph, ps=TRUE, fit=FALSE) {
     postscript(paste(prefix, "steady-state-degree-power-law-plot.eps", sep=""), onefile=FALSE)
   }
 
-  df <- data.frame(degree=c(), cumFreq=c(), size=c())
-
   degree <- degree(graph, mode="in")
-  x <- sort(degree)
-  n <- length(x)
-  vals <- unique(x)
-  y <- tabulate(match(x, vals))/n
-  df <- rbind(df,
-              data.frame(degree=vals,
-                         cumFreq=y,
-                         size=rep(vcount(graph), length(y))))
+  res <- des.power.law.dist(degree)
 
-  df <- df[df$degree > 0,]
+  df <- data.frame(x=res$x, y=res$cumFreq)
 
-  p <- ggplot(df, aes(x=degree, y=cumFreq))
+  p <- ggplot(df, aes(x=x, y=y))
   p <- p + geom_point()
   if (fit) {
-    pl <- plfit(df$degree)
-    dfPL <- data.frame(x=pl$xmin:max(df$degree),y=10*(pl$xmin:max(df$degree))^(-pl$alpha+1))
-    dfPL <- dfPL[dfPL$y < max(df$cumFreq) & dfPL$y > min(df$cumFreq),]
+    pl <- plfit(df$x)
+    dfPL <- data.frame(x=pl$xmin:max(df$x),y=10*(pl$xmin:max(df$x))^(-pl$alpha+1))
+    dfPL <- dfPL[dfPL$y < max(df$y) & dfPL$y > min(df$y),]
     p <- p + geom_line(data=dfPL, aes(x=x,y=y))
   }
-  p <- p + coord_trans(x = "log10", y = "log10")
+  p <- p + coord_trans(x = "log", y = "log")
   p <- p + scale_y_continuous("Cumulative Frequencies")
   p <- p + scale_x_continuous("Vertex In-Degree")
   p <- p + theme_bw()
@@ -71,33 +62,21 @@ des.steady.power.law.arrival <- function(prefix, graph, ps=TRUE, fit=FALSE) {
     postscript(paste(prefix, "steady-state-total-arrival-power-law-plot.eps", sep=""), onefile=FALSE)
   }
 
-  df <- data.frame(lambda=c(), counts=c(), size=c())
-
   lambda <- as.vector(des.queueing.lambda.vec(graph))
-  n <- length(lambda)
-  vals <- seq(0,ceiling(max(lambda)), ceiling(max(lambda)) / 10000)
-  y <- hist(lambda, breaks = vals, plot = FALSE)$counts
-  df <- rbind(df,
-              data.frame(lambda=vals[-1],
-                         counts=y,
-                         size=rep(vcount(graph), length(y))))
+  res <- des.power.law.dist(lambda)
 
-  ## only take the bins that actually have values
-  df <- df[df$counts > 0,]
+  df <- data.frame(x=res$x, y=res$cumFreq)
 
-  ## add the cumulative frequency
-  df <- cbind(df, cumFreq=(df$counts/sum(df$counts)))
-  
-  p <- ggplot()
-  p <- p + geom_point(data=df, aes(x=lambda, y=cumFreq))
+  p <- ggplot(df, aes(x=x, y=y))
+  p <- p + geom_point()
   if (fit) {
-    pl <- plfit(df$lambda)
-    dfPL <- data.frame(x=pl$xmin:max(df$lambda),y=10*(pl$xmin:max(df$lambda))^(-pl$alpha))
-    dfPL <- dfPL[dfPL$y < max(df$cumFreq) & dfPL$y > min(df$cumFreq),]
+    pl <- plfit(df$x)
+    dfPL <- data.frame(x=pl$xmin:max(df$x),y=10*(pl$xmin:max(df$x))^(-pl$alpha+1))
+    dfPL <- dfPL[dfPL$y < max(df$y) & dfPL$y > min(df$y),]
     p <- p + geom_line(data=dfPL, aes(x=x,y=y))
   }
-  p <- p + coord_trans(x = "log10", y = "log10")
-  p <- p + scale_y_continuous("Cumulative Frequency")
+  p <- p + coord_trans(x = "log", y = "log")
+  p <- p + scale_y_continuous("Cumulative Frequencies")
   p <- p + scale_x_continuous("Arrival Rates")
   p <- p + theme_bw()
   print(p)
@@ -108,38 +87,58 @@ des.steady.power.law.arrival <- function(prefix, graph, ps=TRUE, fit=FALSE) {
 }
 
 
+des.steady.power.law.qval <- function(prefix, graph, ps=TRUE, fit=FALSE, xmin=0) {
+  if (ps) {
+    postscript(paste(prefix, "steady-state-total-qval-power-law-plot.eps", sep=""), onefile=FALSE)
+  }
+
+  qval <- -E(graph)$q_value
+  res <- des.power.law.dist(qval)
+
+  df <- data.frame(x=res$x, y=res$cumFreq)
+
+  p <- ggplot(df, aes(x=x, y=y))
+  p <- p + geom_point()
+  if (fit) {
+    pl <- plfit(df$x)
+    dfPL <- data.frame(x=pl$xmin:max(df$x),y=10*(pl$xmin:max(df$x))^(-pl$alpha+1))
+    dfPL <- dfPL[dfPL$y < max(df$y) & dfPL$y > min(df$y),]
+    p <- p + geom_line(data=dfPL, aes(x=x,y=y))
+  }
+  p <- p + coord_trans(x = "log", y = "log")
+  p <- p + scale_y_continuous("Cumulative Frequencies")
+  p <- p + scale_x_continuous("Q-Values")
+  p <- p + theme_bw()
+  print(p)
+
+  if (ps) {
+    dev.off()
+  }
+
+  return(pl$xmin)
+}
+
+
 des.steady.power.law.service <- function(prefix, graph, ps=TRUE, fit=FALSE) {
   if (ps) {
     postscript(paste(prefix, "steady-state-service-power-law-plot.eps", sep=""), onefile=FALSE)
   }
 
-  df <- data.frame(mu=c(), counts=c(), size=c())
-
   mu <- V(graph)$service_rate
-  n <- length(mu)
-  vals <- seq(0,ceiling(max(mu)), ceiling(max(mu)) / 10000)
-  y <- hist(mu, breaks = vals, plot = FALSE)$counts
-  df <- rbind(df,
-              data.frame(mu=vals[-1],
-                         counts=y,
-                         size=rep(vcount(graph), length(y))))
+  res <- des.power.law.dist(mu)
 
-  ## only take the bins that actually have values
-  df <- df[df$counts > 0,]
+  df <- data.frame(x=res$x, y=res$cumFreq)
 
-  ## add the cumulative frequency
-  df <- cbind(df, cumFreq=(df$counts/sum(df$counts)))
-  
-  p <- ggplot()
-  p <- p + geom_point(data=df, aes(x=mu, y=cumFreq))
+  p <- ggplot(df, aes(x=x, y=y))
+  p <- p + geom_point()
   if (fit) {
-    pl <- plfit(df$mu)
-    dfPL <- data.frame(x=pl$xmin:max(df$mu),y=10*(pl$xmin:max(df$mu))^(-pl$alpha))
-    dfPL <- dfPL[dfPL$y < max(df$cumFreq) & dfPL$y > min(df$cumFreq),]
+    pl <- plfit(df$x)
+    dfPL <- data.frame(x=pl$xmin:max(df$x),y=10*(pl$xmin:max(df$x))^(-pl$alpha+1))
+    dfPL <- dfPL[dfPL$y < max(df$y) & dfPL$y > min(df$y),]
     p <- p + geom_line(data=dfPL, aes(x=x,y=y))
   }
-  p <- p + coord_trans(x = "log10", y = "log10")
-  p <- p + scale_y_continuous("Cumulative Frequency")
+  p <- p + coord_trans(x = "log", y = "log")
+  p <- p + scale_y_continuous("Cumulative Frequencies")
   p <- p + scale_x_continuous("Service Rates")
   p <- p + theme_bw()
   print(p)
@@ -155,33 +154,21 @@ des.steady.power.law.delay <- function(prefix, graph, ps=TRUE, fit=FALSE) {
     postscript(paste(prefix, "steady-state-avg-delay-power-law-plot.eps", sep=""), onefile=FALSE)
   }
 
-  df <- data.frame(r=c(), counts=c(), size=c())
-
   r <- V(graph)$average_delay_in_queue
-  n <- length(r)
-  vals <- seq(0,ceiling(max(r)), ceiling(max(r)) / 10000)
-  y <- hist(r, breaks = vals, plot = FALSE)$counts
-  df <- rbind(df,
-              data.frame(r=vals[-1],
-                         counts=y,
-                         size=rep(vcount(graph), length(y))))
+  res <- des.power.law.dist(r)
 
-  ## only take the bins that actually have values
-  df <- df[df$counts > 0,]
+  df <- data.frame(x=res$x, y=res$cumFreq)
 
-  ## add the cumulative frequency
-  df <- cbind(df, cumFreq=(df$counts/sum(df$counts)))
-  
-  p <- ggplot()
-  p <- p + geom_point(data=df, aes(x=r, y=cumFreq))
+  p <- ggplot(df, aes(x=x, y=y))
+  p <- p + geom_point()
   if (fit) {
-    pl <- plfit(df$r)
-    dfPL <- data.frame(x=pl$xmin:max(df$r),y=10*(pl$xmin:max(df$r))^(-pl$alpha))
-    dfPL <- dfPL[dfPL$y < max(df$cumFreq) & dfPL$y > min(df$cumFreq),]
+    pl <- plfit(df$x)
+    dfPL <- data.frame(x=pl$xmin:max(df$x),y=10*(pl$xmin:max(df$x))^(-pl$alpha+1))
+    dfPL <- dfPL[dfPL$y < max(df$y) & dfPL$y > min(df$y),]
     p <- p + geom_line(data=dfPL, aes(x=x,y=y))
   }
-  p <- p + coord_trans(x = "log10", y = "log10")
-  p <- p + scale_y_continuous("Cumulative Frequency")
+  p <- p + coord_trans(x = "log", y = "log")
+  p <- p + scale_y_continuous("Cumulative Frequencies")
   p <- p + scale_x_continuous("Average Delay")
   p <- p + theme_bw()
   print(p)
@@ -197,34 +184,22 @@ des.steady.power.law.utilisation <- function(prefix, graph, ps=TRUE, fit=FALSE) 
     postscript(paste(prefix, "steady-state-utilisation-power-law-plot.eps", sep=""), onefile=FALSE)
   }
 
-  df <- data.frame(rho=c(), counts=c(), size=c())
-
   rho <- V(graph)$utilisation
-  n <- length(rho)
-  vals <- seq(0,ceiling(max(rho)), ceiling(max(rho)) / 10000)
-  y <- hist(rho, breaks = vals, plot = FALSE)$counts
-  df <- rbind(df,
-              data.frame(rho=vals[-1],
-                         counts=y,
-                         size=rep(vcount(graph), length(y))))
+  res <- des.power.law.dist(rho)
 
-  ## only take the bins that actually have values
-  df <- df[df$counts > 0,]
+  df <- data.frame(x=res$x, y=res$cumFreq)
 
-  ## add the cumulative frequency
-  df <- cbind(df, cumFreq=(df$counts/sum(df$counts)))
-  
-  p <- ggplot()
-  p <- p + geom_point(data=df, aes(x=rho, y=cumFreq))
+  p <- ggplot(df, aes(x=x, y=y))
+  p <- p + geom_point()
   if (fit) {
-    pl <- plfit(df$rho)
-    dfPL <- data.frame(x=pl$xmin:max(df$rho),y=10*(pl$xmin:max(df$rho))^(-pl$alpha))
-    dfPL <- dfPL[dfPL$y < max(df$cumFreq) & dfPL$y > min(df$cumFreq),]
+    pl <- plfit(df$x)
+    dfPL <- data.frame(x=pl$xmin:max(df$x),y=10*(pl$xmin:max(df$x))^(-pl$alpha+1))
+    dfPL <- dfPL[dfPL$y < max(df$y) & dfPL$y > min(df$y),]
     p <- p + geom_line(data=dfPL, aes(x=x,y=y))
   }
-  p <- p + coord_trans(x = "log10", y = "log10")
-  p <- p + scale_y_continuous("Cumulative Frequency")
-  p <- p + scale_x_continuous("Utilisaton")
+  p <- p + coord_trans(x = "log", y = "log")
+  p <- p + scale_y_continuous("Cumulative Frequencies")
+  p <- p + scale_x_continuous("Utilisation")
   p <- p + theme_bw()
   print(p)
 
@@ -364,55 +339,6 @@ des.steady.stable <- function(prefix, graphs, stopTime, epsilon, se=FALSE, ps=TR
   p <- p + scale_y_continuous("Network Stability in %")
   p <- p + scale_x_continuous("Time")
   p <- p + scale_shape("Stable")
-  p <- p + theme_bw()
-  print(p)
-
-  if (ps) {
-    dev.off()
-  }
-}
-
-
-des.steady.qval.power.law <- function(prefix, graph, fit=FALSE, ps=TRUE) {
-  if (ps) {
-    postscript(paste(prefix, "steady-state-qval-power-law-plot.eps", sep=""), onefile=FALSE)
-  }
-
-  dfFiltered <- data.frame(vertices=V(graph)$id, degree=degree(graph, mode="out"))
-  dfFiltered <- dfFiltered[dfFiltered$degree > 1,]
-  
-  df <- data.frame(qval=c(), counts=c(), size=c())
-
-  qval <- c()
-  for (i in dfFiltered$vertices) {
-    qval <- c(qval, -E(graph)[from(i)]$q_value)
-  }
-  
-  n <- length(qval)
-  vals <- seq(0,ceiling(max(qval)), ceiling(max(qval)) / 10000)
-  y <- hist(qval, breaks = vals, plot = FALSE)$counts
-  df <- rbind(df,
-              data.frame(qval=vals[-1],
-                         counts=y,
-                         size=rep(vcount(graph), length(y))))
-
-  ## only take the bins that actually have values
-  df <- df[df$counts > 0,]
-
-  ## add the cumulative frequency
-  df <- cbind(df, cumFreq=(df$counts/sum(df$counts)))
-  
-  p <- ggplot()
-  p <- p + geom_point(data=df, aes(x=qval, y=cumFreq))
-  if (fit) {
-    pl <- plfit(df$qval)
-    dfPL <- data.frame(x=pl$xmin:max(df$qval),y=10*(pl$xmin:max(df$qval))^(-pl$alpha))
-    dfPL <- dfPL[dfPL$y < max(df$cumFreq) & dfPL$y > min(df$cumFreq),]
-    p <- p + geom_line(data=dfPL, aes(x=x,y=y))
-  }
-  p <- p + coord_trans(x = "log10", y = "log10")
-  p <- p + scale_y_continuous("Cumulative Frequency")
-  p <- p + scale_x_continuous("Q-Values")
   p <- p + theme_bw()
   print(p)
 
@@ -683,12 +609,12 @@ print(simulations)
 
 ## do the graphs for each replica and all simulations
 for (sim in simulations$sim_num) {
-  replicas <- read.csv(paste(sim, "/replica_results.dat", sep=""), header=TRUE)
   graphs <- simulations[simulations$sim_num == sim,]$graphs
   nodes <- simulations[simulations$sim_num == sim,]$network_size
   stopTime <- simulations[simulations$sim_num == sim,]$stop_time
   
-  for (i in replicas$rep_num) {
+  for (i in simulations$actual_reps) {
+    replicas <- read.csv(paste(sim, "/", i, "/replica_results.dat", sep=""), header=TRUE)
     prefix <- paste(sim, "/", i, "/", sep="")
     lastGraphFile <- paste(prefix, "graphs/graph", (graphs - 1), ".gml", sep="")
     graph <- read.graph(lastGraphFile, format="graphml")
@@ -702,11 +628,11 @@ for (sim in simulations$sim_num) {
     des.steady.power.law.service(prefix, graph, ps=TRUE, fit=FALSE)
     des.steady.power.law.delay(prefix, graph, ps=TRUE, fit=FALSE)
     des.steady.power.law.utilisation(prefix, graph, ps=TRUE, fit=FALSE)
+    des.steady.power.law.qval(prefix, graph, fit=FALSE, ps=TRUE)
     des.steady.distance.randomness(prefix, graphs, stopTime, mode=1, thres=TRUE, se=FALSE, ps=TRUE)
     des.steady.indegree.arrival(prefix, graph, ps=TRUE, fit=FALSE)
     des.steady.indegree.service(prefix, graph, ps=TRUE, fit=FALSE)
     des.steady.stable(prefix, graphs, stopTime, epsilon=0.1, se=FALSE, ps=TRUE)
-    des.steady.qval.power.law(prefix, graph, fit=FALSE, ps=TRUE)
     des.steady.qval.dist(prefix, graph, fit=FALSE, ps=TRUE)
     des.steady.distance.randomness.hist(prefix, graph, mode=1, thres=TRUE, ps=TRUE)
     des.steady.distance.randomness.trace(prefix, graphs, mode=1, thres=TRUE, numNodes=5, ps=TRUE)

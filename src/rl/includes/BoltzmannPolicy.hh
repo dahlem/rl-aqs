@@ -41,13 +41,6 @@ namespace des
 namespace rl
 {
 
-struct PBoltzmannAttr : public PAttr
-{
-    double tau;
-};
-
-typedef boost::shared_ptr<PBoltzmannAttr> PBoltzmannAttrSP;
-
 
 class BoltzmannPolicy : public Policy
 {
@@ -59,7 +52,7 @@ public:
         {}
 
     virtual boost::uint16_t operator() (
-        boost::uint16_t p_source, tValuesVecSP p_values, PBoltzmannAttrSP p_attr = PBoltzmannAttrSP());
+        boost::uint16_t p_source, tValuesVecSP p_values, PAttrSP p_attr = PAttrSP());
 
 private:
     double m_tau;

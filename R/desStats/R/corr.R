@@ -1,4 +1,4 @@
-## Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+## Copyright (C) 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 ##
 ## This file is free software; as a special exception the author gives
 ## unlimited permission to copy and/or distribute it, with or without
@@ -10,25 +10,17 @@
 
 ## Author: Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 ## Maintainer: Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
-## Keywords: utilities, merge data frames
-## Created: 18.04.2008
+## Keywords: utilities, correlation
+## Created: 11.02.2009
 
+des.corr <- function(x, y) {
+  m1 <- mean(x)
+  m2 <- mean(y)
+  m12 <- mean(x*y)
+  m11 <- mean(x^2)
+  m22 <- mean(y^2)
 
-merge.result <- function(result) {
-  data <- result[[1]]
-  for (i in 2:length(result)) {
-    data <- base::merge(data, result[[i]], all=TRUE, sort=FALSE)
-  }
+  corr <- (m12 - m1*m2) / sqrt((m11 - m1^2) * (m22 - m2^2))
 
-  return(data)
-}
-
-
-equal.space <- function(min, max, number) {
-  return(seq(min, max, (max-min)/(number-1)))
-}
-
-
-read.graphs <- function(files) {
-  return(lapply(files, read.graph, format="graphml"))
+  return(corr)
 }

@@ -144,13 +144,19 @@ CL::CL()
         (RL_Q_ALPHA.c_str(), po::value <double>()->default_value(0.1), "Learning Rate.")
         (RL_Q_LAMBDA.c_str(), po::value <double>()->default_value(0.1), "Action-value Rate.")
         (RL_POLICY.c_str(), po::value <boost::uint16_t>()->default_value(
-            1), "Policy (1=epsilon-greedy).")
+            1), "Policy (1=Epsilon-Greedy, 2=Boltzmann).")
        ;
 
     po::options_description opt_rl_policy_epsilon("RL Epsilon Policy Configuration");
     opt_rl_policy_epsilon.add_options()
         (RL_POLICY_EPSILON.c_str(), po::value <double>()->default_value(
             0.1), "Epsilon-greedy value.")
+        ;
+
+    po::options_description opt_rl_policy_boltzmann("RL Boltzmann Policy Configuration");
+    opt_rl_policy_boltzmann.add_options()
+        (RL_POLICY_BOLTZMANN_T.c_str(), po::value <double>()->default_value(
+            100.0), "Temperator for Boltzmann policy.")
         ;
 
     po::options_description opt_debug("Debug Configuration");
@@ -168,6 +174,7 @@ CL::CL()
     opt_desc->add(opt_lhs);
     opt_desc->add(opt_rl);
     opt_desc->add(opt_rl_policy_epsilon);
+    opt_desc->add(opt_rl_policy_boltzmann);
     opt_desc->add(opt_debug);
 }
 
@@ -481,12 +488,19 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
             desArgs->rl_policy = vm[RL_POLICY.c_str()].as <boost::uint16_t>();
         }
         std::cout << "RL Selection Policy: " << desArgs->rl_policy << "." << std::endl;
-    }
 
-    if (vm.count(RL_POLICY_EPSILON.c_str())) {
-        desArgs->rl_policy_epsilon = vm[RL_POLICY_EPSILON.c_str()].as <double>();
+        if (desArgs->rl_policy == 1) {
+            if (vm.count(RL_POLICY_EPSILON.c_str())) {
+                desArgs->rl_policy_epsilon = vm[RL_POLICY_EPSILON.c_str()].as <double>();
+            }
+            std::cout << "RL Epsilon: " << desArgs->rl_policy_epsilon << "." << std::endl;
+        } else if (desArgs->rl_policy == 2) {
+            if (vm.count(RL_POLICY_BOLTZMANN_T.c_str())) {
+                desArgs->rl_policy_boltzmann_t = vm[RL_POLICY_BOLTZMANN_T.c_str()].as <double>();
+            }
+            std::cout << "RL Boltzmann T: " << desArgs->rl_policy_boltzmann_t << "." << std::endl;
+        }
     }
-    std::cout << "RL Epsilon: " << desArgs->rl_policy_epsilon << "." << std::endl;
 
     std::cout << std::endl << "7) Output Files" << std::endl;
     desArgs->events_unprocessed = "events_unprocessed.dat";

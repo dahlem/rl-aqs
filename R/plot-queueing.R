@@ -73,22 +73,13 @@ des.queueing.arrival.power.law.plot <- function(qts, graphs, factor, ps=TRUE) {
 
   for (i in seq(1, length(qts))) {
     lambda <- qts[[i]]$lambda
-    n <- length(lambda)
-    vals <- seq(0,ceiling(max(lambda)), ceiling(max(lambda)) / 10000)
-    y <- hist(lambda, breaks = vals, plot = FALSE)$counts
-    
+    res <- des.power.law.dist(lambda)
     df <- rbind(df,
-                data.frame(lambda=vals[-1],
-                           counts=y,
-                           size=rep(vcount(graphs[[i]]), length(y))))
+                data.frame(lambda=res$x,
+                           cumFreq=res$y,
+                           size=rep(vcount(graphs[[i]]), length(res$y))))
   }
 
-  ## only take the bins that actually have values
-  df <- df[df$counts > 0,]
-
-  ## add the cumulative frequency
-  df <- cbind(df, cumFreq=(df$counts/sum(df$counts)))
-  
   p <- ggplot()
   if (!is.null(factor)) {
     if (factor == "size") {
@@ -158,17 +149,12 @@ des.queueing.degree.power.law.plot <- function(qts, graphs, factor, ps=TRUE) {
 
   for (i in seq(1, length(qts))) {
     degree <- degree(graphs[[i]], mode="in")
-    x <- sort(degree)
-    n <- length(x)
-    vals <- unique(x)
-    y <- tabulate(match(x, vals))/n
+    res <- des.power.law.dist(degree)
     df <- rbind(df,
-                data.frame(degree=vals,
-                           cumFreq=y,
-                           size=rep(vcount(graphs[[i]]), length(y))))
+                data.frame(degree=res$x,
+                           cumFreq=res$y,
+                           size=rep(vcount(graphs[[i]]), length(res$y))))
   }
-
-  df <- df[df$degree > 0,]
 
   p <- ggplot(df, aes(x=degree, y=cumFreq))
   if (!is.null(factor)) {
@@ -233,21 +219,12 @@ des.queueing.average.response.power.law.plot <- function(qts, graphs, factor, ps
 
   for (i in seq(1, length(qts))) {
     response <- qts[[i]]$w
-    n <- length(response)
-    vals <- seq(0,ceiling(max(response)), ceiling(max(response)) / 10000)
-    y <- hist(response, breaks = vals, plot = FALSE)$counts
-    
+    res <- des.power.law.dist(response)
     df <- rbind(df,
-                data.frame(response=vals[-1],
-                           counts=y,
-                           size=rep(vcount(graphs[[i]]), length(y))))
+                data.frame(response=res$x,
+                           cumFreq=res$y,
+                           size=rep(vcount(graphs[[i]]), length(res$y))))
   }
-
-  ## only take the bins that actually have values
-  df <- df[df$counts > 0,]
-
-  ## add the cumulative frequency
-  df <- cbind(df, cumFreq=(df$counts/sum(df$counts)))
   
   p <- ggplot()
   if (!is.null(factor)) {
@@ -293,21 +270,12 @@ des.queueing.service.power.law.plot <- function(qts, graphs, factor, ps=TRUE, fi
 
   for (i in seq(1, length(qts))) {
     mu <- qts[[i]]$mu
-    n <- length(mu)
-    vals <- seq(0,ceiling(max(mu)), ceiling(max(mu)) / 10000)
-    y <- hist(mu, breaks = vals, plot = FALSE)$counts
-    
+    res <- des.power.law.dist(mu)
     df <- rbind(df,
-                data.frame(mu=vals[-1],
-                           counts=y,
-                           size=rep(vcount(graphs[[i]]), length(y))))
+                data.frame(mu=res$x,
+                           cumFreq=res$y,
+                           size=rep(vcount(graphs[[i]]), length(res$y))))
   }
-
-  ## only take the bins that actually have values
-  df <- df[df$counts > 0,]
-
-  ## add the cumulative frequency
-  df <- cbind(df, cumFreq=(df$counts/sum(df$counts)))
   
   p <- ggplot()
   if (!is.null(factor)) {

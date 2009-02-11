@@ -48,7 +48,9 @@ bool val_greater(tValues const& v1, tValues const& v2);
 
 
 struct PAttr
-{};
+{
+    double tau; // boltzmann policy temperature
+};
 
 typedef boost::shared_ptr<PAttr> PAttrSP;
 

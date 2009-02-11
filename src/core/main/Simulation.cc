@@ -48,6 +48,7 @@
 #include "AdminEvent.hh"
 #include "ArrivalEvent.hh"
 #include "ArrivalHandler.hh"
+#include "BoltzmannPolicy.hh"
 #include "CL.hh"
 #include "DepartureEvent.hh"
 #include "DepartureHandler.hh"
@@ -180,7 +181,7 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
 {
     boost::uint16_t sim_num, rep_num, num_vertices;
     boost::uint16_t net_size, max_edges;
-    double edge_prob, rl_q_alpha, rl_q_lambda, rl_policy_epsilon;
+    double edge_prob, rl_q_alpha, rl_q_lambda, rl_policy_epsilon, rl_policy_boltz_t;
 
     // receive the input arguments via mpi
 #ifdef HAVE_MPI
@@ -211,6 +212,8 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
         rl_q_alpha = simArgs.rl_q_alpha;
         rl_q_lambda = simArgs.rl_q_lambda;
         rl_policy_epsilon = simArgs.rl_policy_epsilon;
+        rl_policy_boltz_t = simArgs.rl_policy_boltzmann_t;
+
 #else
         sim_num = desArgs->sim_num;
         rep_num = desArgs->rep_num;
@@ -220,6 +223,8 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
         rl_q_alpha = desArgs->rl_q_alpha;
         rl_q_lambda = desArgs->rl_q_lambda;
         rl_policy_epsilon = desArgs->rl_policy_epsilon;
+        rl_policy_boltz_t = desArgs->rl_policy_boltzmann_t;
+
 #endif /* HAVE_MPI */
 
         dnet::tGraphSP graph(new dnet::Graph);
@@ -460,6 +465,15 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
                     = dsample::CRN::getInstance().get(pol_uniform_rng_index);
 
                 pol = drl::tPolicySP(new drl::EpsilonGreedy(desArgs->rl_policy_epsilon, r1, r2));
+            } else if (desArgs->rl_policy == 2) {
+                boost::uint32_t seed = dsample::Seeds::getInstance().getSeed();
+                boost::uint32_t pol_uniform_rng_index
+                    = dsample::CRN::getInstance().init(seed);
+                dsample::CRN::getInstance().log(seed, "boltzmann uniform");
+                dsample::tGslRngSP r1
+                    = dsample::CRN::getInstance().get(pol_uniform_rng_index);
+
+                pol = drl::tPolicySP(new drl::BoltzmannPolicy(desArgs->rl_policy_boltzmann_t, r1));
             }
 
             // configure the on-policy selection

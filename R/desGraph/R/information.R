@@ -37,7 +37,7 @@ des.graph.max.info.fn <- function(outdegree) {
 ## mode 1: based on qval
 ##      2: based on weight
 ##      3: based on shortest paths
-des.graph.info <- function(graph, mode=1, thres=FALSE) {
+des.graph.info <- function(graph, mode=1, thres=FALSE, greedy=TRUE) {
   # for each vertex calculate the available information using
   # the weights of all out-edges
 
@@ -49,37 +49,36 @@ des.graph.info <- function(graph, mode=1, thres=FALSE) {
       ## select only vertices with an out-degree of > 1
       df <- df[df$degree > 1,]
       dist <- sapply(df$vertices, des.graph.node.qval.info, graph=graph)
-      greedyQVal <- sapply(df$vertices, des.graph.node.qval.greedy.info, graph=graph)
-      df <- cbind(df, distance=dist, greedyQVal=greedyQVal)
+      df <- cbind(df, distance=dist)
     } else {
       ## select all vertices but the first one
-      df <- df[-1,]
       dist <- sapply(df$vertices, des.graph.node.qval.info, graph=graph)
-      greedyQVal <- sapply(df$vertices, des.graph.node.qval.greedy.info, graph=graph)
-      df <- cbind(df, distance=dist, greedyQVal=greedyQVal)
+      df <- cbind(df, distance=dist)
     }
   } else if (mode == 2) {
     ## select all vertices but the first one
     df <- df[-1,]
     dist <- sapply(df$vertices, des.graph.node.info, graph=graph)
-    greedyQVal <- sapply(df$vertices, des.graph.node.qval.greedy.info, graph=graph)
-    df <- cbind(df, distance=dist, greedyQVal=greedyQVal)
+    df <- cbind(df, distance=dist)
   } else if (mode == 3) {
     if (thres) {
       ## select only vertices with an out-degree of > 1
       df <- df[df$degree > 1,]
       dist <- sapply(df$vertices, des.graph.node.shortest.path.info, graph=graph)
-      greedyQVal <- sapply(df$vertices, des.graph.node.qval.greedy.info, graph=graph)
-      df <- cbind(df, distance=dist, greedyQVal=greedyQVal)
+      df <- cbind(df, distance=dist)
     } else {
       ## select all vertices but the first one
       df <- df[-1,]
       dist <- sapply(df$vertices, des.graph.node.shortest.path.info, graph=graph)
-      greedyQVal <- sapply(df$vertices, des.graph.node.qval.greedy.info, graph=graph)
-      df <- cbind(df, distance=dist, greedyQVal=greedyQVal)
+      df <- cbind(df, distance=dist)
     }
   }
 
+  if (greedy) {
+    greedyQVal <- sapply(df$vertices, des.graph.node.qval.greedy.info, graph=graph)
+    df <- cbind(df, greedyQVal=greedyQVal)
+  }
+  
   return(df)
 }
 
@@ -213,15 +212,20 @@ des.graph.node.qval.sp <- function(vertex, graph) {
 
 
 des.graph.node.qval.info <- function(vertex, graph) {
-  weights <- E(graph)[from(vertex)]$q_value
-  if (length(weights) == 1) {
-    weights[1] = 1
-  }
-  sumWeights <- sum(weights)
-  normWeights <- weights/sumWeights
-  outdegree <- 1/length(weights)
+  edge <- E(graph)[from(vertex)]
+  if (length(edge)) {
+    weights <- edge$q_value
+    if (length(weights) == 1) {
+      weights[1] = 1
+    }
+    sumWeights <- sum(weights)
+    normWeights <- weights/sumWeights
+    outdegree <- 1/length(weights)
   
-  return(des.graph.info.fn(outdegree, normWeights))
+    return(des.graph.info.fn(outdegree, normWeights))
+  } else {
+    return(0.0)
+  }
 }
 
 

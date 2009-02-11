@@ -73,6 +73,7 @@ typedef struct {
     double rl_q_alpha;          /* q-learning rate */
     double rl_q_lambda;         /* action value discount rate */
     double rl_policy_epsilon;   /* rl policy epsilon-greedy value */
+    double rl_policy_boltz_t;   /* rl policy boltzmann temperature */
 } tSimArgsMPI;
 
 
