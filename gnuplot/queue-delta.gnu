@@ -12,6 +12,7 @@ MINY=$4;
 MAXY=$5;
 XLABEL=$6;
 YLABEL=$7;
+ZLABEL=$8;
 
 # Check whether the command-line parameters are present
 if [ -z "$DATAFILE" ] ; then
@@ -42,7 +43,7 @@ fi
 
 gnuplot << EOF
 
-set terminal postscript colour solid rounded
+set terminal postscript enhanced colour solid rounded
 set output "$DATAFILE-delta.eps"
 
 set yrange [$MINY:$MAXY]
@@ -54,10 +55,18 @@ set dgrid3d 30
 
 set size 2.8/5., 1.7/3.
 
-set xlabel "$XLABEL"
-set ylabel "$YLABEL"
+set xlabel "$XLABEL" -1,-1
+set ylabel "$YLABEL" 1,0
+set zlabel "$ZLABEL" 2,4
 
-splot "soc-$DATAFILE.dat" u 1:2:5 title "Delta (ER Model)" w l,\
-      "rand-$DATAFILE.dat" u 1:2:5 title "Delta (BBV Model)" w l 
+set xtics 0.02 rotate by 45
+set mxtics
+set ytics 0.02
+set mytics
+set ztics 2000
+set mztics
+
+splot "soc-$DATAFILE.dat" u 1:2:5 title "ER Model" w l,\
+      "rand-$DATAFILE.dat" u 1:2:5 title "BBV Model" w l 
 
 EOF

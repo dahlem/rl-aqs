@@ -107,6 +107,9 @@ public:
             std::cout << "Edge Prob. Index: " << LhsUtils::getEdgeProbIndex(p_desArgs) << std::endl;
             std::cout << "Arrival Boost Index: " << LhsUtils::getVertexBoostIndex(p_desArgs) << std::endl;
             std::cout << "Edge Boost Index: " << LhsUtils::getEdgeBoostIndex(p_desArgs) << std::endl;
+            std::cout << "RL Q alpha Index: " << LhsUtils::getRLAlphaIndex(p_desArgs) << std::endl;
+            std::cout << "RL Q Lambda Index: " << LhsUtils::getRLLambdaIndex(p_desArgs) << std::endl;
+            std::cout << "RL epsilon Index: " << LhsUtils::getRLEpsilonIndex(p_desArgs) << std::endl;
 #endif /* NDEBUG */
 
             min = gsl_vector_calloc(dimensions);
@@ -131,6 +134,18 @@ public:
             if (LhsUtils::getEdgeBoostIndex(p_desArgs) >= 0) {
                 gsl_vector_set(min, LhsUtils::getEdgeBoostIndex(p_desArgs), p_desArgs->min_boost_edge);
                 gsl_vector_set(max, LhsUtils::getEdgeBoostIndex(p_desArgs), p_desArgs->max_boost_edge);
+            }
+            if (LhsUtils::getRLAlphaIndex(p_desArgs) >= 0) {
+                gsl_vector_set(min, LhsUtils::getRLAlphaIndex(p_desArgs), p_desArgs->min_rl_q_alpha);
+                gsl_vector_set(max, LhsUtils::getRLAlphaIndex(p_desArgs), p_desArgs->max_rl_q_alpha);
+            }
+            if (LhsUtils::getRLLambdaIndex(p_desArgs) >= 0) {
+                gsl_vector_set(min, LhsUtils::getRLLambdaIndex(p_desArgs), p_desArgs->min_rl_q_lambda);
+                gsl_vector_set(max, LhsUtils::getRLLambdaIndex(p_desArgs), p_desArgs->max_rl_q_lambda);
+            }
+            if (LhsUtils::getRLEpsilonIndex(p_desArgs) >= 0) {
+                gsl_vector_set(min, LhsUtils::getRLEpsilonIndex(p_desArgs), p_desArgs->min_rl_policy_epsilon);
+                gsl_vector_set(max, LhsUtils::getRLEpsilonIndex(p_desArgs), p_desArgs->max_rl_policy_epsilon);
             }
 
             dsample::LHS::sample(rng.get(), min, max, p_desArgs->simulations, &sample);
@@ -174,6 +189,18 @@ public:
                 if (LhsUtils::getEdgeBoostIndex(p_desArgs) >= 0) {
                     p_desArgs->boost_edge = gsl_matrix_get(
                         sample, i, LhsUtils::getEdgeBoostIndex(p_desArgs));
+                }
+                if (LhsUtils::getRLAlphaIndex(p_desArgs) >= 0) {
+                    p_desArgs->rl_q_alpha = gsl_matrix_get(
+                        sample, i, LhsUtils::getRLAlphaIndex(p_desArgs));
+                }
+                if (LhsUtils::getRLLambdaIndex(p_desArgs) >= 0) {
+                    p_desArgs->rl_q_lambda = gsl_matrix_get(
+                        sample, i, LhsUtils::getRLLambdaIndex(p_desArgs));
+                }
+                if (LhsUtils::getRLEpsilonIndex(p_desArgs) >= 0) {
+                    p_desArgs->rl_policy_epsilon = gsl_matrix_get(
+                        sample, i, LhsUtils::getRLEpsilonIndex(p_desArgs));
                 }
 
                 output = m_dsim->simulate(p_desArgs);

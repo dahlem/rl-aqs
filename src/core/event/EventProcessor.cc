@@ -68,50 +68,124 @@ bool EventProcessor::process()
     dcommon::Entry *entry = NULL;
 
     try {
-        while ((entry = m_queue->dequeue()) != NULL) {
+        while (true) {
 #ifndef NDEBUG_EVENTS
-            std::cout << "Handle event: " << const_cast <const dcommon::Entry&> (*entry) << std::endl;
+            std::cout << "** EventProcessor : dequeue event" << std::endl;
+#endif /* NDEBUG_EVENTS */
+            entry = m_queue->dequeue();
+#ifndef NDEBUG_EVENTS
+            std::cout << "** EventProcessor : event dequeued" << std::endl;
+#endif /* NDEBUG_EVENTS */
+
+            if (entry == NULL) {
+                break;
+            }
+
+#ifndef NDEBUG_EVENTS
+            std::cout << "** EventProcessor : Handle event: " << const_cast <const dcommon::Entry&> (*entry) << std::endl;
 #endif /* NDEBUG_EVENTS */
             // if it is a admin event, then handle it
             if (entry->getType() == LOG_GRAPH_EVENT) {
+#ifndef NDEBUG_EVENTS
+                std::cout << "** EventProcessor : admin event start" << std::endl;
+#endif /* NDEBUG_EVENTS */
                 m_adminEvent->admin(entry);
+#ifndef NDEBUG_EVENTS
+                std::cout << "** EventProcessor : admin event finished" << std::endl;
+#endif /* NDEBUG_EVENTS */
             } else {
 
                 // if stop time has been reached break out and handle the event below
                 if (entry->getArrival() > m_stopTime) {
                     break;
                 } else {
+#ifndef NDEBUG_EVENTS
+                    std::cout << "** EventProcessor : pre any event start" << std::endl;
+#endif /* NDEBUG_EVENTS */
                     m_preAnyEvent->preAny(entry);
+#ifndef NDEBUG_EVENTS
+                    std::cout << "** EventProcessor : pre any event finished" << std::endl;
+#endif /* NDEBUG_EVENTS */
                 }
 
                 switch (entry->getType()) {
                   case LAST_ARRIVAL_EVENT:
                       // generate new events
+#ifndef NDEBUG_EVENTS
+                      std::cout << "** EventProcessor : last arrival event start" << std::endl;
+#endif /* NDEBUG_EVENTS */
                       m_lastArrivalEvent->lastArrival(entry);
+#ifndef NDEBUG_EVENTS
+                      std::cout << "** EventProcessor : last arrival event finished" << std::endl;
+#endif /* NDEBUG_EVENTS */
                   case ARRIVAL_EVENT:
                   case RESCHEDULED_EVENT:
+#ifndef NDEBUG_EVENTS
+                      std::cout << "** EventProcessor : arrival event start" << std::endl;
+#endif /* NDEBUG_EVENTS */
                       m_arrivalEvent->arrival(entry);
+#ifndef NDEBUG_EVENTS
+                      std::cout << "** EventProcessor : arrival event finished" << std::endl;
+#endif /* NDEBUG_EVENTS */
                       break;
                   case DEPARTURE_EVENT:
+#ifndef NDEBUG_EVENTS
+                      std::cout << "** EventProcessor : departure event start" << std::endl;
+#endif /* NDEBUG_EVENTS */
                       m_departureEvent->departure(entry);
+#ifndef NDEBUG_EVENTS
+                      std::cout << "** EventProcessor : departure event finished" << std::endl;
+#endif /* NDEBUG_EVENTS */
                       break;
                   case ACK_EVENT:
+#ifndef NDEBUG_EVENTS
+                      std::cout << "** EventProcessor : ack event start" << std::endl;
+#endif /* NDEBUG_EVENTS */
                       m_ackEvent->ack(entry);
+#ifndef NDEBUG_EVENTS
+                      std::cout << "** EventProcessor : ack event finished" << std::endl;
+#endif /* NDEBUG_EVENTS */
                       break;
                   case LEAVE_EVENT:
+#ifndef NDEBUG_EVENTS
+                      std::cout << "** EventProcessor : leave event start" << std::endl;
+#endif /* NDEBUG_EVENTS */
                       m_leaveEvent->leave(entry);
+#ifndef NDEBUG_EVENTS
+                      std::cout << "** EventProcessor : leave event finished" << std::endl;
+#endif /* NDEBUG_EVENTS */
                       break;
                   default:
                       break;
                 }
 
+#ifndef NDEBUG_EVENTS
+                std::cout << "** EventProcessor : post any event start" << std::endl;
+#endif /* NDEBUG_EVENTS */
                 m_postAnyEvent->postAny(entry);
+#ifndef NDEBUG_EVENTS
+                std::cout << "** EventProcessor : post any event finished" << std::endl;
+#endif /* NDEBUG_EVENTS */
 
                 delete entry;
             }
         }
 
+#ifndef NDEBUG_EVENTS
+        std::cout << "** EventProcessor : post event start" << std::endl;
+#endif /* NDEBUG_EVENTS */
+
+#ifndef NDEBUG
+        if (entry == NULL) {
+            std::cout << "the entry is NULL!" << std::endl;
+        }
+#endif /* NDEBUG_EVENTS */
+
         m_postEvent->post(entry);
+
+#ifndef NDEBUG_EVENTS
+        std::cout << "** EventProcessor : post event finished" << std::endl;
+#endif /* NDEBUG_EVENTS */
 
         std::cout << "Finished processing events." << std::endl;
     } catch (dcommon::QueueException &qe) {
@@ -132,6 +206,7 @@ bool EventProcessor::process()
 
 #ifndef NDEBUG
     std::cout << m_queue->getInEvents() << ", " << m_queue->getOutEvents() << std::endl;
+    std::cout << "LadderQ events :" << m_queue->size() << std::endl;
     assert(m_queue->getInEvents() == m_queue->getOutEvents());
 #endif /* NDEBUG_EVENTS */
 

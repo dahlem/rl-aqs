@@ -10,7 +10,7 @@
 
 AC_PREREQ(2.61)
 AC_INIT([Discrete Event Simulation for Service Interaction],
-        [2.1],
+        [2.2],
         [Dominik Dahlem Dominik.Dahlem@cs.tcd.ie], 
         [des])
 
@@ -200,16 +200,17 @@ DX_INIT_DOXYGEN([DES], [Doxyfile], [doc/doxygen])
 AC_CONFIG_FILES([
    README
    Makefile
-   des.pbs
-   des_soc_500s_3e_1000t.pbs
-   des_rand_500s_1000e_1000t.pbs
-   des_soc_1000s_5e_1000t.pbs
-   des_soc_5000s_5e_1000t.pbs
-   crn_test.pbs
-   seeds_read.pbs
-   struct_test.pbs
-   read_graphml.pbs
-   write_seeds.pbs
+   pbs/des.pbs
+   pbs/des_soc_500s_3e_1000t.pbs
+   pbs/des_rand_500s_1000e_1000t.pbs
+   pbs/des_soc_1000s_5e_1000t.pbs
+   pbs/des_soc_5000s_5e_1000t.pbs
+   pbs/crn_test.pbs
+   pbs/seeds_read.pbs
+   pbs/struct_test.pbs
+   pbs/read_graphml.pbs
+   pbs/write_seeds.pbs
+   pbs/des-soc-1000_3-sarsa-epsilon.pbs
    doc/Makefile
    m4/Makefile
    R/Makefile

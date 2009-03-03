@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
         (MAX_ARRIVAL.c_str(), po::value <double>()->default_value(1), "Maximum arrival rate.")
         (BOOST_ARRIVAL.c_str(), po::value <double>()->default_value(1.0), "Boost the arrival rate.")
         (BOOST_EDGE.c_str(), po::value <double>()->default_value(1.0), "Boost the edge weight.")
-        (MAX_EDGES.c_str(), po::value<boost::uint32_t>()->default_value(dnet::WEvonet::MAX_EDGES), "set the maximum number of edges to connect a new vertex")
+        (MAX_EDGES.c_str(), po::value<boost::uint32_t>()->default_value(dnet::WEvonet::MAX_OUTDEGREE), "set the maximum number of edges to connect a new vertex")
         (NUM_GRAPHS.c_str(), po::value<boost::uint32_t>()->default_value(1), "set the number of graphs to be generated")
         ;
 

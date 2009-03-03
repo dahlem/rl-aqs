@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,6 +17,14 @@
 /** @file UtilisationHandler.cc
  * Implementation of a basic utilisation handler.
  */
+#if HAVE_CONFIG_H
+# include <config.h>
+#endif
+
+#ifndef NDEBUG_EVENTS
+# include <iostream>
+#endif /* NDEBUG_EVENTS */
+
 #include "events.hh"
 #include "UtilisationHandler.hh"
 namespace dcore = des::core;
@@ -54,6 +62,10 @@ void dcore::UtilisationHandler::update(dcore::PostAnyEvent *subject)
         dnet::Vertex vertex = boost::vertex(entry->getDestination(), *m_graph);
         double b_i = 0.0;
 
+#ifndef NDEBUG_EVENTS
+        std::cout << "** Update utilisation for vertex: " << entry->getDestination() << std::endl;
+#endif /* NDEBUG_EVENTS */
+
         if (vertex_busy_map[vertex]) {
             double diff = entry->getArrival() - vertex_last_event_time_map[vertex];
             b_i = diff;
@@ -64,4 +76,8 @@ void dcore::UtilisationHandler::update(dcore::PostAnyEvent *subject)
         vertex_Bdt_map[vertex] = vertex_Bdt_map[vertex] + b_i;
         vertex_utilisation_map[vertex] = vertex_Bdt_map[vertex] / entry->getArrival();
     }
+
+#ifndef NDEBUG_EVENTS
+    std::cout << "Departure event scheduled." << std::endl;
+#endif /* NDEBUG_EVENTS */
 }

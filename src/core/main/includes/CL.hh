@@ -85,11 +85,17 @@ const std::string GENERATOR = "graph_generator";
 
 const std::string RL = "rl";
 const std::string RL_Q_ALPHA = "rl_q_alpha";
+const std::string MIN_RL_Q_ALPHA = "min_rl_q_alpha";
+const std::string MAX_RL_Q_ALPHA = "max_rl_q_alpha";
 const std::string RL_Q_LAMBDA = "rl_q_lambda";
+const std::string MIN_RL_Q_LAMBDA = "min_rl_q_lambda";
+const std::string MAX_RL_Q_LAMBDA = "max_rl_q_lambda";
 const std::string RL_RESPONSE_ALPHA = "rl_response_alphas";
 const std::string RL_RESPONSE_REWARD = "rl_response_rewards";
 const std::string RL_POLICY = "rl_policy";
 const std::string RL_POLICY_EPSILON = "rl_policy_epsilon";
+const std::string MIN_RL_POLICY_EPSILON = "min_rl_policy_epsilon";
+const std::string MAX_RL_POLICY_EPSILON = "max_rl_policy_epsilon";
 const std::string RL_POLICY_BOLTZMANN_T = "rl_policy_boltzmann_t";
 
 
@@ -153,9 +159,15 @@ struct desArgs_t {
     boost::shared_array<double> response_reward;    /* the response rewards for the reward model */
     boost::uint16_t response_levels;                /* number of response levels */
     double rl_q_alpha;                              /* q-learning rate */
+    double min_rl_q_alpha;                          /* min q-learning rate */
+    double max_rl_q_alpha;                          /* max q-learning rate */
     double rl_q_lambda;                             /* action value discount rate */
+    double min_rl_q_lambda;                         /* min action value discount rate */
+    double max_rl_q_lambda;                         /* max action value discount rate */
     boost::uint16_t rl_policy;                      /* policy */
     double rl_policy_epsilon;                       /* epsilon-greedy */
+    double min_rl_policy_epsilon;                   /* min epsilon-greedy */
+    double max_rl_policy_epsilon;                   /* max epsilon-greedy */
     double rl_policy_boltzmann_t;                   /* the temperature value for boltzmann */
 
     friend std::ostream& operator <<(std::ostream &p_os, const desArgs_t &desArgs)

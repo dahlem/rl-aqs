@@ -13,27 +13,26 @@
 ## Keywords: plotting
 ## Created: 12.01.2009
 
-des.network.radial.plot <- function(data, filename, ps=TRUE, width=7, height=7, pts=12, fontsize=12) {
+des.network.radial.plot <- function(data, filename, ps=TRUE, width=7, height=7, pts=12) {
   if (ps) {
-    par(mar=rep(0,4))
     postscript(filename, onefile=FALSE, horizontal=FALSE,
-               paper="special", width=width, height=height, pointsize=pts)
+               paper="special", width=width, height=height)
+##     par(omi=rep(0,4))
+##     par(mar=c(-5,0,0,0))
   }
 
   a <- as.character(max(data$degree))
   b <- strsplit(a, "")
   digits <- length(b[[1]])
   breaks <- 10^(digits - 1) *
-    seq(0,
-        round(max(data$degree) / (10^(digits-1))),
-        round(max(data$degree) / (10^(digits-1)) / 5))
+    seq(0, round(max(data$degree) / (10^(digits-1))), round(max(data$degree) / (10^(digits-1)) / 5))
   labels <- max(data$degree) - breaks
   
   p <- ggplot(data, aes(x=rand, y=invdegree)) + coord_polar()
   p <- p + geom_point()
   p <- p + scale_y_continuous("In-Degree", breaks=breaks, labels=labels)
   p <- p + scale_x_continuous("")
-  p <- p + theme_bw()
+  p <- p + theme_bw(base_size=8)
   p <- p + opts(axis.text.x=theme_blank())
 ##   p <- p + opts(title="Radial Plot of the Vertex In-Degree",
 ##                 axis.text.x=theme_blank(),
@@ -41,6 +40,13 @@ des.network.radial.plot <- function(data, filename, ps=TRUE, width=7, height=7, 
 
   print(p)
 
+##   grob <- ggplotGrob(p)
+##   ## Modify in place
+##   grob <- geditGrob(grob, gPath("strip","label"), gp=gpar(fontface="bold"))
+##   ## Draw it
+##   grid.newpage()
+##   grid.draw(grob)
+  
   if (ps) {
     dev.off()
   }
@@ -63,5 +69,5 @@ for (i in filtered) {
 
   filename <- paste(strsplit(dir[i], ".gml")[[1]][1], ".eps", sep="")
 
-  des.network.radial.plot(df, filename, width=2.8, height=2.8, pts=8)
+  des.network.radial.plot(data=df, filename=filename, ps=TRUE, width=2.8, height=2.8, pts=8)
 }

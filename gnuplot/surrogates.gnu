@@ -4,7 +4,7 @@
 #
 # Usage: ./surrogates.gnu <data-file> <minX> <maxX> <minY> <maxY> <xlabel> <ylabel> <Title>
 
-USAGE="./surrogates.gnu <data-file> <minX> <maxX> <minY> <maxY> <xlabel> <ylabel> <Title>";
+USAGE="./surrogates.gnu <data-file> <minX> <maxX> <minY> <maxY> <xlabel> <ylabel>";
 DATAFILE=$1;
 MINX=$2;
 MAXX=$3;
@@ -12,7 +12,7 @@ MINY=$4;
 MAXY=$5;
 XLABEL=$6;
 YLABEL=$7;
-TITLE=$8;
+ZLABEL=$8;
 
 # Check whether the command-line parameters are present
 if [ -z "$DATAFILE" ] ; then
@@ -43,11 +43,11 @@ fi
 
 gnuplot << EOF
 
-set terminal postscript colour solid rounded
+set terminal postscript enhanced colour solid rounded
 set output "$DATAFILE.eps"
 
-set yrange [$MINY:$MAXY]
 set xrange [$MINX:$MAXX]
+set yrange [$MINY:$MAXY]
 
 #set hidden3d offset 1 trianglepattern 3 undefined 1 altdiagonal bentover
 #set style data lines
@@ -55,7 +55,6 @@ set xrange [$MINX:$MAXX]
 #set cntrparam levels 10
 #set pm3d
 
-#unset key
 set lmargin 0
 set bmargin 0
 set rmargin 0
@@ -63,9 +62,14 @@ set tmargin 0
 
 set size 2.8/5., 1.7/3.
 
-set xlabel "$XLABEL"
-set ylabel "$YLABEL"
+set xtics 0.02
+set mxtics
+set ytics 0.02
+set mytics
+set xlabel "$XLABEL" -1,-1
+set ylabel "$YLABEL" 1,0
+set zlabel "$ZLABEL" 1,4
 
-splot "rand-$DATAFILE.dat" every :4:4 title "$TITLE (ER Model)" w l,\
-      "soc-$DATAFILE.dat" every :4:4 title "$TITLE (BBV Model)" w l 
+splot "rand-$DATAFILE.dat" every :4:4 title "ER Model" w l,\
+      "soc-$DATAFILE.dat" every :4:4 title "BBV Model" w l 
 EOF

@@ -235,7 +235,7 @@ void WEvonet::advance(boost::uint32_t p_steps, tGraphSP g,
         // if MAX_EDGES is selected than the edges are deterministic
         // otherwise they are stochastic bounded on the maximum number of available
         // vertices
-        if (max_edges == WEvonet::MAX_EDGES) {
+        if (max_edges == WEvonet::MAX_OUTDEGREE) {
             edges = vertices;
         } else if (max_edges > vertices) {
             edges = gsl_rng_uniform_int(num_edges_rng.get(), vertices) + 1;
@@ -345,7 +345,7 @@ tGraphSP WEvonet::createERGraph(boost::uint32_t p_size, double fixed_edge_weight
 
     // Create graph with p_size nodes and edges with probability p
     tGraphSP g;
-    if (max_edges == WEvonet::MAX_EDGES) {
+    if (max_edges == WEvonet::MAX_OUTDEGREE) {
 #ifndef NDEBUG_NETWORK
         std::cout << "WEvonet -- size: " << p_size << ", edge probability: " <<  p << std::endl;
 #endif /* NDEBUG_NETWORK */

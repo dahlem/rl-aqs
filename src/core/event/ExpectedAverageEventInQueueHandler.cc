@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,6 +17,14 @@
 /** @file ExpectedAverageEventInQueueHandler.cc
  * Implementation of a basic expectedAverageEventInQueue handler.
  */
+#if HAVE_CONFIG_H
+# include <config.h>
+#endif
+
+#ifndef NDEBUG_EVENTS
+# include <iostream>
+#endif /* NDEBUG_EVENTS */
+
 #include "events.hh"
 #include "ExpectedAverageEventInQueueHandler.hh"
 namespace dcore = des::core;
@@ -53,6 +61,11 @@ void dcore::ExpectedAverageEventInQueueHandler::update(dcore::PostAnyEvent *subj
 
         dnet::Vertex vertex = boost::vertex(entry->getDestination(), *m_graph);
         double q_i = entry->getArrival() - vertex_last_event_time_map[vertex];
+
+#ifndef NDEBUG_EVENTS
+        std::cout << "** Update expected avg. event in queue for vertex: " << entry->getDestination() << std::endl;
+#endif /* NDEBUG_EVENTS */
+
         q_i *= vertex_number_in_queue_map[vertex];
 
         // \hat(q) = \fract{\int_{0}^{T(n)}Q(t)dt}{T(n)}
@@ -61,4 +74,8 @@ void dcore::ExpectedAverageEventInQueueHandler::update(dcore::PostAnyEvent *subj
         vertex_expected_average_number_event_map[vertex] =
             vertex_Qdt_map[vertex] / entry->getArrival();
     }
+
+#ifndef NDEBUG_EVENTS
+    std::cout << "Avg. Event in queue updated." << std::endl;
+#endif /* NDEBUG_EVENTS */
 }

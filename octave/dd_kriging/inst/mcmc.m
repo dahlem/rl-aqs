@@ -15,6 +15,11 @@
 ## Created: 20.01.2008
 ## Version: 0.1
 
+function x_bar_new = welford_mean(n, x_bar, x)
+  d = x - x_bar;
+  x_bar_new = x_bar + d / n;
+endfunction
+
 
 ## This function implements the metropolis hastings algorithm for
 ## estimating the model parameters of the bayesian likelihood equation,
@@ -38,13 +43,11 @@ function chain = mcmc_mh(scale, x0_theta, X, y, n, prior = "Jeffrey", \
     error("The given prior is not supported");
   endif
 
-  F = [];
-  for i = 1:rows(X)
-    F = [F; FUN(X(i,:))];
-  endfor
+  dims = columns(X);
+  F = FUN(X);
 
   ## initialise the x values
-  x.theta = zeros(1, columns(X));
+  x.theta = zeros(1, dims);
   x_old.theta = x0_theta;
 
   x.beta = zeros(columns(F), 1);
@@ -63,17 +66,23 @@ function chain = mcmc_mh(scale, x0_theta, X, y, n, prior = "Jeffrey", \
   ## initialise the chain
   chain.accepted = 0;
   chain.beta = zeros(columns(F), n);
-  chain.theta = zeros(n, 2);
+  chain.theta = zeros(n, dims);
   chain.sigma = zeros(1, n);
   chain.l = zeros(1, n);
+  mean.thetaP = zeros(1, dims);
 
   for i = 1:n
-   ## step 1: generate x from the proposal distribution
+    ## step 1: generate x from the proposal distribution
     ## theta has to be positive
-    for k = 1:columns(X)
-      x.theta(k) = prior_pick(5, scale, columns(X));
-      x.theta(k) = e.^x.theta(k);
+    for k = 1:dims
+      if (chain.accepted == 0)
+	x.theta(k) = prior_pick(1./x0_theta(k).^2, scale, columns(X));
+      else
+	x.theta(k) = prior_pick(mean.thetaP(k), scale, columns(X));
+      endif
+      x.theta(k) = e^x.theta(k);
     endfor
+    
     ## step 2: calcuate the probability of move
     [q_new, x.beta, x.sigma] = krig_likelihood(x.theta, X, y, F, nugget);
 
@@ -103,6 +112,7 @@ function chain = mcmc_mh(scale, x0_theta, X, y, n, prior = "Jeffrey", \
       chain.theta(chain.accepted, :) = x_old.theta;
       chain.sigma(chain.accepted) = x_old.sigma;
       chain.l(chain.accepted) = q_old;
+      mean.thetaP = welford_mean(i, mean.thetaP, 1./x.theta.^2);
     endif
   endfor
 
@@ -132,10 +142,7 @@ function chain = mcmc_nonst_mh(scale, ub, x0_eta, X, y, n, \
     error("The given prior is not supported");
   endif
 
-  F = [];
-  for i = 1:rows(X)
-    F = [F; FUN(X(i,:))];
-  endfor
+  F = FUN(X);
   k = rows(xi);
   l = columns(xi);
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2007,2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2007,2008,2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@ public:
     const char* what() const throw();
     int errorCode() const;
 
-    enum {
+    enum Errors {
         BAD_RESET = 0,
         RUNG_NOT_FOUND,
         RUNG_OUT_OF_BOUNDS,

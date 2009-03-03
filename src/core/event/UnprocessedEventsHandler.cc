@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,6 +17,14 @@
 /** @file UnprocessedEventHandler.cc
  * Implementation of a basic unprocessedEvent handler.
  */
+#if HAVE_CONFIG_H
+# include <config.h>
+#endif
+
+#if !defined(NDEBUG_EVENTS) || !defined(NDEBUG)
+# include <iostream>
+#endif /* NDEBUG_EVENTS */
+
 #include <iomanip>
 #include <string>
 
@@ -44,6 +52,13 @@ dcore::UnprocessedEventsHandler::~UnprocessedEventsHandler()
 
 void dcore::UnprocessedEventsHandler::update(dcore::PostEvent *subject)
 {
+#ifndef NDEBUG_EVENTS
+    std::cout << "** Drop unprocessed events" << std::endl;
+#endif /* NDEBUG_EVENTS */
+#ifndef NDEBUG
+    int num = 0;
+#endif /* NDEBUG */
+
     dcommon::Entry *entry = subject->getEvent();
 
     // record the events left over
@@ -55,6 +70,16 @@ void dcore::UnprocessedEventsHandler::update(dcore::PostEvent *subject)
             s << std::setprecision(14) << const_cast<const dcommon::Entry&> (*entry);
             m_unprocessedEvents->print(s);
             delete entry;
+#ifndef NDEBUG
+            num++;
+#endif /* NDEBUG */
         } while ((entry = m_queue->dequeue()) != NULL);
     }
+
+#ifndef NDEBUG_EVENTS
+    std::cout << "Unprocessed events dropped" << std::endl;
+#endif /* NDEBUG_EVENTS */
+#ifndef NDEBUG
+    std::cout << "Unprocessed events: " << num << std::endl;
+#endif /* NDEBUG */
 }

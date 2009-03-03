@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,6 +17,14 @@
 /** @file LastEventHandler.cc
  * Implementation of a basic lastEvent handler.
  */
+#if HAVE_CONFIG_H
+# include <config.h>
+#endif
+
+#ifndef NDEBUG_EVENTS
+# include <iostream>
+#endif /* NDEBUG_EVENTS */
+
 #include "events.hh"
 #include "LastEventHandler.hh"
 namespace dcore = des::core;
@@ -48,7 +56,15 @@ void dcore::LastEventHandler::update(dcore::PostAnyEvent *subject)
         (entry->getType() == ARRIVAL_EVENT) ||
         (entry->getType() == DEPARTURE_EVENT)) {
 
+#ifndef NDEBUG_EVENTS
+        std::cout << "** Update last event for vertex: " << entry->getDestination() << std::endl;
+#endif /* NDEBUG_EVENTS */
+
         dnet::Vertex vertex = boost::vertex(entry->getDestination(), *m_graph);
         vertex_last_event_time_map[vertex] = entry->getArrival();
     }
+
+#ifndef NDEBUG_EVENTS
+    std::cout << "Last event updated." << std::endl;
+#endif /* NDEBUG_EVENTS */
 }

@@ -126,13 +126,24 @@ des.influence.strength.power.law.weight <- function(q, ps=TRUE, fit=FALSE) {
 }
 
 
-des.influence.strength <- function(W) {
+des.influence.strength.row <- function(W) {
   W1 <- W
   
   ## make the diagonals zero
   diag(W1) <- 0
   
   q <- rowSums(W1)
+  return(q)
+}
+
+
+des.influence.strength.col <- function(W) {
+  W1 <- W
+  
+  ## make the diagonals zero
+  diag(W1) <- 0
+  
+  q <- colSums(W1)
   return(q)
 }
 
@@ -167,8 +178,16 @@ des.corr.graph.weight <- function(graph, G, degThres=TRUE) {
   
   for (i in df$vertices) {
     neighbours <- V(graph)[nei(i, mode="out")]
-    for (j in neighbours) {
-      W[i+1, j+1] <- des.corr(G[,i+1], G[,j+1])
+    ## we are only interested in learning agents
+    if (length(neighbours) > 1) {
+      for (j in neighbours) {
+        ## we are only interested in learning agents
+        neighboursneigh <- V(graph)[nei(j, mode="out")]
+        if (length(neighboursneigh) > 1) {
+          print(paste("From", i, "to", j))
+          W[i+1, j+1] <- des.corr(G[,i+1], G[,j+1])
+        }
+      }
     }
   }
 

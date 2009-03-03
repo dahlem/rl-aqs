@@ -56,7 +56,7 @@ class WEvonet
 public:
 
 
-    static const boost::uint32_t MAX_EDGES = UINT_MAX;
+    static const boost::uint32_t MAX_OUTDEGREE = UINT_MAX;
 
     /**
      * Constructor which evolves a weighted directed network given a particular size.

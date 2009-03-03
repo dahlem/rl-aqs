@@ -1,4 +1,4 @@
-// Copyright (C) 2007,2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2007,2008,2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -25,9 +25,9 @@
 # define __STDC_CONSTANT_MACROS
 #endif /* __STDC_CONSTANT_MACROS */
 
-#ifndef NDEBUG_QUEUE
+#if !defined(NDEBUG_QUEUE) || !defined(NDEBUG)
 # include <iostream>
-#endif /* NDEBUG_EVENTS */
+#endif /* NDEBUG */
 
 #if HAVE_LADDERTIMING
 # include <ctime>
@@ -179,18 +179,28 @@ Entry* LadderQueue::dequeue() throw (QueueException)
     Entry *entry = NULL;
     EntryList *list = NULL;
 
+#ifndef NDEBUG_QUEUE
+    std::cout << "LQ -- Dequeue" << std::endl;
+#endif /* NDEBUG_EVENTS */
+
     if (m_bottom->size() > 0) {
+#ifndef NDEBUG_QUEUE
+        std::cout << "LQ -- Dequeue from bottom..." << std::endl;
+#endif /* NDEBUG_EVENTS */
         // bottom serves the dequeue operation
         entry = m_bottom->front();
         m_bottom->pop_front();
 #ifndef NDEBUG_QUEUE
-        std::cout << "LQ -- Dequeue from bottom" << std::endl;
+        std::cout << "LQ -- Dequeue from bottom finished" << std::endl;
 #endif /* NDEBUG_EVENTS */
     } else {
         // otherwise the ladder will transfer events to the bottom
         boost::uint32_t size = m_ladder->getNBC();
 
         if (size > 0) {
+#ifndef NDEBUG_QUEUE
+            std::cout << "LQ -- Transfer ladder to bottom" << std::endl;
+#endif /* NDEBUG_EVENTS */
             // the ladder contains events to be transferred to bottom
             list = m_ladder->delist();
             m_bottom->push(list);
@@ -199,6 +209,9 @@ Entry* LadderQueue::dequeue() throw (QueueException)
 #endif /* NDEBUG_EVENTS */
             entry = m_bottom->front();
             m_bottom->pop_front();
+#ifndef NDEBUG_QUEUE
+            std::cout << "LQ -- Popped bottom" << std::endl;
+#endif /* NDEBUG_EVENTS */
         } else {
             // check whether the top structure has events
             size = m_top->getNTop();
@@ -206,13 +219,16 @@ Entry* LadderQueue::dequeue() throw (QueueException)
             double min = m_top->getMinTS();
 
             if (size > 0) {
+#ifndef NDEBUG_QUEUE
+                std::cout << "LQ -- Transfer top to ladder..." << std::endl;
+#endif /* NDEBUG_EVENTS */
                 // the top structure transfers to the ladder and the ladder
                 // to the bottom structure
                 list = m_top->delist();
                 m_ladder->push(list, max, min);
                 m_top->reset();
 #ifndef NDEBUG_QUEUE
-                std::cout << "LQ -- Transferred top to ladder." << std::endl;
+                std::cout << "LQ -- Transferred top to ladder finished." << std::endl;
 #endif /* NDEBUG_EVENTS */
                 list = m_ladder->delist();
                 m_bottom->push(list);
@@ -221,6 +237,9 @@ Entry* LadderQueue::dequeue() throw (QueueException)
 #endif /* NDEBUG_EVENTS */
                 entry = m_bottom->front();
                 m_bottom->pop_front();
+#ifndef NDEBUG_QUEUE
+                std::cout << "LQ -- Popped bottom" << std::endl;
+#endif /* NDEBUG_EVENTS */
             }
         }
     }
@@ -247,6 +266,17 @@ Entry* LadderQueue::dequeue() throw (QueueException)
 #endif /* NDEBUG */
 
     return entry;
+}
+
+boost::uint32_t LadderQueue::size()
+{
+#ifndef NDEBUG
+    std::cout << "LQ -- top: " << m_top->getNTop()
+              << ", ladder: " << m_ladder->getNBC()
+              << ", bottom: " << m_bottom->size() << std::endl;
+#endif /* NDEBUG */
+
+    return m_top->getNTop() + m_ladder->getNBC() + m_bottom->size();
 }
 
 

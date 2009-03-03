@@ -1,4 +1,4 @@
-// Copyright (C) 2007,2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2007,2008,2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -241,17 +241,23 @@ const bool dcommon::Ladder::push(dcommon::Entry *p_entry) throw (dcommon::QueueE
 #ifndef NDEBUG_QUEUE
     std::cout << "Ladder -- Push event: " << const_cast <const dcommon::Entry&> (*p_entry) << std::endl;
 #endif /* NDEBUG_EVENTS */
+
     // cannot enqueue, if the internal structure has not been initialised
     // by an epoch
-//     if (getNBC() == 0) {
-//         throw dcommon::QueueException(dcommon::QueueException::NO_EPOCH_INIT);
-//     }
+    if (getNBC() == 0) {
+        throw dcommon::QueueException(dcommon::QueueException::NO_EPOCH_INIT);
+    }
 
     boost::uint32_t nRungs = 0;
+    double ts_arrival = p_entry->getArrival();
 
     // find the rung
-    while ((p_entry->getArrival() < getRCur(nRungs)) && (nRungs <= m_lowestRung)) {
-        nRungs++;
+    while (true) {
+        if ((ts_arrival < getRCur(nRungs)) && (nRungs < m_NRung)) {
+            nRungs++;
+        } else {
+            break;
+        }
     }
 
     // found
@@ -259,13 +265,16 @@ const bool dcommon::Ladder::push(dcommon::Entry *p_entry) throw (dcommon::QueueE
         // insert into tail of rung x, bucket k
 #ifndef NDEBUG_QUEUE
         std::cout << "Ladder -- Rung: " << nRungs << ", bucket: "
-                  << bucket(p_entry->getArrival(), nRungs);
+                  << bucket(ts_arrival, nRungs);
 #endif /* NDEBUG_EVENTS */
-        m_rungs[nRungs][bucket(p_entry->getArrival(), nRungs)].push_back(*p_entry);
+
+        m_rungs[nRungs][bucket(ts_arrival, nRungs)].push_back(*p_entry);
+
 #ifndef NDEBUG_QUEUE
-        std::cout << ", size: " << m_rungs[nRungs][bucket(p_entry->getArrival(), nRungs)].size()
+        std::cout << ", size: " << m_rungs[nRungs][bucket(ts_arrival, nRungs)].size()
                   << std::endl;
 #endif /* NDEBUG_EVENTS */
+
         updateNEvents(nRungs, 1);
     } else {
         throw dcommon::QueueException(dcommon::QueueException::RUNG_NOT_FOUND);
@@ -347,6 +356,10 @@ void dcommon::Ladder::push(dcommon::EntryList *p_list, double p_maxTS, double p_
 
 dcommon::EntryList* const dcommon::Ladder::delist() throw (dcommon::QueueException)
 {
+#ifndef NDEBUG_QUEUE
+    std::cout << "Ladder -- Delist" << std::endl;
+#endif /* NDEBUG_EVENTS */
+
     // advance the dequeue bucket
     advanceDequeueBucket(1);
 
@@ -363,6 +376,7 @@ dcommon::EntryList* const dcommon::Ladder::delist() throw (dcommon::QueueExcepti
               << m_currentBucket[m_lowestRung] << ", size: " << temp->size()
               << std::endl;
 #endif /* NDEBUG_EVENTS */
+
     return temp;
 }
 
@@ -375,31 +389,37 @@ void dcommon::Ladder::resizeFirstRung(boost::uint32_t p_base)
 
 void dcommon::Ladder::advanceDequeueBucket(bool p_spawn) throw (dcommon::QueueException)
 {
+#ifndef NDEBUG_QUEUE
+    std::cout << "Ladder -- advance dequeue bucket" << std::endl;
+#endif /* NDEBUG_EVENTS */
+
     boost::uint32_t elements = 0;
 
     // skip empty tail buckets of the current and lower rungs
-    while ((m_lowestRung > 0) && (m_events[m_lowestRung] == 0)) {
-        m_lowestRung--;
+    while (true) {
+        if ((m_lowestRung > 0) && (m_events[m_lowestRung] == 0)) {
+            m_lowestRung--;
+        } else {
+            break;
+        }
     }
 
     // find next non-empty bucket from lowest rung
     while (true) {
-        if (!canAdvance()) {
-            // throw an exception here, if there are more entries available
-            if (m_events[m_lowestRung] > 0) {
-                throw dcommon::QueueException(
-                    dcommon::QueueException::ADVANCE_IGNORED_EVENTS);
-            } else {
-                if (m_lowestRung > 0) {
-                    m_lowestRung--;
-                } else {
-                    break;
-                }
-            }
-        }
+#ifndef NDEBUG_QUEUE
+        std::cout << "Ladder -- advance on rung " << m_lowestRung
+                  << " from bucket " << m_currentBucket[m_lowestRung]
+                  << ", num events: " << m_events[m_lowestRung] << std::endl;
+#endif /* NDEBUG_EVENTS */
 
         // how many elements are in this bucket?
         elements = m_rungs[m_lowestRung][m_currentBucket[m_lowestRung]].size();
+
+#ifndef NDEBUG_QUEUE
+        std::cout << "Ladder -- rung " << m_lowestRung
+                  << ", num events " << elements << " in bucket "
+                  << m_currentBucket[m_lowestRung] << std::endl;
+#endif /* NDEBUG_EVENTS */
 
         // advance to next bucket
         if (elements == 0) {
@@ -413,6 +433,10 @@ void dcommon::Ladder::advanceDequeueBucket(bool p_spawn) throw (dcommon::QueueEx
     if (p_spawn && (elements > m_Thres)) {
         advanceDequeueBucket(spawn(true));
     }
+
+#ifndef NDEBUG_QUEUE
+    std::cout << "Ladder -- advance dequeue bucket finished" << std::endl;
+#endif /* NDEBUG_EVENTS */
 }
 
 bool dcommon::Ladder::canAdvance()
@@ -458,8 +482,7 @@ bool dcommon::Ladder::spawn(bool p_doEnlist)
             getRCur(m_lowestRung - 1)
             - getBucketwidth(m_lowestRung - 1);
         m_RCur[m_lowestRung] =
-            getRCur(m_lowestRung - 1)
-            - getBucketwidth(m_lowestRung - 1)
+            m_RStart[m_lowestRung]
             + getBucketwidth(m_lowestRung);
 
         // we need to set the current dequeue bucket of the spawned rung to zero
@@ -471,8 +494,8 @@ bool dcommon::Ladder::spawn(bool p_doEnlist)
             dcommon::EntryList *list =
                 reinterpret_cast<dcommon::EntryList*>(
                     &(m_rungs[m_lowestRung - 1][m_currentBucket[m_lowestRung - 1]]));
-            m_events[m_lowestRung - 1] -= list->size();
 
+            updateNEvents(m_lowestRung - 1, -list->size());
             push(m_lowestRung, list);
         }
 
@@ -489,21 +512,18 @@ void dcommon::Ladder::createRung()
     // create a new rung
     dcommon::EntryListSM rungs = dcommon::EntryListSM(new dcommon::EntryListSA[m_NRung]);
 
-    for (boost::uint32_t i = 0; i < m_NRung; ++i) {
-        rungs[i] = dcommon::EntryListSA(new dcommon::EntryList[m_Thres]);
-    }
-
     // copy the old rungs over
-    for (boost::uint32_t i = 0; i < m_lowestRung; ++i) {
-        rungs[i].swap(m_rungs[i]);
+    for (boost::uint32_t i = 0; i < (m_NRung - 1); ++i) {
+        rungs[i] = m_rungs[i];
     }
+    rungs[m_NRung - 1] = dcommon::EntryListSA(new dcommon::EntryList[m_Thres]);
 
     m_rungs = rungs;
 
     // resize the events data structure
     boost::uint32_t *events = new boost::uint32_t[m_NRung];
     memset(events, 0, sizeof(boost::uint32_t) * m_NRung);
-    for (boost::uint32_t i = 0; i < m_lowestRung; ++i) {
+    for (boost::uint32_t i = 0; i < m_NRung; ++i) {
         events[i] = m_events[i];
     }
 
@@ -512,7 +532,7 @@ void dcommon::Ladder::createRung()
     // resize the currentBucket data structure
     boost::uint32_t *currentBucket = new boost::uint32_t[m_NRung];
     memset(currentBucket, 0, sizeof(boost::uint32_t) * m_NRung);
-    for (boost::uint32_t i = 0; i < m_lowestRung; ++i) {
+    for (boost::uint32_t i = 0; i < m_NRung; ++i) {
         currentBucket[i] = m_currentBucket[i];
     }
 
@@ -521,7 +541,7 @@ void dcommon::Ladder::createRung()
     // resize the bucketwidth data structure
     double *bucketwidth = new double[m_NRung];
     memset(bucketwidth, 0, sizeof(double) * m_NRung);
-    for (boost::uint32_t i = 0; i < m_lowestRung; ++i) {
+    for (boost::uint32_t i = 0; i < m_NRung; ++i) {
         bucketwidth[i] = m_bucketwidth[i];
     }
 
@@ -530,7 +550,7 @@ void dcommon::Ladder::createRung()
     // resize the rcur data structure
     double *rcur = new double[m_NRung];
     memset(rcur, 0, sizeof(double) * m_NRung);
-    for (boost::uint32_t i = 0; i < m_lowestRung; ++i) {
+    for (boost::uint32_t i = 0; i < m_NRung; ++i) {
         rcur[i] = m_RCur[i];
     }
 
@@ -539,7 +559,7 @@ void dcommon::Ladder::createRung()
     // resize the rstart data structure
     double *rstart = new double[m_NRung];
     memset(rstart, 0, sizeof(double) * m_NRung);
-    for (boost::uint32_t i = 0; i < m_lowestRung; ++i) {
+    for (boost::uint32_t i = 0; i < m_NRung; ++i) {
         rstart[i] = m_RStart[i];
     }
 

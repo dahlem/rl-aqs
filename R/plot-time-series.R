@@ -54,6 +54,7 @@ des.ts.calcDist <- function(R) {
   return(D)
 }
 
+
 des.adj.graph <- function(D) {
   ## remove nans
   D[is.nan(D)] <- 0
@@ -62,9 +63,22 @@ des.adj.graph <- function(D) {
   return(graph)
 }
 
+
 des.mst <- function(graph) {
   mst <- minimum.spanning.tree(graph)
   return(mst)
+}
+
+
+des.corr.time <- function(X, splits=5) {
+  ## split X up
+  ## calc G (rel return)
+  ## calc W
+  ## store weight matrix in list
+}
+
+
+des.plot.corr.dist.time <- function(data, ps=TRUE) {
 }
 
 

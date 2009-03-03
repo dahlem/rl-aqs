@@ -28,9 +28,10 @@
 
 library(desGraph)
 
-des.steady.power.law.degree <- function(prefix, graph, ps=TRUE, fit=FALSE) {
+des.steady.power.law.degree <- function(prefix, graph, ps=TRUE, fit=FALSE, width=7, height=7, pts=12) {
   if (ps) {
-    postscript(paste(prefix, "steady-state-degree-power-law-plot.eps", sep=""), onefile=FALSE)
+    filename <- paste(prefix, "steady-state-degree-power-law-plot.eps", sep="")
+    des.postscript(filename, width, height, pointsize=pts)
   }
 
   degree <- degree(graph, mode="in")
@@ -41,15 +42,35 @@ des.steady.power.law.degree <- function(prefix, graph, ps=TRUE, fit=FALSE) {
   p <- ggplot(df, aes(x=x, y=y))
   p <- p + geom_point()
   if (fit) {
-    pl <- plfit(df$x)
-    dfPL <- data.frame(x=pl$xmin:max(df$x),y=10*(pl$xmin:max(df$x))^(-pl$alpha+1))
-    dfPL <- dfPL[dfPL$y < max(df$y) & dfPL$y > min(df$y),]
-    p <- p + geom_line(data=dfPL, aes(x=x,y=y))
+    p <- des.plot.powerlaw.fit(df, fit)
   }
   p <- p + coord_trans(x = "log", y = "log")
-  p <- p + scale_y_continuous("Cumulative Frequencies")
-  p <- p + scale_x_continuous("Vertex In-Degree")
-  p <- p + theme_bw()
+  p <- p + scale_y_continuous("P(k)")
+  p <- p + scale_x_continuous("Node In-Degree (k)")
+  p <- p + theme_bw(base_size=pts)
+  print(p)
+
+  if (ps) {
+    dev.off()
+  }
+}
+
+des.steady.dist.degree <- function(prefix, graph, ps=TRUE, fit=FALSE, width=7, height=7, pts=12) {
+  if (ps) {
+    filename <- paste(prefix, "steady-state-degree-dist-plot.eps", sep="")
+    des.postscript(filename, width, height, pointsize=pts)
+  }
+
+  degree <- degree(graph, mode="in")
+  res <- des.power.law.dist(degree)
+
+  df <- data.frame(x=res$x, y=res$cumFreq)
+
+  p <- ggplot(df, aes(x=x, y=y))
+  p <- p + geom_point()
+  p <- p + scale_y_continuous("P(k)")
+  p <- p + scale_x_continuous("Node In-Degree (k)")
+  p <- p + theme_bw(base_size=pts)
   print(p)
 
   if (ps) {

@@ -11,6 +11,7 @@ MINY=$4;
 MAXY=$5;
 XLABEL=$6;
 YLABEL=$7;
+ZLABEL=$8;
 
 # Check whether the command-line parameters are present
 if [ -z "$DATAFILE" ] ; then
@@ -41,11 +42,11 @@ fi
 
 gnuplot << EOF
 
-set terminal postscript colour solid rounded
+set terminal postscript enhanced colour solid rounded
 set output "$DATAFILE-gamma.eps"
 
-set yrange [$MINY:$MAXY]
 set xrange [$MINX:$MAXX]
+set yrange [$MINY:$MAXY]
 
 set datafile separator ","
 
@@ -53,12 +54,18 @@ set dgrid3d 30
 
 set size 2.8/5., 1.7/3.
 
-# change the angle the plot is shown
-#set view , , 1, 1.5
-set xlabel "$XLABEL"
-set ylabel "$YLABEL"
+set xlabel "$XLABEL" -1,-1
+set ylabel "$YLABEL" 1,0
+set zlabel "$ZLABEL" 2,4
 
-splot "soc-$DATAFILE.dat" u 1:2:6 title "Gamma (ER Model)" w l,\
-      "rand-$DATAFILE.dat" u 1:2:6 title "Gamma (BBV Model)" w l 
+set xtics 0.02
+set mxtics
+set ytics 0.02
+set mytics
+set ztics 500000
+set mztics
+
+splot "soc-$DATAFILE.dat" u 1:2:6 title "ER Model" w l,\
+      "rand-$DATAFILE.dat" u 1:2:6 title "BBV Model" w l 
 
 EOF

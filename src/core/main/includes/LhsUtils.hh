@@ -49,6 +49,9 @@ public:
     static int getEdgeProbIndex(tDesArgsSP p_desArgs);
     static int getEdgeBoostIndex(tDesArgsSP p_desArgs);
     static int getVertexBoostIndex(tDesArgsSP p_desArgs);
+    static int getRLAlphaIndex(tDesArgsSP p_desArgs);
+    static int getRLLambdaIndex(tDesArgsSP p_desArgs);
+    static int getRLEpsilonIndex(tDesArgsSP p_desArgs);
 
 private:
 

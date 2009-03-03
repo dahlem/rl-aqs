@@ -168,7 +168,15 @@ void ArrivalHandler::update(ArrivalEvent *subject)
               << std::endl;
 #endif /* NDEBUG_EVENTS */
 
-    m_queue->push(new_entry);
+    try {
+        m_queue->push(new_entry);
+#ifndef NDEBUG_EVENTS
+        std::cout << "Departure event scheduled." << std::endl;
+#endif /* NDEBUG_EVENTS */
+    } catch (dcommon::QueueException &qe) {
+        std::cout << "Error scheduling departure event: " << qe.what() << std::endl;
+        throw;
+    }
 }
 
 

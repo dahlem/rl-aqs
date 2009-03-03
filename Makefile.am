@@ -21,11 +21,7 @@ EXTRA_DIST = \
 	seeds.dat \
 	seeds-mpi.dat \
 	iitac.sh \
-	des.pbs.in \
-	des_soc_1000s_5e_1000t.pbs \
-	crn_test.pbs.in \
-	seeds_read.pbs.in \
-	struct_test.pbs.in \
+	$(srcdir)/pbs \
 	$(srcdir)/bin \
 	$(srcdir)/graphs_dense.sh \
 	$(srcdir)/graphs.sh \

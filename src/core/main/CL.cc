@@ -89,7 +89,7 @@ CL::CL()
         (MAX_ARRIVAL.c_str(), po::value <double>()->default_value(1.0), "Max. arrival rate.")
         (BOOST_ARRIVAL.c_str(), po::value <double>()->default_value(1.0), "Boost the arrival rate.")
         (BOOST_EDGE.c_str(), po::value <double>()->default_value(1.0), "Boost the edge weight.")
-        (MAX_EDGES.c_str(), po::value<boost::uint32_t>()->default_value(dnet::WEvonet::MAX_EDGES), "set the maximum number of edges to connect a new vertex")
+        (MAX_EDGES.c_str(), po::value<boost::uint32_t>()->default_value(UINT_MAX), "set the maximum number of edges to connect a new vertex")
         (ADD_SIM.c_str(), po::value<std::string>()->default_value(std::string("")), "add to existing experiments")
         ;
 
@@ -134,6 +134,18 @@ CL::CL()
             std::numeric_limits<double>::max()), "set the min. rate to boost the edge weight.")
         (MAX_BOOST_EDGE.c_str(), po::value <double>()->default_value(
             std::numeric_limits<double>::max()), "set the max. rate to boost the edge weight.")
+        (MIN_RL_Q_ALPHA.c_str(), po::value <double>()->default_value(
+            std::numeric_limits<double>::max()), "set the min. learning rate for q-learning.")
+        (MAX_RL_Q_ALPHA.c_str(), po::value <double>()->default_value(
+            std::numeric_limits<double>::max()), "set the max. learning rate for q-learning.")
+        (MIN_RL_Q_LAMBDA.c_str(), po::value <double>()->default_value(
+            std::numeric_limits<double>::max()), "set the min. discount rate for q-learning.")
+        (MAX_RL_Q_LAMBDA.c_str(), po::value <double>()->default_value(
+            std::numeric_limits<double>::max()), "set the max. discount rate for q-learning.")
+        (MIN_RL_POLICY_EPSILON.c_str(), po::value <double>()->default_value(
+            std::numeric_limits<double>::max()), "set the min. epsilon for epsilon-greedy policy.")
+        (MAX_RL_POLICY_EPSILON.c_str(), po::value <double>()->default_value(
+            std::numeric_limits<double>::max()), "set the max. epsilon for epsilon-greedy policy.")
         ;
 
     po::options_description opt_rl("RL Configuration");
@@ -318,94 +330,8 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
                   << desArgs->edge_prob << " (only for ER graphs)." << std::endl;
     }
 
-    std::cout << std::endl << "4) Confidence Interval Configuration" << std::endl;
-    if (vm.count(WITH_CI.c_str())) {
-        desArgs->confidence = vm[WITH_CI.c_str()].as <bool>();
-    }
-    std::cout << "Confidence Interval enabled: " << desArgs->confidence << std::endl;
 
-    if (desArgs->confidence == 1) {
-        if (vm.count(REPLICATIONS.c_str())) {
-            desArgs->replications = vm[REPLICATIONS.c_str()].as <boost::uint16_t>();
-        }
-        std::cout << "Number of replications: " << desArgs->replications << std::endl;
-
-        if (vm.count(ALPHA.c_str())) {
-            desArgs->alpha = vm[ALPHA.c_str()].as <double>();
-        }
-        std::cout << "Confidence interval (in %): " << 100 * (1 - desArgs->alpha) << std::endl;
-
-        if (vm.count(ERROR.c_str())) {
-            desArgs->error = vm[ERROR.c_str()].as <double>();
-        }
-        std::cout << "Reliative error (in %): " << 100 * (desArgs->error) << std::endl;
-    }
-
-    std::cout << std::endl << "5) Latin Hypercube Configuration" << std::endl;
-    if (vm.count(WITH_LHS.c_str())) {
-        desArgs->lhs = vm[WITH_LHS.c_str()].as <bool>();
-    }
-    std::cout << "LHS enabled: " << desArgs->lhs << std::endl;
-
-    if (desArgs->lhs == 1) {
-        if (vm.count(SIMULATIONS.c_str())) {
-            desArgs->simulations = vm[SIMULATIONS.c_str()].as <boost::uint32_t>();
-        }
-        std::cout << "Number of simulations set to " << desArgs->simulations << "." << std::endl;
-
-        if (vm.count(MIN_BOOST_ARRIVAL.c_str())) {
-            desArgs->min_boost_arrival = vm[MIN_BOOST_ARRIVAL.c_str()].as <double>();
-        }
-        std::cout << "Min. boost rate for the arrival rate " << desArgs->min_boost_arrival << "." << std::endl;
-
-        if (vm.count(MIN_BOOST_EDGE.c_str())) {
-            desArgs->min_boost_edge = vm[MIN_BOOST_EDGE.c_str()].as <double>();
-        }
-        std::cout << "Min. boost rate for the edge weight " << desArgs->min_boost_edge << "." << std::endl;
-
-        if (vm.count(MAX_BOOST_ARRIVAL.c_str())) {
-            desArgs->max_boost_arrival = vm[MAX_BOOST_ARRIVAL.c_str()].as <double>();
-        }
-        std::cout << "Max. boost rate for the arrival rate " << desArgs->max_boost_arrival << "." << std::endl;
-
-        if (vm.count(MAX_BOOST_EDGE.c_str())) {
-            desArgs->max_boost_edge = vm[MAX_BOOST_EDGE.c_str()].as <double>();
-        }
-        std::cout << "Max. boost rate for the edge weight " << desArgs->max_boost_edge << "." << std::endl;
-
-        if (vm.count(MINSIZE.c_str())) {
-            desArgs->min_size = vm[MINSIZE.c_str()].as <boost::uint16_t>();
-        }
-        std::cout << "Minimum network size " << desArgs->min_size << "." << std::endl;
-
-        if (vm.count(MAXSIZE.c_str())) {
-            desArgs->max_size = vm[MAXSIZE.c_str()].as <boost::uint16_t>();
-        }
-        std::cout << "Maximum network size " << desArgs->max_size << "." << std::endl;
-
-        if (vm.count(MIN_MAX_EDGES.c_str())) {
-            desArgs->min_max_edges = vm[MIN_MAX_EDGES.c_str()].as <boost::uint32_t>();
-        }
-        std::cout << "Minimum max. number of edges set to " << desArgs->min_max_edges << "." << std::endl;
-
-        if (vm.count(MAX_MAX_EDGES.c_str())) {
-            desArgs->max_max_edges = vm[MAX_MAX_EDGES.c_str()].as <boost::uint32_t>();
-        }
-        std::cout << "Maximum max. number of edges set to " << desArgs->max_max_edges << "." << std::endl;
-
-        if (vm.count(MIN_EDGE_PROB.c_str())) {
-            desArgs->min_edge_prob = vm[MIN_EDGE_PROB.c_str()].as <double>();
-        }
-        std::cout << "Minimum probability of having in edge (u,v) set to " << desArgs->min_edge_prob << "." << std::endl;
-
-        if (vm.count(MAX_EDGE_PROB.c_str())) {
-            desArgs->max_edge_prob = vm[MAX_EDGE_PROB.c_str()].as <double>();
-        }
-        std::cout << "Maximum probability of having in edge (u,v) set to " << desArgs->max_edge_prob << "." << std::endl;
-    }
-
-
-    std::cout << std::endl << "6) Reinforcement Learning Configuration" << std::endl;
+    std::cout << std::endl << "4) Reinforcement Learning Configuration" << std::endl;
     if (vm.count(RL.c_str())) {
         desArgs->rl = vm[RL.c_str()].as <bool>();
     }
@@ -500,6 +426,123 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
             }
             std::cout << "RL Boltzmann T: " << desArgs->rl_policy_boltzmann_t << "." << std::endl;
         }
+    }
+
+    std::cout << std::endl << "5) Confidence Interval Configuration" << std::endl;
+    if (vm.count(WITH_CI.c_str())) {
+        desArgs->confidence = vm[WITH_CI.c_str()].as <bool>();
+    }
+    std::cout << "Confidence Interval enabled: " << desArgs->confidence << std::endl;
+
+    if (desArgs->confidence == 1) {
+        if (vm.count(REPLICATIONS.c_str())) {
+            desArgs->replications = vm[REPLICATIONS.c_str()].as <boost::uint16_t>();
+        }
+        std::cout << "Number of replications: " << desArgs->replications << std::endl;
+
+        if (vm.count(ALPHA.c_str())) {
+            desArgs->alpha = vm[ALPHA.c_str()].as <double>();
+        }
+        std::cout << "Confidence interval (in %): " << 100 * (1 - desArgs->alpha) << std::endl;
+
+        if (vm.count(ERROR.c_str())) {
+            desArgs->error = vm[ERROR.c_str()].as <double>();
+        }
+        std::cout << "Reliative error (in %): " << 100 * (desArgs->error) << std::endl;
+    }
+
+
+    std::cout << std::endl << "6) Latin Hypercube Configuration" << std::endl;
+    if (vm.count(WITH_LHS.c_str())) {
+        desArgs->lhs = vm[WITH_LHS.c_str()].as <bool>();
+    }
+    std::cout << "LHS enabled: " << desArgs->lhs << std::endl;
+
+    if (desArgs->lhs == 1) {
+        if (vm.count(SIMULATIONS.c_str())) {
+            desArgs->simulations = vm[SIMULATIONS.c_str()].as <boost::uint32_t>();
+        }
+        std::cout << "Number of simulations set to " << desArgs->simulations << "." << std::endl;
+
+        if (vm.count(MIN_BOOST_ARRIVAL.c_str())) {
+            desArgs->min_boost_arrival = vm[MIN_BOOST_ARRIVAL.c_str()].as <double>();
+        }
+        std::cout << "Min. boost rate for the arrival rate " << desArgs->min_boost_arrival << "." << std::endl;
+
+        if (vm.count(MIN_BOOST_EDGE.c_str())) {
+            desArgs->min_boost_edge = vm[MIN_BOOST_EDGE.c_str()].as <double>();
+        }
+        std::cout << "Min. boost rate for the edge weight " << desArgs->min_boost_edge << "." << std::endl;
+
+        if (vm.count(MAX_BOOST_ARRIVAL.c_str())) {
+            desArgs->max_boost_arrival = vm[MAX_BOOST_ARRIVAL.c_str()].as <double>();
+        }
+        std::cout << "Max. boost rate for the arrival rate " << desArgs->max_boost_arrival << "." << std::endl;
+
+        if (vm.count(MAX_BOOST_EDGE.c_str())) {
+            desArgs->max_boost_edge = vm[MAX_BOOST_EDGE.c_str()].as <double>();
+        }
+        std::cout << "Max. boost rate for the edge weight " << desArgs->max_boost_edge << "." << std::endl;
+
+        if (vm.count(MINSIZE.c_str())) {
+            desArgs->min_size = vm[MINSIZE.c_str()].as <boost::uint16_t>();
+        }
+        std::cout << "Minimum network size " << desArgs->min_size << "." << std::endl;
+
+        if (vm.count(MAXSIZE.c_str())) {
+            desArgs->max_size = vm[MAXSIZE.c_str()].as <boost::uint16_t>();
+        }
+        std::cout << "Maximum network size " << desArgs->max_size << "." << std::endl;
+
+        if (vm.count(MIN_MAX_EDGES.c_str())) {
+            desArgs->min_max_edges = vm[MIN_MAX_EDGES.c_str()].as <boost::uint32_t>();
+        }
+        std::cout << "Minimum max. number of edges set to " << desArgs->min_max_edges << "." << std::endl;
+
+        if (vm.count(MAX_MAX_EDGES.c_str())) {
+            desArgs->max_max_edges = vm[MAX_MAX_EDGES.c_str()].as <boost::uint32_t>();
+        }
+        std::cout << "Maximum max. number of edges set to " << desArgs->max_max_edges << "." << std::endl;
+
+        if (vm.count(MIN_EDGE_PROB.c_str())) {
+            desArgs->min_edge_prob = vm[MIN_EDGE_PROB.c_str()].as <double>();
+        }
+        std::cout << "Minimum probability of having in edge (u,v) set to " << desArgs->min_edge_prob << "." << std::endl;
+
+        if (vm.count(MAX_EDGE_PROB.c_str())) {
+            desArgs->max_edge_prob = vm[MAX_EDGE_PROB.c_str()].as <double>();
+        }
+        std::cout << "Maximum probability of having in edge (u,v) set to " << desArgs->max_edge_prob << "." << std::endl;
+
+        if (vm.count(MIN_RL_Q_ALPHA.c_str())) {
+            desArgs->min_rl_q_alpha = vm[MIN_RL_Q_ALPHA.c_str()].as <double>();
+        }
+        std::cout << "Minimum RL learning rate set to " << desArgs->min_rl_q_alpha << "." << std::endl;
+
+        if (vm.count(MAX_RL_Q_ALPHA.c_str())) {
+            desArgs->max_rl_q_alpha = vm[MAX_RL_Q_ALPHA.c_str()].as <double>();
+        }
+        std::cout << "Maximum RL learning rate set to " << desArgs->max_rl_q_alpha << "." << std::endl;
+
+        if (vm.count(MIN_RL_Q_LAMBDA.c_str())) {
+            desArgs->min_rl_q_lambda = vm[MIN_RL_Q_LAMBDA.c_str()].as <double>();
+        }
+        std::cout << "Minimum RL discount rate set to " << desArgs->min_rl_q_lambda << "." << std::endl;
+
+        if (vm.count(MAX_RL_Q_LAMBDA.c_str())) {
+            desArgs->max_rl_q_lambda = vm[MAX_RL_Q_LAMBDA.c_str()].as <double>();
+        }
+        std::cout << "Maximum RL discount rate set to " << desArgs->max_rl_q_lambda << "." << std::endl;
+
+        if (vm.count(MIN_RL_POLICY_EPSILON.c_str())) {
+            desArgs->min_rl_policy_epsilon = vm[MIN_RL_POLICY_EPSILON.c_str()].as <double>();
+        }
+        std::cout << "Minimum epsilon set to " << desArgs->min_rl_policy_epsilon << "." << std::endl;
+
+        if (vm.count(MAX_RL_POLICY_EPSILON.c_str())) {
+            desArgs->max_rl_policy_epsilon = vm[MAX_RL_POLICY_EPSILON.c_str()].as <double>();
+        }
+        std::cout << "Maximum epsilon set to " << desArgs->max_rl_policy_epsilon << "." << std::endl;
     }
 
     std::cout << std::endl << "7) Output Files" << std::endl;
