@@ -74,6 +74,8 @@ void dcore::UnprocessedEventsHandler::update(dcore::PostEvent *subject)
             num++;
 #endif /* NDEBUG */
         } while ((entry = m_queue->dequeue()) != NULL);
+    } else {
+        std::cout << "event was NULL" << std::endl;
     }
 
 #ifndef NDEBUG_EVENTS

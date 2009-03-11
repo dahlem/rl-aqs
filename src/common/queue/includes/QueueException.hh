@@ -54,6 +54,7 @@ public:
         PAST_EVENT_NOT_ALLOWED,
         QUEUE_EMPTY,
         ADVANCE_IGNORED_EVENTS,
+        BUCKET_EQUALS_DEQUEUEBUCKET,
         NUM_ERRORS
     };
 

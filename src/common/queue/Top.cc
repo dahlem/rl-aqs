@@ -1,4 +1,4 @@
-// Copyright (C) 2007,2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2007-2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -161,6 +161,14 @@ void dcommon::Top::push(dcommon::EntryList* p_list)
 
 dcommon::EntryList* const dcommon::Top::delist()
 {
-    m_topStart = m_maxTS;
+    double width = 1.0;
+
+    if (m_maxTS != m_minTS) {
+        width = (m_maxTS - m_minTS) /
+            static_cast<boost::uint32_t> (m_fifo->size());
+    }
+
+    m_topStart = m_maxTS + width;
+
     return m_fifo;
 }

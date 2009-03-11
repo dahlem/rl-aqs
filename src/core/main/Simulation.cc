@@ -375,12 +375,14 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
                     graph, queue, arrival_rng, destination, arrival_rate, stopTimeAdj);
             }
 
-            if (desArgs->graph_rate > 1) {
-                graphGenRate = desArgs->stop_time / desArgs->graph_rate;
-            }
+            if (desArgs->log_graphs) {
+                if (desArgs->graph_rate > 1) {
+                    graphGenRate = desArgs->stop_time / desArgs->graph_rate;
+                }
 
-            EventGenerator::generateLogGraph(
-                queue, graphGenRate, desArgs->stop_time);
+                EventGenerator::generateLogGraph(
+                    queue, graphGenRate, desArgs->stop_time);
+            }
         }
 
         // configure the results directory

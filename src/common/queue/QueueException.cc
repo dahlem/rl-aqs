@@ -1,4 +1,4 @@
-// Copyright (C) 2007,2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2007-2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -34,8 +34,9 @@ const char* QueueException::m_errorStrings[QueueException::NUM_ERRORS] =
     "An epoch has not been started with the Ladder structure.",
     "An epoch cannot be created, if another one is not finished yet.",
     "Cannot enqueue past event.",
-    "The queue is empty."
-    "Advanced the dequeue bucket ignoring existing events."
+    "The queue is empty.",
+    "Advanced the dequeue bucket ignoring existing events.",
+    "Current enqueue Bucket equals the current dequeue bucket."
 };
 
 QueueException::QueueException(int p_code)

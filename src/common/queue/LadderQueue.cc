@@ -131,7 +131,7 @@ const bool LadderQueue::push(Entry *p_entry) throw (QueueException)
             if (m_bottom->size() > m_ladder->getThres()) {
                 // check whether ladder is empty
                 // if yes, get max and min TS values from bottom and enlist
-                if (m_ladder->getNBucket() == 0) {
+                if (m_ladder->getNBC() == 0) {
                     double max = m_bottom->getMaxTS();
                     double min = m_bottom->getMinTS();
 
@@ -274,6 +274,7 @@ boost::uint32_t LadderQueue::size()
     std::cout << "LQ -- top: " << m_top->getNTop()
               << ", ladder: " << m_ladder->getNBC()
               << ", bottom: " << m_bottom->size() << std::endl;
+    m_ladder->printEvents();
 #endif /* NDEBUG */
 
     return m_top->getNTop() + m_ladder->getNBC() + m_bottom->size();

@@ -116,43 +116,45 @@ public:
             std::cout << "RL epsilon Index: " << LhsUtils::getRLEpsilonIndex(p_desArgs) << std::endl;
 #endif /* NDEBUG */
 
-            min = gsl_vector_calloc(dimensions);
-            max = gsl_vector_calloc(dimensions);
+            if (dimensions > 0) {
+                min = gsl_vector_calloc(dimensions);
+                max = gsl_vector_calloc(dimensions);
 
-            if (LhsUtils::getNetSizeIndex(p_desArgs) >= 0) {
-                gsl_vector_set(min, LhsUtils::getNetSizeIndex(p_desArgs), p_desArgs->min_size);
-                gsl_vector_set(max, LhsUtils::getNetSizeIndex(p_desArgs), p_desArgs->max_size);
-            }
-            if (LhsUtils::getMaxEdgesIndex(p_desArgs) >= 0) {
-                gsl_vector_set(min, LhsUtils::getMaxEdgesIndex(p_desArgs), p_desArgs->min_max_edges);
-                gsl_vector_set(max, LhsUtils::getMaxEdgesIndex(p_desArgs), p_desArgs->max_max_edges);
-            }
-            if (LhsUtils::getEdgeProbIndex(p_desArgs) >= 0) {
-                gsl_vector_set(min, LhsUtils::getEdgeProbIndex(p_desArgs), p_desArgs->min_edge_prob);
-                gsl_vector_set(max, LhsUtils::getEdgeProbIndex(p_desArgs), p_desArgs->max_edge_prob);
-            }
-            if (LhsUtils::getVertexBoostIndex(p_desArgs) >= 0) {
-                gsl_vector_set(min, LhsUtils::getVertexBoostIndex(p_desArgs), p_desArgs->min_boost_arrival);
-                gsl_vector_set(max, LhsUtils::getVertexBoostIndex(p_desArgs), p_desArgs->max_boost_arrival);
-            }
-            if (LhsUtils::getEdgeBoostIndex(p_desArgs) >= 0) {
-                gsl_vector_set(min, LhsUtils::getEdgeBoostIndex(p_desArgs), p_desArgs->min_boost_edge);
-                gsl_vector_set(max, LhsUtils::getEdgeBoostIndex(p_desArgs), p_desArgs->max_boost_edge);
-            }
-            if (LhsUtils::getRLAlphaIndex(p_desArgs) >= 0) {
-                gsl_vector_set(min, LhsUtils::getRLAlphaIndex(p_desArgs), p_desArgs->min_rl_q_alpha);
-                gsl_vector_set(max, LhsUtils::getRLAlphaIndex(p_desArgs), p_desArgs->max_rl_q_alpha);
-            }
-            if (LhsUtils::getRLLambdaIndex(p_desArgs) >= 0) {
-                gsl_vector_set(min, LhsUtils::getRLLambdaIndex(p_desArgs), p_desArgs->min_rl_q_lambda);
-                gsl_vector_set(max, LhsUtils::getRLLambdaIndex(p_desArgs), p_desArgs->max_rl_q_lambda);
-            }
-            if (LhsUtils::getRLEpsilonIndex(p_desArgs) >= 0) {
-                gsl_vector_set(min, LhsUtils::getRLEpsilonIndex(p_desArgs), p_desArgs->min_rl_policy_epsilon);
-                gsl_vector_set(max, LhsUtils::getRLEpsilonIndex(p_desArgs), p_desArgs->max_rl_policy_epsilon);
-            }
+                if (LhsUtils::getNetSizeIndex(p_desArgs) >= 0) {
+                    gsl_vector_set(min, LhsUtils::getNetSizeIndex(p_desArgs), p_desArgs->min_size);
+                    gsl_vector_set(max, LhsUtils::getNetSizeIndex(p_desArgs), p_desArgs->max_size);
+                }
+                if (LhsUtils::getMaxEdgesIndex(p_desArgs) >= 0) {
+                    gsl_vector_set(min, LhsUtils::getMaxEdgesIndex(p_desArgs), p_desArgs->min_max_edges);
+                    gsl_vector_set(max, LhsUtils::getMaxEdgesIndex(p_desArgs), p_desArgs->max_max_edges);
+                }
+                if (LhsUtils::getEdgeProbIndex(p_desArgs) >= 0) {
+                    gsl_vector_set(min, LhsUtils::getEdgeProbIndex(p_desArgs), p_desArgs->min_edge_prob);
+                    gsl_vector_set(max, LhsUtils::getEdgeProbIndex(p_desArgs), p_desArgs->max_edge_prob);
+                }
+                if (LhsUtils::getVertexBoostIndex(p_desArgs) >= 0) {
+                    gsl_vector_set(min, LhsUtils::getVertexBoostIndex(p_desArgs), p_desArgs->min_boost_arrival);
+                    gsl_vector_set(max, LhsUtils::getVertexBoostIndex(p_desArgs), p_desArgs->max_boost_arrival);
+                }
+                if (LhsUtils::getEdgeBoostIndex(p_desArgs) >= 0) {
+                    gsl_vector_set(min, LhsUtils::getEdgeBoostIndex(p_desArgs), p_desArgs->min_boost_edge);
+                    gsl_vector_set(max, LhsUtils::getEdgeBoostIndex(p_desArgs), p_desArgs->max_boost_edge);
+                }
+                if (LhsUtils::getRLAlphaIndex(p_desArgs) >= 0) {
+                    gsl_vector_set(min, LhsUtils::getRLAlphaIndex(p_desArgs), p_desArgs->min_rl_q_alpha);
+                    gsl_vector_set(max, LhsUtils::getRLAlphaIndex(p_desArgs), p_desArgs->max_rl_q_alpha);
+                }
+                if (LhsUtils::getRLLambdaIndex(p_desArgs) >= 0) {
+                    gsl_vector_set(min, LhsUtils::getRLLambdaIndex(p_desArgs), p_desArgs->min_rl_q_lambda);
+                    gsl_vector_set(max, LhsUtils::getRLLambdaIndex(p_desArgs), p_desArgs->max_rl_q_lambda);
+                }
+                if (LhsUtils::getRLEpsilonIndex(p_desArgs) >= 0) {
+                    gsl_vector_set(min, LhsUtils::getRLEpsilonIndex(p_desArgs), p_desArgs->min_rl_policy_epsilon);
+                    gsl_vector_set(max, LhsUtils::getRLEpsilonIndex(p_desArgs), p_desArgs->max_rl_policy_epsilon);
+                }
 
-            dsample::LHS::sample(rng.get(), min, max, p_desArgs->simulations, &sample);
+                dsample::LHS::sample(rng.get(), min, max, p_desArgs->simulations, &sample);
+            }
 
             std::stringstream outDir, simDir, csv_line;
             std::vector <dio::tResultsSP> replica_results;
@@ -429,9 +431,11 @@ public:
             }
 
             // 5. free gsl stuff
-            gsl_vector_free(min);
-            gsl_vector_free(max);
-            gsl_matrix_free(sample);
+            if (dimensions > 0) {
+                gsl_vector_free(min);
+                gsl_vector_free(max);
+                gsl_matrix_free(sample);
+            }
         }
 
 

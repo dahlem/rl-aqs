@@ -1,4 +1,4 @@
-// Copyright (C) 2007,2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2007-2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -80,6 +80,10 @@ public:
     const bool push(dcommon::Entry *p_entry) throw (dcommon::QueueException);
     dcommon::EntryList* const delist() throw (dcommon::QueueException);
 
+#ifndef NDEBUG
+    void printEvents();
+#endif /* NDEBUG */
+
     /**
      * Insert a list into the ladder structure and intialise the following
      * variables:
@@ -108,56 +112,9 @@ public:
     boost::uint32_t getNBC();
 
     /**
-     * The current number of instantiated rungs
-     */
-    boost::uint32_t getNRung();
-
-    /**
      * The event threshold of each bucket in the rung
      */
     boost::uint32_t getThres();
-
-    /**
-     * @param int the rung
-     * @param int the bucket
-     * @return the number of events in a given bucket in a given rung
-     */
-    boost::uint32_t getNBucket(boost::uint32_t p_rung, boost::uint32_t p_bucket) throw (dcommon::QueueException);
-
-    /**
-     * @return the number of events in the current dequeue bucket
-     */
-    boost::uint32_t getNBucket();
-
-    /**
-     * @param int rung
-     * @return the bucketwidth of a given rung
-     * @throws QueueException thrown, if the given rung has not been initialised
-     */
-    double getBucketwidth(boost::uint32_t p_rung) throw (dcommon::QueueException);
-
-    /**
-     * @return the bucketwidth of the currently active dequeue rung
-     */
-    double getBucketwidth();
-
-    /**
-     * @param int the rung
-     * @return the minimum arrival timestamp of a given rung for enqueuing events
-     */
-    double getRCur(boost::uint32_t p_rung);
-
-    /**
-     * @return the minimum arrival timestamp of a given rung for enqueuing events
-     *         on the currently active rung
-     */
-    double getRCur();
-
-    /**
-     * @param int the rung
-     * @return the starting timestamp of a given rung
-     */
-    double getRStart(boost::uint32_t p_rung);
 
     /**
      * The rung structure is updated according to the following equations. Those
@@ -296,6 +253,8 @@ private:
     tDoubleSA m_bucketwidth;
     tDoubleSA m_RCur;
     tDoubleSA m_RStart;
+
+    bool epochDelisted;
 };
 
 
