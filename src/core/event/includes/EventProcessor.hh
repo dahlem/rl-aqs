@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -81,6 +81,11 @@ private:
     dcore::tLeaveEventSP m_leaveEvent;
 
     double m_stopTime;
+
+#ifndef NDEBUG
+    double m_oldTime;
+#endif /* NDEBUG */
+
 };
 
 typedef boost::shared_ptr <dcore::EventProcessor> tEventProcessorSP;

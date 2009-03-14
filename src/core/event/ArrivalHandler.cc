@@ -25,6 +25,10 @@
 # include <iostream>
 #endif /* NDEBUG_EVENTS */
 
+#ifndef NDEBUG
+# include <cassert>
+#endif /* NDEBUG */
+
 #include <cstdlib>
 
 #include <gsl/gsl_randist.h>
@@ -168,13 +172,17 @@ void ArrivalHandler::update(ArrivalEvent *subject)
               << std::endl;
 #endif /* NDEBUG_EVENTS */
 
+#ifndef NDEBUG
+    assert(delay >= 0.0);
+#endif /* NDEBUG */
+
     try {
         m_queue->push(new_entry);
 #ifndef NDEBUG_EVENTS
         std::cout << "Departure event scheduled." << std::endl;
 #endif /* NDEBUG_EVENTS */
     } catch (dcommon::QueueException &qe) {
-        std::cout << "Error scheduling departure event: " << qe.what() << std::endl;
+        std::cout << "Error scheduling departure event: " << new_entry->getArrival() << " " << qe.what() << std::endl;
         throw;
     }
 }

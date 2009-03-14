@@ -21,7 +21,10 @@
 # include <config.h>
 #endif
 
-#include <cassert>
+#ifndef NDEBUG
+# include <cassert>
+#endif /* NDEBUG */
+
 #include <iostream>
 
 #include "Entry.hh"
@@ -56,7 +59,11 @@ EventProcessor::EventProcessor(dcommon::tQueueSP p_queue,
       m_departureEvent(p_departureEvent), m_postEvent(p_postEvent),
       m_lastArrivalEvent(p_lastArrivalEvent), m_ackEvent(p_ackEvent),
       m_leaveEvent(p_leaveEvent), m_stopTime(p_stopTime)
-{}
+{
+#ifndef NDEBUG
+    m_oldTime = 0.0;
+#endif /* NDEBUG */
+}
 
 
 EventProcessor::~EventProcessor()
@@ -80,6 +87,13 @@ bool EventProcessor::process()
             if (entry == NULL) {
                 break;
             }
+
+#ifndef NDEBUG
+            double newTime = entry->getArrival();
+
+            assert(m_oldTime <= newTime);
+            m_oldTime = newTime;
+#endif /* NDEBUG */
 
 #ifndef NDEBUG_EVENTS
             std::cout << "** EventProcessor : Handle event: " << const_cast <const dcommon::Entry&> (*entry) << std::endl;

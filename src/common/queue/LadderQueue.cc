@@ -26,6 +26,7 @@
 #endif /* __STDC_CONSTANT_MACROS */
 
 #if !defined(NDEBUG_QUEUE) || !defined(NDEBUG)
+# include <cassert>
 # include <iostream>
 #endif /* NDEBUG */
 
@@ -118,37 +119,71 @@ const bool LadderQueue::push(Entry *p_entry) throw (QueueException)
         std::cout << "LQ -- Inserted at top." << std::endl;
 #endif /* NDEBUG_EVENTS */
     } else {
-        try {
-            m_ladder->push(p_entry);
-#ifndef NDEBUG_QUEUE
-            std::cout << "LQ -- Inserted at ladder." << std::endl;
-#endif /* NDEBUG_EVENTS */
-        } catch (QueueException qe) {
-            m_bottom->push(p_entry);
-#ifndef NDEBUG_QUEUE
-            std::cout << "LQ -- Inserted at bottom." << std::endl;
-#endif /* NDEBUG_EVENTS */
-            if (m_bottom->size() > m_ladder->getThres()) {
-                // check whether ladder is empty
-                // if yes, get max and min TS values from bottom and enlist
-                if (m_ladder->getNBC() == 0) {
-                    double max = m_bottom->getMaxTS();
-                    double min = m_bottom->getMinTS();
+#ifndef NDEBUG
+//            assert(p_entry->getArrival() > m_bottom->getMaxTS());
+#endif /* NDEBUG */
 
-                    EntryList *list = m_bottom->list();
-                    m_ladder->push(list, max, min);
+//         if (p_entry->getArrival() <= m_bottom->getMaxTS()) {
+//             m_bottom->push(p_entry);
+
+// #ifndef NDEBUG_QUEUE
+//             std::cout << "LQ -- Inserted at bottom." << std::endl;
+// #endif /* NDEBUG_EVENTS */
+
+//             if (m_bottom->size() > m_ladder->getThres()) {
+//                 // check whether ladder is empty
+//                 // if yes, get max and min TS values from bottom and enlist
+//                 if (m_ladder->getNBC() == 0) {
+//                     double max = m_bottom->getMaxTS();
+//                     double min = m_bottom->getMinTS();
+
+//                     EntryList *list = m_bottom->list();
+//                     m_ladder->push(list, max, min);
+// #ifndef NDEBUG_QUEUE
+//                     std::cout << "LQ -- Insert bottom to ladder." << std::endl;
+// #endif /* NDEBUG_EVENTS */
+//                 } else {
+//                     EntryList *list = m_bottom->list();
+//                     m_ladder->pushBack(list);
+// #ifndef NDEBUG_QUEUE
+//                     std::cout << "LQ -- Push back bottom to ladder." << std::endl;
+// #endif /* NDEBUG_EVENTS */
+//                 }
+//             }
+//         } else {
+            try {
+                m_ladder->push(p_entry);
+
 #ifndef NDEBUG_QUEUE
-                    std::cout << "LQ -- Insert bottom to ladder." << std::endl;
+                std::cout << "LQ -- Inserted at ladder." << std::endl;
 #endif /* NDEBUG_EVENTS */
-                } else {
-                    EntryList *list = m_bottom->list();
-                    m_ladder->pushBack(list);
+            } catch (QueueException qe) {
+                m_bottom->push(p_entry);
 #ifndef NDEBUG_QUEUE
-                    std::cout << "LQ -- Push back bottom to ladder." << std::endl;
+                std::cout << "LQ -- Inserted at bottom." << std::endl;
 #endif /* NDEBUG_EVENTS */
+                if (m_bottom->size() > m_ladder->getThres()) {
+                    // check whether ladder is empty
+                    // if yes, get max and min TS values from bottom and enlist
+                    if (m_ladder->getNBC() == 0) {
+                        double max = m_bottom->getMaxTS();
+                        double min = m_bottom->getMinTS();
+
+                        EntryList *list = m_bottom->list();
+                        m_ladder->push(list, max, min);
+#ifndef NDEBUG_QUEUE
+                        std::cout << "LQ -- Insert bottom to ladder." << std::endl;
+#endif /* NDEBUG_EVENTS */
+                    } else {
+                        EntryList *list = m_bottom->list();
+                        m_ladder->pushBack(list);
+#ifndef NDEBUG_QUEUE
+                        std::cout << "LQ -- Push back bottom to ladder." << std::endl;
+#endif /* NDEBUG_EVENTS */
+                    }
                 }
             }
-        }
+//         }
     }
 
 #ifdef HAVE_LADDERTIMING
