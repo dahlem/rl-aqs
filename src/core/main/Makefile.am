@@ -31,6 +31,7 @@ des_main_CPPFLAGS =                                                      \
 	-I$(top_srcdir)/src/statistics/analysis/includes                 \
 	-I$(top_srcdir)/src/date/includes                                \
 	-I$(top_srcdir)/src/common/list/includes                         \
+	$(GSL_CFLAGS)                                                    \
 	$(BOOST_CPPFLAGS)
 
 
@@ -45,7 +46,8 @@ des_main_LDADD =                                                         \
 	$(top_srcdir)/src/common/list/libcommonlist.la                   \
 	$(top_srcdir)/src/core/event/libcoreevent.la                     \
 	$(top_srcdir)/src/network/evolution/libnetevo.la                 \
-	$(BOOST_PROGRAM_OPTIONS_LIB)
+	$(BOOST_PROGRAM_OPTIONS_LIB)                                     \
+	$(GSL_LIBS)
 
 
 include_HEADERS = includes

@@ -60,6 +60,7 @@
 #include "LastArrivalEvent.hh"
 #include "LastEventHandler.hh"
 #include "LogGraphHandler.hh"
+#include "NullUnprocessedEventsHandler.hh"
 #include "NumEventsHandler.hh"
 #include "PostEvent.hh"
 #include "PreAnyEvent.hh"
@@ -443,6 +444,11 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
 
             preAnyEvent->attach(processedEventsHandler);
             postEvent->attach(unprocessedEventsHandler);
+        } else {
+            // handle unprocessed events, i.e., just drop them off the queue here
+            tNullUnprocessedEventsHandlerSP nullUnprocessedEventsHandler(
+                new NullUnprocessedEventsHandler(queue));
+            postEvent->attach(nullUnprocessedEventsHandler);
         }
 
         arrivalEvent->attach(numEventsHandler);

@@ -25,6 +25,12 @@
 # include <mpi.h>
 #endif /* HAVE_MPI */
 
+#ifdef HAVE_LIBGSL
+# include <gsl/gsl_math.h>
+# include <gsl/gsl_ieee_utils.h>
+#endif /* HAVE_LIBGSL */
+
+
 #include "common.hh"
 #include "CL.hh"
 #include "Simulation.hh"
@@ -111,6 +117,11 @@ void register_simout(MPI_Datatype &MPI_Desout, dcore::sim_output &value)
 
 int main(int argc, char *argv[])
 {
+#ifdef HAVE_LIBGSL
+    /* read GSL_IEEE_MODE */
+    gsl_ieee_env_setup();
+#endif /* HAVE_LIBGSL */
+
     dcore::tDesArgsSP desArgs(new dcore::desArgs_t);
     char dateCStr[128];
 

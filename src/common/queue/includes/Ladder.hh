@@ -52,7 +52,7 @@ typedef boost::shared_array <boost::uint32_t> tIntSA;
 /** @typedef tDoubleSA
  * a type defintion of a shared array of doubles
  */
-typedef boost::shared_array <double> tDoubleSA;
+typedef boost::shared_array <long double> tDoubleSA;
 
 
 
@@ -177,7 +177,7 @@ private:
      * @return the bucketwidth given the max/min timestamps and the number of
      *         events.
      */
-    double bucketwidth(double p_max, double p_min, boost::uint32_t p_n);
+    long double bucketwidth(double p_max, double p_min, boost::uint32_t p_n);
 
     /**
      * Determine the bucket to insert the event with a given arrival timestamp
@@ -191,7 +191,7 @@ private:
      * @return the index of the bucket in the given rung where the event with
      *         the given arrival timestamp is to be inserted
      */
-    boost::uint32_t bucket(double p_TS, boost::uint32_t p_rung);
+    boost::uint32_t bucket(long double p_TS, boost::uint32_t p_rung);
 
     /**
      * This method resizes the first rung given the number of events to be
@@ -229,6 +229,15 @@ private:
      */
     bool canAdvance();
 
+#if !defined(NDEBUG) || !defined(NDEBUG_QUEUE)
+    /** @fn void printState(boost::uint32_t)
+     * Print the current state of the given rung.
+     *
+     * @param boost::uint32_t the rung to be printed
+     */
+    void printState(boost::uint32_t p_rung);
+#endif /* NDEBUG || NDEBUG_QUEUE */
+
     /**
      * Default constant of the event threshold per bucket.
      */
@@ -240,8 +249,8 @@ private:
     static const boost::uint32_t MAX_RUNGS = 8;
 
     dcommon::EntryListSM m_rungs;
-    boost::uint32_t m_BucketsFirstRung;
 
+    boost::uint32_t m_BucketsFirstRung;
     boost::uint32_t m_NRung;
     boost::uint32_t m_NBC;
     boost::uint32_t m_lowestRung;
@@ -249,12 +258,11 @@ private:
 
     tIntSA m_events;
     tIntSA m_currentBucket;
+    tIntSA m_buckets;
 
     tDoubleSA m_bucketwidth;
     tDoubleSA m_RCur;
     tDoubleSA m_RStart;
-
-    bool epochDelisted;
 };
 
 

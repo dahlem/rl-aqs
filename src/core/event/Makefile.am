@@ -25,6 +25,7 @@ libcoreevent_la_SOURCES =                                                  \
 	LastArrivalEvent.cc                                                \
 	ProcessedEventsHandler.cc                                          \
 	UnprocessedEventsHandler.cc                                        \
+	NullUnprocessedEventsHandler.cc                                    \
 	GenerateEventHandler.cc                                            \
 	ArrivalEvent.cc                                                    \
 	ArrivalHandler.cc                                                  \
