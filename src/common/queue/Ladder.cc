@@ -322,27 +322,20 @@ void Ladder::push(boost::uint32_t p_rung, EntryList *p_list)
         p_list->pop_front();
 
 #ifndef NDEBUG
-//         assert(entry->getArrival() >= m_RCur[p_rung]);
         assert(l_bucket < m_buckets[p_rung]);
         assert(l_bucket >= m_currentBucket[p_rung]);
-
-        if (p_rung > 0) {
-            std::cout << std::setprecision(25) << "Ladder -- Enter event: " << entry->getArrival()
-                      << " between " << (m_RStart[p_rung] + m_bucketwidth[p_rung] * (l_bucket))
-                      << " and " << (m_RStart[p_rung] + m_bucketwidth[p_rung] * (l_bucket + 1))
-                      << ", current bucket: " << l_bucket << std::endl;
-
-            printState(p_rung);
-            printState(p_rung - 1);
-        }
 #endif /* NDEBUG */
 
 #ifndef NDEBUG_QUEUE
-        std::cout << std::setprecision(14) << "Ladder -- Enter event: " << entry->getArrival()
+        std::cout << std::setprecision(25) << "Ladder -- Enter event: " << entry->getArrival()
                   << " between " << (m_RStart[p_rung] + m_bucketwidth[p_rung] * (l_bucket))
                   << " and " << (m_RStart[p_rung] + m_bucketwidth[p_rung] * (l_bucket + 1))
                   << ", current bucket: " << l_bucket << std::endl;
-        printState(p_rung);
+
+        if (p_rung > 0) {
+            printState(p_rung);
+            printState(p_rung - 1);
+        }
 #endif /* NDEBUG_QUEUE */
 
         m_rungs[p_rung][l_bucket].push_back(*entry);
