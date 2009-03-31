@@ -60,6 +60,12 @@ function y = krig(x, X, R, beta, theta, y, F, FUN = @(x) 1)
   y = FUN(x) * beta + r' * (R\(y - F * beta));
 endfunction
 
+function y = krig1(x, X, R, beta, theta, y, F, FUN = @(x) 1)
+  z = x';
+  r = scf_gaussianu(X, z, theta);
+  y = FUN(z) * beta + r' * (R\(y - F * beta));
+endfunction
+
 
 ## -------------------------------------------------
 ## From "A nonstationary covariance based kriging method for

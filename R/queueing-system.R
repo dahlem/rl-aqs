@@ -17,13 +17,14 @@ library(desGraph)
 
 dir <- dir(recursive=TRUE)
 ##filtered <- grep(".*soc.*gml", dir)
-filtered <- grep(".*rand.*gml", dir)
+filtered <- grep(".*gml", dir)
 
 df <- data.frame(boostVertex=rep(0, length(filtered)),
                  boostEdge=rep(0, length(filtered)),
                  W=rep(0, length(filtered)),
                  L=rep(0, length(filtered)),
                  Rho=rep(0, length(filtered)),
+                 wTot=rep(0, length(filtered)),
                  network=rep(0, length(filtered)))
 counter <- 1
 
@@ -35,6 +36,7 @@ for (i in filtered) {
   df$boostEdge[counter] <- as.numeric(sub(".*_be(\\d.\\d{4}).*", "\\1", dir[i], perl=TRUE))
   df$W[counter] <- qt$W
   df$L[counter] <- sum(qt$L)
+  df$wTot[counter] <- sum(qt$w)
   df$Rho[counter] <- mean(qt$rho)
   file <- basename(dir[i])
   net <- sub("(\\W*)_.*", "\\1", file, perl=TRUE)

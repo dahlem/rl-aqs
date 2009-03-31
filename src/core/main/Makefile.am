@@ -46,6 +46,7 @@ des_main_LDADD =                                                         \
 	$(top_srcdir)/src/common/list/libcommonlist.la                   \
 	$(top_srcdir)/src/core/event/libcoreevent.la                     \
 	$(top_srcdir)/src/network/evolution/libnetevo.la                 \
+	$(top_srcdir)/src/rl/librl.la                                    \
 	$(BOOST_PROGRAM_OPTIONS_LIB)                                     \
 	$(GSL_LIBS)
 

@@ -177,6 +177,8 @@ void WEvonet::advance(boost::uint32_t p_steps, tGraphSP g,
 
     double accum_service_rate;
     size_t vertices;
+    boost::uint16_t num_edges = 0;
+
 
     // at each step do:
     // 1. create vertex
@@ -256,7 +258,7 @@ void WEvonet::advance(boost::uint32_t p_steps, tGraphSP g,
                     if (!edge(v, z, *g).second) {
                         std::pair<Edge, bool> e = add_edge(v, z, *g);
                         edge_q_val_map[e.first] = 0.0;
-                        edge_index_map[e.first] = boost::num_edges(*g) + 1;
+                        edge_index_map[e.first] = num_edges++;
                         break;
                     }
                 }
@@ -367,11 +369,45 @@ tGraphSP WEvonet::createERGraph(boost::uint32_t p_size, double fixed_edge_weight
     // set the graph properties
     boost::set_property(*g, graph_generator, 2);
 
-    VertexIndexMap vertexIndexMap = get(boost::vertex_index, *g);
+    VServiceIterator service_it, service_it_end;
     VertexArrivalRateMap vertex_arrival_props_map
         = get(vertex_arrival_rate, *g);
     VertexServiceRateMap vertex_service_props_map
         = get(vertex_service_rate, *g);
+    VertexIndexMap vertex_index_props_map
+        = get(boost::vertex_index, *g);
+    VertexBusyMap vertex_busy_map
+        = get(vertex_busy, *g);
+    VertexTimeServiceEndsMap vertex_time_service_ends_map
+        = get(vertex_time_service_ends, *g);
+    VertexNumberInQueueMap vertex_number_in_queue_map
+        = get(vertex_number_in_queue, *g);
+    VertexAverageDelayInQueueMap vertex_average_delay_in_queue_map
+        = get(vertex_average_delay_in_queue, *g);
+    VertexNumEventsMap vertex_num_events_map
+        = get(vertex_num_events, *g);
+    VertexUtilisationMap vertex_utilisation_map
+        = get(vertex_utilisation, *g);
+    VertexBdtMap vertex_Bdt_map
+        = get(vertex_Bdt, *g);
+    VertexQdtMap vertex_Qdt_map
+        = get(vertex_Qdt, *g);
+    VertexLastEventTimeMap vertex_last_event_time_map
+        = get(vertex_last_event_time, *g);
+    VertexExpectedAverageNumberEventMap vertex_expected_average_number_event_map
+        = get(vertex_expected_average_number_event, *g);
+    VertexNumEventsProcessedMap vertex_num_events_processed_map
+        = get(vertex_num_events_processed, *g);
+    VertexMeanRewardMap vertex_mean_reward_map
+        = get(vertex_mean_reward, *g);
+    VertexNextActionMap vertex_next_action_map
+        = get(vertex_next_action, *g);
+    EdgeQValueMap edge_q_val_map
+        = get(edge_q_val, *g);
+    EdgeIndexMap edge_index_map
+        = get(edge_eindex, *g);
+    VertexNextEventTimeMap vertex_next_event_time_map
+        = get(vertex_next_event_time, *g);
 
     // assign ids, arrival and service rates
 #ifndef NDEBUG_NETWORK
@@ -380,11 +416,32 @@ tGraphSP WEvonet::createERGraph(boost::uint32_t p_size, double fixed_edge_weight
     std::pair <VertexIterator, VertexIterator> p_v;
     int i = 0;
     for (p_v = boost::vertices(*g); p_v.first != p_v.second; ++p_v.first) {
-        vertexIndexMap[*p_v.first] = i++;
+        vertex_index_props_map[*p_v.first] = i++;
         vertex_arrival_props_map[*p_v.first] =
             (gsl_rng_uniform(p_vertex_arrival_rng.get()) * max_arrival_rate);
         vertex_service_props_map[*p_v.first] =
             boost_arrival * vertex_arrival_props_map[*p_v.first];
+        vertex_busy_map[*p_v.first] = false;
+        vertex_time_service_ends_map[*p_v.first] = 0.0;
+        vertex_number_in_queue_map[*p_v.first] = 0;
+        vertex_average_delay_in_queue_map[*p_v.first] = 0.0;
+        vertex_num_events_map[*p_v.first] = 0;
+        vertex_utilisation_map[*p_v.first] = 0.0;
+        vertex_Bdt_map[*p_v.first] = 0.0;
+        vertex_Qdt_map[*p_v.first] = 0.0;
+        vertex_last_event_time_map[*p_v.first] = 0.0;
+        vertex_expected_average_number_event_map[*p_v.first] = 0.0;
+        vertex_num_events_processed_map[*p_v.first] = 0;
+        vertex_mean_reward_map[*p_v.first] = 0.0;
+        vertex_next_action_map[*p_v.first] = -1;
+        vertex_next_event_time_map[*p_v.first] = 0.0;
+    }
+
+    // assign edge indeces
+    boost::uint16_t num_edges = 0;
+    BOOST_FOREACH(Edge e, (boost::edges(*g))) {
+        edge_q_val_map[e] = 0.0;
+        edge_index_map[e] = num_edges++;
     }
 
     // remove cycles

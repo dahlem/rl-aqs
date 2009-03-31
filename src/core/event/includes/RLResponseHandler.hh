@@ -29,7 +29,7 @@
 #endif /* __STDC_CONSTANT_MACROS */
 
 #include <boost/cstdint.hpp>
-#include <boost/shared_array.hpp>
+#include <boost/scoped_array.hpp>
 #include <boost/shared_ptr.hpp>
 
 
@@ -51,7 +51,7 @@ namespace des
 namespace core
 {
 
-typedef boost::shared_ptr <std::vector<double> > tDoubleVecSP;
+typedef boost::scoped_array <double> tDoubleVecSP;
 
 
 /** @class RLResponseHandler
@@ -60,30 +60,26 @@ typedef boost::shared_ptr <std::vector<double> > tDoubleVecSP;
 class RLResponseHandler : public design::Observer<AckEvent>
 {
 public:
-    RLResponseHandler(dnet::tGraphSP p_graph, boost::shared_array<double> p_alpha,
-                      boost::shared_array<double> p_r, boost::uint16_t p_levels,
-                      double p_q_alpha, double p_q_lambda, drl::tPolicySP p_policy);
-    
+    RLResponseHandler(dnet::tGraphSP p_graph, double p_q_alpha, double p_q_lambda,
+                      drl::tPolicySP p_policy);
+
     ~RLResponseHandler();
 
     void update(AckEvent *subject);
 
 private:
     dnet::tGraphSP m_graph;
-    boost::shared_array<double> m_alpha;
-    boost::shared_array<double> m_r;
-    boost::uint16_t m_levels;
     double m_q_alpha;
     double m_q_lambda;
     drl::tPolicySP m_policy;
-    
+    tDoubleVecSP m_actionValues;
+
     // derived fields
     dnet::EdgeIndexMap edge_index_map;
     dnet::VertexNextActionMap vertex_next_action_map;
     dnet::VertexIndexMap vertex_index_map;
     dnet::EdgeQValueMap edge_q_val_map;
 
-    tDoubleVecSP m_actionValues;
 };
 
 

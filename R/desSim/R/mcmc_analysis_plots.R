@@ -371,7 +371,7 @@ des.kriging.mcmc.theta.mean.plot <- function(prefix="2d-shdf", idx="1", ps=TRUE)
     postscript(paste(prefix, "-chain-theta", idx, "-mean.eps", sep=""), onefile=FALSE)
   }
 
-  chain <- read.table(paste(prefix, "-chain-theta", idx, "-mean.dat", sep=""),
+  chain <- read.table(paste(prefix, "-chain-theta_", idx, "-mean.dat", sep=""),
                       header=TRUE, col.names=c("theta"))
   df <- data.frame(x=1:length(chain$theta), y=chain$theta)
   i <- as.numeric(idx)

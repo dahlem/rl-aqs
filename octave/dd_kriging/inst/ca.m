@@ -33,10 +33,13 @@ endfunction
 function D = ca_mesh(boundaries, meshsize)
   stepsize1 = (boundaries(2, 1) - boundaries(1, 1)) / meshsize;
   stepsize2 = (boundaries(2, 2) - boundaries(1, 2)) / meshsize;
+  stepsize3 = (boundaries(2, 3) - boundaries(1, 3)) / meshsize;
 
-  [xx, yy] = meshgrid(boundaries(1, 1):stepsize1:boundaries(2, 1),
-                      boundaries(1, 2):stepsize2:boundaries(2, 2));
-  D = [vec(xx), vec(yy)];
+  [xx, yy, zz] = meshgrid(boundaries(1, 1):stepsize1:boundaries(2, 1),
+                          boundaries(1, 2):stepsize2:boundaries(2, 2),
+                          boundaries(1, 3):stepsize3:boundaries(2, 3));
+
+  D = [vec(xx), vec(yy), vec(zz)];
 endfunction
 
 
@@ -173,18 +176,19 @@ function [y, z, theta] = ca_modelXM(M, D, B, b)
 endfunction
 
 
-function [ym,z,w,B,D,M,lambda,thetam] = ca_analyse(meshsize, boundaries, yS, xS, \
-                                                   S, R, beta, theta, \
-                                                   y, F, FUN)
+function [ym,z,w,b,B,D,M,lambda,thetam] = ca_analyse(meshsize, boundaries, yS, xS, \
+                                                     S, R, beta, theta, \
+                                                     y, F, FUN)
   D = ca_mesh(boundaries, meshsize);
   X = ca_modelM(D);
 
   x1_vec = X(:,1)';
   x2_vec = X(:,2)';
+  x3_vec = X(:,3)';
   yk = zeros(rows(X), 1);
 
   for i = 1:columns(x1_vec)
-    yk(i) = krig([x1_vec(i), x2_vec(i)], S, R, beta, theta, y, F, FUN);
+    yk(i) = krig([x1_vec(i), x2_vec(i), x3_vec(i)], S, R, beta, theta, y, F, FUN);
   endfor
 
   b = ca_lse(X, yk);

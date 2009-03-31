@@ -494,8 +494,7 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
             // configure the simple on-policy SARSA control RL handler
             tRLResponseHandlerSP rlResponseHandler(
                 new RLResponseHandler(
-                    graph, desArgs->response_alpha, desArgs->response_reward, desArgs->response_levels,
-                    rl_q_alpha, rl_q_lambda, pol));
+                    graph, rl_q_alpha, rl_q_lambda, pol));
             ackEvent->attach(rlResponseHandler);
         } else {
             drl::tPolicySP pol = drl::tPolicySP();
