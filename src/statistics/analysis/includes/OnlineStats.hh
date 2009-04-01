@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -45,7 +45,7 @@ namespace statistics
 class OnlineStats
 {
 public:
-    OnlineStats() : m_n(0) {}
+    OnlineStats() : m_n(0), m_oldM(0.0), m_newM(0.0), m_oldS(0.0), m_newS(0.0) {}
 
     void clear();
 

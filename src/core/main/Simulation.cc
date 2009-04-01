@@ -50,6 +50,7 @@
 #include "ArrivalHandler.hh"
 #include "BoltzmannPolicy.hh"
 #include "CL.hh"
+#include "DefaultResponseHandler.hh"
 #include "DepartureEvent.hh"
 #include "DepartureHandler.hh"
 #include "events.hh"
@@ -503,6 +504,11 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
             tDepartureHandlerSP departureHandler(
                 new DepartureHandler(queue, graph, selection));
             departureEvent->attach(departureHandler);
+
+            // configure default response handler
+            tDefaultResponseHandlerSP defaultResponseHandler(
+                new DefaultResponseHandler(graph));
+            ackEvent->attach(defaultResponseHandler);
         }
 
         ackEvent->attach(ackHandler);

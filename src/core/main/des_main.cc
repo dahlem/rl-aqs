@@ -93,7 +93,7 @@ void register_simout(MPI_Datatype &MPI_Desout, dcore::sim_output &value)
     MPI_Datatype old_types[2];
 
     /* One value of each type */
-    blocklens[0] = 6;
+    blocklens[0] = 9;
     blocklens[1] = 2;
 
     /* The base types */

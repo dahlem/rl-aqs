@@ -160,8 +160,10 @@ public:
             dio::tResultsSP sim_output(
                 new dio::Results(file, dir));
 
-            csv_line << "sim_num," << ARGS_HEADER << ",actual_reps";
-            sim_output->print(csv_line);
+            if (p_desArgs->add_sim.empty()) {
+                csv_line << "sim_num," << ARGS_HEADER << ",actual_reps";
+                sim_output->print(csv_line);
+            }
 
             // 3. run experiment
             for (boost::uint16_t i = 0; i < p_desArgs->simulations; ++i) {
@@ -206,8 +208,10 @@ public:
                 output = m_dsim->simulate(p_desArgs);
 
                 csv_line.str("");
-                csv_line << p_desArgs->sim_num << "," << const_cast <const desArgs_t&> (*p_desArgs)
-                         << "," << output.replications;
+                csv_line << p_desArgs->sim_num << ","
+                         << const_cast <const desArgs_t&> (*p_desArgs) << ","
+                         << output.replications;
+
                 sim_output->print(csv_line);
             }
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -46,6 +46,7 @@ void Report::accumResults(dnet::tGraphSP p_graph, sim_output *output)
         = meanDelay(p_graph);
     output->system_expected_average_num_in_queue
         = meanExpectedAverageNumberEvents(p_graph);
+    output->system_total_q = totalQ(p_graph);
 }
 
 double Report::meanExpectedAverageNumberEvents(dnet::tGraphSP p_graph)
@@ -74,6 +75,19 @@ double Report::meanDelay(dnet::tGraphSP p_graph)
     result = std::accumulate(it, it_end, 0.0);
 
     return result / static_cast<double> (size);
+}
+
+double Report::totalQ(dnet::tGraphSP p_graph)
+{
+    dnet::EQValIterator it, it_end;
+    double result = 0.0;
+
+    tie(it, it_end) = boost::get_property_iter_range(
+        *p_graph, edge_q_val);
+
+    result = std::accumulate(it, it_end, 0.0);
+
+    return result;
 }
 
 

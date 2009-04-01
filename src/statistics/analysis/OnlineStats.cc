@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -38,13 +38,10 @@ void OnlineStats::push(double x)
     m_n++;
 
     // See Knuth TAOCP vol 2, 3rd edition, page 232
-    if (m_n == 1)
-    {
+    if (m_n == 1) {
         m_oldM = x;
         m_oldS = 0.0;
-    }
-    else
-    {
+    } else {
         m_newM = m_oldM + (x - m_oldM) / m_n;
         m_newS = m_oldS + (x - m_oldM) * (x - m_newM);
 
@@ -74,7 +71,7 @@ double OnlineStats::mean() const
 
 double OnlineStats::variance() const
 {
-    return ((m_n > 1) ? m_newS / (m_n - 1) : 0.0);
+    return ((m_n > 1) ? (m_newS / (m_n - 1)) : 0.0);
 }
 
 double OnlineStats::standardDeviation() const

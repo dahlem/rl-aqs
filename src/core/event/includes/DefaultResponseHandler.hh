@@ -21,14 +21,9 @@
 # include <config.h>
 #endif
 
-#ifndef __CORE_RLRESPONSEHANDLER_HH__
-#define __CORE_RLRESPONSEHANDLER_HH__
+#ifndef __CORE_DEFAULTRESPONSEHANDLER_HH__
+#define __CORE_DEFAULTRESPONSEHANDLER_HH__
 
-#ifndef __STDC_CONSTANT_MACROS
-# define __STDC_CONSTANT_MACROS
-#endif /* __STDC_CONSTANT_MACROS */
-
-#include <boost/cstdint.hpp>
 #include <boost/scoped_array.hpp>
 #include <boost/shared_ptr.hpp>
 
@@ -39,11 +34,9 @@ namespace design = des::design;
 #include "DirectedGraph.hh"
 namespace dnet = des::network;
 
-#include "Policy.hh"
-namespace drl = des::rl;
-
 #include "OnlineStats.hh"
 namespace dstats = des::statistics;
+
 
 #include "AckEvent.hh"
 
@@ -55,42 +48,36 @@ namespace core
 
 typedef boost::scoped_array<dstats::OnlineStats> tQOnlineStatsSA;
 
-/** @class RLResponseHandler
+/** @class DefaultResponseHandler
  * The class @code{RLResponseHandler} handles the RL update statistic.
  */
-class RLResponseHandler : public design::Observer<AckEvent>
+class DefaultResponseHandler : public design::Observer<AckEvent>
 {
 public:
-    RLResponseHandler(dnet::tGraphSP p_graph, double p_q_alpha, double p_q_lambda,
-                      drl::tPolicySP p_policy);
-
-    ~RLResponseHandler();
+    DefaultResponseHandler(dnet::tGraphSP p_graph);
+    ~DefaultResponseHandler();
 
     void update(AckEvent *subject);
 
 private:
     dnet::tGraphSP m_graph;
-    double m_q_alpha;
-    double m_q_lambda;
-    drl::tPolicySP m_policy;
     tQOnlineStatsSA qStatsSA;
 
     // derived fields
     dnet::EdgeIndexMap edge_index_map;
-    dnet::VertexNextActionMap vertex_next_action_map;
-    dnet::VertexIndexMap vertex_index_map;
     dnet::EdgeQValueMap edge_q_val_map;
+
 };
 
 
-/** @typedef tRLResponseHandlerSP
- * a type definition of the shared pointer of the ack handler
+/** @typedef tDefaultResponseHandlerSP
+ * a type definition of the shared pointer of the default response handler
  */
-typedef boost::shared_ptr <RLResponseHandler> tRLResponseHandlerSP;
+typedef boost::shared_ptr <DefaultResponseHandler> tDefaultResponseHandlerSP;
 
 
 }
 }
 
 
-#endif /* __CORE_RLRESPONSEHANDLER_HH__ */
+#endif /* __CORE_DEFAULTRESPONSEHANDLER_HH__ */

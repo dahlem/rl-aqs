@@ -92,9 +92,10 @@ public:
             sim_output output, result;
             dstats::OnlineStats avgDelay;
             dstats::OnlineStats avgNumEvents;
+            dstats::OnlineStats totalQ;
 
             if (p_desArgs->add_sim.empty()) {
-                csv_line << "sim_num,rep_num,systemDelay,systemAvgNumEvents,meanDelay,varDelay,meanAvgNumEvents,varAvgNumEvents";
+                csv_line << "sim_num,rep_num,systemDelay,systemAvgNumEvents,systemTotalQ,meanDelay,varDelay,meanAvgNumEvents,varAvgNumEvents,meanTotalQ,varTotalQ";
                 replica_output->print(csv_line);
             }
 
@@ -102,32 +103,61 @@ public:
             for (p_desArgs->rep_num = 1; p_desArgs->rep_num <= m_initialExp; ++p_desArgs->rep_num) {
                 csv_line.str("");
                 output = m_dsim->simulate(p_desArgs);
+
+                // update the online statistics
                 avgDelay.push(output.system_average_delay);
                 avgNumEvents.push(output.system_expected_average_num_in_queue);
-                csv_line << p_desArgs->sim_num << "," << p_desArgs->rep_num << ","
-                         << output.system_average_delay << "," << output.system_expected_average_num_in_queue
-                         << "," << avgDelay.mean() << "," << avgDelay.variance() << ","
-                         << avgNumEvents.mean() << "," << avgNumEvents.variance();
+                totalQ.push(output.system_total_q);
+
+                // output the new statistics
+                csv_line << p_desArgs->sim_num << ","
+                         << p_desArgs->rep_num << ","
+                         << output.system_average_delay << ","
+                         << output.system_expected_average_num_in_queue << ","
+                         << output.system_total_q << ","
+                         << avgDelay.mean() << ","
+                         << avgDelay.variance() << ","
+                         << avgNumEvents.mean() << ","
+                         << avgNumEvents.variance() << ","
+                         << totalQ.mean() << ","
+                         << totalQ.variance();
+
                 replica_output->print(csv_line);
             }
 
             while (!dstats::CI::isConfidentWithPrecision(
-                         avgDelay.mean(),
-                         avgDelay.variance(),
-                         avgDelay.getNumValues(), m_alpha, m_error)
-                     && !dstats::CI::isConfidentWithPrecision(
-                         avgNumEvents.mean(),
-                         avgNumEvents.variance(),
-                         avgNumEvents.getNumValues(), m_alpha, m_error))
+                       avgDelay.mean(),
+                       avgDelay.variance(),
+                       avgDelay.getNumValues(), m_alpha, m_error)
+                   && !dstats::CI::isConfidentWithPrecision(
+                       avgNumEvents.mean(),
+                       avgNumEvents.variance(),
+                       avgNumEvents.getNumValues(), m_alpha, m_error)
+                   && !dstats::CI::isConfidentWithPrecision(
+                       totalQ.mean(),
+                       totalQ.variance(),
+                       totalQ.getNumValues(), m_alpha, m_error)
+                )
             {
                 csv_line.str("");
                 output = m_dsim->simulate(p_desArgs);
+
                 avgDelay.push(output.system_average_delay);
                 avgNumEvents.push(output.system_expected_average_num_in_queue);
-                csv_line << p_desArgs->sim_num << "," << p_desArgs->rep_num << ","
-                         << output.system_average_delay << "," << output.system_expected_average_num_in_queue
-                         << "," << avgDelay.mean() << "," << avgDelay.variance() << ","
-                         << avgNumEvents.mean() << "," << avgNumEvents.variance();
+                totalQ.push(output.system_total_q);
+
+                csv_line << p_desArgs->sim_num << ","
+                         << p_desArgs->rep_num << ","
+                         << output.system_average_delay << ","
+                         << output.system_expected_average_num_in_queue << ","
+                         << output.system_total_q << ","
+                         << avgDelay.mean() << ","
+                         << avgDelay.variance() << ","
+                         << avgNumEvents.mean() << ","
+                         << avgNumEvents.variance() << ","
+                         << totalQ.mean() << ","
+                         << totalQ.variance();
+
                 replica_output->print(csv_line);
                 (p_desArgs->rep_num)++;
             }
@@ -136,6 +166,8 @@ public:
             result.sd_system_average_delay = avgDelay.standardDeviation();
             result.mean_system_expected_average_num_in_queue = avgNumEvents.mean();
             result.sd_system_expected_average_num_in_queue = avgNumEvents.standardDeviation();
+            result.mean_system_total_q = totalQ.mean();
+            result.sd_system_total_q = totalQ.standardDeviation();
 
             if (p_desArgs->rep_num > m_initialExp) {
                 result.replications = p_desArgs->rep_num - 1;

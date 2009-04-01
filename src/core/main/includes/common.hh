@@ -46,12 +46,15 @@ typedef struct
     // single simulation output
     double system_average_delay;
     double system_expected_average_num_in_queue;
+    double system_total_q;
 
     // average simulation output
     double mean_system_average_delay;
     double mean_system_expected_average_num_in_queue;
+    double mean_system_total_q;
     double sd_system_average_delay;
     double sd_system_expected_average_num_in_queue;
+    double sd_system_total_q;
 
     // number of replications
     unsigned int replications;

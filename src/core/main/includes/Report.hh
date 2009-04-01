@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -57,6 +57,7 @@ private:
 
     static double meanExpectedAverageNumberEvents(dnet::tGraphSP);
     static double meanDelay(dnet::tGraphSP);
+    static double totalQ(dnet::tGraphSP);
 
 };
 

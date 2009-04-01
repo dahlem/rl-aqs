@@ -37,6 +37,7 @@ libcoreevent_la_SOURCES =                                                  \
 	LogGraphHandler.cc                                                 \
 	DepartureHandler.cc                                                \
 	ResponseStatsHandler.cc                                            \
+	DefaultResponseHandler.cc                                          \
 	RLResponseHandler.cc
 
 libcoreevent_la_CPPFLAGS =                                                 \

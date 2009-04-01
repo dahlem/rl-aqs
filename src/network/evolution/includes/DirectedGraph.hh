@@ -438,6 +438,11 @@ typedef boost::graph_property_iter_range <Graph, vertex_expected_average_number_
  */
 typedef boost::graph_property_iter_range <Graph, vertex_average_delay_in_queue_t>::iterator VAverageDelayQueueIterator;
 
+/** @typedef EQValIterator
+ * Specifies the iterator for the edge q value
+ */
+typedef boost::graph_property_iter_range <Graph, edge_q_val_t>::iterator EQValIterator;
+
 /** @typedef OutEdgeIterator
  * Specifies the iterator for the out degree edges
  */

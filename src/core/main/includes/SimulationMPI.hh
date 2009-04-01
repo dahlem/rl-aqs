@@ -93,9 +93,14 @@ public:
             // 1. perform lhs
             gsl_vector *min, *max;
             gsl_matrix *sample;
+
+            // keep track of the significance of the experiments
             std::vector<bool> areExpsSignificant(p_desArgs->simulations, false);
+
+            // online statistics for the experiments
             std::vector<dstats::OnlineStats> avgDelays(p_desArgs->simulations);
             std::vector<dstats::OnlineStats> avgNumEvents(p_desArgs->simulations);
+            std::vector<dstats::OnlineStats> totalQs(p_desArgs->simulations);
 
             // 2. init the crn for the lhs permutation
             boost::uint32_t seed = dsample::Seeds::getInstance().getSeed();
@@ -266,8 +271,10 @@ public:
                 dio::tResultsSP replica_output(
                     new dio::Results(file, dir));
 
-                csv_line << "sim_num,rep_num,systemDelay,systemAvgNumEvents,meanDelay,varDelay,meanAvgNumEvents,varAvgNumEvents";
-                replica_output->print(csv_line);
+                if (p_desArgs->add_sim.empty()) {
+                    csv_line << "sim_num,rep_num,systemDelay,systemAvgNumEvents,systemTotalQ,meanDelay,varDelay,meanAvgNumEvents,varAvgNumEvents,meanTotalQ,varTotalQ";
+                    replica_output->print(csv_line);
+                }
                 csv_line.str("");
 
                 replica_results.push_back(replica_output);
@@ -314,6 +321,7 @@ public:
                 // update fields
                 avgDelays[output->simulation_id - 1].push(output->system_average_delay);
                 avgNumEvents[output->simulation_id - 1].push(output->system_expected_average_num_in_queue);
+                totalQs[output->simulation_id - 1].push(output->system_total_q);
 
                 // test whether this result is significant
                 if (avgDelays[output->simulation_id - 1].getNumValues()
@@ -329,7 +337,14 @@ public:
                             avgNumEvents[output->simulation_id - 1].mean(),
                             avgNumEvents[output->simulation_id - 1].variance(),
                             avgNumEvents[output->simulation_id - 1].getNumValues(),
-                            p_desArgs->alpha, p_desArgs->error);
+                            p_desArgs->alpha, p_desArgs->error)
+                        &&
+                        dstats::CI::isConfidentWithPrecision(
+                            totalQs[output->simulation_id - 1].mean(),
+                            totalQs[output->simulation_id - 1].variance(),
+                            totalQs[output->simulation_id - 1].getNumValues(),
+                            p_desArgs->alpha, p_desArgs->error)
+                        ;
 
                     // if not send another replica
                     if (!isConfident) {
@@ -414,13 +429,18 @@ public:
 
                 // write replica results
                 csv_line.str("");
-                csv_line << output->simulation_id << "," << output->replications << ","
+                csv_line << output->simulation_id << ","
+                         << output->replications << ","
                          << output->system_average_delay << ","
-                         << output->system_expected_average_num_in_queue
-                         << "," << avgDelays[output->simulation_id - 1].mean() << ","
+                         << output->system_expected_average_num_in_queue << ","
+                         << output->system_total_q << ","
+                         << avgDelays[output->simulation_id - 1].mean() << ","
                          << avgDelays[output->simulation_id - 1].variance() << ","
                          << avgNumEvents[output->simulation_id - 1].mean() << ","
-                         << avgNumEvents[output->simulation_id - 1].variance();
+                         << avgNumEvents[output->simulation_id - 1].variance() << ","
+                         << totalQs[output->simulation_id - 1].mean() << ","
+                         << totalQs[output->simulation_id - 1].variance();
+
                 replica_results[output->simulation_id - 1]->print(csv_line);
 
                 delete[] output;
