@@ -1,4 +1,4 @@
-// Copyright (C) 2007, 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2007, 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This file is free software; as a special exception the author gives
 // unlimited permission to copy and/or distribute it, with or without
@@ -11,6 +11,10 @@
 /** @file CRN.hh
  * Declaration of the common random number interface.
  */
+#if HAVE_CONFIG_H
+# include <config.h>
+#endif
+
 #ifndef CRN_HH
 #define CRN_HH
 

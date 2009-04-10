@@ -27,6 +27,10 @@
 # include <config.h>
 #endif
 
+#ifdef HAVE_OPENMP
+# include <omp.h>
+#endif /* HAVE_OPENMP */
+
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -58,7 +62,7 @@ template <class DecoratedSim>
 class SimulationCI
 {
 public:
-    SimulationCI(DecoratedSim p_dsim, double p_alpha, double p_error,
+    SimulationCI(DecoratedSim &p_dsim, double p_alpha, double p_error,
                  boost::uint16_t p_initialExp)
         : m_dsim(p_dsim), m_alpha(p_alpha), m_error(p_error), m_initialExp(p_initialExp)
         {}
@@ -100,9 +104,9 @@ public:
             }
 
             // start 2 experiments
-            for (p_desArgs->rep_num = 1; p_desArgs->rep_num <= m_initialExp; ++p_desArgs->rep_num) {
+            for (p_desArgs->rep_num = 1; p_desArgs->rep_num <= m_initialExp; p_desArgs->rep_num++) {
                 csv_line.str("");
-                output = m_dsim->simulate(p_desArgs);
+                output = m_dsim.simulate(p_desArgs);
 
                 // update the online statistics
                 avgDelay.push(output.system_average_delay);
@@ -125,22 +129,22 @@ public:
                 replica_output->print(csv_line);
             }
 
-            while (!dstats::CI::isConfidentWithPrecision(
-                       avgDelay.mean(),
-                       avgDelay.variance(),
-                       avgDelay.getNumValues(), m_alpha, m_error)
-                   && !dstats::CI::isConfidentWithPrecision(
-                       avgNumEvents.mean(),
-                       avgNumEvents.variance(),
-                       avgNumEvents.getNumValues(), m_alpha, m_error)
-                   && !dstats::CI::isConfidentWithPrecision(
-                       totalQ.mean(),
-                       totalQ.variance(),
-                       totalQ.getNumValues(), m_alpha, m_error)
+            while (!(dstats::CI::isConfidentWithPrecision(
+                         avgDelay.mean(),
+                         avgDelay.variance(),
+                         avgDelay.getNumValues(), m_alpha, m_error)
+                     && dstats::CI::isConfidentWithPrecision(
+                         avgNumEvents.mean(),
+                         avgNumEvents.variance(),
+                         avgNumEvents.getNumValues(), m_alpha, m_error)
+                     && dstats::CI::isConfidentWithPrecision(
+                         totalQ.mean(),
+                         totalQ.variance(),
+                         totalQ.getNumValues(), m_alpha, m_error))
                 )
             {
                 csv_line.str("");
-                output = m_dsim->simulate(p_desArgs);
+                output = m_dsim.simulate(p_desArgs);
 
                 avgDelay.push(output.system_average_delay);
                 avgNumEvents.push(output.system_expected_average_num_in_queue);
@@ -188,7 +192,7 @@ private:
         {}
 
 
-    DecoratedSim m_dsim;
+    DecoratedSim &m_dsim;
     double m_alpha;
     double m_error;
     boost::uint16_t m_initialExp;

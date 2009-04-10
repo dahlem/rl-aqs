@@ -71,7 +71,7 @@ template <class DecoratedSim>
 class SimulationLHS
 {
 public:
-    SimulationLHS(DecoratedSim p_dsim)
+    SimulationLHS(DecoratedSim &p_dsim)
         : m_dsim(p_dsim)
         {}
 
@@ -205,7 +205,7 @@ public:
                         sample, i, LhsUtils::getRLEpsilonIndex(p_desArgs));
                 }
 
-                output = m_dsim->simulate(p_desArgs);
+                output = m_dsim.simulate(p_desArgs);
 
                 csv_line.str("");
                 csv_line << p_desArgs->sim_num << ","
@@ -232,7 +232,7 @@ private:
     void operator=(const SimulationLHS&)
         {}
 
-    DecoratedSim m_dsim;
+    DecoratedSim &m_dsim;
 };
 
 

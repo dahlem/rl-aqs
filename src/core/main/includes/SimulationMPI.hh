@@ -41,6 +41,7 @@
 #endif /* HAVE_MPI */
 
 #include <boost/cstdint.hpp>
+#include <boost/shared_array.hpp>
 #include <boost/shared_ptr.hpp>
 
 #include <gsl/gsl_rng.h>
@@ -71,6 +72,8 @@ namespace des
 namespace core
 {
 
+typedef boost::shared_array<bool> tBoolSA;
+
 
 /** @class SimulationMPI
  * Class encapsulating the logic to start an Latin-Hypercube Design of experiments.
@@ -95,7 +98,10 @@ public:
             gsl_matrix *sample;
 
             // keep track of the significance of the experiments
-            std::vector<bool> areExpsSignificant(p_desArgs->simulations, false);
+            tBoolSA areExpsSignificant = tBoolSA(new bool[p_desArgs->simulations]);
+            for (boost::uint16_t i = 0; i < p_desArgs->simulations; ++i) {
+                areExpsSignificant[i] = false;
+            }
 
             // online statistics for the experiments
             std::vector<dstats::OnlineStats> avgDelays(p_desArgs->simulations);
@@ -171,8 +177,7 @@ public:
             std::string dir = simDir.str();
             std::string file = "simulations.dat";
 
-            dio::tResultsSP sim_results(
-                new dio::Results(file, dir));
+            dio::tResultsSP sim_results(new dio::Results(file, dir));
 
             if (p_desArgs->add_sim.empty()) {
                 csv_line << "sim_num," << ARGS_HEADER << ",actual_reps";
@@ -271,10 +276,8 @@ public:
                 dio::tResultsSP replica_output(
                     new dio::Results(file, dir));
 
-                if (p_desArgs->add_sim.empty()) {
-                    csv_line << "sim_num,rep_num,systemDelay,systemAvgNumEvents,systemTotalQ,meanDelay,varDelay,meanAvgNumEvents,varAvgNumEvents,meanTotalQ,varTotalQ";
-                    replica_output->print(csv_line);
-                }
+                csv_line << "sim_num,rep_num,systemDelay,systemAvgNumEvents,systemTotalQ,meanDelay,varDelay,meanAvgNumEvents,varAvgNumEvents,meanTotalQ,varTotalQ";
+                replica_output->print(csv_line);
                 csv_line.str("");
 
                 replica_results.push_back(replica_output);
@@ -299,15 +302,16 @@ public:
             }
 
             // 4. continue with as many experiments as needed
-            while (!areAllSignificant(areExpsSignificant)) {
+            while (!areAllSignificant(areExpsSignificant, p_desArgs->simulations)) {
                 sim_output *output = new sim_output[1];
+
 #ifndef NDEBUG
                 std::cout << "Receive results." << std::endl;
                 std::cout.flush();
 #endif /* NDEBUG */
+
                 // receive results
-                rc = MPI_Recv(output, 1, mpi_desout, MPI_ANY_SOURCE, MPI_ANY_TAG,
-                              MPI_COMM_WORLD, &status);
+                rc = MPI_Recv(output, 1, mpi_desout, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
                 if (rc != MPI_SUCCESS) {
                     std::cerr << "Error receiving results from slave." << std::endl;
                     MPI_Abort(MPI_COMM_WORLD, 916);
@@ -315,17 +319,16 @@ public:
 
 #ifndef NDEBUG
                 std::cout << "Received simulation: " << output->simulation_id << ", replications: "
-                          << output->replications << std::endl;
-                std::cout.flush();
+                          << output->replications << std::endl << std::flush;
 #endif /* NDEBUG */
                 // update fields
                 avgDelays[output->simulation_id - 1].push(output->system_average_delay);
                 avgNumEvents[output->simulation_id - 1].push(output->system_expected_average_num_in_queue);
                 totalQs[output->simulation_id - 1].push(output->system_total_q);
 
-                // test whether this result is significant
-                if (avgDelays[output->simulation_id - 1].getNumValues()
-                    > (p_desArgs->simulations - 1)) {
+                // check whether we've got all the required replications
+                if (avgDelays[output->simulation_id - 1].getNumValues() >= p_desArgs->replications) {
+                    // test whether this result is significant
                     bool isConfident =
                         dstats::CI::isConfidentWithPrecision(
                             avgDelays[output->simulation_id - 1].mean(),
@@ -346,12 +349,14 @@ public:
                             p_desArgs->alpha, p_desArgs->error)
                         ;
 
+#ifndef NDEBUG
+                    std::cout << "Simulation " << output->simulation_id << ", replications: "
+                              << output->replications << " is confident: " << isConfident << std::endl;
+                    std::cout.flush();
+#endif /* NDEBUG */
+
                     // if not send another replica
                     if (!isConfident) {
-#ifndef NDEBUG
-                        std::cout << "Simulation " << output->simulation_id << " is not confident." << std::endl;
-                        std::cout.flush();
-#endif /* NDEBUG */
                         // update the experiment arguments
                         tSimArgsMPI desArgsMPI;
 
@@ -416,12 +421,7 @@ public:
                         }
                         jobs++;
                     } else {
-#ifndef NDEBUG
-                        std::cout << "Simulation " << output->simulation_id << " is confident." << std::endl;
-                        std::cout.flush();
-#endif /* NDEBUG */
                         areExpsSignificant[output->simulation_id - 1] = true;
-
                         // write the overall results
                         sim_results_lines[output->simulation_id - 1] << "," << output->replications;
                     }
@@ -445,6 +445,11 @@ public:
 
                 delete[] output;
             }
+
+#ifndef NDEBUG
+            std::cout << "Write the simulation output." << std::endl;
+            std::cout.flush();
+#endif /* NDEBUG */
 
             for (boost::uint16_t i = 0; i < p_desArgs->simulations; ++i) {
                 sim_results->print(sim_results_lines[i]);
@@ -473,14 +478,10 @@ private:
     void operator=(const SimulationMPI&)
         {}
 
-    static bool areAllSignificant(std::vector<bool> expSignificant)
+    static bool areAllSignificant(tBoolSA expSignificant, boost::uint16_t size)
         {
-            std::vector<bool>::iterator
-                it(expSignificant.begin()),
-                it_end(expSignificant.end());
-
-            for (; it != it_end; ++it) {
-                if (!(*it)) {
+            for (boost::uint16_t i = 0; i < size; ++i) {
+                if (!expSignificant[i]) {
                     return false;
                 }
             }

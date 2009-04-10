@@ -1,4 +1,4 @@
-# Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+# Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 #  
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without 
@@ -16,9 +16,11 @@ libdesdate_la_SOURCES =                                              \
 libdesdate_la_CPPFLAGS =                                             \
 	-I./includes                                                 \
 	-I$(top_srcdir)/src/design/pattern/includes                  \
+	$(OPENMP_CXXFLAGS)                                           \
 	$(BOOST_CPPFLAGS)
 
 libdesdate_la_LIBADD =                                               \
+	$(OPENMP_CXXFLAGS)                                           \
 	$(BOOST_LDFLAGS)
 
 include_HEADERS = includes

@@ -25,6 +25,10 @@
 # include <mpi.h>
 #endif /* HAVE_MPI */
 
+#ifdef HAVE_OPENMP
+# include <omp.h>
+#endif /* HAVE_OPENMP */
+
 #ifdef HAVE_LIBGSL
 # include <gsl/gsl_math.h>
 # include <gsl/gsl_ieee_utils.h>
@@ -243,19 +247,25 @@ int main(int argc, char *argv[])
 #else
     dcore::sim_output output;
     if (desArgs->lhs && desArgs->confidence) {
-        dcore::SimSP sim(new dcore::Simulation());
-        SimCISP sim_ci(
-            new SimCI(sim, desArgs->alpha, desArgs->error, desArgs->replications));
-        SimLHSSP sim_lhs(new SimLHS(sim_ci));
-        output = sim_lhs->simulate(desArgs);
+        dcore::Simulation sim;
+
+//         dcore::SimSP sim(new dcore::Simulation());
+        dcore::SimulationCI<dcore::Simulation> simCI(sim, desArgs->alpha, desArgs->error, desArgs->replications);
+
+//         SimCISP sim_ci(
+//             new SimCI(sim, desArgs->alpha, desArgs->error, desArgs->replications));
+        dcore::SimulationLHS<dcore::SimulationCI <dcore::Simulation> > simLHS(simCI);
+
+//         SimLHSSP sim_lhs(new SimLHS(sim_ci));
+        output = simLHS.simulate(desArgs);
     } else if (desArgs->confidence) {
-        dcore::SimSP sim(new dcore::Simulation());
-        SimCISP sim_ci(
-            new SimCI(sim, desArgs->alpha, desArgs->error, desArgs->replications));
-        output = sim_ci->simulate(desArgs);
+//         dcore::SimSP sim(new dcore::Simulation());
+//         SimCISP sim_ci(
+//             new SimCI(sim, desArgs->alpha, desArgs->error, desArgs->replications));
+//         output = sim_ci->simulate(desArgs);
     } else {
-        dcore::SimSP sim(new dcore::Simulation());
-        output = sim->simulate(desArgs);
+//         dcore::SimSP sim(new dcore::Simulation());
+//         output = sim->simulate(desArgs);
     }
 
     if (!desArgs->lhs) {

@@ -1,4 +1,4 @@
-# Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+# Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 #  
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without 
@@ -31,6 +31,7 @@ wevonet_main_CPPFLAGS =                                               \
 	-I$(top_srcdir)/src/design/pattern/includes                   \
 	-I$(top_srcdir)/src/sampling/common/includes                  \
 	$(BOOST_CPPFLAGS)                                             \
+	$(OPENMP_CXXFLAGS)                                            \
 	$(EXPAT_CFLAGS)
 
 
@@ -43,6 +44,7 @@ wevonet_main_LDADD =                                                  \
 	$(BOOST_FILESYSTEM_LIB)                                       \
 	$(BOOST_SYSTEM_LIB)                                           \
 	$(BOOST_LDFLAGS)                                              \
+	$(OPENMP_CXXFLAGS)                                            \
 	$(EXPAT_LDFLAGS)
 
 

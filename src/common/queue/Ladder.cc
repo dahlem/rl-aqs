@@ -1,4 +1,4 @@
-// Copyright (C) 2007,2008,2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2007-2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -42,6 +42,8 @@ namespace bio = boost::iostreams;
 #include <cstddef>
 #include <limits>
 
+#include <gsl/gsl_math.h>
+
 #include "Ladder.hh"
 
 
@@ -73,22 +75,22 @@ void Ladder::init()
     m_events = tIntSA(new boost::uint32_t[m_NRung]);
     m_currentBucket = tIntSA(new boost::uint32_t[m_NRung]);
     m_buckets = tIntSA(new boost::uint32_t[m_NRung]);
-    m_bucketwidth = tDoubleSA(new long double[m_NRung]);
-    m_RCur = tDoubleSA(new long double[m_NRung]);
-    m_RStart = tDoubleSA(new long double[m_NRung]);
+    m_bucketwidth = tDoubleSA(new double[m_NRung]);
+    m_RCur = tDoubleSA(new double[m_NRung]);
+    m_RStart = tDoubleSA(new double[m_NRung]);
 
     // initialise the allocated memory
     memset(m_events.get(), 0, sizeof(boost::uint32_t) * m_NRung);
     memset(m_currentBucket.get(), 0, sizeof(boost::uint32_t) * m_NRung);
     memset(m_buckets.get(), 0, sizeof(boost::uint32_t) * m_NRung);
-    memset(m_bucketwidth.get(), 0, sizeof(long double) * m_NRung);
+    memset(m_bucketwidth.get(), 0, sizeof(double) * m_NRung);
 
     m_rungs = EntryListSM(new EntryListSA[m_NRung]);
 
     for (boost::uint32_t i = 0; i < m_NRung; ++i) {
         m_rungs[i] = EntryListSA(new EntryList[m_Thres]);
-        m_RCur[i] = std::numeric_limits<long double>::max();
-        m_RStart[i] = std::numeric_limits<long double>::max();
+        m_RCur[i] = std::numeric_limits<double>::max();
+        m_RStart[i] = std::numeric_limits<double>::max();
 
         if (i == 0) {
             m_buckets[0] = m_BucketsFirstRung;
@@ -168,7 +170,7 @@ boost::uint32_t Ladder::getThres()
     return m_Thres;
 }
 
-long double Ladder::bucketwidth(double p_max, double p_min, boost::uint32_t p_n)
+double Ladder::bucketwidth(double p_max, double p_min, boost::uint32_t p_n)
 {
     if (p_max == p_min) {
         return 1.0;
@@ -177,16 +179,14 @@ long double Ladder::bucketwidth(double p_max, double p_min, boost::uint32_t p_n)
     }
 }
 
-boost::uint32_t Ladder::bucket(long double p_TS, boost::uint32_t p_rung)
+boost::uint32_t Ladder::bucket(double p_TS, boost::uint32_t p_rung)
 {
-    long double diff = (p_TS - m_RStart[p_rung]);
+    double diff = 0.0;
 
     // if the difference is too small we set it to zero
-    if (diff < 1e-6) {
-        diff = 0.0;
-    }
+    diff = (gsl_fcmp(p_TS, m_RStart[p_rung], 1e-9) <= 0) ? (0.0) : (p_TS - m_RStart[p_rung]);
 
-    long double result = diff / m_bucketwidth[p_rung];
+    double result = diff / m_bucketwidth[p_rung];
     boost::uint32_t retVal = (boost::uint32_t) floor(result);
 
     // since rstart allowed the enqueue event, and l_bucket is smaller than the
@@ -230,7 +230,7 @@ const bool Ladder::push(Entry *p_entry) throw (QueueException)
     }
 
     boost::uint32_t nRungs = 0;
-    long double ts_arrival = p_entry->getArrival();
+    double ts_arrival = p_entry->getArrival();
 
     // check the timestamp against the rcur value of the lowest rung
     // if the rcur value of the lowest rung is larger than the TS then it doesn't fit anywhere
@@ -243,7 +243,8 @@ const bool Ladder::push(Entry *p_entry) throw (QueueException)
     // we know that at least the lowest rung can take the event
     // but we look more carefully now starting from rung 0
     while (true) {
-        if ((ts_arrival < m_RCur[nRungs]) && (nRungs < m_lowestRung)) {
+        if ((ts_arrival < m_RCur[nRungs])
+            && (nRungs < m_lowestRung)) {
             nRungs++;
         } else {
             break;
@@ -267,24 +268,21 @@ const bool Ladder::push(Entry *p_entry) throw (QueueException)
 
         // work with inaccuracies
         // ddahlem: could still cause problems if the inaccuracies occur on lower rungs as well
-        if ((m_RStart[nRungs] + m_bucketwidth[nRungs] * l_bucket) > ts_arrival) {
+        if (gsl_fcmp(ts_arrival, m_RStart[nRungs] + m_bucketwidth[nRungs] * l_bucket, 1e-9) == -1) {
             throw QueueException(QueueException::RUNG_NOT_FOUND);
         }
 
 #ifndef NDEBUG_QUEUE
-        std::cout << std::setprecision(14) << "Ladder -- Rung: " << nRungs
-                  << ", current bucket: " << m_currentBucket[nRungs] << ", bucket: " << l_bucket
-                  << ", rcur: " << m_RCur[nRungs] << ", bucketwidth: " << m_bucketwidth[nRungs]
-                  << ", start: " << m_RStart[nRungs] << std::endl;
+        printState(nRungs);
         std::cout << std::setprecision(14) << "Ladder -- Enter event: " << ts_arrival
                   << " between " << (m_RStart[nRungs] + m_bucketwidth[nRungs] * (l_bucket))
                   << " and " << (m_RStart[nRungs] + m_bucketwidth[nRungs] * (l_bucket + 1)) << std::endl;
 #endif /* NDEBUG_QUEUE */
 
 #ifndef NDEBUG
-        assert(m_RStart[nRungs] <= ts_arrival);
-        assert((m_RStart[nRungs] + m_bucketwidth[nRungs] * l_bucket) <= ts_arrival);
-        assert(ts_arrival <= (m_RStart[nRungs] + m_bucketwidth[nRungs] * (l_bucket + 1)));
+        assert(gsl_fcmp(m_RStart[nRungs], ts_arrival, 1e-9) <= 0);
+        assert(gsl_fcmp(m_RStart[nRungs] + m_bucketwidth[nRungs] * l_bucket, ts_arrival, 1e-9) <= 0);
+        assert(gsl_fcmp(ts_arrival, (m_RStart[nRungs] + m_bucketwidth[nRungs] * (l_bucket + 1)), 1e-9) <= 0);
 #endif /* NDEBUG */
 
         m_rungs[nRungs][l_bucket].push_back(*p_entry);
@@ -382,8 +380,10 @@ void Ladder::push(EntryList *p_list, double p_maxTS, double p_minTS)
         m_currentBucket[i] = 0;
     }
 
-    boost::uint32_t buckets = static_cast<boost::uint32_t>(
-        (p_maxTS - p_minTS) / m_bucketwidth[0]);
+    double diff = 0.0;
+    diff = (gsl_fcmp(p_maxTS, p_minTS, 1e-9) <= 0) ? (0.0) : (p_maxTS - p_minTS);
+
+    boost::uint32_t buckets = static_cast<boost::uint32_t>(diff / m_bucketwidth[0]);
 
     if (buckets >= m_BucketsFirstRung) {
         resizeFirstRung(buckets);
@@ -418,11 +418,15 @@ EntryList* const Ladder::delist() throw (QueueException)
 
     // once delisted we increment rcur to invalidate the previous bucket
     if ((m_lowestRung > 0) && (m_events[m_lowestRung] == 0)) {
-        m_RCur[m_lowestRung] = std::numeric_limits<long double>::max();
-        m_RStart[m_lowestRung] = std::numeric_limits<long double>::max();
+        m_RCur[m_lowestRung] = std::numeric_limits<double>::max();
+        m_RStart[m_lowestRung] = std::numeric_limits<double>::max();
         m_currentBucket[m_lowestRung] = 0;
         m_lowestRung--;
     } else {
+#ifndef NDEBUG
+        assert(gsl_fcmp(m_RCur[m_lowestRung], m_RCur[m_lowestRung] + m_bucketwidth[m_lowestRung], 1e-9) == -1);
+#endif /* NDEBUG */
+
         m_RCur[m_lowestRung] += m_bucketwidth[m_lowestRung];
         m_currentBucket[m_lowestRung]++;
     }
@@ -455,8 +459,8 @@ void Ladder::advanceDequeueBucket(bool p_spawn) throw (QueueException)
             assert(m_events[m_lowestRung] == 0);
 #endif /* NDEBUG */
 
-            m_RCur[m_lowestRung] = std::numeric_limits<long double>::max();
-            m_RStart[m_lowestRung] = std::numeric_limits<long double>::max();
+            m_RCur[m_lowestRung] = std::numeric_limits<double>::max();
+            m_RStart[m_lowestRung] = std::numeric_limits<double>::max();
             m_currentBucket[m_lowestRung] = 0;
             m_lowestRung--;
         } else {
@@ -507,6 +511,10 @@ void Ladder::advanceDequeueBucket(bool p_spawn) throw (QueueException)
 
         // advance to next bucket
         if (elements == 0) {
+#ifndef NDEBUG
+            assert(gsl_fcmp(m_RCur[m_lowestRung], m_RCur[m_lowestRung] + m_bucketwidth[m_lowestRung], 1e-9) == -1);
+#endif /* NDEBUG */
+
             m_currentBucket[m_lowestRung]++;
             m_RCur[m_lowestRung] += m_bucketwidth[m_lowestRung];
         } else {
@@ -589,6 +597,10 @@ bool Ladder::spawn(bool p_doEnlist)
             push(m_lowestRung, list);
         }
 
+#ifndef NDEBUG
+        assert(gsl_fcmp(m_RCur[m_lowestRung - 1], m_RCur[m_lowestRung - 1] + m_bucketwidth[m_lowestRung - 1], 1e-9) == -1);
+#endif /* NDEBUG */
+
         m_currentBucket[m_lowestRung - 1]++;
         m_RCur[m_lowestRung - 1] += m_bucketwidth[m_lowestRung - 1];
 
@@ -641,8 +653,8 @@ void Ladder::createRung()
     m_buckets = tIntSA(buckets);
 
     // resize the bucketwidth data structure
-    long double *bucketwidth = new long double[m_NRung];
-    memset(bucketwidth, 0, sizeof(long double) * m_NRung);
+    double *bucketwidth = new double[m_NRung];
+    memset(bucketwidth, 0, sizeof(double) * m_NRung);
     for (boost::uint32_t i = 0; i < m_NRung; ++i) {
         bucketwidth[i] = m_bucketwidth[i];
     }
@@ -650,8 +662,8 @@ void Ladder::createRung()
     m_bucketwidth = tDoubleSA(bucketwidth);
 
     // resize the rcur data structure
-    long double *rcur = new long double[m_NRung];
-    memset(rcur, 0, sizeof(long double) * m_NRung);
+    double *rcur = new double[m_NRung];
+    memset(rcur, 0, sizeof(double) * m_NRung);
     for (boost::uint32_t i = 0; i < m_NRung; ++i) {
         rcur[i] = m_RCur[i];
     }
@@ -659,8 +671,8 @@ void Ladder::createRung()
     m_RCur = tDoubleSA(rcur);
 
     // resize the rstart data structure
-    long double *rstart = new long double[m_NRung];
-    memset(rstart, 0, sizeof(long double) * m_NRung);
+    double *rstart = new double[m_NRung];
+    memset(rstart, 0, sizeof(double) * m_NRung);
     for (boost::uint32_t i = 0; i < m_NRung; ++i) {
         rstart[i] = m_RStart[i];
     }

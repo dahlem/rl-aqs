@@ -1,4 +1,4 @@
-# Copyright (C) 2007, 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+# Copyright (C) 2007-2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 #  
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without 
@@ -20,12 +20,13 @@ libcommonqueue_la_SOURCES =                                           \
 
 libcommonqueue_la_CPPFLAGS =                                          \
 	$(BOOST_CPPFLAGS)                                             \
+	$(GSL_CFLAGS)                                                 \
 	-I./includes                                                  \
 	-I../list/includes
 
 libcommonqueue_la_LIBADD =                                            \
 	$(BOOST_LDFLAGS)                                              \
-	-lm                                                           \
+	$(GSL_LIBS)                                                   \
 	../list/libcommonlist.la
 
 include_HEADERS = includes

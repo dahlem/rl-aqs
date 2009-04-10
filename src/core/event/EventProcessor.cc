@@ -27,6 +27,8 @@
 
 #include <iostream>
 
+#include <gsl/gsl_math.h>
+
 #include "Entry.hh"
 #include "LadderQueue.hh"
 namespace dcommon = des::common;
@@ -91,7 +93,7 @@ bool EventProcessor::process()
 #ifndef NDEBUG
             double newTime = entry->getArrival();
 
-            assert(m_oldTime <= newTime);
+            assert(gsl_fcmp(newTime, m_oldTime, 1e-6) > -1);
             m_oldTime = newTime;
 #endif /* NDEBUG */
 

@@ -32,6 +32,7 @@ des_main_CPPFLAGS =                                                      \
 	-I$(top_srcdir)/src/date/includes                                \
 	-I$(top_srcdir)/src/common/list/includes                         \
 	$(GSL_CFLAGS)                                                    \
+	$(OPENMP_CXXFLAGS)                                               \
 	$(BOOST_CPPFLAGS)
 
 
@@ -48,6 +49,7 @@ des_main_LDADD =                                                         \
 	$(top_srcdir)/src/network/evolution/libnetevo.la                 \
 	$(top_srcdir)/src/rl/librl.la                                    \
 	$(BOOST_PROGRAM_OPTIONS_LIB)                                     \
+	$(OPENMP_CXXFLAGS)                                               \
 	$(GSL_LIBS)
 
 

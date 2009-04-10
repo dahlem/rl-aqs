@@ -25,6 +25,8 @@
 # include <iostream>
 #endif /* NDEBUG_EVENTS */
 
+#include <gsl/gsl_math.h>
+
 #include "events.hh"
 #include "ExpectedAverageEventInQueueHandler.hh"
 namespace dcore = des::core;
@@ -60,7 +62,9 @@ void dcore::ExpectedAverageEventInQueueHandler::update(dcore::PostAnyEvent *subj
         (entry->getType() == DEPARTURE_EVENT)) {
 
         dnet::Vertex vertex = boost::vertex(entry->getDestination(), *m_graph);
-        double q_i = entry->getArrival() - vertex_last_event_time_map[vertex];
+        double q_i = (gsl_fcmp(entry->getArrival(), vertex_last_event_time_map[vertex], 1e-9) == 0)
+            ? (0.0)
+            : (entry->getArrival() - vertex_last_event_time_map[vertex]);
 
 #ifndef NDEBUG_EVENTS
         std::cout << "** Update expected avg. event in queue for vertex: " << entry->getDestination() << std::endl;

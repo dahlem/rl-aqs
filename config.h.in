@@ -75,6 +75,9 @@
 /* define if the compiler has numeric_limits<T> */
 #undef HAVE_NUMERIC_LIMITS
 
+/* define openmp, if enabled */
+#undef HAVE_OPENMP
+
 /* Define to 1 if you have the `pow' function. */
 #undef HAVE_POW
 

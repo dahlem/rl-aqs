@@ -31,6 +31,7 @@
 
 #include <cstdlib>
 
+#include <gsl/gsl_math.h>
 #include <gsl/gsl_randist.h>
 
 #include "Entry.hh"
@@ -123,7 +124,11 @@ void ArrivalHandler::update(ArrivalEvent *subject)
     // otherwise schedule the departure
     if (vertex_busy_map[vertex]) {
         // the new arrival time is that of the time-service-ends
-        delay = vertex_time_service_ends_map[vertex] - entry->getArrival();
+        double delay = 0.0;
+        delay = (gsl_fcmp(vertex_time_service_ends_map[vertex], entry->getArrival(), 1e-9) <= 0)
+            ? (0.0)
+            : (vertex_time_service_ends_map[vertex] - entry->getArrival());
+
         departure = vertex_time_service_ends_map[vertex] + service_time;
         vertex_number_in_queue_map[vertex]++;
 

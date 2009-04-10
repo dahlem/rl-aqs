@@ -1,4 +1,4 @@
-# Copyright (C) 2007, 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+# Copyright (C) 2007, 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 #  
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without 
@@ -18,6 +18,7 @@ libsamplingcrn_la_SOURCES =                                           \
 libsamplingcrn_la_CPPFLAGS =                                          \
 	$(GSL_CFLAGS)                                                 \
 	$(BOOST_CPPFLAGS)                                             \
+	$(OPENMP_CXXFLAGS)                                            \
 	-I$(top_srcdir)/src/sampling/crn/includes                     \
 	-I$(top_srcdir)/src/design/pattern/includes                   \
 	-I$(top_srcdir)/src/sampling/common/includes
@@ -25,6 +26,7 @@ libsamplingcrn_la_CPPFLAGS =                                          \
 
 libsamplingcrn_la_LIBADD =                                            \
 	$(BOOST_LDFLAGS)                                              \
+	$(OPENMP_CXXFLAGS)                                            \
 	$(GSL_LIBS)                                                   \
 	$(top_srcdir)/src/sampling/common/libsamplingcommon.la
 

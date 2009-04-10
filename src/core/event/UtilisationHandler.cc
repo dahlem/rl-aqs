@@ -25,6 +25,8 @@
 # include <iostream>
 #endif /* NDEBUG_EVENTS */
 
+#include <gsl/gsl_math.h>
+
 #include "events.hh"
 #include "UtilisationHandler.hh"
 namespace dcore = des::core;
@@ -67,7 +69,9 @@ void dcore::UtilisationHandler::update(dcore::PostAnyEvent *subject)
 #endif /* NDEBUG_EVENTS */
 
         if (vertex_busy_map[vertex]) {
-            double diff = entry->getArrival() - vertex_last_event_time_map[vertex];
+            double diff = (gsl_fcmp(entry->getArrival(), vertex_last_event_time_map[vertex], 1e-9) == 0)
+                ? (0.0)
+                : (entry->getArrival() - vertex_last_event_time_map[vertex]);
             b_i = diff;
         }
 

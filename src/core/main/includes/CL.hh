@@ -157,9 +157,6 @@ struct desArgs_t {
     double max_edge_prob;           /* max. probability of vertices connecting */
 
     bool rl;                        /* switch to enable reinforcement learning */
-    boost::shared_array<double> response_alpha;     /* the response levels for the reward model */
-    boost::shared_array<double> response_reward;    /* the response rewards for the reward model */
-    boost::uint16_t response_levels;                /* number of response levels */
     double rl_q_alpha;                              /* q-learning rate */
     double min_rl_q_alpha;                          /* min q-learning rate */
     double max_rl_q_alpha;                          /* max q-learning rate */
@@ -171,6 +168,46 @@ struct desArgs_t {
     double min_rl_policy_epsilon;                   /* min epsilon-greedy */
     double max_rl_policy_epsilon;                   /* max epsilon-greedy */
     double rl_policy_boltzmann_t;                   /* the temperature value for boltzmann */
+
+    desArgs_t(desArgs_t const &args)
+        : graph_filename(args.graph_filename), seeds_filename(args.seeds_filename), results_dir(args.results_dir),
+          events_unprocessed(args.events_unprocessed), events_processed(args.events_processed), add_sim(args.add_sim),
+          trace_event(args.trace_event), log_events(args.log_events), log_graphs(args.log_graphs),
+          vertex(args.vertex), graph_rate(args.graph_rate), max_arrival(args.max_arrival),
+          stop_time(args.stop_time), generations(args.generations), confidence(args.confidence),
+          lhs(args.lhs), alpha(args.alpha), error(args.error),
+          replications(args.replications), simulations(args.simulations), sim_num(args.sim_num),
+          rep_num(args.rep_num), net_size(args.net_size), max_size(args.max_size),
+          max_edges(args.max_edges), min_max_edges(args.min_max_edges), max_max_edges(args.max_max_edges),
+          boost_arrival(args.boost_arrival), min_boost_arrival(args.min_boost_arrival), max_boost_arrival(args.max_boost_arrival),
+          boost_edge(args.boost_edge), min_boost_edge(args.min_boost_edge), max_boost_edge(args.max_boost_edge),
+          net_gen(args.net_gen), edge_fixed(args.edge_fixed), edge_prob(args.edge_prob),
+          min_edge_prob(args.min_edge_prob), max_edge_prob(args.max_edge_prob), rl(args.rl),
+          rl_q_alpha(args.rl_q_alpha), min_rl_q_alpha(args.min_rl_q_alpha), max_rl_q_alpha(args.max_rl_q_alpha),
+          rl_q_lambda(args.rl_q_lambda), min_rl_q_lambda(args.min_rl_q_lambda), max_rl_q_lambda(args.max_rl_q_lambda),
+          rl_policy(args.rl_policy), rl_policy_epsilon(args.rl_policy_epsilon), min_rl_policy_epsilon(args.min_rl_policy_epsilon),
+          max_rl_policy_epsilon(args.max_rl_policy_epsilon), rl_policy_boltzmann_t(args.rl_policy_boltzmann_t)
+        {}
+
+    desArgs_t()
+        : graph_filename(""), seeds_filename(""), results_dir(""),
+          events_unprocessed(""), events_processed(""), add_sim(""),
+          trace_event(0), log_events(0), log_graphs(0),
+          vertex(0), graph_rate(0), max_arrival(0.0),
+          stop_time(0.0), generations(0), confidence(0),
+          lhs(0), alpha(0.0), error(0.0),
+          replications(0), simulations(0), sim_num(0),
+          rep_num(0), net_size(0), max_size(0),
+          max_edges(0), min_max_edges(0), max_max_edges(0),
+          boost_arrival(0.0), min_boost_arrival(0.0), max_boost_arrival(0.0),
+          boost_edge(0.0), min_boost_edge(0.0), max_boost_edge(0.0),
+          net_gen(0), edge_fixed(0.0), edge_prob(0.0),
+          min_edge_prob(0.0), max_edge_prob(0.0), rl(0),
+          rl_q_alpha(0.0), min_rl_q_alpha(0.0), max_rl_q_alpha(0.0),
+          rl_q_lambda(0.0), min_rl_q_lambda(0.0), max_rl_q_lambda(0.0),
+          rl_policy(0), rl_policy_epsilon(0.0), min_rl_policy_epsilon(0.0),
+          max_rl_policy_epsilon(0.0), rl_policy_boltzmann_t(0.0)
+        {}
 
     friend std::ostream& operator <<(std::ostream &p_os, const desArgs_t &desArgs)
         {

@@ -52,7 +52,7 @@ typedef boost::shared_array <boost::uint32_t> tIntSA;
 /** @typedef tDoubleSA
  * a type defintion of a shared array of doubles
  */
-typedef boost::shared_array <long double> tDoubleSA;
+typedef boost::shared_array <double> tDoubleSA;
 
 
 
@@ -177,7 +177,7 @@ private:
      * @return the bucketwidth given the max/min timestamps and the number of
      *         events.
      */
-    long double bucketwidth(double p_max, double p_min, boost::uint32_t p_n);
+    double bucketwidth(double p_max, double p_min, boost::uint32_t p_n);
 
     /**
      * Determine the bucket to insert the event with a given arrival timestamp
@@ -191,7 +191,7 @@ private:
      * @return the index of the bucket in the given rung where the event with
      *         the given arrival timestamp is to be inserted
      */
-    boost::uint32_t bucket(long double p_TS, boost::uint32_t p_rung);
+    boost::uint32_t bucket(double p_TS, boost::uint32_t p_rung);
 
     /**
      * This method resizes the first rung given the number of events to be

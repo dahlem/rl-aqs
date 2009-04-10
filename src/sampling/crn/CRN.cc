@@ -11,10 +11,6 @@
 /** @file CRN.cc
  * Implementation of the common random number interface @ref{CRN.hh}
  */
-#if HAVE_CONFIG_H
-# include <config.h>
-#endif
-
 #ifndef NDEBUG_SAMPLING
 # include <iostream>
 #endif /* NDEBUG */

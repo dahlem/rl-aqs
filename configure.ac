@@ -21,6 +21,8 @@ AC_CONFIG_HEADER([config.h])
 # place where extra autoconf macros are kept
 AC_CONFIG_MACRO_DIR([m4])
 
+AC_LANG([C++])
+
 AM_INIT_AUTOMAKE
 
 
@@ -76,7 +78,6 @@ AC_ARG_ENABLE(mpi, AS_HELP_STRING(
 		   [USE_MPI=$enableval], [USE_MPI=no])
 if test "x$USE_MPI" = xyes; then
    HAVE_MPI=TRUE
-   AC_LANG([C++])
    ACX_MPI([], [AC_MSG_WARN([cannot configure MPI (compile in serial)])])
    SNOW="snow"
    AC_SUBST(HAVE_MPI)
@@ -90,6 +91,17 @@ else
    AC_SUBST(SNOW)
 fi
 AM_CONDITIONAL(COMPILE_PARALLEL, test "x$USE_MPI" = xyes)
+
+
+# Check for OpenMP
+AC_ARG_ENABLE(openmp, AS_HELP_STRING(
+		   [--enable-openmp], 
+		   [enable OpenMP @<:@default=no@:>@]), 
+		   [USE_OPENMP=$enableval], [USE_OPENMP=no])
+if test "x$USE_OPENMP" = xyes; then
+   AC_OPENMP
+   AC_DEFINE(HAVE_OPENMP, 1, [define openmp, if enabled])
+fi
 
 
 # Check for queue debug

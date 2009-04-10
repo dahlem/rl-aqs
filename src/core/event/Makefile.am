@@ -42,6 +42,7 @@ libcoreevent_la_SOURCES =                                                  \
 
 libcoreevent_la_CPPFLAGS =                                                 \
 	$(BOOST_CPPFLAGS)                                                  \
+	$(OPENMP_CXXFLAGS)                                                 \
 	$(GSL_CFLAGS)                                                      \
 	-I./includes                                                       \
 	-I$(top_srcdir)/src/rl/includes                                    \
@@ -58,6 +59,7 @@ libcoreevent_la_LIBADD =                                                   \
 	$(BOOST_LDFLAGS)                                                   \
 	$(BOOST_FILESYSTEM_LIB)                                            \
 	$(BOOST_SYSTEM_LIB)                                                \
+	$(OPENMP_CXXFLAGS)                                                 \
 	$(GSL_LIBS)                                                        \
 	$(top_srcdir)/src/io/libdesio.la                                   \
 	$(top_srcdir)/src/sampling/common/libsamplingcommon.la             \

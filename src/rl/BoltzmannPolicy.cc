@@ -32,6 +32,8 @@
 
 #include <boost/foreach.hpp>
 
+#include <gsl/gsl_math.h>
+
 #include "BoltzmannPolicy.hh"
 
 
@@ -96,7 +98,7 @@ boost::uint16_t BoltzmannPolicy::operator() (
             std::cout << "Accum. probability: " << temp << std::endl;
 #endif /* NDEBUG_EVENTS */
 
-            if (u < temp) {
+            if (gsl_fcmp(u, temp, 1e-9) == -1) {
                 action = (*it).first;
                 break;
             }

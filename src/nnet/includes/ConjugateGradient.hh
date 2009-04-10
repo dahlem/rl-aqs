@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This file is free software; as a spevectoral exception the author gives
 // unlimited permission to copy and/or distribute it, with or without
@@ -24,6 +24,7 @@
 
 #include <algorithm>
 #include <cstring>
+#include <cmath>
 #include <limits>
 #include <vector>
 
@@ -269,7 +270,7 @@ private:
                 double r = (bx - ax) * (fb - fc);
                 double q = (bx - cx) * (fb - fa);
                 double u = bx - ((bx - cx) * q - (bx - ax) * r) /
-                    (2.0 * SIGN(std::max(static_cast<double> (abs(q - r)), TINY), q - r));
+                    (2.0 * SIGN(std::max(static_cast<double> (fabs(q - r)), TINY), q - r));
                 double ulim = bx + GLIMIT * (cx - bx);
 
                 if ((bx - u) * (u - cx) > 0.0) {
@@ -352,12 +353,12 @@ private:
 
             for (boost::uint16_t iter = 0; iter < ITMAX; ++iter) {
                 xm = 0.5 * (a + b);
-                tol2 = 2.0 * (tol1 = tol * abs(x) + ZEPS);
+                tol2 = 2.0 * (tol1 = tol * fabs(x) + ZEPS);
 
-                if (abs(x - xm) <= (tol2 - 0.5 * (b - a))) {
+                if (fabs(x - xm) <= (tol2 - 0.5 * (b - a))) {
                     return x;
                 }
-                if (abs(e) > tol1) {
+                if (fabs(e) > tol1) {
                     r = (x - w) * (fx - fv);
                     q = (x - v) * (fx - fw);
                     p = (x - v) * q - (x - w) * r;
@@ -365,11 +366,11 @@ private:
 
                     if (q > 0.0) p = -p;
 
-                    q = abs(q);
+                    q = fabs(q);
                     etemp = e;
                     e = d;
 
-                    if (abs(p) >= abs(0.5 * q * etemp) || p <= q * (a - x)
+                    if (fabs(p) >= fabs(0.5 * q * etemp) || p <= q * (a - x)
 						|| p >= q * (b - x)) {
                         d = CGOLD * (e = (x >= xm ? a - x : b - x));
                     } else {
@@ -383,7 +384,7 @@ private:
                     d = CGOLD * (e = (x >= xm ? a - x : b - x));
                 }
 
-                u = (abs(d) >= tol1 ? x + d : x + SIGN(tol1, d));
+                u = (fabs(d) >= tol1 ? x + d : x + SIGN(tol1, d));
                 for (boost::uint16_t i = 0; i < m_numFree; ++i) {
                     potentialWeights[i] = p_weights[i] + p_trainingDirection[i] * u;
                 }

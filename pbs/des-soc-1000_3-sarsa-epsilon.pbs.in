@@ -1,7 +1,7 @@
 #!/bin/sh
-#PBS -l walltime=02:00:00
+#PBS -l walltime=15:00:00
 #PBS -q parallel
-#PBS -l cput=124:00:00
+#PBS -l cput=930:00:00
 #PBS -l nodes=31:ppn=2
 #PBS -m abe
 #PBS -M Dominik.Dahlem@cs.tcd.ie
@@ -24,7 +24,7 @@ echo "Running on $NUM_PROCESSES processors on $NUM_NODES nodes." >> $JOBINFO
 export LD_LIBRARY_PATH=/usr/support/arch/x86_64/MVAPICH/mvapich--0.9.8-gcc-3.4.6-pgf90/lib:/usr/support/arch/x86_64/BOOST/1.37.0/lib:/usr/support/arch/x86_64/GSL/gsl-1.9-gcc-3.4.6/lib:$LD_LIBRARY_PATH
 export PATH=/usr/support/arch/x86_64/MVAPICH/mvapich--0.9.8-gcc-3.4.6-pgf90/bin:$PATH
 
-export GSL_IEEE_MODE="round-up,extended-precision"
+export GSL_IEEE_MODE="round-to-nearest,double-precision"
 mpiexec ./../src/core/main/des_main --seeds ../seeds-mpi.dat --results ../results --confidence 1 --lhs 1 --simulations 20 --replications 3 --graph_generator 1 --graph_generation 5000 --log_events 0 --stop_time 20000 --generations 20 --size 1000 --boost_arrival 1.2 --boost_edge 1.2 --max_edges 3 --rl 1 --min_rl_q_alpha 0.01 --max_rl_q_alpha 0.5 --min_rl_q_lambda 0.01 --max_rl_q_lambda 1.0 --min_rl_policy_epsilon 0.01 --max_rl_policy_epsilon 0.5
 
 echo "Job finished at `date`" >> $JOBINFO

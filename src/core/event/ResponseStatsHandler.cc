@@ -25,6 +25,8 @@
 # include <iostream>
 #endif /* NDEBUG_EVENTS */
 
+#include <gsl/gsl_math.h>
+
 #include "Entry.hh"
 namespace dcommon = des::common;
 
@@ -69,7 +71,9 @@ void ResponseStatsHandler::update(AckEvent *subject)
     dnet::Vertex vertex = boost::vertex(entry->getDestination(), *m_graph);
     double size = vertex_num_events_processed_map[vertex];
     double xbar = vertex_mean_response_map[vertex];
-    double x = entry->getArrival() - entry->topArrival();
+    double x = (gsl_fcmp(entry->getArrival(), entry->topArrival(), 1e-9) == 0)
+        ? (0.0)
+        : (entry->getArrival() - entry->topArrival());
 
 #ifndef NDEBUG_EVENTS
     std::cout << "old stats -- size: " << size << ", xbar: " << xbar

@@ -1,4 +1,4 @@
-# Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+# Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 #  
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without 
@@ -16,6 +16,7 @@ nnet_gaussian_SOURCES =                                               \
 
 nnet_gaussian_CPPFLAGS =                                              \
 	$(BOOST_CPPFLAGS)                                             \
+	$(OPENMP_CXXFLAGS)                                            \
 	$(GSL_CFLAGS)                                                 \
 	-I$(top_srcdir)/src/utils/vector/includes                     \
 	-I$(top_srcdir)/src/sampling/crn/includes                     \
@@ -27,6 +28,7 @@ nnet_gaussian_CPPFLAGS =                                              \
 nnet_gaussian_LDADD =                                                 \
 	$(BOOST_LDFLAGS)                                              \
 	$(BOOST_PROGRAM_OPTIONS_LIB)                                  \
+	$(OPENMP_CXXFLAGS)                                            \
 	$(top_srcdir)/src/sampling/crn/libsamplingcrn.la              \
 	$(top_srcdir)/src/utils/vector/libutils_vector.la             \
 	$(top_srcdir)/src/sampling/common/libsamplingcommon.la        \

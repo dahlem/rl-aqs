@@ -20,6 +20,7 @@ librl_la_SOURCES =                                                      \
 librl_la_CPPFLAGS =                                                     \
 	$(BOOST_CPPFLAGS)                                               \
 	$(GSL_CFLAGS)                                                   \
+	$(OPENMP_CXXFLAGS)                                              \
 	-I$(top_srcdir)/src/sampling/crn/includes                       \
 	-I$(top_srcdir)/src/design/pattern/includes                     \
 	-I$(top_srcdir)/src/sampling/common/includes                    \
@@ -29,6 +30,7 @@ librl_la_CPPFLAGS =                                                     \
 librl_la_LIBADD =                                                       \
 	-lm                                                             \
 	$(BOOST_LDFLAGS)                                                \
+	$(OPENMP_CXXFLAGS)                                              \
 	$(GSL_LIBS)                                                     \
 	$(top_srcdir)/src/sampling/common/libsamplingcommon.la
 
