@@ -51,16 +51,16 @@ private:
 
 public:
     static void generate(
-        dnet::tGraphSP p_graph,
-        dcommon::tQueueSP p_queue,
+        dnet::Graph &p_graph,
+        dcommon::Queue &p_queue,
         dsample::tGslRngSP arrival_rng,
         boost::int32_t destination,
         double arrival_rate,
         double stop_time);
 
     static void generate(
-        dnet::tGraphSP p_graph,
-        dcommon::tQueueSP p_queue,
+        dnet::Graph &p_graph,
+        dcommon::Queue &p_queue,
         dsample::tGslRngSP arrival_rng,
         boost::int32_t destination,
         double arrival_rate,
@@ -68,13 +68,13 @@ public:
         double stop_time);
 
     static void generate(
-        dcommon::tQueueSP p_queue,
+        dcommon::Queue &p_queue,
         dsample::tGslRngSP arrival_rng,
         boost::int32_t destination,
         double arrival_rate);
 
     static void generateLogGraph(
-        dcommon::tQueueSP p_queue,
+        dcommon::Queue &p_queue,
         double rate,
         double stop_time);
 

@@ -36,13 +36,13 @@ namespace dcommon = des::common;
 
 
 
-dcore::UnprocessedEventsHandler::UnprocessedEventsHandler(dio::tResultsSP p_unprocessedEvents,
-                                                          dcommon::tQueueSP p_queue)
+dcore::UnprocessedEventsHandler::UnprocessedEventsHandler(dio::Results &p_unprocessedEvents,
+                                                          dcommon::LadderQueue &p_queue)
     : m_unprocessedEvents(p_unprocessedEvents), m_queue(p_queue)
 {
     std::stringstream s;
     s << dcommon::Entry::header();
-    m_unprocessedEvents->print(s);
+    m_unprocessedEvents.print(s);
 }
 
 
@@ -68,12 +68,12 @@ void dcore::UnprocessedEventsHandler::update(dcore::PostEvent *subject)
         do {
             s.str("");
             s << std::setprecision(14) << const_cast<const dcommon::Entry&> (*entry);
-            m_unprocessedEvents->print(s);
+            m_unprocessedEvents.print(s);
             delete entry;
 #ifndef NDEBUG
             num++;
 #endif /* NDEBUG */
-        } while ((entry = m_queue->dequeue()) != NULL);
+        } while ((entry = m_queue.dequeue()) != NULL);
     } else {
         std::cout << "event was NULL" << std::endl;
     }

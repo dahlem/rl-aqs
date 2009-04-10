@@ -30,7 +30,6 @@
 
 #include <boost/cstdint.hpp>
 #include <boost/shared_array.hpp>
-#include <boost/shared_ptr.hpp>
 
 
 #include "Observer.hh"
@@ -62,14 +61,14 @@ typedef boost::shared_array <boost::int32_t> Int32SA;
 class ArrivalHandler : public design::Observer<ArrivalEvent>
 {
 public:
-    ArrivalHandler(dcommon::tQueueSP p_queue, dnet::tGraphSP p_graph,  Int32SA p_service_ids);
+    ArrivalHandler(dcommon::Queue &p_queue, dnet::Graph &p_graph,  Int32SA p_service_ids);
     ~ArrivalHandler();
 
     void update(ArrivalEvent *subject);
 
 private:
-    dcommon::tQueueSP m_queue;
-    dnet::tGraphSP m_graph;
+    dcommon::Queue &m_queue;
+    dnet::Graph &m_graph;
     Int32SA m_service_ids;
 
     dnet::VertexBusyMap vertex_busy_map;

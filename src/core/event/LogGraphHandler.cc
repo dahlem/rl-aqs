@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ namespace dnet = des::network;
 
 
 
-dcore::LogGraphHandler::LogGraphHandler(std::string p_baseResultDir, dnet::tGraphSP p_graph)
+dcore::LogGraphHandler::LogGraphHandler(std::string p_baseResultDir, dnet::Graph &p_graph)
     : m_baseResultDir(p_baseResultDir), m_graph(p_graph)
 {
     std::stringstream path_str;

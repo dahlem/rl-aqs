@@ -168,7 +168,7 @@ public:
             }
 
             std::stringstream outDir, simDir, csv_line;
-            std::vector <dio::tResultsSP> replica_results;
+            std::vector <dio::Results*> replica_results;
 
             simDir << p_desArgs->results_dir << "/";
 
@@ -177,11 +177,11 @@ public:
             std::string dir = simDir.str();
             std::string file = "simulations.dat";
 
-            dio::tResultsSP sim_results(new dio::Results(file, dir));
+            dio::Results sim_results(file, dir);
 
             if (p_desArgs->add_sim.empty()) {
                 csv_line << "sim_num," << ARGS_HEADER << ",actual_reps";
-                sim_results->print(csv_line);
+                sim_results.print(csv_line);
             }
             csv_line.str("");
 
@@ -273,14 +273,13 @@ public:
                 std::cout.flush();
 #endif /* NDEBUG */
 
-                dio::tResultsSP replica_output(
-                    new dio::Results(file, dir));
+                dio::Results replica_output(file, dir);
 
                 csv_line << "sim_num,rep_num,systemDelay,systemAvgNumEvents,systemTotalQ,meanDelay,varDelay,meanAvgNumEvents,varAvgNumEvents,meanTotalQ,varTotalQ";
-                replica_output->print(csv_line);
+                replica_output.print(csv_line);
                 csv_line.str("");
 
-                replica_results.push_back(replica_output);
+                replica_results.push_back(&replica_output);
 
                 // prepare the overall results
                 sim_results_lines[i] << desArgsMPI.sim_num << ","
@@ -452,7 +451,7 @@ public:
 #endif /* NDEBUG */
 
             for (boost::uint16_t i = 0; i < p_desArgs->simulations; ++i) {
-                sim_results->print(sim_results_lines[i]);
+                sim_results.print(sim_results_lines[i]);
             }
 
             // 5. free gsl stuff

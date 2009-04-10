@@ -27,8 +27,6 @@
 #endif /* __STDC_CONSTANT_MACROS */
 
 #include <boost/cstdint.hpp>
-#include <boost/shared_array.hpp>
-#include <boost/shared_ptr.hpp>
 
 #include "DirectedGraph.hh"
 namespace dnet = des::network;
@@ -49,20 +47,18 @@ namespace rl
 class OnPolicySelection : public Selection
 {
 public:
-    OnPolicySelection(tPolicySP p_policy, dnet::tGraphSP p_graph);
-    
+    OnPolicySelection(Policy &p_policy, dnet::Graph &p_graph);
+
     virtual ~OnPolicySelection()
         {}
 
     boost::int32_t operator() (boost::int32_t p_source);
 
 private:
-    dnet::tGraphSP m_graph;
+    dnet::Graph &m_graph;
     dnet::VertexNextActionMap vertex_next_action_map;
-    
-};
 
-typedef boost::shared_ptr<OnPolicySelection> tOnPolicySelectionSP;
+};
 
 
 }

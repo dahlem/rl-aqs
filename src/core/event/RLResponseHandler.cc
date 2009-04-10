@@ -50,15 +50,15 @@ namespace core
 {
 
 
-RLResponseHandler::RLResponseHandler(dnet::tGraphSP p_graph, double p_q_alpha, double p_q_lambda,
-                                     drl::tPolicySP p_policy)
+RLResponseHandler::RLResponseHandler(dnet::Graph &p_graph, double p_q_alpha, double p_q_lambda,
+                                     drl::Policy &p_policy)
     : m_graph(p_graph), m_q_alpha(p_q_alpha), m_q_lambda(p_q_lambda), m_policy(p_policy),
-      qStatsSA(new dstats::OnlineStats[boost::num_edges(*m_graph)])
+      qStatsSA(new dstats::OnlineStats[boost::num_edges(m_graph)])
 {
-    vertex_next_action_map = get(vertex_next_action, *m_graph);
-    vertex_index_map = get(boost::vertex_index, *m_graph);
-    edge_q_val_map = get(edge_q_val, *m_graph);
-    edge_index_map = get(edge_eindex, *m_graph);
+    vertex_next_action_map = get(vertex_next_action, m_graph);
+    vertex_index_map = get(boost::vertex_index, m_graph);
+    edge_q_val_map = get(edge_q_val, m_graph);
+    edge_index_map = get(edge_eindex, m_graph);
 }
 
 
@@ -75,13 +75,13 @@ void RLResponseHandler::update(AckEvent *subject)
     std::cout << "Event: " << const_cast <const dcommon::Entry&> (*entry) << std::endl;
 #endif /* NDEBUG_EVENTS */
 
-    dnet::Vertex vertex = boost::vertex(entry->getDestination(), *m_graph);
-    dnet::Graph::degree_size_type degree = boost::out_degree(vertex, *m_graph);
+    dnet::Vertex vertex = boost::vertex(entry->getDestination(), m_graph);
+    dnet::Graph::degree_size_type degree = boost::out_degree(vertex, m_graph);
     boost::uint16_t newAction = 0;
 
     // observe reward (the longer it takes the smaller the reward)
     double reward = 0.0;
-    reward = (gsl_fcmp(entry->topArrival(), entry->getArrival(), 1e-9) <= 0)
+    reward = (gsl_fcmp(entry->topArrival(), entry->getArrival(), 1e-9) == 0)
         ? (0.0)
         : (entry->topArrival() - entry->getArrival());
 
@@ -93,9 +93,9 @@ void RLResponseHandler::update(AckEvent *subject)
         // choose new action based on new state
         drl::tValuesVecSP values = drl::tValuesVecSP(new drl::tValuesVec);
 
-        BOOST_FOREACH(dnet::Edge e, (boost::out_edges(vertex, *m_graph))) {
+        BOOST_FOREACH(dnet::Edge e, (boost::out_edges(vertex, m_graph))) {
             drl::tValues value;
-            int target_vertex = vertex_index_map[boost::target(e, *m_graph)];
+            int target_vertex = vertex_index_map[boost::target(e, m_graph)];
             value.first = target_vertex;
             value.second = edge_q_val_map[e];
 
@@ -105,16 +105,17 @@ void RLResponseHandler::update(AckEvent *subject)
             values->push_back(value);
         }
 
-        newAction = (*m_policy)(entry->getDestination(), values);
+        drl::PAttr attr;
+        newAction = m_policy(entry->getDestination(), values, attr);
 #ifndef NDEBUG_EVENTS
         std::cout << "New Action: " << newAction << std::endl;
 #endif /* NDEBUG_EVENTS */
 
         // calculate new q-value
         dnet::Edge oldE = boost::edge(
-            vertex, boost::vertex(entry->getOrigin(), *m_graph), *m_graph).first;
+            vertex, boost::vertex(entry->getOrigin(), m_graph), m_graph).first;
         dnet::Edge newE = boost::edge(
-            vertex, boost::vertex(newAction, *m_graph), *m_graph).first;
+            vertex, boost::vertex(newAction, m_graph), m_graph).first;
 
         double oldQ = edge_q_val_map[oldE];
         double alphaLambdaQ = m_q_alpha * m_q_lambda * edge_q_val_map[newE];
@@ -129,8 +130,8 @@ void RLResponseHandler::update(AckEvent *subject)
         std::cout << "Old Q-value: " << oldQ << ", new Q-value: " << newQ << std::endl;
 #endif /* NDEBUG_EVENTS */
     } else if (degree == 1) {
-        dnet::Edge e = *(boost::out_edges(vertex, *m_graph).first);
-        newAction = vertex_index_map[boost::target(e, *m_graph)];
+        dnet::Edge e = *(boost::out_edges(vertex, m_graph).first);
+        newAction = vertex_index_map[boost::target(e, m_graph)];
 
         // calculate q-value
         boost::uint16_t edge_index = edge_index_map[e];

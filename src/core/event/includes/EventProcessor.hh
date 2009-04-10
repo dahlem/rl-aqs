@@ -24,8 +24,6 @@
 # include <config.h>
 #endif
 
-#include <boost/shared_ptr.hpp>
-
 #include "AckEvent.hh"
 #include "AdminEvent.hh"
 #include "ArrivalEvent.hh"
@@ -52,16 +50,16 @@ namespace des
 class EventProcessor
 {
 public:
-    EventProcessor(dcommon::tQueueSP,
-                   dcore::tAdminEventSP,
-                   dcore::tPreAnyEventSP,
-                   dcore::tPostAnyEventSP,
-                   dcore::tArrivalEventSP,
-                   dcore::tDepartureEventSP,
-                   dcore::tPostEventSP,
-                   dcore::tLastArrivalEventSP,
-                   dcore::tAckEventSP,
-                   dcore::tLeaveEventSP,
+    EventProcessor(dcommon::LadderQueue&,
+                   dcore::AdminEvent&,
+                   dcore::PreAnyEvent&,
+                   dcore::PostAnyEvent&,
+                   dcore::ArrivalEvent&,
+                   dcore::DepartureEvent&,
+                   dcore::PostEvent&,
+                   dcore::LastArrivalEvent&,
+                   dcore::AckEvent&,
+                   dcore::LeaveEvent&,
                    double);
     ~EventProcessor();
 
@@ -69,16 +67,16 @@ public:
 
 
 private:
-    dcommon::tQueueSP m_queue;
-    dcore::tAdminEventSP m_adminEvent;
-    dcore::tPreAnyEventSP m_preAnyEvent;
-    dcore::tPostAnyEventSP m_postAnyEvent;
-    dcore::tArrivalEventSP m_arrivalEvent;
-    dcore::tDepartureEventSP m_departureEvent;
-    dcore::tPostEventSP m_postEvent;
-    dcore::tLastArrivalEventSP m_lastArrivalEvent;
-    dcore::tAckEventSP m_ackEvent;
-    dcore::tLeaveEventSP m_leaveEvent;
+    dcommon::LadderQueue &m_queue;
+    dcore::AdminEvent &m_adminEvent;
+    dcore::PreAnyEvent &m_preAnyEvent;
+    dcore::PostAnyEvent &m_postAnyEvent;
+    dcore::ArrivalEvent &m_arrivalEvent;
+    dcore::DepartureEvent &m_departureEvent;
+    dcore::PostEvent &m_postEvent;
+    dcore::LastArrivalEvent &m_lastArrivalEvent;
+    dcore::AckEvent &m_ackEvent;
+    dcore::LeaveEvent &m_leaveEvent;
 
     double m_stopTime;
 
@@ -87,8 +85,6 @@ private:
 #endif /* NDEBUG */
 
 };
-
-typedef boost::shared_ptr <dcore::EventProcessor> tEventProcessorSP;
 
 
     }

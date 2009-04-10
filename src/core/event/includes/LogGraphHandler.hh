@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,8 +23,6 @@
 
 #include <string>
 
-#include <boost/shared_ptr.hpp>
-
 
 #include "AdminEvent.hh"
 namespace dcore = des::core;
@@ -48,26 +46,21 @@ namespace des
 class LogGraphHandler : public design::Observer<dcore::AdminEvent>
 {
 public:
-    LogGraphHandler(std::string, dnet::tGraphSP);
+    LogGraphHandler(std::string, dnet::Graph&);
     ~LogGraphHandler();
 
     void update(dcore::AdminEvent *subject);
 
 private:
     std::string m_baseResultDir;
-    dnet::tGraphSP m_graph;
+    dnet::Graph &m_graph;
 
     // derived fields
     std::string m_resultDir;
     int counter;
-    
+
 };
 
-
-/** @typedef tProcessedEventHandlerSP
- * a type definition of the shared pointer of the processedEvent handler
- */
-typedef boost::shared_ptr <LogGraphHandler> tLogGraphHandlerSP;
 
 
     }

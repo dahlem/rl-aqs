@@ -59,20 +59,20 @@ namespace core
 {
 
 
-ArrivalHandler::ArrivalHandler(dcommon::tQueueSP p_queue,
-                               dnet::tGraphSP p_graph, Int32SA p_service_ids)
+ArrivalHandler::ArrivalHandler(dcommon::Queue &p_queue,
+                               dnet::Graph &p_graph, Int32SA p_service_ids)
     : m_queue(p_queue), m_graph(p_graph), m_service_ids(p_service_ids)
 {
-    vertex_busy_map = get(vertex_busy, *m_graph);
-    vertex_service_map = get(vertex_service_rate, *m_graph);
-    vertex_number_in_queue_map = get(vertex_number_in_queue, *m_graph);
-    vertex_time_service_ends_map = get(vertex_time_service_ends, *m_graph);
-    vertex_num_events_map = get(vertex_num_events, *m_graph);
-    vertex_average_delay_in_queue_map = get(vertex_average_delay_in_queue, *m_graph);
+    vertex_busy_map = get(vertex_busy, m_graph);
+    vertex_service_map = get(vertex_service_rate, m_graph);
+    vertex_number_in_queue_map = get(vertex_number_in_queue, m_graph);
+    vertex_time_service_ends_map = get(vertex_time_service_ends, m_graph);
+    vertex_num_events_map = get(vertex_num_events, m_graph);
+    vertex_average_delay_in_queue_map = get(vertex_average_delay_in_queue, m_graph);
 
 #ifndef NDEBUG_SAMPLING
     std::cout << "Service seed: ";
-    for (boost::uint32_t i = 0; i < boost::num_vertices(*m_graph); ++i) {
+    for (boost::uint32_t i = 0; i < boost::num_vertices(m_graph); ++i) {
         std::cout << m_service_ids[i] << ", ";
     }
     std::cout << std::endl << std::cout.flush();
@@ -93,7 +93,7 @@ void ArrivalHandler::update(ArrivalEvent *subject)
     double delay = 0.0;
 
     entry = subject->getEvent();
-    vertex = boost::vertex(entry->getDestination(), *m_graph);
+    vertex = boost::vertex(entry->getDestination(), m_graph);
 
     try {
         dsample::tGslRngSP service_rng = dsample::CRN::getInstance().get(
@@ -124,7 +124,6 @@ void ArrivalHandler::update(ArrivalEvent *subject)
     // otherwise schedule the departure
     if (vertex_busy_map[vertex]) {
         // the new arrival time is that of the time-service-ends
-        double delay = 0.0;
         delay = (gsl_fcmp(vertex_time_service_ends_map[vertex], entry->getArrival(), 1e-9) <= 0)
             ? (0.0)
             : (vertex_time_service_ends_map[vertex] - entry->getArrival());
@@ -136,6 +135,7 @@ void ArrivalHandler::update(ArrivalEvent *subject)
         std::cout << "Busy -- service time: " << service_time
                   << ", Time service ends: " << vertex_time_service_ends_map[vertex]
                   << ",  number in queue: " << vertex_number_in_queue_map[vertex]
+                  << ", delay: " << vertex_time_service_ends_map[vertex] - entry->getArrival()
                   << std::endl;
 #endif /* NDEBUG_EVENTS */
 
@@ -182,12 +182,13 @@ void ArrivalHandler::update(ArrivalEvent *subject)
 #endif /* NDEBUG */
 
     try {
-        m_queue->push(new_entry);
+        m_queue.push(new_entry);
 #ifndef NDEBUG_EVENTS
         std::cout << "Departure event scheduled." << std::endl;
 #endif /* NDEBUG_EVENTS */
     } catch (dcommon::QueueException &qe) {
         std::cout << "Error scheduling departure event: " << new_entry->getArrival() << " " << qe.what() << std::endl;
+        delete new_entry;
         throw;
     }
 }

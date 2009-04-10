@@ -25,7 +25,6 @@
 #define __CORE_DEFAULTRESPONSEHANDLER_HH__
 
 #include <boost/scoped_array.hpp>
-#include <boost/shared_ptr.hpp>
 
 
 #include "Observer.hh"
@@ -54,13 +53,13 @@ typedef boost::scoped_array<dstats::OnlineStats> tQOnlineStatsSA;
 class DefaultResponseHandler : public design::Observer<AckEvent>
 {
 public:
-    DefaultResponseHandler(dnet::tGraphSP p_graph);
+    DefaultResponseHandler(dnet::Graph &p_graph);
     ~DefaultResponseHandler();
 
     void update(AckEvent *subject);
 
 private:
-    dnet::tGraphSP m_graph;
+    dnet::Graph &m_graph;
     tQOnlineStatsSA qStatsSA;
 
     // derived fields
@@ -68,12 +67,6 @@ private:
     dnet::EdgeQValueMap edge_q_val_map;
 
 };
-
-
-/** @typedef tDefaultResponseHandlerSP
- * a type definition of the shared pointer of the default response handler
- */
-typedef boost::shared_ptr <DefaultResponseHandler> tDefaultResponseHandlerSP;
 
 
 }

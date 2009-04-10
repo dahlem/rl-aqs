@@ -29,6 +29,7 @@
 #endif /* __STDC_CONSTANT_MACROS */
 
 #include <boost/cstdint.hpp>
+#include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
 
@@ -246,15 +247,13 @@ private:
     /**
      * Constang specifying the maximum number of rungs.
      */
-    static const boost::uint32_t MAX_RUNGS = 8;
+    static const boost::uint32_t MAX_RUNGS = 5;
 
-    dcommon::EntryListSM m_rungs;
-
-    boost::uint32_t m_BucketsFirstRung;
-    boost::uint32_t m_NRung;
-    boost::uint32_t m_NBC;
-    boost::uint32_t m_lowestRung;
     boost::uint32_t m_Thres;
+    boost::uint32_t m_NRung;
+    boost::uint32_t m_lowestRung;
+    boost::uint32_t m_NBC;
+    boost::uint32_t m_BucketsFirstRung;
 
     tIntSA m_events;
     tIntSA m_currentBucket;
@@ -263,13 +262,15 @@ private:
     tDoubleSA m_bucketwidth;
     tDoubleSA m_RCur;
     tDoubleSA m_RStart;
+
+    dcommon::EntryListSM m_rungs;
 };
 
 
 /** @typedef tLadderSP
  * a type defintion of a shared pointer of a ladder structure
  */
-typedef boost::shared_ptr <Ladder> tLadderSP;
+typedef boost::scoped_ptr <Ladder> tLadderSP;
 
     }
 }

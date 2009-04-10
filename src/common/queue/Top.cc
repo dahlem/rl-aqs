@@ -43,10 +43,8 @@ namespace dcommon = des::common;
 
 
 dcommon::Top::Top()
-    : m_maxTS(0.0), m_minTS(DBL_MAX), m_topStart(0.0)
+    : m_maxTS(0.0), m_minTS(DBL_MAX), m_topStart(0.0), m_fifo(new dcommon::EntryList())
 {
-    m_fifo = new dcommon::EntryList();
-
 #ifdef HAVE_LADDERSTATS
     events_in = 0;
     events_out = 0;

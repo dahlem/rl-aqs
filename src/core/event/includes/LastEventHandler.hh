@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,9 +20,6 @@
 
 #ifndef __LASTEVENTHANDLER_HH__
 #define __LASTEVENTHANDLER_HH__
-
-#include <boost/shared_ptr.hpp>
-
 
 #include "PostAnyEvent.hh"
 namespace dcore = des::core;
@@ -46,24 +43,18 @@ namespace des
 class LastEventHandler : public design::Observer<dcore::PostAnyEvent>
 {
 public:
-    LastEventHandler(dnet::tGraphSP p_graph);
+    LastEventHandler(dnet::Graph &p_graph);
     ~LastEventHandler();
 
     void update(dcore::PostAnyEvent *subject);
 
 private:
-    dnet::tGraphSP m_graph;
+    dnet::Graph &m_graph;
 
     // derived fields
     dnet::VertexLastEventTimeMap vertex_last_event_time_map;
 
 };
-
-
-/** @typedef tLastEventHandlerSP
- * a type definition of the shared pointer of the lastEvent handler
- */
-typedef boost::shared_ptr <LastEventHandler> tLastEventHandlerSP;
 
 
     }

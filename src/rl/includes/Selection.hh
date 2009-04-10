@@ -27,7 +27,6 @@
 #endif /* __STDC_CONSTANT_MACROS */
 
 #include <boost/cstdint.hpp>
-#include <boost/shared_ptr.hpp>
 
 #include "Policy.hh"
 
@@ -41,7 +40,7 @@ namespace rl
 class Selection
 {
 public:
-    Selection(tPolicySP p_policy)
+    Selection(Policy &p_policy)
         : m_policy(p_policy)
         {}
 
@@ -51,11 +50,9 @@ public:
     virtual boost::int32_t operator() (boost::int32_t p_source) = 0;
 
 protected:
-    tPolicySP m_policy;
+    Policy &m_policy;
 
 };
-
-typedef boost::shared_ptr<Selection> tSelectionSP;
 
 
 }

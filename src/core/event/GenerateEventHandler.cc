@@ -42,10 +42,10 @@ namespace core
 
 
 dcore::GenerateEventHandler::GenerateEventHandler(
-    dnet::tGraphSP p_graph,
+    dnet::Graph &p_graph,
     Int32SA p_arrivalRngs,
     int p_generations,
-    dcommon::tQueueSP p_queue,
+    dcommon::Queue &p_queue,
     double p_stopTime)
     : m_graph(p_graph), m_arrivalRngs(p_arrivalRngs), m_generations(p_generations),
       m_queue(p_queue), m_stopTime(p_stopTime)
@@ -54,7 +54,7 @@ dcore::GenerateEventHandler::GenerateEventHandler(
 
     m_interval = m_stopTime / m_generations;
 
-    vertices = boost::num_vertices(*m_graph);
+    vertices = boost::num_vertices(m_graph);
     m_currentGeneration = dcore::tIntSA(new int[vertices]);
 
     for (boost::int32_t i = 0; i < vertices; ++i) {
@@ -91,13 +91,13 @@ void dcore::GenerateEventHandler::update(dcore::LastArrivalEvent *subject)
 
             // filter the graph to find the vertex
             std::pair <dnet::VertexIterator, dnet::VertexIterator> v_iter;
-            v_iter = boost::vertices(*m_graph);
+            v_iter = boost::vertices(m_graph);
 
             typedef boost::filter_iterator<dnet::exists_vertex_index<dnet::VertexIndexMap>, dnet::VertexIterator>
                 FilterIter;
 
             dnet::VertexIndexMap vertex_index_props_map =
-                get(boost::vertex_index, *m_graph);
+                get(boost::vertex_index, m_graph);
 
             dnet::exists_vertex_index<dnet::VertexIndexMap>
                 predicate(vertex_index_props_map, dest);
@@ -109,9 +109,9 @@ void dcore::GenerateEventHandler::update(dcore::LastArrivalEvent *subject)
             for (; filter_iter_first != filter_iter_last; ++filter_iter_first) {
                 if (count == 0) {
                     dnet::VertexNextEventTimeMap vertex_next_event_time_map =
-                        get(vertex_next_event_time, *m_graph);
+                        get(vertex_next_event_time, m_graph);
                     dnet::VertexArrivalRateMap vertex_arrival_props_map =
-                        get(vertex_arrival_rate, *m_graph);
+                        get(vertex_arrival_rate, m_graph);
                     // generate a single event
                     double arrival_rate = vertex_arrival_props_map[*filter_iter_first];
                     double startTime = vertex_next_event_time_map[*filter_iter_first];

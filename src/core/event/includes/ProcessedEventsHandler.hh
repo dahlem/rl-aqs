@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,9 +20,6 @@
 
 #ifndef __PROCESSEDEVENTHANDLER_HH__
 #define __PROCESSEDEVENTHANDLER_HH__
-
-#include <boost/shared_ptr.hpp>
-
 
 #include "PreAnyEvent.hh"
 namespace dcore = des::core;
@@ -46,21 +43,16 @@ namespace des
 class ProcessedEventsHandler : public design::Observer<dcore::PreAnyEvent>
 {
 public:
-    ProcessedEventsHandler(dio::tResultsSP);
+    ProcessedEventsHandler(dio::Results&);
     ~ProcessedEventsHandler();
 
     void update(dcore::PreAnyEvent *subject);
 
 private:
-    dio::tResultsSP m_processedEvents;
+    dio::Results &m_processedEvents;
 
 };
 
-
-/** @typedef tProcessedEventHandlerSP
- * a type definition of the shared pointer of the processedEvent handler
- */
-typedef boost::shared_ptr <ProcessedEventsHandler> tProcessedEventsHandlerSP;
 
 
     }

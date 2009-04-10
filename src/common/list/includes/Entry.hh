@@ -34,8 +34,8 @@
 #include <string>
 
 #include <boost/cstdint.hpp>
+#include <boost/scoped_ptr.hpp>
 #include <boost/shared_array.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/intrusive/list.hpp>
 
 
@@ -47,8 +47,8 @@ namespace common
 
 typedef std::stack <int> StackInt;
 typedef std::stack <double> StackDouble;
-typedef boost::shared_ptr <StackInt> StackIntSP;
-typedef boost::shared_ptr <StackDouble> StackDoubleSP;
+typedef boost::scoped_ptr <StackInt> StackIntSP;
+typedef boost::scoped_ptr <StackDouble> StackDoubleSP;
 
 
 static const std::string HEADER = "uid,id,arrivalTime,delay,origin,destination,type,eventPathSize";
@@ -67,6 +67,9 @@ public:
     explicit Entry(double del, double a, int d, int o, int t);
 
     explicit Entry(const Entry &p_entry);
+
+    ~Entry()
+        {}
 
     static std::string header()
         {
@@ -116,6 +119,7 @@ private:
     Entry()
         {}
 
+    void operator=(const Entry& other) {  }
 
     void pushArrival(double);
 

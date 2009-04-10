@@ -52,9 +52,6 @@ struct PAttr
     double tau; // boltzmann policy temperature
 };
 
-typedef boost::shared_ptr<PAttr> PAttrSP;
-
-
 class Policy
 {
 public:
@@ -65,11 +62,9 @@ public:
         {}
 
     virtual boost::uint16_t operator() (
-        boost::uint16_t p_source, tValuesVecSP p_values, PAttrSP p_attr = PAttrSP()) = 0;
+        boost::uint16_t p_source, tValuesVecSP p_values, PAttr p_attr) = 0;
 
 };
-
-typedef boost::shared_ptr<Policy> tPolicySP;
 
 
 }

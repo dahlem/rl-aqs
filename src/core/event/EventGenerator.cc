@@ -43,8 +43,8 @@ namespace dnet = des::network;
 
 
 void dcore::EventGenerator::generate(
-    dnet::tGraphSP p_graph,
-    dcommon::tQueueSP p_queue,
+    dnet::Graph &p_graph,
+    dcommon::Queue &p_queue,
     dsample::tGslRngSP arrival_rng,
     boost::int32_t destination,
     double arrival_rate,
@@ -56,8 +56,8 @@ void dcore::EventGenerator::generate(
 
 
 void dcore::EventGenerator::generate(
-    dnet::tGraphSP p_graph,
-    dcommon::tQueueSP p_queue,
+    dnet::Graph &p_graph,
+    dcommon::Queue &p_queue,
     dsample::tGslRngSP arrival_rng,
     boost::int32_t destination,
     double arrival_rate,
@@ -78,7 +78,7 @@ void dcore::EventGenerator::generate(
                 dcore::EXTERNAL_EVENT,
                 dcore::ARRIVAL_EVENT);
 
-            p_queue->push(entry);
+            p_queue.push(entry);
         }
     }
 
@@ -102,12 +102,22 @@ void dcore::EventGenerator::generate(
                 dcore::EXTERNAL_EVENT,
                 dcore::ARRIVAL_EVENT);
 
-            p_queue->push(entry);
+            try {
+                p_queue.push(entry);
+#ifndef NDEBUG_EVENTS
+                std::cout << "External arrival event scheduled for vertex "
+                          << destination << std::endl;
+#endif /* NDEBUG_EVENTS */
+            } catch (dcommon::QueueException &qe) {
+                std::cout << "Error scheduling external arrival event: " << entry->getArrival() << " " << qe.what() << std::endl;
+                delete entry;
+                throw;
+            }
             cur_arrival -= new_arrival;
         } else {
             dnet::VertexNextEventTimeMap vertex_next_event_time_map =
-                get(vertex_next_event_time, *p_graph);
-            dnet::Vertex vertex = boost::vertex(destination, *p_graph);
+                get(vertex_next_event_time, p_graph);
+            dnet::Vertex vertex = boost::vertex(destination, p_graph);
 
             // enqueue the last arrival event
             dcommon::Entry *entry = new dcommon::Entry(
@@ -117,7 +127,17 @@ void dcore::EventGenerator::generate(
                 dcore::EXTERNAL_EVENT,
                 dcore::LAST_ARRIVAL_EVENT);
 
-            p_queue->push(entry);
+            try {
+                p_queue.push(entry);
+#ifndef NDEBUG_EVENTS
+                std::cout << "External last arrival event scheduled for vertex "
+                          << destination << std::endl;
+#endif /* NDEBUG_EVENTS */
+            } catch (dcommon::QueueException &qe) {
+                std::cout << "Error scheduling external last arrival event: " << entry->getArrival() << " " << qe.what() << std::endl;
+                delete entry;
+                throw;
+            }
 
             // store the event that could not be pushed into the queue
             // if event phases are enabled this value will be picked up.
@@ -131,7 +151,7 @@ void dcore::EventGenerator::generate(
 
 
 void dcore::EventGenerator::generate(
-    dcommon::tQueueSP p_queue,
+    dcommon::Queue &p_queue,
     dsample::tGslRngSP arrival_rng,
     boost::int32_t destination,
     double arrival_rate)
@@ -149,12 +169,21 @@ void dcore::EventGenerator::generate(
         dcore::EXTERNAL_EVENT,
         dcore::ARRIVAL_EVENT);
 
-    p_queue->push(entry);
+    try {
+        p_queue.push(entry);
+#ifndef NDEBUG_EVENTS
+        std::cout << "External arrival event scheduled for vertex " << destination << std::endl;
+#endif /* NDEBUG_EVENTS */
+    } catch (dcommon::QueueException &qe) {
+        std::cout << "Error scheduling external arrival event: " << entry->getArrival() << " " << qe.what() << std::endl;
+        delete entry;
+        throw;
+    }
 }
 
 
 void dcore::EventGenerator::generateLogGraph(
-    dcommon::tQueueSP p_queue,
+    dcommon::Queue &p_queue,
     double rate,
     double stop_time)
 {
@@ -168,6 +197,15 @@ void dcore::EventGenerator::generateLogGraph(
             dcore::ADMIN_EVENT,
             dcore::LOG_GRAPH_EVENT);
 
-        p_queue->push(entry);
+        try {
+            p_queue.push(entry);
+#ifndef NDEBUG_EVENTS
+            std::cout << "Admin log graph event scheduled." << std::endl;
+#endif /* NDEBUG_EVENTS */
+        } catch (dcommon::QueueException &qe) {
+            std::cout << "Error scheduling admin log graph event: " << entry->getArrival() << " " << qe.what() << std::endl;
+            delete entry;
+            throw;
+        }
     }
 }

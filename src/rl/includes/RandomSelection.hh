@@ -28,7 +28,6 @@
 
 #include <boost/cstdint.hpp>
 #include <boost/shared_array.hpp>
-#include <boost/shared_ptr.hpp>
 
 #include "DirectedGraph.hh"
 namespace dnet = des::network;
@@ -50,22 +49,20 @@ typedef boost::shared_array <boost::int32_t> Int32SA;
 class RandomSelection : public Selection
 {
 public:
-    RandomSelection(tPolicySP p_policy, dnet::tGraphSP p_graph, Int32SA p_depart_uniform_ids);
-    
+    RandomSelection(Policy &p_policy, dnet::Graph &p_graph, Int32SA p_depart_uniform_ids);
+
     virtual ~RandomSelection()
         {}
 
     boost::int32_t operator() (boost::int32_t p_source);
 
 private:
-    dnet::tGraphSP m_graph;
+    dnet::Graph &m_graph;
     Int32SA m_depart_uniform_ids;
     dnet::EdgeWeightMap edge_weight_map;
     dnet::VertexIndexMap vertex_index_map;
-    
-};
 
-typedef boost::shared_ptr<RandomSelection> tRandomSelectionSP;
+};
 
 
 }

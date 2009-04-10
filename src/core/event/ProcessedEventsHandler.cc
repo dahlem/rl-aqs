@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -29,12 +29,12 @@ namespace dcommon = des::common;
 
 
 
-dcore::ProcessedEventsHandler::ProcessedEventsHandler(dio::tResultsSP p_processedEvents)
+dcore::ProcessedEventsHandler::ProcessedEventsHandler(dio::Results &p_processedEvents)
     : m_processedEvents(p_processedEvents)
 {
     std::stringstream s;
     s << dcommon::Entry::header();
-    m_processedEvents->print(s);
+    m_processedEvents.print(s);
 }
 
 
@@ -52,5 +52,5 @@ void dcore::ProcessedEventsHandler::update(dcore::PreAnyEvent *subject)
     // log the event
     s.str("");
     s << std::setprecision(14) << const_cast <const dcommon::Entry&> (*entry);
-    m_processedEvents->print(s);
+    m_processedEvents.print(s);
 }

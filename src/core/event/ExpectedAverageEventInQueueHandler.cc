@@ -25,6 +25,10 @@
 # include <iostream>
 #endif /* NDEBUG_EVENTS */
 
+#ifndef NDEBUG
+# include <cassert>
+#endif /* NDEBUG */
+
 #include <gsl/gsl_math.h>
 
 #include "events.hh"
@@ -38,13 +42,13 @@ namespace dcommon = des::common;
 namespace dnet = des::network;
 
 
-dcore::ExpectedAverageEventInQueueHandler::ExpectedAverageEventInQueueHandler(dnet::tGraphSP p_graph)
+dcore::ExpectedAverageEventInQueueHandler::ExpectedAverageEventInQueueHandler(dnet::Graph &p_graph)
     : m_graph(p_graph)
 {
-    vertex_Qdt_map = get(vertex_Qdt, *m_graph);
-    vertex_number_in_queue_map = get(vertex_number_in_queue, *m_graph);
-    vertex_expected_average_number_event_map = get(vertex_expected_average_number_event, *m_graph);
-    vertex_last_event_time_map = get(vertex_last_event_time, *m_graph);
+    vertex_Qdt_map = get(vertex_Qdt, m_graph);
+    vertex_number_in_queue_map = get(vertex_number_in_queue, m_graph);
+    vertex_expected_average_number_event_map = get(vertex_expected_average_number_event, m_graph);
+    vertex_last_event_time_map = get(vertex_last_event_time, m_graph);
 }
 
 
@@ -61,20 +65,27 @@ void dcore::ExpectedAverageEventInQueueHandler::update(dcore::PostAnyEvent *subj
         (entry->getType() == ARRIVAL_EVENT) ||
         (entry->getType() == DEPARTURE_EVENT)) {
 
-        dnet::Vertex vertex = boost::vertex(entry->getDestination(), *m_graph);
+        dnet::Vertex vertex = boost::vertex(entry->getDestination(), m_graph);
         double q_i = (gsl_fcmp(entry->getArrival(), vertex_last_event_time_map[vertex], 1e-9) == 0)
             ? (0.0)
             : (entry->getArrival() - vertex_last_event_time_map[vertex]);
 
-#ifndef NDEBUG_EVENTS
-        std::cout << "** Update expected avg. event in queue for vertex: " << entry->getDestination() << std::endl;
-#endif /* NDEBUG_EVENTS */
+#ifndef NDEBUG
+        assert(gsl_fcmp(entry->getArrival(), vertex_last_event_time_map[vertex], 1e-9) >= 0);
+#endif /* NDEBUG */
 
         q_i *= vertex_number_in_queue_map[vertex];
 
+#ifndef NDEBUG_EVENTS
+        std::cout << "** Update expected avg. event in queue for vertex: " << entry->getDestination() << std::endl;
+        std::cout << "Number in queue: " << vertex_number_in_queue_map[vertex];
+        std::cout << ", diff: " << (entry->getArrival() - vertex_last_event_time_map[vertex]);
+        std::cout << std::endl << "q_i: " << q_i << std::endl;
+#endif /* NDEBUG_EVENTS */
+
         // \hat(q) = \fract{\int_{0}^{T(n)}Q(t)dt}{T(n)}
         // Eq. 1.4 in Simulation, Modeling and Analysis by Law, Kelton
-        vertex_Qdt_map[vertex] = vertex_Qdt_map[vertex] + q_i;
+        vertex_Qdt_map[vertex] += q_i;
         vertex_expected_average_number_event_map[vertex] =
             vertex_Qdt_map[vertex] / entry->getArrival();
     }

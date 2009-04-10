@@ -31,7 +31,7 @@ namespace dcore = des::core;
 namespace dcommon = des::common;
 
 
-dcore::AckHandler::AckHandler(dcommon::tQueueSP p_queue)
+dcore::AckHandler::AckHandler(dcommon::Queue &p_queue)
     : m_queue(p_queue)
 {
 }
@@ -51,7 +51,7 @@ void dcore::AckHandler::update(dcore::AckEvent *subject)
             const_cast <const dcommon::Entry&> (*entry));
 
         new_entry->leave(dcore::EXTERNAL_EVENT, dcore::LEAVE_EVENT);
-        m_queue->push(new_entry);
+        m_queue.push(new_entry);
     } else {
         // schedule ack events
         boost::int32_t origin = entry->getDestination();
@@ -61,6 +61,6 @@ void dcore::AckHandler::update(dcore::AckEvent *subject)
             const_cast <const dcommon::Entry&> (*entry));
 
         new_entry->acknowledge(origin, destination, dcore::ACK_EVENT);
-        m_queue->push(new_entry);
+        m_queue.push(new_entry);
     }
 }

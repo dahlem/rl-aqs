@@ -52,7 +52,7 @@ BoltzmannPolicy::BoltzmannPolicy(
 
 
 boost::uint16_t BoltzmannPolicy::operator() (
-    boost::uint16_t p_source, tValuesVecSP p_values, PAttrSP p_attr)
+    boost::uint16_t p_source, tValuesVecSP p_values, PAttr p_attr)
 {
 #ifndef NDEBUG_EVENTS
     std::cout << "** Boltzmann Policy" << std::endl;
@@ -63,9 +63,7 @@ boost::uint16_t BoltzmannPolicy::operator() (
     if (p_values->size() > 1) {
         double tau = m_tau;
 
-        if (p_attr.get() != NULL) {
-            tau = p_attr->tau;
-        }
+//         tau = p_attr->tau;
 
         // calculate the exps first
         std::vector<double> exps;

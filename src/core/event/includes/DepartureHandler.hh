@@ -26,7 +26,6 @@
 #endif /* __STDC_CONSTANT_MACROS */
 
 #include <boost/cstdint.hpp>
-#include <boost/shared_ptr.hpp>
 
 
 #include "DepartureEvent.hh"
@@ -57,25 +56,19 @@ namespace core
 class DepartureHandler : public design::Observer<dcore::DepartureEvent>
 {
 public:
-    DepartureHandler(dcommon::tQueueSP p_queue, dnet::tGraphSP p_graph, drl::tSelectionSP p_selection);
+    DepartureHandler(dcommon::Queue &p_queue, dnet::Graph &p_graph, drl::Selection &p_selection);
     ~DepartureHandler();
 
     void update(dcore::DepartureEvent *subject);
 
 private:
-    dcommon::tQueueSP m_queue;
-    dnet::tGraphSP m_graph;
-    drl::tSelectionSP m_selection;
+    dcommon::Queue &m_queue;
+    dnet::Graph &m_graph;
+    drl::Selection &m_selection;
 
     dnet::VertexBusyMap vertex_busy_map;
     dnet::VertexNumberInQueueMap vertex_number_in_queue_map;
 };
-
-
-/** @typedef tDepartureHandlerSP
- * a type definition of the shared pointer of the departure handler
- */
-typedef boost::shared_ptr <DepartureHandler> tDepartureHandlerSP;
 
 
 }

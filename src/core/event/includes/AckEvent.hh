@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,8 +20,6 @@
 
 #ifndef __ACKEVENT_HH__
 #define __ACKEVENT_HH__
-
-#include <boost/shared_ptr.hpp>
 
 #include "Entry.hh"
 namespace dcommon = des::common;
@@ -50,11 +48,6 @@ public:
 
     void ack(dcommon::Entry *event);
 };
-
-/** @typedef tAckEventSP
- * a type definition of a shared pointer to an ack event
- */
-typedef boost::shared_ptr <AckEvent> tAckEventSP;
 
     }
 }

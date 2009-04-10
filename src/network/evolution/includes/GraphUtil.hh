@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -56,7 +56,7 @@ public:
      * @param const std::string& the filename to be printed into
      * @param const GraphTypes the graph type selected for the output
      */
-    static void print(tGraphSP, const std::string& filename, const GraphTypes);
+    static void print(Graph&, const std::string& filename, const GraphTypes);
 
     /** @fn void read(tGraphSP, std::string) throw (GraphException)
      * Read a graph from a file and store it into the first parameter.
@@ -65,7 +65,7 @@ public:
      * @param const std::string& the filename to read the graph from
      * @param const GraphTypes the graph type selected for the input
      */
-    static void read(tGraphSP, const std::string&, const GraphTypes)
+    static void read(Graph&, const std::string&, const GraphTypes)
         throw (GraphException);
 
 private:
@@ -76,21 +76,21 @@ private:
     ~GraphUtil()
         {}
 
-    static boost::dynamic_properties getProperties(tGraphSP p_graph);
+    static boost::dynamic_properties getProperties(Graph &p_graph);
 
     /** @fn void print_dot(const std::string& filename)
      * Print the graph using the graphviz interface of BGL into a file
      *
      * @param const std::string& the filename to be printed into
      */
-    static void print_dot(tGraphSP, const std::string& filename);
+    static void print_dot(Graph&, const std::string& filename);
 
     /** @fn void print_graphml(const std::string& filename)
      * Print the graph into a graphml format
      *
      * @param const std::string& the filename to be printed into
      */
-    static void print_graphml(tGraphSP, const std::string& filename);
+    static void print_graphml(Graph&, const std::string& filename);
 
     /** @fn void read_dot(tGraphSP, const std::string& filename)
      * Read the graph using the graphviz interface of BGL from a file
@@ -98,7 +98,7 @@ private:
      * @param tGraphSP the graph object to store the graph
      * @param const std::string& the filename to be printed into
      */
-    static void read_dot(tGraphSP, const std::string& filename)
+    static void read_dot(Graph&, const std::string& filename)
         throw (GraphException);
 
     /** @fn void read_graphml(tGraphSP, const std::string& filename)
@@ -107,7 +107,7 @@ private:
      * @param tGraphSP the graph object to store the graph
      * @param const std::string& the filename to be printed into
      */
-    static void read_graphml(tGraphSP, const std::string& filename)
+    static void read_graphml(Graph&, const std::string& filename)
         throw (GraphException);
 };
 

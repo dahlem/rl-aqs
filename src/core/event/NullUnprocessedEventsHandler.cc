@@ -33,7 +33,7 @@ namespace dcommon = des::common;
 
 
 
-dcore::NullUnprocessedEventsHandler::NullUnprocessedEventsHandler(dcommon::tQueueSP p_queue)
+dcore::NullUnprocessedEventsHandler::NullUnprocessedEventsHandler(dcommon::LadderQueue &p_queue)
     : m_queue(p_queue)
 {}
 
@@ -56,10 +56,11 @@ void dcore::NullUnprocessedEventsHandler::update(dcore::PostEvent *subject)
     // record the events left over
     if (entry != NULL) {
         do {
+            delete entry;
 #ifndef NDEBUG
             num++;
 #endif /* NDEBUG */
-        } while ((entry = m_queue->dequeue()) != NULL);
+        } while ((entry = m_queue.dequeue()) != NULL);
     } else {
         std::cout << "event was NULL" << std::endl;
     }

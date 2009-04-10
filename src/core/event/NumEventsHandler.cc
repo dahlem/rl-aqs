@@ -33,10 +33,10 @@ namespace core
 {
 
 
-NumEventsHandler::NumEventsHandler(dnet::tGraphSP p_graph)
+NumEventsHandler::NumEventsHandler(dnet::Graph &p_graph)
     : m_graph(p_graph)
 {
-    vertex_num_events_map = get(vertex_num_events, *m_graph);
+    vertex_num_events_map = get(vertex_num_events, m_graph);
 }
 
 
@@ -47,7 +47,7 @@ NumEventsHandler::~NumEventsHandler()
 void NumEventsHandler::update(ArrivalEvent *subject)
 {
     dcommon::Entry *entry = subject->getEvent();
-    dnet::Vertex vertex = boost::vertex(entry->getDestination(), *m_graph);
+    dnet::Vertex vertex = boost::vertex(entry->getDestination(), m_graph);
 
     // increment the number of numEvents events seen by this node
     if ((entry->getType() == LAST_ARRIVAL_EVENT) ||

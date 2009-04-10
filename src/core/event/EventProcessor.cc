@@ -27,8 +27,6 @@
 
 #include <iostream>
 
-#include <gsl/gsl_math.h>
-
 #include "Entry.hh"
 #include "LadderQueue.hh"
 namespace dcommon = des::common;
@@ -45,17 +43,17 @@ namespace core
 
 
 
-EventProcessor::EventProcessor(dcommon::tQueueSP p_queue,
-                                      tAdminEventSP p_adminEvent,
-                                      tPreAnyEventSP p_preAnyEvent,
-                                      tPostAnyEventSP p_postAnyEvent,
-                                      tArrivalEventSP p_arrivalEvent,
-                                      tDepartureEventSP p_departureEvent,
-                                      tPostEventSP p_postEvent,
-                                      tLastArrivalEventSP p_lastArrivalEvent,
-                                      tAckEventSP p_ackEvent,
-                                      tLeaveEventSP p_leaveEvent,
-                                      double p_stopTime)
+EventProcessor::EventProcessor(dcommon::LadderQueue &p_queue,
+                               AdminEvent &p_adminEvent,
+                               PreAnyEvent &p_preAnyEvent,
+                               PostAnyEvent &p_postAnyEvent,
+                               ArrivalEvent &p_arrivalEvent,
+                               DepartureEvent &p_departureEvent,
+                               PostEvent &p_postEvent,
+                               LastArrivalEvent &p_lastArrivalEvent,
+                               AckEvent &p_ackEvent,
+                               LeaveEvent &p_leaveEvent,
+                               double p_stopTime)
     : m_queue(p_queue), m_adminEvent(p_adminEvent), m_preAnyEvent(p_preAnyEvent),
       m_postAnyEvent(p_postAnyEvent), m_arrivalEvent(p_arrivalEvent),
       m_departureEvent(p_departureEvent), m_postEvent(p_postEvent),
@@ -81,7 +79,7 @@ bool EventProcessor::process()
 #ifndef NDEBUG_EVENTS
             std::cout << "** EventProcessor : dequeue event" << std::endl;
 #endif /* NDEBUG_EVENTS */
-            entry = m_queue->dequeue();
+            entry = m_queue.dequeue();
 #ifndef NDEBUG_EVENTS
             std::cout << "** EventProcessor : event dequeued" << std::endl;
 #endif /* NDEBUG_EVENTS */
@@ -93,7 +91,7 @@ bool EventProcessor::process()
 #ifndef NDEBUG
             double newTime = entry->getArrival();
 
-            assert(gsl_fcmp(newTime, m_oldTime, 1e-6) > -1);
+            assert(newTime >= m_oldTime);
             m_oldTime = newTime;
 #endif /* NDEBUG */
 
@@ -105,7 +103,7 @@ bool EventProcessor::process()
 #ifndef NDEBUG_EVENTS
                 std::cout << "** EventProcessor : admin event start" << std::endl;
 #endif /* NDEBUG_EVENTS */
-                m_adminEvent->admin(entry);
+                m_adminEvent.admin(entry);
 #ifndef NDEBUG_EVENTS
                 std::cout << "** EventProcessor : admin event finished" << std::endl;
 #endif /* NDEBUG_EVENTS */
@@ -118,7 +116,7 @@ bool EventProcessor::process()
 #ifndef NDEBUG_EVENTS
                     std::cout << "** EventProcessor : pre any event start" << std::endl;
 #endif /* NDEBUG_EVENTS */
-                    m_preAnyEvent->preAny(entry);
+                    m_preAnyEvent.preAny(entry);
 #ifndef NDEBUG_EVENTS
                     std::cout << "** EventProcessor : pre any event finished" << std::endl;
 #endif /* NDEBUG_EVENTS */
@@ -130,7 +128,7 @@ bool EventProcessor::process()
 #ifndef NDEBUG_EVENTS
                       std::cout << "** EventProcessor : last arrival event start" << std::endl;
 #endif /* NDEBUG_EVENTS */
-                      m_lastArrivalEvent->lastArrival(entry);
+                      m_lastArrivalEvent.lastArrival(entry);
 #ifndef NDEBUG_EVENTS
                       std::cout << "** EventProcessor : last arrival event finished" << std::endl;
 #endif /* NDEBUG_EVENTS */
@@ -139,7 +137,7 @@ bool EventProcessor::process()
 #ifndef NDEBUG_EVENTS
                       std::cout << "** EventProcessor : arrival event start" << std::endl;
 #endif /* NDEBUG_EVENTS */
-                      m_arrivalEvent->arrival(entry);
+                      m_arrivalEvent.arrival(entry);
 #ifndef NDEBUG_EVENTS
                       std::cout << "** EventProcessor : arrival event finished" << std::endl;
 #endif /* NDEBUG_EVENTS */
@@ -148,7 +146,7 @@ bool EventProcessor::process()
 #ifndef NDEBUG_EVENTS
                       std::cout << "** EventProcessor : departure event start" << std::endl;
 #endif /* NDEBUG_EVENTS */
-                      m_departureEvent->departure(entry);
+                      m_departureEvent.departure(entry);
 #ifndef NDEBUG_EVENTS
                       std::cout << "** EventProcessor : departure event finished" << std::endl;
 #endif /* NDEBUG_EVENTS */
@@ -157,7 +155,7 @@ bool EventProcessor::process()
 #ifndef NDEBUG_EVENTS
                       std::cout << "** EventProcessor : ack event start" << std::endl;
 #endif /* NDEBUG_EVENTS */
-                      m_ackEvent->ack(entry);
+                      m_ackEvent.ack(entry);
 #ifndef NDEBUG_EVENTS
                       std::cout << "** EventProcessor : ack event finished" << std::endl;
 #endif /* NDEBUG_EVENTS */
@@ -166,7 +164,7 @@ bool EventProcessor::process()
 #ifndef NDEBUG_EVENTS
                       std::cout << "** EventProcessor : leave event start" << std::endl;
 #endif /* NDEBUG_EVENTS */
-                      m_leaveEvent->leave(entry);
+                      m_leaveEvent.leave(entry);
 #ifndef NDEBUG_EVENTS
                       std::cout << "** EventProcessor : leave event finished" << std::endl;
 #endif /* NDEBUG_EVENTS */
@@ -178,7 +176,7 @@ bool EventProcessor::process()
 #ifndef NDEBUG_EVENTS
                 std::cout << "** EventProcessor : post any event start" << std::endl;
 #endif /* NDEBUG_EVENTS */
-                m_postAnyEvent->postAny(entry);
+                m_postAnyEvent.postAny(entry);
 #ifndef NDEBUG_EVENTS
                 std::cout << "** EventProcessor : post any event finished" << std::endl;
 #endif /* NDEBUG_EVENTS */
@@ -197,7 +195,7 @@ bool EventProcessor::process()
         }
 #endif /* NDEBUG_EVENTS */
 
-        m_postEvent->post(entry);
+        m_postEvent.post(entry);
 
 #ifndef NDEBUG_EVENTS
         std::cout << "** EventProcessor : post event finished" << std::endl;
@@ -214,6 +212,7 @@ bool EventProcessor::process()
                 std::cout << "Event Processed: "
                           << const_cast <const dcommon::Entry&> (*entry)
                           << std::endl;
+                delete entry;
             }
 
             return false;
@@ -221,9 +220,9 @@ bool EventProcessor::process()
     }
 
 #ifndef NDEBUG
-    std::cout << m_queue->getInEvents() << ", " << m_queue->getOutEvents() << std::endl;
-    std::cout << "LadderQ events :" << m_queue->size() << std::endl;
-    assert(m_queue->getInEvents() == m_queue->getOutEvents());
+    std::cout << m_queue.getInEvents() << ", " << m_queue.getOutEvents() << std::endl;
+    std::cout << "LadderQ events :" << m_queue.size() << std::endl;
+    assert(m_queue.getInEvents() == m_queue.getOutEvents());
 #endif /* NDEBUG_EVENTS */
 
 

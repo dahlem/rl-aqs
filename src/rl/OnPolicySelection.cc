@@ -37,10 +37,10 @@ namespace rl
 {
 
 OnPolicySelection::OnPolicySelection(
-    tPolicySP p_policy, dnet::tGraphSP p_graph)
+    Policy &p_policy, dnet::Graph &p_graph)
     : Selection(p_policy), m_graph(p_graph)
 {
-    vertex_next_action_map = get(vertex_next_action, *m_graph);
+    vertex_next_action_map = get(vertex_next_action, m_graph);
 }
 
 
@@ -50,17 +50,17 @@ boost::int32_t OnPolicySelection::operator() (boost::int32_t p_source)
     std::cout << "** OnPolicy Selection" << std::endl;
 #endif /* NDEBUG_EVENTS */
 
-    dnet::Vertex vertex = boost::vertex(p_source, *m_graph);
+    dnet::Vertex vertex = boost::vertex(p_source, m_graph);
     boost::int32_t destination = vertex_next_action_map[vertex];
 
     if (destination < 0) {
-        dnet::EdgeQValueMap edge_q_val_map = get(edge_q_val, *m_graph);
-        dnet::VertexIndexMap vertex_index_map = get(boost::vertex_index, *m_graph);
+        dnet::EdgeQValueMap edge_q_val_map = get(edge_q_val, m_graph);
+        dnet::VertexIndexMap vertex_index_map = get(boost::vertex_index, m_graph);
         tValuesVecSP values = tValuesVecSP(new tValuesVec);
-    
-        BOOST_FOREACH(dnet::Edge e, (boost::out_edges(vertex, *m_graph))) {
+
+        BOOST_FOREACH(dnet::Edge e, (boost::out_edges(vertex, m_graph))) {
             tValues value;
-            int target_vertex = vertex_index_map[boost::target(e, *m_graph)];
+            int target_vertex = vertex_index_map[boost::target(e, m_graph)];
             value.first = target_vertex;
             value.second = edge_q_val_map[e];
 
@@ -70,9 +70,10 @@ boost::int32_t OnPolicySelection::operator() (boost::int32_t p_source)
             values->push_back(value);
         }
 
-        destination = (*m_policy)(p_source, values);
+        PAttr attr;
+        destination = m_policy(p_source, values, attr);
     }
-    
+
 #ifndef NDEBUG_EVENTS
     std::cout << "Destination: " << destination << std::endl;
 #endif /* NDEBUG_EVENTS */

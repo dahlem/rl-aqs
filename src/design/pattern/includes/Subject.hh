@@ -1,4 +1,4 @@
-// Copyright (C) 2007, 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2007, 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This file is free software; as a special exception the author gives
 // unlimited permission to copy and/or distribute it, with or without
@@ -13,8 +13,6 @@
 
 
 #include <vector>
-
-#include <boost/shared_ptr.hpp>
 
 #include "Observer.hh"
 
@@ -56,9 +54,9 @@ public:
      *
      * @param Observer<T> the observer to be attached to the subject
      */
-    void attach(boost::shared_ptr <design::Observer <T> > observer)
+    void attach(design::Observer <T> &observer)
         {
-            m_observers.push_back(observer);
+            m_observers.push_back(&observer);
         }
 
     /**
@@ -66,7 +64,7 @@ public:
      */
     void notify()
         {
-            typename std::vector <boost::shared_ptr <Observer<T> > >::iterator it;
+            typename std::vector <Observer<T> *>::iterator it;
 
             for (it = m_observers.begin(); it != m_observers.end(); it++) {
                 (*it)->update(static_cast <T *>(this));
@@ -74,7 +72,7 @@ public:
         }
 
 private:
-    std::vector <boost::shared_ptr <design::Observer <T> > > m_observers;
+    std::vector <design::Observer <T> *> m_observers;
 };
 
 

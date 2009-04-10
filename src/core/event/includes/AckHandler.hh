@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -43,20 +43,14 @@ namespace des
 class AckHandler : public design::Observer<dcore::AckEvent>
 {
 public:
-    AckHandler(dcommon::tQueueSP p_queue);
+    AckHandler(dcommon::Queue &p_queue);
     ~AckHandler();
 
     void update(dcore::AckEvent *subject);
 
 private:
-    dcommon::tQueueSP m_queue;
+    dcommon::Queue &m_queue;
 };
-
-
-/** @typedef tAckHandlerSP
- * a type definition of the shared pointer of the ack handler
- */
-typedef boost::shared_ptr <AckHandler> tAckHandlerSP;
 
 
     }

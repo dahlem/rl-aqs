@@ -47,11 +47,11 @@ namespace core
 {
 
 
-ResponseStatsHandler::ResponseStatsHandler(dnet::tGraphSP p_graph)
+ResponseStatsHandler::ResponseStatsHandler(dnet::Graph &p_graph)
     : m_graph(p_graph)
 {
-    vertex_mean_response_map = get(vertex_mean_reward, *m_graph);
-    vertex_num_events_processed_map = get(vertex_num_events_processed, *m_graph);
+    vertex_mean_response_map = get(vertex_mean_reward, m_graph);
+    vertex_num_events_processed_map = get(vertex_num_events_processed, m_graph);
 }
 
 
@@ -68,10 +68,10 @@ void ResponseStatsHandler::update(AckEvent *subject)
     std::cout << "Event: " << const_cast <const dcommon::Entry&> (*entry) << std::endl;
 #endif /* NDEBUG_EVENTS */
 
-    dnet::Vertex vertex = boost::vertex(entry->getDestination(), *m_graph);
+    dnet::Vertex vertex = boost::vertex(entry->getDestination(), m_graph);
     double size = vertex_num_events_processed_map[vertex];
     double xbar = vertex_mean_response_map[vertex];
-    double x = (gsl_fcmp(entry->getArrival(), entry->topArrival(), 1e-9) == 0)
+    double x = (gsl_fcmp(entry->getArrival(), entry->topArrival(), 1e-9) <= 0)
         ? (0.0)
         : (entry->getArrival() - entry->topArrival());
 

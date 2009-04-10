@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,8 +20,6 @@
 
 #ifndef __EXPECTEDAVERAGEEVENTINQUEUEHANDLER_HH__
 #define __EXPECTEDAVERAGEEVENTINQUEUEHANDLER_HH__
-
-#include <boost/shared_ptr.hpp>
 
 
 #include "PostAnyEvent.hh"
@@ -46,13 +44,13 @@ namespace des
 class ExpectedAverageEventInQueueHandler : public design::Observer<dcore::PostAnyEvent>
 {
 public:
-    ExpectedAverageEventInQueueHandler(dnet::tGraphSP p_graph);
+    ExpectedAverageEventInQueueHandler(dnet::Graph &p_graph);
     ~ExpectedAverageEventInQueueHandler();
 
     void update(dcore::PostAnyEvent *subject);
 
 private:
-    dnet::tGraphSP m_graph;
+    dnet::Graph &m_graph;
 
     // derived fields
     dnet::VertexQdtMap vertex_Qdt_map;
@@ -62,11 +60,6 @@ private:
 
 };
 
-
-/** @typedef tExpectedAverageEventInQueueHandlerSP
- * a type definition of the shared pointer of the expectedAverageEventInQueue handler
- */
-typedef boost::shared_ptr <ExpectedAverageEventInQueueHandler> tExpectedAverageEventInQueueHandlerSP;
 
 
     }

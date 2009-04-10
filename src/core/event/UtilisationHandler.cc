@@ -38,13 +38,13 @@ namespace dcommon = des::common;
 namespace dnet = des::network;
 
 
-dcore::UtilisationHandler::UtilisationHandler(dnet::tGraphSP p_graph)
+dcore::UtilisationHandler::UtilisationHandler(dnet::Graph &p_graph)
     : m_graph(p_graph)
 {
-    vertex_Bdt_map = get(vertex_Bdt, *m_graph);
-    vertex_busy_map = get(vertex_busy, *m_graph);
-    vertex_utilisation_map = get(vertex_utilisation, *m_graph);
-    vertex_last_event_time_map = get(vertex_last_event_time, *m_graph);
+    vertex_Bdt_map = get(vertex_Bdt, m_graph);
+    vertex_busy_map = get(vertex_busy, m_graph);
+    vertex_utilisation_map = get(vertex_utilisation, m_graph);
+    vertex_last_event_time_map = get(vertex_last_event_time, m_graph);
 }
 
 
@@ -61,7 +61,7 @@ void dcore::UtilisationHandler::update(dcore::PostAnyEvent *subject)
         (entry->getType() == ARRIVAL_EVENT) ||
         (entry->getType() == DEPARTURE_EVENT)) {
 
-        dnet::Vertex vertex = boost::vertex(entry->getDestination(), *m_graph);
+        dnet::Vertex vertex = boost::vertex(entry->getDestination(), m_graph);
         double b_i = 0.0;
 
 #ifndef NDEBUG_EVENTS
@@ -75,13 +75,13 @@ void dcore::UtilisationHandler::update(dcore::PostAnyEvent *subject)
             b_i = diff;
         }
 
+#ifndef NDEBUG_EVENTS
+        std::cout << "b_i: " << b_i << std::endl;
+#endif /* NDEBUG_EVENTS */
+
         // \hat(u) = \fract{\int_{0}^{T(n)}B(t)dt}{T(n)}
         // Eq. 1.6 in Simulation, Modeling and Analysis by Law, Kelton
-        vertex_Bdt_map[vertex] = vertex_Bdt_map[vertex] + b_i;
+        vertex_Bdt_map[vertex] += b_i;
         vertex_utilisation_map[vertex] = vertex_Bdt_map[vertex] / entry->getArrival();
     }
-
-#ifndef NDEBUG_EVENTS
-    std::cout << "Departure event scheduled." << std::endl;
-#endif /* NDEBUG_EVENTS */
 }

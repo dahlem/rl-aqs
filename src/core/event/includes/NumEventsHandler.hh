@@ -21,8 +21,6 @@
 #ifndef __NUMEVENTSHANDLER_HH__
 #define __NUMEVENTSHANDLER_HH__
 
-#include <boost/shared_ptr.hpp>
-
 
 #include "Observer.hh"
 namespace design = des::design;
@@ -45,24 +43,18 @@ namespace des
 class NumEventsHandler : public design::Observer<dcore::ArrivalEvent>
 {
 public:
-    NumEventsHandler(dnet::tGraphSP p_graph);
+    NumEventsHandler(dnet::Graph &p_graph);
     ~NumEventsHandler();
 
     void update(ArrivalEvent *subject);
 
 private:
-    dnet::tGraphSP m_graph;
+    dnet::Graph &m_graph;
 
     // derived fields
     dnet::VertexNumEventsMap vertex_num_events_map;
 
 };
-
-
-/** @typedef tNumEventsHandlerSP
- * a type definition of the shared pointer of the numEvents handler
- */
-typedef boost::shared_ptr <NumEventsHandler> tNumEventsHandlerSP;
 
 
     }

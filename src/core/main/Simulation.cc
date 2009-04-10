@@ -36,6 +36,7 @@
 #include <utility>
 
 #include <boost/cstdint.hpp>
+#include <boost/foreach.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/iterator/filter_iterator.hpp>
 #include <boost/shared_ptr.hpp>
@@ -103,6 +104,11 @@ namespace core
 {
 
 typedef boost::shared_array <boost::int32_t> Int32SA;
+typedef boost::shared_ptr<drl::Policy> tPolicySP;
+typedef boost::shared_ptr<drl::Selection> tSelectionSP;
+typedef boost::shared_ptr<DepartureHandler> tDepartureHandlerSP;
+typedef boost::shared_ptr<RLResponseHandler> tRLResponseHandlerSP;
+typedef boost::shared_ptr<DefaultResponseHandler> tDefaultResponseHandlerSP;
 
 
 Int32SA arrivalCRN(boost::uint16_t p_num_vertices)
@@ -178,7 +184,7 @@ Int32SA departureCRN(boost::uint16_t p_num_vertices)
 void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
                           tDesArgsSP desArgs)
 #else
-sim_output Simulation::simulate(tDesArgsSP desArgs)
+    sim_output Simulation::operator()(tDesArgsSP desArgs)
 #endif /* HAVE_MPI */
 {
     boost::uint16_t sim_num, rep_num, num_vertices;
@@ -230,12 +236,12 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
 #endif /* HAVE_MPI */
 
         dnet::tGraphSP graph(new dnet::Graph);
-        dcommon::tQueueSP queue(new dcommon::LadderQueue);
+        dcommon::LadderQueue queue;
 
         if (desArgs->graph_filename != "") {
             // read the graph
             try {
-                dnet::GraphUtil::read(graph, desArgs->graph_filename, dnet::GraphUtil::GRAPHML);
+                dnet::GraphUtil::read(*graph, desArgs->graph_filename, dnet::GraphUtil::GRAPHML);
             } catch (dnet::GraphException &ge) {
                 std::cerr << "Error: Cannot open graph file " << desArgs->graph_filename
                           << "!" << std::endl;
@@ -364,17 +370,21 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
             dsample::tGslRngSP arrival_rng;
 
 #ifndef NDEBUG
-            std::cout << "Generate events" << std::endl;
+            std::cout << "Generate events..." << std::endl;
 #endif /* NDEBUG */
 
-            for (p = boost::vertices(*graph); p.first != p.second; ++p.first) {
-                destination = vertex_index_props_map[*p.first];
-                arrival_rate = vertex_arrival_props_map[*p.first];
+            BOOST_FOREACH(dnet::Vertex v, boost::vertices(*graph)) {
+                destination = vertex_index_props_map[v];
+                arrival_rate = vertex_arrival_props_map[v];
+
+#ifndef NDEBUG_EVENTS
+                std::cout << "... for vertex " << destination << std::endl;
+#endif /* NDEBUG */
 
                 arrival_rng = dsample::CRN::getInstance().get(
                     arrivalCRNs[destination]);
                 EventGenerator::generate(
-                    graph, queue, arrival_rng, destination, arrival_rate, stopTimeAdj);
+                    *graph, queue, arrival_rng, destination, arrival_rate, stopTimeAdj);
             }
 
             if (desArgs->log_graphs) {
@@ -393,72 +403,63 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
         std::string resultsBaseDir = baseDir.str();
 
         // instantiate the events & handlers
-        tAdminEventSP adminEvent(new AdminEvent);
-        tPreAnyEventSP preAnyEvent(new PreAnyEvent);
-        tPostAnyEventSP postAnyEvent(new PostAnyEvent);
-        tArrivalEventSP arrivalEvent(new ArrivalEvent);
-        tDepartureEventSP departureEvent(new DepartureEvent);
-        tPostEventSP postEvent(new PostEvent);
-        tLastArrivalEventSP lastArrivalEvent(new LastArrivalEvent);
-        tAckEventSP ackEvent(new AckEvent);
-        tLeaveEventSP leaveEvent(new LeaveEvent);
+        AdminEvent adminEvent;
+        PreAnyEvent preAnyEvent;
+        PostAnyEvent postAnyEvent;
+        ArrivalEvent arrivalEvent;
+        DepartureEvent departureEvent;
+        PostEvent postEvent;
+        LastArrivalEvent lastArrivalEvent;
+        AckEvent ackEvent;
+        LeaveEvent leaveEvent;
 
-        tLogGraphHandlerSP logGraphHandler(
-            new LogGraphHandler(resultsBaseDir, graph));
+        LogGraphHandler logGraphHandler(resultsBaseDir, *graph);
 
-        tArrivalHandlerSP arrivalHandler(
-            new ArrivalHandler(queue, graph, serviceCRNs));
-        tNumEventsHandlerSP numEventsHandler(
-            new NumEventsHandler(graph));
-        tLastEventHandlerSP lastEventHandler(
-            new LastEventHandler(graph));
-        tUtilisationHandlerSP utilisationHandler(
-            new UtilisationHandler(graph));
-        tExpectedAverageEventInQueueHandlerSP expectedAverageEventInQueueHandler(
-            new ExpectedAverageEventInQueueHandler(graph));
-        tAckHandlerSP ackHandler(
-            new AckHandler(queue));
+        ArrivalHandler arrivalHandler(queue, *graph, serviceCRNs);
+        NumEventsHandler numEventsHandler(*graph);
+        LastEventHandler lastEventHandler(*graph);
+        UtilisationHandler utilisationHandler(*graph);
+        ExpectedAverageEventInQueueHandler expectedAverageEventInQueueHandler(*graph);
+        AckHandler ackHandler(queue);
 
         // we only need to register an event generation handler, if there are > 1 phases
+        GenerateEventHandler generateEventHandler(
+                *graph, arrivalCRNs, desArgs->generations, queue, desArgs->stop_time);
         if (desArgs->generations > 1) {
-            tGenerateEventHandlerSP generateEventHandler(
-                new GenerateEventHandler(
-                    graph, arrivalCRNs, desArgs->generations, queue, desArgs->stop_time));
-            lastArrivalEvent->attach(generateEventHandler);
+            lastArrivalEvent.attach(generateEventHandler);
         }
 
         // attach the handlers to the events
         // the order of the handlers is important
-        adminEvent->attach(logGraphHandler);
+        adminEvent.attach(logGraphHandler);
 
         // only register the logging handlers, if they are configured.
+        dio::Results processed_events(desArgs->events_processed, resultsBaseDir);
+        dio::Results unprocessed_events(desArgs->events_unprocessed, resultsBaseDir);
+
+        ProcessedEventsHandler processedEventsHandler(processed_events);
+        UnprocessedEventsHandler unprocessedEventsHandler(unprocessed_events, queue);
+        NullUnprocessedEventsHandler nullUnprocessedEventsHandler(queue);
+
         if (desArgs->log_events) {
-            dio::tResultsSP processed_events(
-                new dio::Results(desArgs->events_processed, resultsBaseDir));
-            dio::tResultsSP unprocessed_events(
-                new dio::Results(desArgs->events_unprocessed, resultsBaseDir));
-
-            tProcessedEventsHandlerSP processedEventsHandler(
-                new ProcessedEventsHandler(processed_events));
-            tUnprocessedEventsHandlerSP unprocessedEventsHandler(
-                new UnprocessedEventsHandler(unprocessed_events, queue));
-
-            preAnyEvent->attach(processedEventsHandler);
-            postEvent->attach(unprocessedEventsHandler);
+            preAnyEvent.attach(processedEventsHandler);
+            postEvent.attach(unprocessedEventsHandler);
         } else {
             // handle unprocessed events, i.e., just drop them off the queue here
-            tNullUnprocessedEventsHandlerSP nullUnprocessedEventsHandler(
-                new NullUnprocessedEventsHandler(queue));
-            postEvent->attach(nullUnprocessedEventsHandler);
+            postEvent.attach(nullUnprocessedEventsHandler);
         }
 
-        arrivalEvent->attach(numEventsHandler);
-        arrivalEvent->attach(arrivalHandler);
+        arrivalEvent.attach(numEventsHandler);
+        arrivalEvent.attach(arrivalHandler);
 
         // configure reinforcement learning
-        if (desArgs->rl) {
-            drl::tPolicySP pol;
+        tPolicySP pol;
+        tSelectionSP selection;
+        tDepartureHandlerSP departureHandler;
+        tRLResponseHandlerSP rlResponseHandler;
+        tDefaultResponseHandlerSP defaultResponseHandler;
 
+        if (desArgs->rl) {
             if (desArgs->rl_policy == 1) {
                 boost::uint32_t seed = dsample::Seeds::getInstance().getSeed();
                 boost::uint32_t pol_epsilon_rng_index
@@ -473,7 +474,7 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
                 dsample::tGslRngSP r2
                     = dsample::CRN::getInstance().get(pol_uniform_rng_index);
 
-                pol = drl::tPolicySP(new drl::EpsilonGreedy(desArgs->rl_policy_epsilon, r1, r2));
+                pol = tPolicySP(new drl::EpsilonGreedy(desArgs->rl_policy_epsilon, r1, r2));
             } else if (desArgs->rl_policy == 2) {
                 boost::uint32_t seed = dsample::Seeds::getInstance().getSeed();
                 boost::uint32_t pol_uniform_rng_index
@@ -482,52 +483,48 @@ sim_output Simulation::simulate(tDesArgsSP desArgs)
                 dsample::tGslRngSP r1
                     = dsample::CRN::getInstance().get(pol_uniform_rng_index);
 
-                pol = drl::tPolicySP(new drl::BoltzmannPolicy(desArgs->rl_policy_boltzmann_t, r1));
+                pol = tPolicySP(new drl::BoltzmannPolicy(desArgs->rl_policy_boltzmann_t, r1));
             }
 
             // configure the on-policy selection
-            drl::tSelectionSP selection = drl::tSelectionSP(
-                new drl::OnPolicySelection(pol, graph));
-            tDepartureHandlerSP departureHandler(
-                new DepartureHandler(queue, graph, selection));
-            departureEvent->attach(departureHandler);
+            selection = tSelectionSP(new drl::OnPolicySelection(*pol, *graph));
+            departureHandler = tDepartureHandlerSP(new DepartureHandler(queue, *graph, *selection));
+            departureEvent.attach(*departureHandler);
 
             // configure the simple on-policy SARSA control RL handler
-            tRLResponseHandlerSP rlResponseHandler(
-                new RLResponseHandler(
-                    graph, rl_q_alpha, rl_q_lambda, pol));
-            ackEvent->attach(rlResponseHandler);
+            rlResponseHandler = tRLResponseHandlerSP(
+                new RLResponseHandler(*graph, rl_q_alpha, rl_q_lambda, *pol));
+            ackEvent.attach(*rlResponseHandler);
         } else {
-            drl::tPolicySP pol = drl::tPolicySP();
-            drl::tSelectionSP selection = drl::tSelectionSP(
-                new drl::RandomSelection(pol, graph, departureCRNs));
-            tDepartureHandlerSP departureHandler(
-                new DepartureHandler(queue, graph, selection));
-            departureEvent->attach(departureHandler);
+            pol = tPolicySP();
+            selection = tSelectionSP(
+                new drl::RandomSelection(*pol, *graph, departureCRNs));
+            departureHandler = tDepartureHandlerSP(
+                new DepartureHandler(queue, *graph, *selection));
+            departureEvent.attach(*departureHandler);
 
             // configure default response handler
-            tDefaultResponseHandlerSP defaultResponseHandler(
-                new DefaultResponseHandler(graph));
-            ackEvent->attach(defaultResponseHandler);
+            defaultResponseHandler = tDefaultResponseHandlerSP(
+                new DefaultResponseHandler(*graph));
+            ackEvent.attach(*defaultResponseHandler);
         }
 
-        ackEvent->attach(ackHandler);
+        ackEvent.attach(ackHandler);
 
-        postAnyEvent->attach(utilisationHandler);
-        postAnyEvent->attach(expectedAverageEventInQueueHandler);
-        postAnyEvent->attach(lastEventHandler);
+        postAnyEvent.attach(utilisationHandler);
+        postAnyEvent.attach(expectedAverageEventInQueueHandler);
+        postAnyEvent.attach(lastEventHandler);
 
         // instantiate the event processor and set the events
-        tEventProcessorSP processor(
-            new EventProcessor(queue, adminEvent, preAnyEvent, postAnyEvent, arrivalEvent,
-                               departureEvent, postEvent, lastArrivalEvent, ackEvent,
-                               leaveEvent, desArgs->stop_time));
+        EventProcessor processor(queue, adminEvent, preAnyEvent, postAnyEvent, arrivalEvent,
+                                 departureEvent, postEvent, lastArrivalEvent, ackEvent,
+                                 leaveEvent, desArgs->stop_time);
 
         // process the events
 #ifndef NDEBUG
         std::cout << "Process events" << std::endl;
 #endif /* NDEBUG */
-        processor->process();
+        processor.process();
         sim_output output;
 
         Report::accumResults(graph, &output);

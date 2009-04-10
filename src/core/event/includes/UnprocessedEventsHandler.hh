@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,8 +20,6 @@
 
 #ifndef __UNPROCESSEDEVENTHANDLER_HH__
 #define __UNPROCESSEDEVENTHANDLER_HH__
-
-#include <boost/shared_ptr.hpp>
 
 
 #include "LadderQueue.hh"
@@ -49,22 +47,17 @@ namespace des
 class UnprocessedEventsHandler : public design::Observer<dcore::PostEvent>
 {
 public:
-    UnprocessedEventsHandler(dio::tResultsSP, dcommon::tQueueSP);
+    UnprocessedEventsHandler(dio::Results&, dcommon::LadderQueue&);
     ~UnprocessedEventsHandler();
 
     void update(dcore::PostEvent *subject);
 
 private:
-    dio::tResultsSP m_unprocessedEvents;
-    dcommon::tQueueSP m_queue;
+    dio::Results &m_unprocessedEvents;
+    dcommon::LadderQueue &m_queue;
 
 };
 
-
-/** @typedef tUnprocessedEventHandlerSP
- * a type definition of the shared pointer of the unprocessedEvent handler
- */
-typedef boost::shared_ptr <UnprocessedEventsHandler> tUnprocessedEventsHandlerSP;
 
 
     }

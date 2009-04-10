@@ -20,10 +20,6 @@
 #ifndef __DELAYSTATSHANDLER_HH__
 #define __DELAYSTATSHANDLER_HH__
 
-#include <vector>
-
-#include <boost/shared_ptr.hpp>
-
 
 #include "Observer.hh"
 namespace design = des::design;
@@ -45,24 +41,19 @@ namespace core
 class ResponseStatsHandler : public design::Observer<AckEvent>
 {
 public:
-    ResponseStatsHandler(dnet::tGraphSP p_graph);
+    ResponseStatsHandler(dnet::Graph &p_graph);
     ~ResponseStatsHandler();
 
     void update(AckEvent *subject);
 
 private:
-    dnet::tGraphSP m_graph;
+    dnet::Graph &m_graph;
 
     // derived fields
     dnet::VertexMeanRewardMap vertex_mean_response_map;
     dnet::VertexNumEventsProcessedMap vertex_num_events_processed_map;
 };
 
-
-/** @typedef tResponseStatsHandlerSP
- * a type definition of the shared pointer of the ack handler
- */
-typedef boost::shared_ptr <ResponseStatsHandler> tResponseStatsHandlerSP;
 
 
 }

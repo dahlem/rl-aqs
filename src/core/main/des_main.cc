@@ -58,11 +58,8 @@ namespace dio = des::io;
 
 
 #ifndef HAVE_MPI
-typedef dcore::SimulationCI <dcore::SimSP> SimCI;
-typedef boost::shared_ptr <SimCI> SimCISP;
-
-typedef dcore::SimulationLHS <SimCISP> SimLHS;
-typedef boost::shared_ptr <SimLHS> SimLHSSP;
+typedef dcore::SimulationCI <dcore::Simulation> SimCI;
+typedef dcore::SimulationLHS <SimCI> SimLHS;
 #else
 void register_simargs(MPI_Datatype &MPI_Simargs, dcore::tSimArgsMPI &value)
 {
@@ -241,31 +238,21 @@ int main(int argc, char *argv[])
         std::cout << "Start slave: " << rank << std::endl;
 # endif /* NDEBUG */
         // slave node
-        dcore::SimSP sim(new dcore::Simulation());
-        sim->simulate(MPI_Simargs, MPI_Desout, desArgs);
+        dcore::Simulation sim;
+        sim.simulate(MPI_Simargs, MPI_Desout, desArgs);
     }
 #else
     dcore::sim_output output;
     if (desArgs->lhs && desArgs->confidence) {
-        dcore::Simulation sim;
-
-//         dcore::SimSP sim(new dcore::Simulation());
-        dcore::SimulationCI<dcore::Simulation> simCI(sim, desArgs->alpha, desArgs->error, desArgs->replications);
-
-//         SimCISP sim_ci(
-//             new SimCI(sim, desArgs->alpha, desArgs->error, desArgs->replications));
-        dcore::SimulationLHS<dcore::SimulationCI <dcore::Simulation> > simLHS(simCI);
-
-//         SimLHSSP sim_lhs(new SimLHS(sim_ci));
+        SimCI simCI(desArgs->alpha, desArgs->error, desArgs->replications);
+        SimLHS simLHS(simCI);
         output = simLHS.simulate(desArgs);
     } else if (desArgs->confidence) {
-//         dcore::SimSP sim(new dcore::Simulation());
-//         SimCISP sim_ci(
-//             new SimCI(sim, desArgs->alpha, desArgs->error, desArgs->replications));
-//         output = sim_ci->simulate(desArgs);
+        SimCI simCI(desArgs->alpha, desArgs->error, desArgs->replications);
+        output = simCI.simulate(desArgs);
     } else {
-//         dcore::SimSP sim(new dcore::Simulation());
-//         output = sim->simulate(desArgs);
+        dcore::Simulation sim;
+        output = sim(desArgs);
     }
 
     if (!desArgs->lhs) {
@@ -275,18 +262,17 @@ int main(int argc, char *argv[])
         std::string dir = outDir.str();
         std::string file = "simulations.dat";
 
-        dio::tResultsSP sim_results(
-            new dio::Results(file, dir));
+        dio::Results sim_results(file, dir);
 
         if (desArgs->add_sim.empty()) {
             csv_line << "sim_num," << dcore::ARGS_HEADER << ",actual_reps";
-            sim_results->print(csv_line);
+            sim_results.print(csv_line);
         }
 
         csv_line.str("");
         csv_line << desArgs->sim_num << "," << const_cast <const dcore::desArgs_t&> (*desArgs)
                  << "," << output.replications;
-        sim_results->print(csv_line);
+        sim_results.print(csv_line);
     }
 #endif /* HAVE_MPI */
 

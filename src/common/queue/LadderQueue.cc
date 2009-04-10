@@ -58,10 +58,8 @@ namespace common
 
 
 LadderQueue::LadderQueue()
+    : m_top(new Top()), m_ladder(new Ladder()), m_bottom(new Bottom())
 {
-    m_top = tTopSP(new Top());
-    m_ladder = tLadderSP(new Ladder());
-    m_bottom = tBottomSP(new Bottom());
 
 #ifdef HAVE_LADDERTIMING
     std::string enqueue = "./ladder-enqueue-timing.txt";
@@ -131,6 +129,9 @@ const bool LadderQueue::push(Entry *p_entry) throw (QueueException)
 #endif /* NDEBUG_EVENTS */
 
             if (m_bottom->size() > m_ladder->getThres()) {
+#ifndef NDEBUG_QUEUE
+                std::cout << "LQ -- Bottom too big: " << m_bottom->size() << std::endl;
+#endif /* NDEBUG_EVENTS */
                 // check whether ladder is empty
                 // if yes, get max and min TS values from bottom and enlist
                 if (m_ladder->getNBC() == 0) {
@@ -144,10 +145,16 @@ const bool LadderQueue::push(Entry *p_entry) throw (QueueException)
 #endif /* NDEBUG_EVENTS */
                 } else {
                     EntryList *list = m_bottom->list();
-                    m_ladder->pushBack(list);
+                    try {
+                        m_ladder->pushBack(list);
 #ifndef NDEBUG_QUEUE
-                    std::cout << "LQ -- Push back bottom to ladder." << std::endl;
+                        std::cout << "LQ -- Pushed back bottom to ladder." << std::endl;
 #endif /* NDEBUG_EVENTS */
+                    } catch (QueueException &qe) {
+#ifndef NDEBUG_QUEUE
+                        std::cout << "LQ -- Push back did not succeed." << std::endl;
+#endif /* NDEBUG_EVENTS */
+                    }
                 }
             }
         } else {

@@ -45,10 +45,8 @@ namespace dcommon = des::common;
 
 
 dcommon::Bottom::Bottom()
+    : m_lastEvent(0.0), m_list(new dcommon::EntryList())
 {
-    m_lastEvent = 0.0;
-    m_list = new dcommon::EntryList();
-
 #ifdef HAVE_LADDERSTATS
     events_in = 0;
     events_out = 0;

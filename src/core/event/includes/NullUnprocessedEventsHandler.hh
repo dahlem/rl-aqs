@@ -21,8 +21,6 @@
 #ifndef __NULLUNPROCESSEDEVENTHANDLER_HH__
 #define __NULLUNPROCESSEDEVENTHANDLER_HH__
 
-#include <boost/shared_ptr.hpp>
-
 
 #include "LadderQueue.hh"
 namespace dcommon = des::common;
@@ -46,21 +44,16 @@ namespace des
 class NullUnprocessedEventsHandler : public design::Observer<dcore::PostEvent>
 {
 public:
-    NullUnprocessedEventsHandler(dcommon::tQueueSP);
+    NullUnprocessedEventsHandler(dcommon::LadderQueue&);
     ~NullUnprocessedEventsHandler();
 
     void update(dcore::PostEvent *subject);
 
 private:
-    dcommon::tQueueSP m_queue;
-    
+    dcommon::LadderQueue &m_queue;
+
 };
 
-
-/** @typedef tNullUnprocessedEventHandlerSP
- * a type definition of the shared pointer of the unprocessedEvent handler
- */
-typedef boost::shared_ptr <NullUnprocessedEventsHandler> tNullUnprocessedEventsHandlerSP;
 
 
     }

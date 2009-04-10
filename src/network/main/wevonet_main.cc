@@ -265,9 +265,9 @@ int main(int argc, char *argv[])
         }
 
         if (format == dnet::GraphUtil::GRAPHVIZ) {
-            dnet::GraphUtil::print(g, file, dnet::GraphUtil::GRAPHVIZ);
+            dnet::GraphUtil::print(*g, file, dnet::GraphUtil::GRAPHVIZ);
         } else {
-            dnet::GraphUtil::print(g, file, dnet::GraphUtil::GRAPHML);
+            dnet::GraphUtil::print(*g, file, dnet::GraphUtil::GRAPHML);
         }
     }
 

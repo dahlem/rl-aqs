@@ -60,6 +60,5 @@ Results::~Results()
 
 void Results::print(std::stringstream &line) const
 {
-    (*os.get()) << line.str() << std::endl;
-    (*os.get()).flush();
+    (*os.get()) << line.str() << std::endl << std::flush;
 }

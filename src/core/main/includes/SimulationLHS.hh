@@ -157,12 +157,11 @@ public:
             std::string dir = outDir.str();
             std::string file = "simulations.dat";
 
-            dio::tResultsSP sim_output(
-                new dio::Results(file, dir));
+            dio::Results sim_output(file, dir);
 
             if (p_desArgs->add_sim.empty()) {
                 csv_line << "sim_num," << ARGS_HEADER << ",actual_reps";
-                sim_output->print(csv_line);
+                sim_output.print(csv_line);
             }
 
             // 3. run experiment
@@ -212,7 +211,7 @@ public:
                          << const_cast <const desArgs_t&> (*p_desArgs) << ","
                          << output.replications;
 
-                sim_output->print(csv_line);
+                sim_output.print(csv_line);
             }
 
             // 4. free gsl stuff

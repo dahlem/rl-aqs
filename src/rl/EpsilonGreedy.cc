@@ -47,7 +47,7 @@ EpsilonGreedy::EpsilonGreedy(
 
 
 boost::uint16_t EpsilonGreedy::operator() (
-    boost::uint16_t p_source, tValuesVecSP p_values, PAttrSP p_attr)
+    boost::uint16_t p_source, tValuesVecSP p_values, PAttr p_attr)
 {
     double epsilon = 0.0;
     boost::uint16_t action = 0;

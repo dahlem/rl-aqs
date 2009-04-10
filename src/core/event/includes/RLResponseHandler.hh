@@ -30,7 +30,6 @@
 
 #include <boost/cstdint.hpp>
 #include <boost/scoped_array.hpp>
-#include <boost/shared_ptr.hpp>
 
 
 #include "Observer.hh"
@@ -61,18 +60,18 @@ typedef boost::scoped_array<dstats::OnlineStats> tQOnlineStatsSA;
 class RLResponseHandler : public design::Observer<AckEvent>
 {
 public:
-    RLResponseHandler(dnet::tGraphSP p_graph, double p_q_alpha, double p_q_lambda,
-                      drl::tPolicySP p_policy);
+    RLResponseHandler(dnet::Graph &p_graph, double p_q_alpha, double p_q_lambda,
+                      drl::Policy &p_policy);
 
     ~RLResponseHandler();
 
     void update(AckEvent *subject);
 
 private:
-    dnet::tGraphSP m_graph;
+    dnet::Graph &m_graph;
     double m_q_alpha;
     double m_q_lambda;
-    drl::tPolicySP m_policy;
+    drl::Policy &m_policy;
     tQOnlineStatsSA qStatsSA;
 
     // derived fields
@@ -81,12 +80,6 @@ private:
     dnet::VertexIndexMap vertex_index_map;
     dnet::EdgeQValueMap edge_q_val_map;
 };
-
-
-/** @typedef tRLResponseHandlerSP
- * a type definition of the shared pointer of the ack handler
- */
-typedef boost::shared_ptr <RLResponseHandler> tRLResponseHandlerSP;
 
 
 }

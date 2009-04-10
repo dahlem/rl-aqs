@@ -44,12 +44,12 @@ namespace core
 {
 
 
-DefaultResponseHandler::DefaultResponseHandler(dnet::tGraphSP p_graph)
+DefaultResponseHandler::DefaultResponseHandler(dnet::Graph &p_graph)
     : m_graph(p_graph),
-      qStatsSA(new dstats::OnlineStats[boost::num_edges(*m_graph)])
+      qStatsSA(new dstats::OnlineStats[boost::num_edges(m_graph)])
 {
-    edge_index_map = get(edge_eindex, *m_graph);
-    edge_q_val_map = get(edge_q_val, *m_graph);
+    edge_index_map = get(edge_eindex, m_graph);
+    edge_q_val_map = get(edge_q_val, m_graph);
 }
 
 
@@ -66,14 +66,14 @@ void DefaultResponseHandler::update(AckEvent *subject)
     std::cout << "Event: " << const_cast <const dcommon::Entry&> (*entry) << std::endl;
 #endif /* NDEBUG_EVENTS */
 
-    dnet::Vertex vertex = boost::vertex(entry->getDestination(), *m_graph);
-    dnet::Graph::degree_size_type degree = boost::out_degree(vertex, *m_graph);
+    dnet::Vertex vertex = boost::vertex(entry->getDestination(), m_graph);
+    dnet::Graph::degree_size_type degree = boost::out_degree(vertex, m_graph);
 
     if (degree > 0) {
         // observe RTT (the longer it takes the smaller the reward)
         double roundTripTime = entry->topArrival() - entry->getArrival();
         dnet::Edge e = boost::edge(
-            vertex, boost::vertex(entry->getOrigin(), *m_graph), *m_graph).first;
+            vertex, boost::vertex(entry->getOrigin(), m_graph), m_graph).first;
 
         // calculate q-value
         boost::uint16_t edge_index = edge_index_map[e];

@@ -47,13 +47,13 @@ namespace dnet = des::network;
 namespace drl = des::rl;
 
 
-dcore::DepartureHandler::DepartureHandler(dcommon::tQueueSP p_queue,
-                                          dnet::tGraphSP p_graph,
-                                          drl::tSelectionSP p_selection)
+dcore::DepartureHandler::DepartureHandler(dcommon::Queue &p_queue,
+                                          dnet::Graph &p_graph,
+                                          drl::Selection &p_selection)
     : m_queue(p_queue), m_graph(p_graph), m_selection(p_selection)
 {
-    vertex_busy_map = get(vertex_busy, *m_graph);
-    vertex_number_in_queue_map = get(vertex_number_in_queue, *m_graph);
+    vertex_busy_map = get(vertex_busy, m_graph);
+    vertex_number_in_queue_map = get(vertex_number_in_queue, m_graph);
 }
 
 
@@ -64,7 +64,7 @@ dcore::DepartureHandler::~DepartureHandler()
 void dcore::DepartureHandler::update(dcore::DepartureEvent *subject)
 {
     dcommon::Entry *entry = subject->getEvent();
-    dnet::Vertex vertex = boost::vertex(entry->getDestination(), *m_graph);
+    dnet::Vertex vertex = boost::vertex(entry->getDestination(), m_graph);
 
 
 #ifndef NDEBUG_EVENTS
@@ -85,12 +85,12 @@ void dcore::DepartureHandler::update(dcore::DepartureEvent *subject)
     }
 
     dnet::Graph::degree_size_type degree =
-        boost::out_degree(vertex, *m_graph);
+        boost::out_degree(vertex, m_graph);
 
     if (degree > 0) {
         dcommon::Entry *new_entry = new dcommon::Entry(
             const_cast <const dcommon::Entry&> (*entry));
-        boost::int32_t destination = (*m_selection)(entry->getDestination());
+        boost::int32_t destination = m_selection(entry->getDestination());
 
 #ifndef NDEBUG
         assert(destination >= 0);
@@ -104,7 +104,17 @@ void dcore::DepartureHandler::update(dcore::DepartureEvent *subject)
 #endif /* NDEBUG_EVENTS */
 
         new_entry->pushEvent(new_entry->getOrigin());
-        m_queue->push(new_entry);
+
+        try {
+            m_queue.push(new_entry);
+#ifndef NDEBUG_EVENTS
+            std::cout << "Arrival event scheduled." << std::endl;
+#endif /* NDEBUG_EVENTS */
+        } catch (dcommon::QueueException &qe) {
+            std::cout << "Error scheduling arrival event: " << new_entry->getArrival() << " " << qe.what() << std::endl;
+            delete new_entry;
+            throw;
+        }
     } else {
         if (entry->isEventQueueEmpty()) {
             // schedule leave event
@@ -118,7 +128,16 @@ void dcore::DepartureHandler::update(dcore::DepartureEvent *subject)
                       << std::endl;
 #endif /* NDEBUG_EVENTS */
 
-            m_queue->push(new_entry);
+            try {
+                m_queue.push(new_entry);
+#ifndef NDEBUG_EVENTS
+                std::cout << "Leave event scheduled." << std::endl;
+#endif /* NDEBUG_EVENTS */
+            } catch (dcommon::QueueException &qe) {
+                std::cout << "Error scheduling leave event: " << new_entry->getArrival() << " " << qe.what() << std::endl;
+                delete new_entry;
+                throw;
+            }
         } else {
             // schedule ack events
             boost::int32_t origin = entry->getDestination();
@@ -133,7 +152,16 @@ void dcore::DepartureHandler::update(dcore::DepartureEvent *subject)
                       << std::endl;
 #endif /* NDEBUG_EVENTS */
 
-            m_queue->push(new_entry);
+            try {
+                m_queue.push(new_entry);
+#ifndef NDEBUG_EVENTS
+                std::cout << "Acknowledge event scheduled." << std::endl;
+#endif /* NDEBUG_EVENTS */
+            } catch (dcommon::QueueException &qe) {
+                std::cout << "Error scheduling acknowledge event: " << new_entry->getArrival() << " " << qe.what() << std::endl;
+                delete new_entry;
+                throw;
+            }
         }
     }
 }

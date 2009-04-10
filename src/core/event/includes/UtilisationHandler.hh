@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,8 +20,6 @@
 
 #ifndef __UTILISATIONHANDLER_HH__
 #define __UTILISATIONHANDLER_HH__
-
-#include <boost/shared_ptr.hpp>
 
 
 #include "PostAnyEvent.hh"
@@ -46,13 +44,13 @@ namespace des
 class UtilisationHandler : public design::Observer<dcore::PostAnyEvent>
 {
 public:
-    UtilisationHandler(dnet::tGraphSP p_graph);
+    UtilisationHandler(dnet::Graph &p_graph);
     ~UtilisationHandler();
 
     void update(dcore::PostAnyEvent *subject);
 
 private:
-    dnet::tGraphSP m_graph;
+    dnet::Graph &m_graph;
 
     // derived fields
     dnet::VertexBdtMap vertex_Bdt_map;

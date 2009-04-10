@@ -54,31 +54,27 @@ namespace common
 
 
 Ladder::Ladder(boost::uint32_t p_thres)
+    : m_Thres(p_thres), m_NRung(3), m_lowestRung(0), m_NBC(0),
+      m_BucketsFirstRung(p_thres), m_events(new boost::uint32_t[m_NRung]),
+      m_currentBucket(new boost::uint32_t[m_NRung]),
+      m_buckets(new boost::uint32_t[m_NRung]), m_bucketwidth(new double[m_NRung]),
+      m_RCur(new double[m_NRung]), m_RStart(new double[m_NRung])
 {
-    m_Thres = p_thres;
     init();
 }
 
 Ladder::Ladder()
+    : m_Thres(DEFAULT_THRES), m_NRung(3), m_lowestRung(0), m_NBC(0),
+      m_BucketsFirstRung(DEFAULT_THRES), m_events(new boost::uint32_t[m_NRung]),
+      m_currentBucket(new boost::uint32_t[m_NRung]),
+      m_buckets(new boost::uint32_t[m_NRung]), m_bucketwidth(new double[m_NRung]),
+      m_RCur(new double[m_NRung]), m_RStart(new double[m_NRung])
 {
-    m_Thres = DEFAULT_THRES;
     init();
 }
 
 void Ladder::init()
 {
-    m_NRung = 5;
-    m_lowestRung = 0;
-    m_NBC = 0;
-    m_BucketsFirstRung = m_Thres;
-
-    m_events = tIntSA(new boost::uint32_t[m_NRung]);
-    m_currentBucket = tIntSA(new boost::uint32_t[m_NRung]);
-    m_buckets = tIntSA(new boost::uint32_t[m_NRung]);
-    m_bucketwidth = tDoubleSA(new double[m_NRung]);
-    m_RCur = tDoubleSA(new double[m_NRung]);
-    m_RStart = tDoubleSA(new double[m_NRung]);
-
     // initialise the allocated memory
     memset(m_events.get(), 0, sizeof(boost::uint32_t) * m_NRung);
     memset(m_currentBucket.get(), 0, sizeof(boost::uint32_t) * m_NRung);
@@ -280,9 +276,9 @@ const bool Ladder::push(Entry *p_entry) throw (QueueException)
 #endif /* NDEBUG_QUEUE */
 
 #ifndef NDEBUG
-        assert(gsl_fcmp(m_RStart[nRungs], ts_arrival, 1e-9) <= 0);
-        assert(gsl_fcmp(m_RStart[nRungs] + m_bucketwidth[nRungs] * l_bucket, ts_arrival, 1e-9) <= 0);
-        assert(gsl_fcmp(ts_arrival, (m_RStart[nRungs] + m_bucketwidth[nRungs] * (l_bucket + 1)), 1e-9) <= 0);
+        assert(m_RStart[nRungs] <= ts_arrival);
+        assert(m_RStart[nRungs] + m_bucketwidth[nRungs] * l_bucket <= ts_arrival);
+        assert(ts_arrival <= (m_RStart[nRungs] + m_bucketwidth[nRungs] * (l_bucket + 1)));
 #endif /* NDEBUG */
 
         m_rungs[nRungs][l_bucket].push_back(*p_entry);
@@ -424,7 +420,7 @@ EntryList* const Ladder::delist() throw (QueueException)
         m_lowestRung--;
     } else {
 #ifndef NDEBUG
-        assert(gsl_fcmp(m_RCur[m_lowestRung], m_RCur[m_lowestRung] + m_bucketwidth[m_lowestRung], 1e-9) == -1);
+        assert(m_RCur[m_lowestRung] < m_RCur[m_lowestRung] + m_bucketwidth[m_lowestRung]);
 #endif /* NDEBUG */
 
         m_RCur[m_lowestRung] += m_bucketwidth[m_lowestRung];
@@ -496,7 +492,7 @@ void Ladder::advanceDequeueBucket(bool p_spawn) throw (QueueException)
                 }
             }
         }
-        assert(m_currentBucket[m_lowestRung] < m_buckets[m_lowestRung]);
+        assert(m_currentBucket[m_lowestRung] <= m_buckets[m_lowestRung]);
 
 #endif /* NDEBUG */
 
@@ -512,7 +508,7 @@ void Ladder::advanceDequeueBucket(bool p_spawn) throw (QueueException)
         // advance to next bucket
         if (elements == 0) {
 #ifndef NDEBUG
-            assert(gsl_fcmp(m_RCur[m_lowestRung], m_RCur[m_lowestRung] + m_bucketwidth[m_lowestRung], 1e-9) == -1);
+            assert(m_RCur[m_lowestRung] < m_RCur[m_lowestRung] + m_bucketwidth[m_lowestRung]);
 #endif /* NDEBUG */
 
             m_currentBucket[m_lowestRung]++;
@@ -598,7 +594,7 @@ bool Ladder::spawn(bool p_doEnlist)
         }
 
 #ifndef NDEBUG
-        assert(gsl_fcmp(m_RCur[m_lowestRung - 1], m_RCur[m_lowestRung - 1] + m_bucketwidth[m_lowestRung - 1], 1e-9) == -1);
+        assert(m_RCur[m_lowestRung - 1] < m_RCur[m_lowestRung - 1] + m_bucketwidth[m_lowestRung - 1]);
 #endif /* NDEBUG */
 
         m_currentBucket[m_lowestRung - 1]++;

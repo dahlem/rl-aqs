@@ -36,10 +36,10 @@ namespace dcommon = des::common;
 namespace dnet = des::network;
 
 
-dcore::LastEventHandler::LastEventHandler(dnet::tGraphSP p_graph)
+dcore::LastEventHandler::LastEventHandler(dnet::Graph &p_graph)
     : m_graph(p_graph)
 {
-    vertex_last_event_time_map = get(vertex_last_event_time, *m_graph);
+    vertex_last_event_time_map = get(vertex_last_event_time, m_graph);
 }
 
 
@@ -60,8 +60,12 @@ void dcore::LastEventHandler::update(dcore::PostAnyEvent *subject)
         std::cout << "** Update last event for vertex: " << entry->getDestination() << std::endl;
 #endif /* NDEBUG_EVENTS */
 
-        dnet::Vertex vertex = boost::vertex(entry->getDestination(), *m_graph);
+        dnet::Vertex vertex = boost::vertex(entry->getDestination(), m_graph);
         vertex_last_event_time_map[vertex] = entry->getArrival();
+
+#ifndef NDEBUG_EVENTS
+        std::cout << "Last event: " << vertex_last_event_time_map[vertex] << std::endl;
+#endif /* NDEBUG_EVENTS */
     }
 
 #ifndef NDEBUG_EVENTS

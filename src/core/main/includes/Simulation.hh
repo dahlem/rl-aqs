@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -65,7 +65,7 @@ public:
 #ifdef HAVE_MPI
     void simulate(MPI_Datatype&, MPI_Datatype&, tDesArgsSP);
 #else
-    sim_output simulate(tDesArgsSP);
+    sim_output operator()(tDesArgsSP);
 #endif /* HAVE_MPI */
 
 private:

@@ -44,11 +44,11 @@ namespace rl
 {
 
 RandomSelection::RandomSelection(
-    tPolicySP p_policy, dnet::tGraphSP p_graph, Int32SA p_depart_uniform_ids)
+    Policy &p_policy, dnet::Graph &p_graph, Int32SA p_depart_uniform_ids)
     : Selection(p_policy), m_graph(p_graph), m_depart_uniform_ids(p_depart_uniform_ids)
 {
-    edge_weight_map = get(boost::edge_weight, *m_graph);
-    vertex_index_map = get(boost::vertex_index, *m_graph);
+    edge_weight_map = get(boost::edge_weight, m_graph);
+    vertex_index_map = get(boost::vertex_index, m_graph);
 }
 
 
@@ -57,15 +57,15 @@ boost::int32_t RandomSelection::operator() (boost::int32_t p_source)
 #ifndef NDEBUG_EVENTS
     std::cout << "** Random Selection" << std::endl;
 #endif /* NDEBUG_EVENTS */
-    dnet::Vertex vertex = boost::vertex(p_source, *m_graph);
-    dnet::Graph::degree_size_type degree = boost::out_degree(vertex, *m_graph);
+    dnet::Vertex vertex = boost::vertex(p_source, m_graph);
+    dnet::Graph::degree_size_type degree = boost::out_degree(vertex, m_graph);
     boost::int32_t destination = -1;
     dnet::OutEdgeIterator out_edge_it, out_edge_it_end;
 
-    tie(out_edge_it, out_edge_it_end) = boost::out_edges(vertex, *m_graph);
+    tie(out_edge_it, out_edge_it_end) = boost::out_edges(vertex, m_graph);
 
     if (degree == 1) {
-        destination = vertex_index_map[target(*out_edge_it, *m_graph)];
+        destination = vertex_index_map[target(*out_edge_it, m_graph)];
     } else if (degree > 1) {
         std::vector <dnet::Edge> edges(degree);
         std::vector <double> edge_weights;
@@ -78,7 +78,7 @@ boost::int32_t RandomSelection::operator() (boost::int32_t p_source)
         // copy the index range into the service_rate_order vector
         std::copy(range.begin(), range.end(), sorted_edge_weights.begin());
 
-        BOOST_FOREACH(dnet::Edge e, (boost::out_edges(vertex, *m_graph))) {
+        BOOST_FOREACH(dnet::Edge e, (boost::out_edges(vertex, m_graph))) {
             edge_weights.push_back(edge_weight_map[e]);
         }
 
@@ -104,7 +104,7 @@ boost::int32_t RandomSelection::operator() (boost::int32_t p_source)
 #endif /* NDEBUG_EVENTS */
             if (u < temp) {
                 // schedule an internal arrival event
-                destination = vertex_index_map[target(edge, *m_graph)];
+                destination = vertex_index_map[target(edge, m_graph)];
 
                 break;
             }
@@ -113,7 +113,7 @@ boost::int32_t RandomSelection::operator() (boost::int32_t p_source)
         // in some rare occasion, the above could finish without finding the destination
         // so we return the last element in the list
         if (destination == -1) {
-            destination = vertex_index_map[target(edges[degree - 1], *m_graph)];
+            destination = vertex_index_map[target(edges[degree - 1], m_graph)];
         }
     }
 #ifndef NDEBUG_EVENTS

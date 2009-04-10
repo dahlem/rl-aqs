@@ -1,4 +1,4 @@
-// Copyright (C) 2007,2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2007,2008,2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -28,8 +28,12 @@
 # define __STDC_CONSTANT_MACROS
 #endif /* __STDC_CONSTANT_MACROS */
 
+#ifdef HAVE_LADDERSTATS
+# include <boost/shared_ptr.hpp>
+#endif /* HAVE_LADDERSTATS */
+
 #include <boost/cstdint.hpp>
-#include <boost/shared_ptr.hpp>
+#include <boost/scoped_ptr.hpp>
 
 #include "Entry.hh"
 #include "Queue.hh"
@@ -117,7 +121,7 @@ private:
 /** @typedef tTopSP
  * a type defintion of a shared pointer of a top structure
  */
-typedef boost::shared_ptr <Top> tTopSP;
+typedef boost::scoped_ptr <Top> tTopSP;
 
 
     }

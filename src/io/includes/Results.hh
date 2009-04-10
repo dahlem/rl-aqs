@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -30,7 +30,6 @@
 namespace bio = boost::iostreams;
 
 #include <boost/shared_ptr.hpp>
-using boost::shared_ptr;
 
 
 namespace des
@@ -47,13 +46,13 @@ typedef bio::stream_buffer <bio::file_sink> str_buf;
 /** @typedef tOstreamSP
  * Specifies shared pointer to the std::ostream
  */
-typedef shared_ptr <std::ostream> tOstreamSP;
+typedef boost::shared_ptr <std::ostream> tOstreamSP;
 
 
 /** @typedef tStrBufSP
  * Specifies a shared pointer to the boost::iostreams::stream_buffer
  */
-typedef shared_ptr <str_buf> tStrBufSP;
+typedef boost::shared_ptr <str_buf> tStrBufSP;
 
 
 /** @class Results
@@ -80,8 +79,6 @@ private:
     tOstreamSP os;
     tStrBufSP buf;
 };
-
-typedef shared_ptr <Results> tResultsSP;
 
 
     }

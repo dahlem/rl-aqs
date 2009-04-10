@@ -25,29 +25,24 @@ boost::uintmax_t dcommon::Entry::uid = 0;
 
 
 dcommon::Entry::Entry(double del, double a, int d, int o, int t)
-    : delay(del), arrival(a), destination(d), origin(o), type(t)
+    : delay(del), arrival(a), destination(d), origin(o), type(t),
+      event_path(new StackInt()), event_arrivals(new StackDouble())
 {
     uid++;
     id = uid;
     gid = uid;
-    event_path = StackIntSP(new StackInt());
-    event_arrivals = StackDoubleSP(new StackDouble());
 }
 
 
 dcommon::Entry::Entry(const Entry &p_entry)
-    : boost::intrusive::list_base_hook<>(p_entry)
+    : boost::intrusive::list_base_hook<>(p_entry),
+      id(p_entry.id), delay(p_entry.delay), arrival(p_entry.arrival),
+      destination(p_entry.destination), origin(p_entry.origin), type(p_entry.type),
+      event_path(new StackInt(*p_entry.event_path)),
+      event_arrivals(new StackDouble(*p_entry.event_arrivals))
 {
     uid++;
     gid = uid;
-    id = p_entry.getId();
-    delay = p_entry.getDelay();
-    arrival = p_entry.getArrival();
-    destination = p_entry.getDestination();
-    origin = p_entry.getOrigin();
-    type = p_entry.getType();
-    event_path = p_entry.event_path;
-    event_arrivals = p_entry.event_arrivals;
 }
 
 
