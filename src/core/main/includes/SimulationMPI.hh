@@ -273,13 +273,13 @@ public:
                 std::cout.flush();
 #endif /* NDEBUG */
 
-                dio::Results replica_output(file, dir);
+                dio::Results *replica_output = new dio::Results(file, dir);
 
                 csv_line << "sim_num,rep_num,systemDelay,systemAvgNumEvents,systemTotalQ,meanDelay,varDelay,meanAvgNumEvents,varAvgNumEvents,meanTotalQ,varTotalQ";
-                replica_output.print(csv_line);
+                replica_output->print(csv_line);
                 csv_line.str("");
 
-                replica_results.push_back(&replica_output);
+                replica_results.push_back(replica_output);
 
                 // prepare the overall results
                 sim_results_lines[i] << desArgsMPI.sim_num << ","
@@ -324,6 +324,10 @@ public:
                 avgDelays[output->simulation_id - 1].push(output->system_average_delay);
                 avgNumEvents[output->simulation_id - 1].push(output->system_expected_average_num_in_queue);
                 totalQs[output->simulation_id - 1].push(output->system_total_q);
+#ifndef NDEBUG
+                std::cout << "Updated statistics for simulation " << output->simulation_id
+                          << " and replication " << output->replications << std::endl << std::flush;
+#endif /* NDEBUG */
 
                 // check whether we've got all the required replications
                 if (avgDelays[output->simulation_id - 1].getNumValues() >= p_desArgs->replications) {
@@ -348,14 +352,14 @@ public:
                             p_desArgs->alpha, p_desArgs->error)
                         ;
 
-#ifndef NDEBUG
-                    std::cout << "Simulation " << output->simulation_id << ", replications: "
-                              << output->replications << " is confident: " << isConfident << std::endl;
-                    std::cout.flush();
-#endif /* NDEBUG */
-
                     // if not send another replica
                     if (!isConfident) {
+#ifndef NDEBUG
+                        std::cout << "Simulation " << output->simulation_id << ", replications: "
+                                  << output->replications << " is not confident" << std::endl;
+                        std::cout.flush();
+#endif /* NDEBUG */
+
                         // update the experiment arguments
                         tSimArgsMPI desArgsMPI;
 
@@ -420,11 +424,23 @@ public:
                         }
                         jobs++;
                     } else {
+#ifndef NDEBUG
+                        std::cout << "Simulation " << output->simulation_id << ", replications: "
+                                  << output->replications << " is confident" << std::endl;
+                        std::cout.flush();
+#endif /* NDEBUG */
+
                         areExpsSignificant[output->simulation_id - 1] = true;
                         // write the overall results
                         sim_results_lines[output->simulation_id - 1] << "," << output->replications;
                     }
                 }
+
+#ifndef NDEBUG
+                std::cout << "Simulation " << output->simulation_id << ", replications: "
+                          << output->replications << " write replication results" << std::endl;
+                std::cout.flush();
+#endif /* NDEBUG */
 
                 // write replica results
                 csv_line.str("");
@@ -441,6 +457,11 @@ public:
                          << totalQs[output->simulation_id - 1].variance();
 
                 replica_results[output->simulation_id - 1]->print(csv_line);
+#ifndef NDEBUG
+                std::cout << "Simulation " << output->simulation_id << ", replications: "
+                          << output->replications << " wrote replication results" << std::endl;
+                std::cout.flush();
+#endif /* NDEBUG */
 
                 delete[] output;
             }
@@ -452,6 +473,12 @@ public:
 
             for (boost::uint16_t i = 0; i < p_desArgs->simulations; ++i) {
                 sim_results.print(sim_results_lines[i]);
+            }
+
+            for (boost::uint16_t i = 0; i < replica_results.size(); ++i) {
+                dio::Results *res = replica_results.back();
+                replica_results.pop_back();
+                delete res;
             }
 
             // 5. free gsl stuff

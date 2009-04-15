@@ -87,66 +87,21 @@ void dcore::GenerateEventHandler::update(dcore::LastArrivalEvent *subject)
             m_currentGeneration[dest]++;
 
             double stopTime = m_currentGeneration[dest] * m_interval;
-            int count = 0;
+            dnet::Vertex vertex = boost::vertex(dest, m_graph);
+            dnet::VertexArrivalRateMap vertex_arrival_props_map =
+                get(vertex_arrival_rate, m_graph);
+            dnet::VertexNextEventTimeMap vertex_next_event_time_map =
+                get(vertex_next_event_time, m_graph);
+            // generate a single event
+            double arrival_rate = vertex_arrival_props_map[vertex];
+            double startTime = vertex_next_event_time_map[vertex];
 
-            // filter the graph to find the vertex
-            std::pair <dnet::VertexIterator, dnet::VertexIterator> v_iter;
-            v_iter = boost::vertices(m_graph);
-
-            typedef boost::filter_iterator<dnet::exists_vertex_index<dnet::VertexIndexMap>, dnet::VertexIterator>
-                FilterIter;
-
-            dnet::VertexIndexMap vertex_index_props_map =
-                get(boost::vertex_index, m_graph);
-
-            dnet::exists_vertex_index<dnet::VertexIndexMap>
-                predicate(vertex_index_props_map, dest);
-
-            FilterIter filter_iter_first(predicate, v_iter.first, v_iter.second);
-            FilterIter filter_iter_last(predicate, v_iter.second, v_iter.second);
-            dsample::tGslRngSP arrival_rng;
-
-            for (; filter_iter_first != filter_iter_last; ++filter_iter_first) {
-                if (count == 0) {
-                    dnet::VertexNextEventTimeMap vertex_next_event_time_map =
-                        get(vertex_next_event_time, m_graph);
-                    dnet::VertexArrivalRateMap vertex_arrival_props_map =
-                        get(vertex_arrival_rate, m_graph);
-                    // generate a single event
-                    double arrival_rate = vertex_arrival_props_map[*filter_iter_first];
-                    double startTime = vertex_next_event_time_map[*filter_iter_first];
-
-                    // generate the events
-                    arrival_rng = dsample::CRN::getInstance().get(
-                        m_arrivalRngs[dest]);
-                    dcore::EventGenerator::generate(m_graph, m_queue, arrival_rng,
-                                                    dest, arrival_rate,
-                                                    startTime, stopTime);
-                } else {
-                    std::cout << "Error: Expected a vertex!" << std::endl;
-                    break;
-                }
-
-                count++;
-            }
-
-
-//             double stopTime = m_currentGeneration[dest] * m_interval;
-//             dnet::Vertex vertex = boost::vertex(entry->getDestination(), *m_graph);
-//             dnet::VertexArrivalRateMap vertex_arrival_props_map =
-//                 get(vertex_arrival_rate, *m_graph);
-//             dnet::VertexNextEventTimeMap vertex_next_event_time_map =
-//                 get(vertex_next_event_time, *m_graph);
-//             // generate a single event
-//             double arrival_rate = vertex_arrival_props_map[vertex];
-//             double startTime = vertex_next_event_time_map[vertex];
-
-//             // generate the events
-//             dsample::tGslRngSP arrival_rng = dsample::CRN::getInstance().get(
-//                 m_arrivalRngs[dest]);
-//             dcore::EventGenerator::generate(m_graph, m_queue, arrival_rng,
-//                                             dest, arrival_rate,
-//                                             startTime, stopTime);
+            // generate the events
+            dsample::tGslRngSP arrival_rng = dsample::CRN::getInstance().get(
+                m_arrivalRngs[dest]);
+            dcore::EventGenerator::generate(m_graph, m_queue, arrival_rng,
+                                            dest, arrival_rate,
+                                            startTime, stopTime);
         }
     }
 }

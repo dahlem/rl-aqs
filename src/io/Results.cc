@@ -55,10 +55,14 @@ Results::Results(std::string &filename, std::string &dir)
 
 Results::~Results()
 {
+    if ((buf.get())->is_open()) {
+        (buf.get())->close();
+    }
 }
 
 
 void Results::print(std::stringstream &line) const
 {
-    (*os.get()) << line.str() << std::endl << std::flush;
+    (*os.get()) << line.str() << std::endl;
+    (*os.get()).flush();
 }

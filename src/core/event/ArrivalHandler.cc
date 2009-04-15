@@ -88,8 +88,8 @@ void ArrivalHandler::update(ArrivalEvent *subject)
 {
     dcommon::Entry *entry;
     dnet::Vertex vertex;
-    double service_time;
-    double departure;
+    double service_time = 0.0;
+    double departure = 0.0;
     double delay = 0.0;
 
     entry = subject->getEvent();
@@ -124,7 +124,7 @@ void ArrivalHandler::update(ArrivalEvent *subject)
     // otherwise schedule the departure
     if (vertex_busy_map[vertex]) {
         // the new arrival time is that of the time-service-ends
-        delay = (gsl_fcmp(vertex_time_service_ends_map[vertex], entry->getArrival(), 1e-9) <= 0)
+        delay = (gsl_fcmp(vertex_time_service_ends_map[vertex], entry->getArrival(), 1e-5) <= 0)
             ? (0.0)
             : (vertex_time_service_ends_map[vertex] - entry->getArrival());
 

@@ -191,6 +191,11 @@ boost::uint32_t Ladder::bucket(double p_TS, boost::uint32_t p_rung)
         retVal++;
     }
 
+#ifndef NDEBUG
+    assert(retVal >= m_currentBucket[p_rung]);
+    assert(retVal <= m_buckets[p_rung]);
+#endif /* NDEBUG */
+
     // use interval iteration to find the correct bucket
 //     if (retVal > m_buckets[p_rung]) {
 //     }
@@ -276,9 +281,9 @@ const bool Ladder::push(Entry *p_entry) throw (QueueException)
 #endif /* NDEBUG_QUEUE */
 
 #ifndef NDEBUG
-        assert(m_RStart[nRungs] <= ts_arrival);
-        assert(m_RStart[nRungs] + m_bucketwidth[nRungs] * l_bucket <= ts_arrival);
-        assert(ts_arrival <= (m_RStart[nRungs] + m_bucketwidth[nRungs] * (l_bucket + 1)));
+//         assert(m_RStart[nRungs] <= ts_arrival);
+//         assert(m_RStart[nRungs] + m_bucketwidth[nRungs] * l_bucket <= ts_arrival);
+//         assert(ts_arrival <= (m_RStart[nRungs] + m_bucketwidth[nRungs] * (l_bucket + 1)));
 #endif /* NDEBUG */
 
         m_rungs[nRungs][l_bucket].push_back(*p_entry);
@@ -316,8 +321,8 @@ void Ladder::push(boost::uint32_t p_rung, EntryList *p_list)
         p_list->pop_front();
 
 #ifndef NDEBUG
-        assert(l_bucket < m_buckets[p_rung]);
-        assert(l_bucket >= m_currentBucket[p_rung]);
+//         assert(l_bucket < m_buckets[p_rung]);
+//         assert(l_bucket >= m_currentBucket[p_rung]);
 #endif /* NDEBUG */
 
 #ifndef NDEBUG_QUEUE
