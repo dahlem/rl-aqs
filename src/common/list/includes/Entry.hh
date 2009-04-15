@@ -103,6 +103,7 @@ public:
     int popEvent();
 
     double topArrival();
+    double getExternalArrival();
 
     friend std::ostream& operator <<(std::ostream &p_os, const Entry &p_entry)
         {
@@ -127,6 +128,7 @@ private:
     boost::uintmax_t id;
     double delay;
     double arrival;
+    double externalArrival;
     int destination;
     int origin;
     int type;

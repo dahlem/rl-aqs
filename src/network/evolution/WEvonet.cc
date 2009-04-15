@@ -99,6 +99,8 @@ tGraphSP WEvonet::createBBVGraph(boost::uint32_t p_size, boost::uint32_t max_edg
         = get(vertex_next_action, *g);
     VertexNextEventTimeMap vertex_next_event_time_map
         = get(vertex_next_event_time, *g);
+    VertexAvgEventInSystemTimeMap vertex_avg_event_in_system_time_map
+        = get(vertex_avg_event_in_system_time, *g);
 
     // set the graph properties
     boost::set_property(*g, graph_generator, 1);
@@ -122,6 +124,7 @@ tGraphSP WEvonet::createBBVGraph(boost::uint32_t p_size, boost::uint32_t max_edg
     vertex_mean_reward_map[v1] = 0.0;
     vertex_next_action_map[v1] = -1;
     vertex_next_event_time_map[v1] = 0.0;
+    vertex_avg_event_in_system_time_map[v1] = 0.0;
 
     advance(p_size - 1, g, num_edges_rng, uniform_rng, vertex_arrival_rng,
             fixed_edge_weight, max_arrival_rate, boost_arrival, boost_edge, max_edges);
@@ -174,6 +177,8 @@ void WEvonet::advance(boost::uint32_t p_steps, tGraphSP g,
         = get(edge_eindex, *g);
     VertexNextEventTimeMap vertex_next_event_time_map
         = get(vertex_next_event_time, *g);
+    VertexAvgEventInSystemTimeMap vertex_avg_event_in_system_time_map
+        = get(vertex_avg_event_in_system_time, *g);
 
     double accum_service_rate;
     size_t vertices;
@@ -230,6 +235,7 @@ void WEvonet::advance(boost::uint32_t p_steps, tGraphSP g,
         vertex_mean_reward_map[v] = 0.0;
         vertex_next_action_map[v] = -1;
         vertex_next_event_time_map[v] = 0.0;
+        vertex_avg_event_in_system_time_map[v] = 0.0;
 
         // select vertices to connect to
         boost::uint32_t edges = 0;
@@ -408,6 +414,8 @@ tGraphSP WEvonet::createERGraph(boost::uint32_t p_size, double fixed_edge_weight
         = get(edge_eindex, *g);
     VertexNextEventTimeMap vertex_next_event_time_map
         = get(vertex_next_event_time, *g);
+    VertexAvgEventInSystemTimeMap vertex_avg_event_in_system_time_map
+        = get(vertex_avg_event_in_system_time, *g);
 
     // assign ids, arrival and service rates
 #ifndef NDEBUG_NETWORK
@@ -435,6 +443,7 @@ tGraphSP WEvonet::createERGraph(boost::uint32_t p_size, double fixed_edge_weight
         vertex_mean_reward_map[*p_v.first] = 0.0;
         vertex_next_action_map[*p_v.first] = -1;
         vertex_next_event_time_map[*p_v.first] = 0.0;
+        vertex_avg_event_in_system_time_map[*p_v.first] = 0.0;
     }
 
     // assign edge indeces

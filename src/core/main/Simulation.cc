@@ -61,6 +61,7 @@
 #include "GenerateEventHandler.hh"
 #include "LastArrivalEvent.hh"
 #include "LastEventHandler.hh"
+#include "LeaveHandler.hh"
 #include "LogGraphHandler.hh"
 #include "NullUnprocessedEventsHandler.hh"
 #include "NumEventsHandler.hh"
@@ -210,6 +211,10 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
 
         // kill yourself, if job's done
         if (status.MPI_TAG == KILL_PILL) {
+# ifndef NDEBUG
+            std::cout << "Receive kill pill." << std::endl;
+            std::cout.flush();
+# endif /* NDEBUG */
             break;
         }
         sim_num = simArgs.sim_num;
@@ -234,6 +239,15 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
         rl_policy_boltz_t = desArgs->rl_policy_boltzmann_t;
 
 #endif /* HAVE_MPI */
+
+# ifndef NDEBUG
+        std::cout << "Simulation Parameters: " << std::endl
+                  << "Sim Num: " << sim_num << ", rep num: " << rep_num << std::endl
+                  << "RL alpha: " << rl_q_alpha << ", RL lambda: " << rl_q_lambda << std::endl
+                  << "RL Policy epsilon: " << rl_policy_epsilon << std::endl
+                  << "RL Policy Boltz T: " << rl_policy_boltz_t << std::endl;
+        std::cout.flush();
+# endif /* NDEBUG */
 
         dnet::tGraphSP graph(new dnet::Graph);
         dcommon::LadderQueue queue;
@@ -287,18 +301,16 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
                                                       desArgs->max_arrival, desArgs->boost_arrival, desArgs->boost_edge,
                                                       r1, r2, r3);
             } else if (desArgs->net_gen == 2) {
-                std::cout << "Generate Erdos-Renyi graph..." << std::endl;
+                std::cout << "Generate Erdos-Renyi graph..." << std::endl
+                          << "Max edges: " << max_edges << std::endl
+                          << "Fix edge weight: " << desArgs->edge_fixed << std::endl
+                          << "Edge prob.: " << edge_prob << std::endl;
                 seed = dsample::Seeds::getInstance().getSeed();
                 graph = dnet::WEvonet::createERGraph(desArgs->net_size, desArgs->edge_fixed,
                                                      desArgs->max_arrival, desArgs->boost_arrival,
                                                      desArgs->boost_edge, r1, seed, edge_prob, max_edges);
             }
         }
-
-#ifndef NDEBUG
-        std::cout << "Simulation: " << sim_num << ", Replication: " << rep_num << std::endl;
-        std::cout.flush();
-#endif /* NDEBUG */
 
         num_vertices = boost::num_vertices(*graph);
 
@@ -421,6 +433,9 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
         UtilisationHandler utilisationHandler(*graph);
         ExpectedAverageEventInQueueHandler expectedAverageEventInQueueHandler(*graph);
         AckHandler ackHandler(queue);
+        LeaveHandler leaveHandler(queue, *graph);
+
+        leaveEvent.attach(leaveHandler);
 
         // we only need to register an event generation handler, if there are > 1 phases
         GenerateEventHandler generateEventHandler(

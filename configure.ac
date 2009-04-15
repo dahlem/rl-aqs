@@ -10,7 +10,7 @@
 
 AC_PREREQ(2.61)
 AC_INIT([Discrete Event Simulation for Service Interaction],
-        [2.4],
+        [2.5],
         [Dominik Dahlem Dominik.Dahlem@cs.tcd.ie], 
         [des])
 
@@ -226,6 +226,7 @@ AC_CONFIG_FILES([
    doc/Makefile
    m4/Makefile
    R/Makefile
+   R/plot-diagnostics.R
    R/analysis/Makefile
    R/analysis/assortativity-analysis.R
    R/desGraph/Makefile

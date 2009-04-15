@@ -155,6 +155,13 @@ enum vertex_next_action_t { vertex_next_action = 1128 };
 enum vertex_next_event_time_t { vertex_next_event_time = 1129 };
 
 
+/** @enum vertex_avg_event_in_system_time_t
+ * This enum extends the vertex properties by a next event time argument,
+ * which is used when event generation phases are enabled.
+ */
+enum vertex_avg_event_in_system_time_t { vertex_avg_event_in_system_time = 1130 };
+
+
 // install the vertex service rate property
 namespace boost
 {
@@ -174,6 +181,7 @@ BOOST_INSTALL_PROPERTY(vertex, num_events_processed);
 BOOST_INSTALL_PROPERTY(vertex, mean_reward);
 BOOST_INSTALL_PROPERTY(vertex, next_action);
 BOOST_INSTALL_PROPERTY(vertex, next_event_time);
+BOOST_INSTALL_PROPERTY(vertex, avg_event_in_system_time);
 BOOST_INSTALL_PROPERTY(graph, generator);
 BOOST_INSTALL_PROPERTY(edge, q_val);
 BOOST_INSTALL_PROPERTY(edge, eindex);
@@ -263,10 +271,15 @@ typedef boost::property <vertex_next_action_t, int, VertexMeanRewardProperty> Ve
  */
 typedef boost::property <vertex_next_event_time_t, double, VertexNextActionProperty> VertexNextEventTimeProperty;
 
+/** @typedef VertexLeaveAvgResponseTimeProperty
+ * Specifies the property for the average leave response of a vertex
+ */
+typedef boost::property <vertex_avg_event_in_system_time_t, double, VertexNextEventTimeProperty> VertexAvgEventInSystemTimeProperty;
+
 /** @typedef VertexProperties
  * This type definition assembles all the properties for the vertices of the graph
  */
-typedef boost::property <boost::vertex_index_t, int, VertexNextEventTimeProperty> VertexProperties;
+typedef boost::property <boost::vertex_index_t, int, VertexAvgEventInSystemTimeProperty> VertexProperties;
 
 /** @typedef EdgeWeightProperty
  * Specifies the property for the edge weight
@@ -398,6 +411,11 @@ typedef boost::property_map <Graph, vertex_next_action_t>::type VertexNextAction
  */
 typedef boost::property_map <Graph, vertex_next_event_time_t>::type VertexNextEventTimeMap;
 
+/** @typedef VertexAvgEventInSystemTimeMap
+ * Specifies the map that stores the vertex attribute avg_event_in_system_time
+ */
+typedef boost::property_map <Graph, vertex_avg_event_in_system_time_t>::type VertexAvgEventInSystemTimeMap;
+
 /** @typedef EdgeQValueMap
  * Specifies the map that stores the edge q-value attribute
  */
@@ -437,6 +455,11 @@ typedef boost::graph_property_iter_range <Graph, vertex_expected_average_number_
  * Specifies the iterator for the vertex average delay in queue
  */
 typedef boost::graph_property_iter_range <Graph, vertex_average_delay_in_queue_t>::iterator VAverageDelayQueueIterator;
+
+/** @typedef VAvgEventInSystemTimeIterator
+ * Specifies the iterator for the vertex average event in system time
+ */
+typedef boost::graph_property_iter_range <Graph, vertex_avg_event_in_system_time_t>::iterator VAvgEventInSystemTimeIterator;
 
 /** @typedef EQValIterator
  * Specifies the iterator for the edge q value
@@ -526,6 +549,7 @@ const std::string EDGE_INDEX                        = "eindex";
 const std::string NEXT_ACTION                       = "next_action";
 const std::string GRAPH_GENERATOR                   = "graph_generator";
 const std::string NEXT_EVENT_TIME                   = "next_event_time";
+const std::string AVG_EVENT_IN_SYSTEM_TIME          = "avg_event_in_system_time";
 
 
     }

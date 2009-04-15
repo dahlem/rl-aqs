@@ -21,6 +21,8 @@
 # include <config.h>
 #endif
 
+#include <gsl/gsl_math.h>
+
 #include "events.hh"
 #include "LeaveEvent.hh"
 #include "LeaveHandler.hh"
@@ -31,16 +33,36 @@ namespace dcore = des::core;
 namespace dcommon = des::common;
 
 
-dcore::LeaveHandler::LeaveHandler(dcommon::Queue &p_queue)
-    : m_queue(p_queue)
+dcore::LeaveHandler::LeaveHandler(dcommon::Queue &p_queue, dnet::Graph &p_graph)
+    : m_queue(p_queue), m_graph(p_graph),
+      m_EventInSystem(new dstats::OnlineStats[boost::num_vertices(p_graph)])
 {
+    m_vertexAvgEventInSystemTimeMap = get(vertex_avg_event_in_system_time, m_graph);
 }
 
 
 dcore::LeaveHandler::~LeaveHandler()
-{}
+{
+}
 
 
 void dcore::LeaveHandler::update(dcore::LeaveEvent *subject)
 {
+    dcommon::Entry *entry = subject->getEvent();
+    int origin = entry->getOrigin();
+
+#ifndef NDEBUG_EVENTS
+    std::cout << "** LeaveHandler for vertex: " << origin << std::endl;
+    std::cout << "Event: " << const_cast <const dcommon::Entry&> (*entry) << std::endl;
+#endif /* NDEBUG_EVENTS */
+
+    dnet::Vertex vertex = boost::vertex(origin, m_graph);
+
+    double inSystem = 0.0;
+    inSystem = (gsl_fcmp(entry->getArrival(), entry->getExternalArrival(), 1e-9) == 0)
+        ? (0.0)
+        : (entry->getArrival() - entry->getExternalArrival());
+
+    m_EventInSystem[origin].push(inSystem);
+    m_vertexAvgEventInSystemTimeMap[vertex] = m_EventInSystem[origin].mean();
 }

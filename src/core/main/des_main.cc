@@ -229,6 +229,9 @@ int main(int argc, char *argv[])
 
             // send kill pill
             for(int i = 1; i < num_tasks; ++i) {
+# ifndef NDEBUG
+                std::cout << "Send kill pill to " << i << std::endl;
+# endif /* NDEBUG */
                 /* Send no more jobs */
                 MPI_Send(0, 0, MPI_UNSIGNED_SHORT, i, KILL_PILL, MPI_COMM_WORLD);
             }

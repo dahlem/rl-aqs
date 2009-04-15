@@ -192,58 +192,8 @@ public:
                 tSimArgsMPI desArgsMPI;
 
                 // set the i-th experiment conditions
-                if (LhsUtils::getNetSizeIndex(p_desArgs) >= 0) {
-                    desArgsMPI.net_size = static_cast<unsigned int> (
-                        round(gsl_matrix_get(
-                                  sample, i, LhsUtils::getNetSizeIndex(p_desArgs))));
-                } else {
-                    desArgsMPI.net_size = p_desArgs->net_size;
-                }
-                if (LhsUtils::getMaxEdgesIndex(p_desArgs) >= 0) {
-                    desArgsMPI.max_edges = static_cast<unsigned int> (
-                        round(gsl_matrix_get(
-                                  sample, i, LhsUtils::getMaxEdgesIndex(p_desArgs))));
-                } else {
-                    desArgsMPI.max_edges = p_desArgs->max_edges;
-                }
-                if (LhsUtils::getEdgeProbIndex(p_desArgs) >= 0) {
-                    desArgsMPI.edge_prob = gsl_matrix_get(
-                        sample, i, LhsUtils::getEdgeProbIndex(p_desArgs));
-                } else {
-                    desArgsMPI.edge_prob = p_desArgs->edge_prob;
-                }
-                if (LhsUtils::getVertexBoostIndex(p_desArgs) >= 0) {
-                    desArgsMPI.boost_arrival = gsl_matrix_get(
-                        sample, i, LhsUtils::getVertexBoostIndex(p_desArgs));
-                } else {
-                    desArgsMPI.boost_arrival = p_desArgs->boost_arrival;
-                }
-                if (LhsUtils::getEdgeBoostIndex(p_desArgs) >= 0) {
-                    desArgsMPI.boost_edge = gsl_matrix_get(
-                        sample, i, LhsUtils::getEdgeBoostIndex(p_desArgs));
-                } else {
-                    desArgsMPI.boost_edge = p_desArgs->boost_edge;
-                }
-                if (LhsUtils::getRLAlphaIndex(p_desArgs) >= 0) {
-                    desArgsMPI.rl_q_alpha = gsl_matrix_get(
-                        sample, i, LhsUtils::getRLAlphaIndex(p_desArgs));
-                } else {
-                    desArgsMPI.rl_q_alpha = p_desArgs->rl_q_alpha;
-                }
-                if (LhsUtils::getRLLambdaIndex(p_desArgs) >= 0) {
-                    desArgsMPI.rl_q_lambda = gsl_matrix_get(
-                        sample, i, LhsUtils::getRLLambdaIndex(p_desArgs));
-                } else {
-                    desArgsMPI.rl_q_lambda = p_desArgs->rl_q_lambda;
-                }
-                if (LhsUtils::getRLEpsilonIndex(p_desArgs) >= 0) {
-                    desArgsMPI.rl_policy_epsilon = gsl_matrix_get(
-                        sample, i, LhsUtils::getRLEpsilonIndex(p_desArgs));
-                } else {
-                    desArgsMPI.rl_policy_epsilon = p_desArgs->rl_policy_epsilon;
-                }
-
                 desArgsMPI.sim_num = i + 1;
+                assignParams(p_desArgs, desArgsMPI, sample);
 
                 for (desArgsMPI.rep_num = 1; desArgsMPI.rep_num <= p_desArgs->replications;
                      ++desArgsMPI.rep_num) {
@@ -297,7 +247,13 @@ public:
                                      << desArgsMPI.net_size << ","
                                      << desArgsMPI.max_edges << ","
                                      << desArgsMPI.edge_prob << ","
-                                     << p_desArgs->edge_fixed;
+                                     << p_desArgs->edge_fixed << ","
+                                     << p_desArgs->rl << ","
+                                     << desArgsMPI.rl_q_alpha << ","
+                                     << desArgsMPI.rl_q_lambda << ","
+                                     << p_desArgs->rl_policy << ","
+                                     << desArgsMPI.rl_policy_epsilon << ","
+                                     << desArgsMPI.rl_policy_epsilon;
             }
 
             // 4. continue with as many experiments as needed
@@ -329,111 +285,60 @@ public:
                           << " and replication " << output->replications << std::endl << std::flush;
 #endif /* NDEBUG */
 
-                // check whether we've got all the required replications
-                if (avgDelays[output->simulation_id - 1].getNumValues() >= p_desArgs->replications) {
-                    // test whether this result is significant
-                    bool isConfident =
-                        dstats::CI::isConfidentWithPrecision(
-                            avgDelays[output->simulation_id - 1].mean(),
-                            avgDelays[output->simulation_id - 1].variance(),
-                            avgDelays[output->simulation_id - 1].getNumValues(),
-                            p_desArgs->alpha, p_desArgs->error)
-                        &&
-                        dstats::CI::isConfidentWithPrecision(
-                            avgNumEvents[output->simulation_id - 1].mean(),
-                            avgNumEvents[output->simulation_id - 1].variance(),
-                            avgNumEvents[output->simulation_id - 1].getNumValues(),
-                            p_desArgs->alpha, p_desArgs->error)
-                        &&
-                        dstats::CI::isConfidentWithPrecision(
-                            totalQs[output->simulation_id - 1].mean(),
-                            totalQs[output->simulation_id - 1].variance(),
-                            totalQs[output->simulation_id - 1].getNumValues(),
-                            p_desArgs->alpha, p_desArgs->error)
-                        ;
+                // test whether this result is significant
+                bool isConfident =
+                    dstats::CI::isConfidentWithPrecision(
+                        avgDelays[output->simulation_id - 1].mean(),
+                        avgDelays[output->simulation_id - 1].variance(),
+                        avgDelays[output->simulation_id - 1].getNumValues(),
+                        p_desArgs->alpha, p_desArgs->error)
+                    &&
+                    dstats::CI::isConfidentWithPrecision(
+                        avgNumEvents[output->simulation_id - 1].mean(),
+                        avgNumEvents[output->simulation_id - 1].variance(),
+                        avgNumEvents[output->simulation_id - 1].getNumValues(),
+                        p_desArgs->alpha, p_desArgs->error)
+                    &&
+                    dstats::CI::isConfidentWithPrecision(
+                        totalQs[output->simulation_id - 1].mean(),
+                        totalQs[output->simulation_id - 1].variance(),
+                        totalQs[output->simulation_id - 1].getNumValues(),
+                        p_desArgs->alpha, p_desArgs->error)
+                    ;
 
-                    // if not send another replica
-                    if (!isConfident) {
+                // if not send another replica
+                if (!isConfident) {
 #ifndef NDEBUG
-                        std::cout << "Simulation " << output->simulation_id << ", replications: "
-                                  << output->replications << " is not confident" << std::endl;
-                        std::cout.flush();
+                    std::cout << "Simulation " << output->simulation_id << ", replications: "
+                              << output->replications << " is not confident" << std::endl;
+                    std::cout.flush();
 #endif /* NDEBUG */
 
-                        // update the experiment arguments
-                        tSimArgsMPI desArgsMPI;
+                    // update the experiment arguments
+                    tSimArgsMPI desArgsMPI;
 
-                        desArgsMPI.rep_num = avgDelays[output->simulation_id - 1].getNumValues() + 1;
-                        desArgsMPI.sim_num = output->simulation_id;
+                    desArgsMPI.rep_num = avgDelays[output->simulation_id - 1].getNumValues() + 1;
+                    desArgsMPI.sim_num = output->simulation_id;
 
-                        if (LhsUtils::getNetSizeIndex(p_desArgs) >= 0) {
-                            desArgsMPI.net_size = static_cast<unsigned int> (
-                                round(gsl_matrix_get(
-                                          sample, output->simulation_id - 1, LhsUtils::getNetSizeIndex(p_desArgs))));
-                        } else {
-                            desArgsMPI.net_size = p_desArgs->net_size;
-                        }
-                        if (LhsUtils::getMaxEdgesIndex(p_desArgs) >= 0) {
-                            desArgsMPI.max_edges = static_cast<unsigned int> (
-                                round(gsl_matrix_get(
-                                          sample, output->simulation_id - 1, LhsUtils::getMaxEdgesIndex(p_desArgs))));
-                        } else {
-                            desArgsMPI.max_edges = p_desArgs->max_edges;
-                        }
-                        if (LhsUtils::getEdgeProbIndex(p_desArgs) >= 0) {
-                            desArgsMPI.edge_prob = gsl_matrix_get(
-                                sample, output->simulation_id - 1, LhsUtils::getEdgeProbIndex(p_desArgs));
-                        } else {
-                            desArgsMPI.edge_prob = p_desArgs->edge_prob;
-                        }
-                        if (LhsUtils::getVertexBoostIndex(p_desArgs) >= 0) {
-                            desArgsMPI.boost_arrival = gsl_matrix_get(
-                                sample, output->simulation_id - 1, LhsUtils::getVertexBoostIndex(p_desArgs));
-                        } else {
-                            desArgsMPI.boost_arrival = p_desArgs->boost_arrival;
-                        }
-                        if (LhsUtils::getEdgeBoostIndex(p_desArgs) >= 0) {
-                            desArgsMPI.boost_edge = gsl_matrix_get(
-                                sample, output->simulation_id - 1, LhsUtils::getEdgeBoostIndex(p_desArgs));
-                        } else {
-                            desArgsMPI.boost_edge = p_desArgs->boost_edge;
-                        }
-                        if (LhsUtils::getRLAlphaIndex(p_desArgs) >= 0) {
-                            desArgsMPI.rl_q_alpha = gsl_matrix_get(
-                                sample, output->simulation_id - 1, LhsUtils::getRLAlphaIndex(p_desArgs));
-                        } else {
-                            desArgsMPI.rl_q_alpha = p_desArgs->rl_q_alpha;
-                        }
-                        if (LhsUtils::getRLLambdaIndex(p_desArgs) >= 0) {
-                            desArgsMPI.rl_q_lambda = gsl_matrix_get(
-                                sample, output->simulation_id - 1, LhsUtils::getRLLambdaIndex(p_desArgs));
-                        } else {
-                            desArgsMPI.rl_q_lambda = p_desArgs->rl_q_lambda;
-                        }
-                        if (LhsUtils::getRLEpsilonIndex(p_desArgs) >= 0) {
-                            desArgsMPI.rl_policy_epsilon = gsl_matrix_get(
-                                sample, output->simulation_id - 1, LhsUtils::getRLEpsilonIndex(p_desArgs));
-                        } else {
-                            desArgsMPI.rl_policy_epsilon = p_desArgs->rl_policy_epsilon;
-                        }
+                    assignParams(p_desArgs, desArgsMPI, sample);
 
-                        rc = MPI_Send(&desArgsMPI, 1, mpi_desargs, status.MPI_SOURCE, jobs, MPI_COMM_WORLD);
-                        if (rc != MPI_SUCCESS) {
-                            std::cerr << "Error sending task to slave." << std::endl;
-                            MPI_Abort(MPI_COMM_WORLD, 916);
-                        }
-                        jobs++;
-                    } else {
-#ifndef NDEBUG
-                        std::cout << "Simulation " << output->simulation_id << ", replications: "
-                                  << output->replications << " is confident" << std::endl;
-                        std::cout.flush();
-#endif /* NDEBUG */
-
-                        areExpsSignificant[output->simulation_id - 1] = true;
-                        // write the overall results
-                        sim_results_lines[output->simulation_id - 1] << "," << output->replications;
+                    rc = MPI_Send(&desArgsMPI, 1, mpi_desargs, status.MPI_SOURCE, jobs, MPI_COMM_WORLD);
+                    if (rc != MPI_SUCCESS) {
+                        std::cerr << "Error sending task to slave." << std::endl;
+                        MPI_Abort(MPI_COMM_WORLD, 916);
                     }
+                    jobs++;
+                } else {
+#ifndef NDEBUG
+                    std::cout << "Simulation " << output->simulation_id << ", replications: "
+                              << output->replications << " is confident" << std::endl;
+                    std::cout.flush();
+#endif /* NDEBUG */
+
+                    areExpsSignificant[output->simulation_id - 1] = true;
+
+                    // write the overall results
+                    sim_results_lines[output->simulation_id - 1] << "," << output->replications;
                 }
 
 #ifndef NDEBUG
@@ -513,6 +418,61 @@ private:
             }
 
             return true;
+        }
+
+    static void assignParams(tDesArgsSP p_desArgs, tSimArgsMPI &desArgsMPI, gsl_matrix *sample)
+        {
+                // set the i-th experiment conditions
+                if (LhsUtils::getNetSizeIndex(p_desArgs) >= 0) {
+                    desArgsMPI.net_size = static_cast<unsigned int> (
+                        round(gsl_matrix_get(
+                                  sample, desArgsMPI.sim_num - 1, LhsUtils::getNetSizeIndex(p_desArgs))));
+                } else {
+                    desArgsMPI.net_size = p_desArgs->net_size;
+                }
+                if (LhsUtils::getMaxEdgesIndex(p_desArgs) >= 0) {
+                    desArgsMPI.max_edges = static_cast<unsigned int> (
+                        round(gsl_matrix_get(
+                                  sample, desArgsMPI.sim_num - 1, LhsUtils::getMaxEdgesIndex(p_desArgs))));
+                } else {
+                    desArgsMPI.max_edges = p_desArgs->max_edges;
+                }
+                if (LhsUtils::getEdgeProbIndex(p_desArgs) >= 0) {
+                    desArgsMPI.edge_prob = gsl_matrix_get(
+                        sample, desArgsMPI.sim_num - 1, LhsUtils::getEdgeProbIndex(p_desArgs));
+                } else {
+                    desArgsMPI.edge_prob = p_desArgs->edge_prob;
+                }
+                if (LhsUtils::getVertexBoostIndex(p_desArgs) >= 0) {
+                    desArgsMPI.boost_arrival = gsl_matrix_get(
+                        sample, desArgsMPI.sim_num - 1, LhsUtils::getVertexBoostIndex(p_desArgs));
+                } else {
+                    desArgsMPI.boost_arrival = p_desArgs->boost_arrival;
+                }
+                if (LhsUtils::getEdgeBoostIndex(p_desArgs) >= 0) {
+                    desArgsMPI.boost_edge = gsl_matrix_get(
+                        sample, desArgsMPI.sim_num - 1, LhsUtils::getEdgeBoostIndex(p_desArgs));
+                } else {
+                    desArgsMPI.boost_edge = p_desArgs->boost_edge;
+                }
+                if (LhsUtils::getRLAlphaIndex(p_desArgs) >= 0) {
+                    desArgsMPI.rl_q_alpha = gsl_matrix_get(
+                        sample, desArgsMPI.sim_num - 1, LhsUtils::getRLAlphaIndex(p_desArgs));
+                } else {
+                    desArgsMPI.rl_q_alpha = p_desArgs->rl_q_alpha;
+                }
+                if (LhsUtils::getRLLambdaIndex(p_desArgs) >= 0) {
+                    desArgsMPI.rl_q_lambda = gsl_matrix_get(
+                        sample, desArgsMPI.sim_num - 1, LhsUtils::getRLLambdaIndex(p_desArgs));
+                } else {
+                    desArgsMPI.rl_q_lambda = p_desArgs->rl_q_lambda;
+                }
+                if (LhsUtils::getRLEpsilonIndex(p_desArgs) >= 0) {
+                    desArgsMPI.rl_policy_epsilon = gsl_matrix_get(
+                        sample, desArgsMPI.sim_num - 1, LhsUtils::getRLEpsilonIndex(p_desArgs));
+                } else {
+                    desArgsMPI.rl_policy_epsilon = p_desArgs->rl_policy_epsilon;
+                }
         }
 };
 

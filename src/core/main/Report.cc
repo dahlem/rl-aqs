@@ -79,11 +79,11 @@ double Report::meanDelay(dnet::tGraphSP p_graph)
 
 double Report::totalQ(dnet::tGraphSP p_graph)
 {
-    dnet::EQValIterator it, it_end;
+    dnet::VAvgEventInSystemTimeIterator it, it_end;
     double result = 0.0;
 
     tie(it, it_end) = boost::get_property_iter_range(
-        *p_graph, edge_q_val);
+        *p_graph, vertex_avg_event_in_system_time);
 
     result = std::accumulate(it, it_end, 0.0);
 

@@ -21,6 +21,7 @@
 #ifndef __LEAVEHANDLER_HH__
 #define __LEAVEHANDLER_HH__
 
+#include <boost/scoped_array.hpp>
 
 #include "LeaveEvent.hh"
 namespace dcore = des::core;
@@ -31,11 +32,20 @@ namespace dcommon = des::common;
 #include "Observer.hh"
 namespace design = des::design;
 
+#include "OnlineStats.hh"
+namespace dstats = des::statistics;
+
+#include "DirectedGraph.hh"
+namespace dnet = des::network;
+
 
 namespace des
 {
     namespace core
     {
+
+
+    typedef boost::scoped_array<dstats::OnlineStats> tOnlineStatsSA;
 
 /** @class LeaveHandler
  * The class @code{LeaveHandler} handles leave events in the DES.
@@ -43,13 +53,17 @@ namespace des
 class LeaveHandler : public design::Observer<dcore::LeaveEvent>
 {
 public:
-    LeaveHandler(dcommon::Queue &p_queue);
+    explicit LeaveHandler(dcommon::Queue &p_queue, dnet::Graph &p_graph);
     ~LeaveHandler();
 
     void update(dcore::LeaveEvent *subject);
 
 private:
     dcommon::Queue &m_queue;
+    dnet::Graph &m_graph;
+    tOnlineStatsSA m_EventInSystem;
+
+    dnet::VertexAvgEventInSystemTimeMap m_vertexAvgEventInSystemTimeMap;
 };
 
 
