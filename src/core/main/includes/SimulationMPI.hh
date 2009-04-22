@@ -96,17 +96,20 @@ public:
             // 1. perform lhs
             gsl_vector *min, *max;
             gsl_matrix *sample;
+            int *simReplications = new int[p_desArgs->simulations];
 
-            // keep track of the significance of the experiments
+            // keep track of the significance of the experiments and their replication count
             tBoolSA areExpsSignificant = tBoolSA(new bool[p_desArgs->simulations]);
             for (boost::uint16_t i = 0; i < p_desArgs->simulations; ++i) {
                 areExpsSignificant[i] = false;
+                simReplications[i] = p_desArgs->replications;
             }
 
             // online statistics for the experiments
             std::vector<dstats::OnlineStats> avgDelays(p_desArgs->simulations);
             std::vector<dstats::OnlineStats> avgNumEvents(p_desArgs->simulations);
             std::vector<dstats::OnlineStats> totalQs(p_desArgs->simulations);
+            std::vector<int> idleNodes;
 
             // 2. init the crn for the lhs permutation
             boost::uint32_t seed = dsample::Seeds::getInstance().getSeed();
@@ -180,7 +183,7 @@ public:
             dio::Results sim_results(file, dir);
 
             if (p_desArgs->add_sim.empty()) {
-                csv_line << "sim_num," << ARGS_HEADER << ",actual_reps";
+                csv_line << "sim_num," << ARGS_HEADER << ",actual_reps,meanDelay,varDelay,meanAvgNumEvents,varAvgNumEvents,meanAvgEventInSystem,varAvgEventInSystem";
                 sim_results.print(csv_line);
             }
             csv_line.str("");
@@ -225,7 +228,7 @@ public:
 
                 dio::Results *replica_output = new dio::Results(file, dir);
 
-                csv_line << "sim_num,rep_num,systemDelay,systemAvgNumEvents,systemTotalQ,meanDelay,varDelay,meanAvgNumEvents,varAvgNumEvents,meanTotalQ,varTotalQ";
+                csv_line << "sim_num,rep_num,systemDelay,systemAvgNumEvents,systemTotalQ";
                 replica_output->print(csv_line);
                 csv_line.str("");
 
@@ -253,7 +256,7 @@ public:
                                      << desArgsMPI.rl_q_lambda << ","
                                      << p_desArgs->rl_policy << ","
                                      << desArgsMPI.rl_policy_epsilon << ","
-                                     << desArgsMPI.rl_policy_epsilon;
+                                     << desArgsMPI.rl_policy_boltzmann_t;
             }
 
             // 4. continue with as many experiments as needed
@@ -272,6 +275,9 @@ public:
                     MPI_Abort(MPI_COMM_WORLD, 916);
                 }
 
+                // add node to the idle vector
+                idleNodes.push_back(status.MPI_SOURCE);
+
 #ifndef NDEBUG
                 std::cout << "Received simulation: " << output->simulation_id << ", replications: "
                           << output->replications << std::endl << std::flush;
@@ -285,86 +291,101 @@ public:
                           << " and replication " << output->replications << std::endl << std::flush;
 #endif /* NDEBUG */
 
-                // test whether this result is significant
-                bool isConfident =
-                    dstats::CI::isConfidentWithPrecision(
-                        avgDelays[output->simulation_id - 1].mean(),
-                        avgDelays[output->simulation_id - 1].variance(),
-                        avgDelays[output->simulation_id - 1].getNumValues(),
-                        p_desArgs->alpha, p_desArgs->error)
-                    &&
-                    dstats::CI::isConfidentWithPrecision(
-                        avgNumEvents[output->simulation_id - 1].mean(),
-                        avgNumEvents[output->simulation_id - 1].variance(),
-                        avgNumEvents[output->simulation_id - 1].getNumValues(),
-                        p_desArgs->alpha, p_desArgs->error)
-                    &&
-                    dstats::CI::isConfidentWithPrecision(
-                        totalQs[output->simulation_id - 1].mean(),
-                        totalQs[output->simulation_id - 1].variance(),
-                        totalQs[output->simulation_id - 1].getNumValues(),
-                        p_desArgs->alpha, p_desArgs->error)
-                    ;
+                if (avgDelays[output->simulation_id - 1].getNumValues() >= simReplications[output->simulation_id - 1]) {
+                    // test whether this result is significant
+                    bool isConfident =
+                        dstats::CI::isConfidentWithPrecision(
+                            avgDelays[output->simulation_id - 1].mean(),
+                            avgDelays[output->simulation_id - 1].variance(),
+                            avgDelays[output->simulation_id - 1].getNumValues(),
+                            p_desArgs->alpha, p_desArgs->error)
+                        &&
+                        dstats::CI::isConfidentWithPrecision(
+                            avgNumEvents[output->simulation_id - 1].mean(),
+                            avgNumEvents[output->simulation_id - 1].variance(),
+                            avgNumEvents[output->simulation_id - 1].getNumValues(),
+                            p_desArgs->alpha, p_desArgs->error)
+                        &&
+                        dstats::CI::isConfidentWithPrecision(
+                            totalQs[output->simulation_id - 1].mean(),
+                            totalQs[output->simulation_id - 1].variance(),
+                            totalQs[output->simulation_id - 1].getNumValues(),
+                            p_desArgs->alpha, p_desArgs->error)
+                        ;
 
-                // if not send another replica
-                if (!isConfident) {
+                    // if not send another replica
+                    if (!isConfident) {
+                        // do progressive parallel job execution
+                        int moreJobs = (p_desArgs->replications > idleNodes.size()) ? idleNodes.size() : p_desArgs->replications;
+
 #ifndef NDEBUG
-                    std::cout << "Simulation " << output->simulation_id << ", replications: "
-                              << output->replications << " is not confident" << std::endl;
-                    std::cout.flush();
+                        std::cout << "Simulation " << output->simulation_id << ", replications: "
+                                  << avgDelays[output->simulation_id - 1].getNumValues() << " is not confident." << std::endl
+                                  << "Start " << moreJobs << " replications" << std::endl;
+                        std::cout.flush();
 #endif /* NDEBUG */
 
-                    // update the experiment arguments
-                    tSimArgsMPI desArgsMPI;
+                        for (int i = 0; i < moreJobs; ++i) {
+                            // update the experiment arguments
+                            tSimArgsMPI desArgsMPI;
 
-                    desArgsMPI.rep_num = avgDelays[output->simulation_id - 1].getNumValues() + 1;
-                    desArgsMPI.sim_num = output->simulation_id;
+                            desArgsMPI.rep_num = avgDelays[output->simulation_id - 1].getNumValues() + 1 + i;
+                            desArgsMPI.sim_num = output->simulation_id;
 
-                    assignParams(p_desArgs, desArgsMPI, sample);
+                            assignParams(p_desArgs, desArgsMPI, sample);
 
-                    rc = MPI_Send(&desArgsMPI, 1, mpi_desargs, status.MPI_SOURCE, jobs, MPI_COMM_WORLD);
-                    if (rc != MPI_SUCCESS) {
-                        std::cerr << "Error sending task to slave." << std::endl;
-                        MPI_Abort(MPI_COMM_WORLD, 916);
+                            int destination = idleNodes.back();
+
+                            rc = MPI_Send(&desArgsMPI, 1, mpi_desargs, destination, jobs, MPI_COMM_WORLD);
+                            if (rc != MPI_SUCCESS) {
+                                std::cerr << "Error sending task to slave." << std::endl;
+                                MPI_Abort(MPI_COMM_WORLD, 916);
+                            }
+
+                            // remove the node from the idle vector
+                            idleNodes.pop_back();
+                            simReplications[output->simulation_id - 1]++;
+                            jobs++;
+                        }
+                    } else {
+#ifndef NDEBUG
+                        std::cout << "Simulation " << output->simulation_id << ", replications: "
+                                  << avgDelays[output->simulation_id - 1].getNumValues() << " is confident" << std::endl;
+                        std::cout.flush();
+#endif /* NDEBUG */
+
+                        areExpsSignificant[output->simulation_id - 1] = true;
+
+                        // write the overall results
+                        sim_results_lines[output->simulation_id - 1]
+                            << "," << avgDelays[output->simulation_id - 1].getNumValues() << ","
+                            << avgDelays[output->simulation_id - 1].mean() << ","
+                            << avgDelays[output->simulation_id - 1].variance() << ","
+                            << avgNumEvents[output->simulation_id - 1].mean() << ","
+                            << avgNumEvents[output->simulation_id - 1].variance() << ","
+                            << totalQs[output->simulation_id - 1].mean() << ","
+                            << totalQs[output->simulation_id - 1].variance();
                     }
-                    jobs++;
-                } else {
-#ifndef NDEBUG
-                    std::cout << "Simulation " << output->simulation_id << ", replications: "
-                              << output->replications << " is confident" << std::endl;
-                    std::cout.flush();
-#endif /* NDEBUG */
-
-                    areExpsSignificant[output->simulation_id - 1] = true;
-
-                    // write the overall results
-                    sim_results_lines[output->simulation_id - 1] << "," << output->replications;
                 }
 
 #ifndef NDEBUG
                 std::cout << "Simulation " << output->simulation_id << ", replications: "
-                          << output->replications << " write replication results" << std::endl;
+                          << avgDelays[output->simulation_id - 1].getNumValues() << " write replication results" << std::endl;
                 std::cout.flush();
 #endif /* NDEBUG */
 
                 // write replica results
                 csv_line.str("");
                 csv_line << output->simulation_id << ","
-                         << output->replications << ","
+                         << avgDelays[output->simulation_id - 1].getNumValues() << ","
                          << output->system_average_delay << ","
                          << output->system_expected_average_num_in_queue << ","
-                         << output->system_total_q << ","
-                         << avgDelays[output->simulation_id - 1].mean() << ","
-                         << avgDelays[output->simulation_id - 1].variance() << ","
-                         << avgNumEvents[output->simulation_id - 1].mean() << ","
-                         << avgNumEvents[output->simulation_id - 1].variance() << ","
-                         << totalQs[output->simulation_id - 1].mean() << ","
-                         << totalQs[output->simulation_id - 1].variance();
+                         << output->system_total_q;
 
                 replica_results[output->simulation_id - 1]->print(csv_line);
 #ifndef NDEBUG
                 std::cout << "Simulation " << output->simulation_id << ", replications: "
-                          << output->replications << " wrote replication results" << std::endl;
+                          << avgDelays[output->simulation_id - 1].getNumValues() << " wrote replication results" << std::endl;
                 std::cout.flush();
 #endif /* NDEBUG */
 
@@ -385,6 +406,9 @@ public:
                 replica_results.pop_back();
                 delete res;
             }
+
+            delete[] sim_results_lines;
+            delete[] simReplications;
 
             // 5. free gsl stuff
             if (dimensions > 0) {

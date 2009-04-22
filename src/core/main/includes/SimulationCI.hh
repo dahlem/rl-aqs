@@ -97,7 +97,7 @@ public:
             dstats::OnlineStats totalQ;
 
             if (p_desArgs->add_sim.empty()) {
-                csv_line << "sim_num,rep_num,systemDelay,systemAvgNumEvents,systemTotalQ,meanDelay,varDelay,meanAvgNumEvents,varAvgNumEvents,meanTotalQ,varTotalQ";
+                csv_line << "sim_num,rep_num,systemDelay,systemAvgNumEvents,systemTotalQ";
                 replica_output.print(csv_line);
             }
 
@@ -117,13 +117,7 @@ public:
                          << p_desArgs->rep_num << ","
                          << output.system_average_delay << ","
                          << output.system_expected_average_num_in_queue << ","
-                         << output.system_total_q << ","
-                         << avgDelay.mean() << ","
-                         << avgDelay.variance() << ","
-                         << avgNumEvents.mean() << ","
-                         << avgNumEvents.variance() << ","
-                         << totalQ.mean() << ","
-                         << totalQ.variance();
+                         << output.system_total_q;
 
                 replica_output.print(csv_line);
             }
@@ -161,13 +155,7 @@ public:
                          << p_desArgs->rep_num << ","
                          << output.system_average_delay << ","
                          << output.system_expected_average_num_in_queue << ","
-                         << output.system_total_q << ","
-                         << avgDelay.mean() << ","
-                         << avgDelay.variance() << ","
-                         << avgNumEvents.mean() << ","
-                         << avgNumEvents.variance() << ","
-                         << totalQ.mean() << ","
-                         << totalQ.variance();
+                         << output.system_total_q;
 
 #ifndef NDEBUG
                 std::cout << csv_line.str() << std::endl << std::flush;
@@ -192,11 +180,11 @@ public:
             }
 
             result.mean_system_average_delay = avgDelay.mean();
-            result.sd_system_average_delay = avgDelay.standardDeviation();
+            result.sd_system_average_delay = avgDelay.variance();
             result.mean_system_expected_average_num_in_queue = avgNumEvents.mean();
-            result.sd_system_expected_average_num_in_queue = avgNumEvents.standardDeviation();
+            result.sd_system_expected_average_num_in_queue = avgNumEvents.variance();
             result.mean_system_total_q = totalQ.mean();
-            result.sd_system_total_q = totalQ.standardDeviation();
+            result.sd_system_total_q = totalQ.variance();
 
             if (p_desArgs->rep_num > m_initialExp) {
                 result.replications = p_desArgs->rep_num - 1;

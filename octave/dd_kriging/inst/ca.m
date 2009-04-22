@@ -46,24 +46,23 @@ endfunction
 function X = ca_modelM(D)
   n = rows(D);
   nvar = columns(D);
-  cross_prod = factorial(nvar)/2;
-  dim = 1 + cross_prod + 2 * nvar;
-  X = ones(n, dim);
-  cols = 1 + nvar;
+  X = ones(n, 1);
 
   for i = 1:nvar
-    X(:, 1 + i) = D(:, i);
+    X = [X, D(:, i)];
   endfor
 
+  squaresStart = 1 + nvar;
+  
+  for i = 1:nvar
+    X = [X, D(:, i).^2];
+  endfor
+
+  squaresEnd = squaresStart + nvar;
   for i = 1:(nvar-1)
     for j = (i+1):nvar
-      cols++;
-      X(:, cols) = D(:, i) .* D(:, j);
+      X = [X, D(:, i) .* D(:, j)];
     endfor
-  endfor
-
-  for i = 1:nvar
-    X(:, 1 + cross_prod + nvar + i) = D(:, i).^2;
   endfor
 endfunction
 
@@ -80,15 +79,14 @@ endfunction
 
 
 function B = ca_coeffM(b, nvar)
-  cross_prod = factorial(nvar)/2;
   B = zeros(nvar, nvar);
 
   for i = 1:nvar
     for j = i:nvar
       if (i == j)
-        B(i,i) = b(1+nvar+cross_prod+i);
+        B(i,i) = b(1 + nvar + i);
       else
-        B(i,j) = b(1+nvar+i)/2;
+        B(i,j) = b(1 + 2 * nvar + i)/2;
         B(j,i) = B(i,j);
       endif
     endfor
@@ -176,15 +174,28 @@ function [y, z, theta] = ca_modelXM(M, D, B, b)
 endfunction
 
 
+function [X_r, y_r] = ca_reducedModel(X, yk, y_upper)
+  X_r = X;
+  y_r = yk;
+  
+  for i = 1:n
+    if (y_r(i) > yk)
+      X_r(i,:) = [];
+      y_r(i) = [];
+    endif
+  endfor
+endfunction
+
+
 function [ym,z,w,b,B,D,M,lambda,thetam] = ca_analyse(meshsize, boundaries, yS, xS, \
                                                      S, R, beta, theta, \
                                                      y, F, FUN)
   D = ca_mesh(boundaries, meshsize);
   X = ca_modelM(D);
 
-  x1_vec = X(:,1)';
-  x2_vec = X(:,2)';
-  x3_vec = X(:,3)';
+  x1_vec = D(:,1)';
+  x2_vec = D(:,2)';
+  x3_vec = D(:,3)';
   yk = zeros(rows(X), 1);
 
   for i = 1:columns(x1_vec)

@@ -214,10 +214,10 @@ des.kriging.mcmc.sigma.plot <- function(prefix="2d-shdf", nonst="", ps=TRUE) {
 
 des.kriging.mcmc.theta.plot <- function(prefix="2d-shdf", idx="1", ps=TRUE) {
   if (ps) {
-    postscript(paste(prefix, "-chain-theta", idx, ".eps", sep=""), onefile=FALSE)
+    postscript(paste(prefix, "-chain-theta_", idx, ".eps", sep=""), onefile=FALSE)
   }
 
-  chain <- read.table(paste(prefix, "-chain-theta", idx, ".dat", sep=""),
+  chain <- read.table(paste(prefix, "-chain-theta_", idx, ".dat", sep=""),
                       header=TRUE, col.names=c("theta"))
   df <- data.frame(x=1:length(chain$theta), y=chain$theta)
 
@@ -368,7 +368,7 @@ des.kriging.mcmc.sigma.mean.plot <- function(prefix="2d-shdf", nonst="", ps=TRUE
 
 des.kriging.mcmc.theta.mean.plot <- function(prefix="2d-shdf", idx="1", ps=TRUE) {
   if (ps) {
-    postscript(paste(prefix, "-chain-theta", idx, "-mean.eps", sep=""), onefile=FALSE)
+    postscript(paste(prefix, "-chain-theta_", idx, "-mean.eps", sep=""), onefile=FALSE)
   }
 
   chain <- read.table(paste(prefix, "-chain-theta_", idx, "-mean.dat", sep=""),
@@ -427,7 +427,7 @@ des.kriging.mcmc.autocorr.plots <- function(prefix="2d-shdf", betas=1, thetas=1)
   
   des.kriging.mcmc.autocorr.plot(prefix, var="sigma", wopt=mcmcanalysis$wopt[betas+1], ps=TRUE)
   for (i in 1:thetas) {
-    des.kriging.mcmc.autocorr.plot(prefix, var=paste("theta", i, sep=""), wopt=mcmcanalysis$wopt[betas+i+1], ps=TRUE)
+    des.kriging.mcmc.autocorr.plot(prefix, var=paste("theta_", i, sep=""), wopt=mcmcanalysis$wopt[betas+i+1], ps=TRUE)
   }
 
   for (i in 1:betas) {
@@ -435,7 +435,7 @@ des.kriging.mcmc.autocorr.plots <- function(prefix="2d-shdf", betas=1, thetas=1)
   }
   des.kriging.mcmc.tauintvsw.plot(prefix, var="sigma", wopt=mcmcanalysis$wopt[2], taui=mcmcanalysis$tauint[betas+1], ps=TRUE)
   for (i in 1:thetas) {
-    des.kriging.mcmc.tauintvsw.plot(prefix, var=paste("theta", i, sep=""), wopt=mcmcanalysis$wopt[betas+i+1], taui=mcmcanalysis$tauint[betas+i+1], ps=TRUE)
+    des.kriging.mcmc.tauintvsw.plot(prefix, var=paste("theta_", i, sep=""), wopt=mcmcanalysis$wopt[betas+i+1], taui=mcmcanalysis$tauint[betas+i+1], ps=TRUE)
   }
 }
 
@@ -460,7 +460,7 @@ des.kriging.mcmc.autocorr.plot <- function(prefix="2d-shdf", var="beta", wopt, p
   p <- p + geom_errorbar(limits, width=0.5)
   p <- p + scale_y_continuous(expression(rho), breaks=c(-0.5, 0, 0.5, 1))
   p <- p + scale_x_continuous("W")
-  p <- p + geom_vline(intercept=wopt, colour="red")
+  p <- p + geom_vline(xintercept=wopt, colour="red")
   p <- p + theme_bw()
   
   if (var == "beta") {
@@ -519,7 +519,7 @@ des.kriging.nonst.mcmc.autocorr.plot <- function(prefix="2d-shdf", i, j, wopt, p
   p <- p + geom_errorbar(limits, width=0.5)
   p <- p + scale_y_continuous(expression(rho), breaks=c(-0.5, 0, 0.5, 1))
   p <- p + scale_x_continuous("W")
-  p <- p + geom_vline(intercept=wopt, colour="red")
+  p <- p + geom_vline(xintercept=wopt, colour="red")
   p <- p + theme_bw()
   p <- p + opts(title=title)
 
@@ -549,8 +549,8 @@ des.kriging.mcmc.tauintvsw.plot <- function(prefix="2d-shdf", var="beta", wopt, 
   p <- p + geom_errorbar(limits, width=0.5)
   p <- p + scale_x_continuous("W")
   p <- p + scale_y_continuous(expression(tau[int]))
-  p <- p + geom_hline(intercept=taui, linetype=2, colour="blue")
-  p <- p + geom_vline(intercept=wopt, colour="red")
+  p <- p + geom_hline(yintercept=taui, linetype=2, colour="blue")
+  p <- p + geom_vline(xintercept=wopt, colour="red")
   p <- p + theme_bw()
 
   if (var == "beta") {
@@ -607,8 +607,8 @@ des.kriging.nonst.mcmc.tauintvsw.plot <- function(prefix="2d-shdf", i, j, wopt, 
   p <- p + geom_errorbar(limits, width=0.5)
   p <- p + scale_x_continuous("W")
   p <- p + scale_y_continuous(expression(tau[int]))
-  p <- p + geom_hline(intercept=taui, linetype=2, colour="blue")
-  p <- p + geom_vline(intercept=wopt, colour="red")
+  p <- p + geom_hline(yintercept=taui, linetype=2, colour="blue")
+  p <- p + geom_vline(xintercept=wopt, colour="red")
   p <- p + theme_bw()
   p <- p + opts(title=title)
 
