@@ -32,7 +32,7 @@ function r = scf_gaussian(x, y, theta)
     error("The vectors x and y have to have the same dimension.");
   endif
 
-  temp = sum(-(((y - x).^2) .* theta));
+  temp = sum(-(((y - x).* theta).^2));
   r = e^temp;
 endfunction
 

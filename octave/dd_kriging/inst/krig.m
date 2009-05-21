@@ -16,6 +16,37 @@
 ## Version: 0.1
 
 
+##function [l, beta, sigma_squared] = krig_likelihood(theta, X, y, F, nugget = 0)
+##  if (nargin != 5)
+##    usage("krig_likelihood(theta, X, y, F, nugget)");
+##  endif
+
+##  if (theta <= 0)
+##    error("The parameter theta has to be positive");
+##  endif
+
+##  if (rows(y) != rows(X))
+##    error("The vectors x and y have to have the same dimensions.");
+##  endif
+
+##  if (rows(F) != rows(X))
+##    error("The vector f has to have the same dimension as matrix rows.");
+##  endif
+
+##  if (columns(theta) != columns(X))
+##    error("The vector theta has to have the same dimension as matrix columns.");
+##  endif
+
+##  R = scf_gaussianm(X, theta, nugget);
+##  n = rows(y);
+
+##  beta = ((F' * (R\F))\F') * (R\y);
+##  temp = y - F * beta;
+##  sigma_squared = 1 / n * temp' * (R\temp);
+  
+##  l = - 0.5 * (n * log(2 * pi * sigma_squared) + log(det(R)) + n); ##from PhD JD Martin Eq 2.37
+##endfunction
+
 function [l, beta, sigma_squared] = krig_likelihood(theta, X, y, F, nugget = 0)
   if (nargin != 5)
     usage("krig_likelihood(theta, X, y, F, nugget)");
@@ -38,11 +69,12 @@ function [l, beta, sigma_squared] = krig_likelihood(theta, X, y, F, nugget = 0)
   endif
 
   R = scf_gaussianm(X, theta, nugget);
+  R_inv = cholinv(R);
   n = rows(y);
 
-  beta = ((F' * (R\F))\F') * (R\y);
+  beta = ((F' * (R_inv * F))\F') * (R_inv * y);
   temp = y - F * beta;
-  sigma_squared = 1 / n * temp' * (R\temp);
+  sigma_squared = 1 / n * temp' * (R_inv * temp);
   
   l = - 0.5 * (n * log(2 * pi * sigma_squared) + log(det(R)) + n); ##from PhD JD Martin Eq 2.37
 endfunction
@@ -64,6 +96,12 @@ function y = krig1(x, X, R, beta, theta, y, F, FUN = @(x) 1)
   z = x';
   r = scf_gaussianu(X, z, theta);
   y = FUN(z) * beta + r' * (R\(y - F * beta));
+endfunction
+
+function y = krig2(x, X, R, beta, theta, y, F, FUN = @(x) 1)
+  z = x';
+  r = scf_gaussianu(X, z, theta);
+  y = -(FUN(z) * beta + r' * (R\(y - F * beta)));
 endfunction
 
 

@@ -96,7 +96,7 @@ boost::uint16_t BoltzmannPolicy::operator() (
             std::cout << "Accum. probability: " << temp << std::endl;
 #endif /* NDEBUG_EVENTS */
 
-            if (gsl_fcmp(u, temp, 1e-9) == -1) {
+            if (u < temp) {
                 action = (*it).first;
                 break;
             }

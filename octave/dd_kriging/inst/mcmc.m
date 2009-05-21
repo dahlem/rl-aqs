@@ -29,7 +29,7 @@ endfunction
 ## observations (rows) with d dimensions (columns), y is the output
 ## vector at the n observations, and n is the number of iterations for
 ## the monte carlo sampling.
-function chain = mcmc_mh(scale, x0_theta, X, y, n, prior = "Jeffrey", \
+function chain = mcmc_mh(a1, x0_theta, X, y, n, prior = "Jeffrey", \
                          nugget = 0, FUN = @(x) 1)
   if (rows(y) != rows(X))
     error("The vector y has to have the same dimension as matrix columns.");
@@ -56,49 +56,47 @@ function chain = mcmc_mh(scale, x0_theta, X, y, n, prior = "Jeffrey", \
   ## "krig_likelihood(sigma, theta, X, y, beta, f)"
   [q_old, x_old.beta, x_old.sigma] = krig_likelihood(x0_theta, X, y, F, nugget);
 
-  ## if the berger prior is required transform sigma
-  if (strcmp(prior, "Berger"))
-    x_old.sigma = bergerPrior(x_old.sigma);
-  endif
-  
-  pi_old = 1 / x_old.sigma;
-
   ## initialise the chain
   chain.accepted = 0;
   chain.beta = zeros(columns(F), n);
   chain.theta = zeros(n, dims);
   chain.sigma = zeros(1, n);
   chain.l = zeros(1, n);
-  mean.thetaP = zeros(1, dims);
 
+  mean.thetaP = x0_theta.^-2;
+##  pi_old = x_old.sigma^-2;
+  pi_old = mean.thetaP;
+
+  ## if the berger prior is required transform sigma
+  if (strcmp(prior, "Berger"))
+    mean.thetaP = bergerPrior(mean.thetaP);
+  endif
+  
   for i = 1:n
+##    x.theta = gamrnd(a1/2, a1/2 * mean.thetaP);
+    x.theta = gamrnd(a1/2, a1/2 * x0_theta.^-2);
     ## step 1: generate x from the proposal distribution
     ## theta has to be positive
-    for k = 1:dims
-      if (chain.accepted == 0)
-	x.theta(k) = prior_pick(1./x0_theta(k).^2, scale, columns(X));
-      else
-	x.theta(k) = prior_pick(mean.thetaP(k), scale, columns(X));
-      endif
-      x.theta(k) = e^x.theta(k);
-    endfor
-    
+##    for k = 1:dims
+##      if (chain.accepted == 0)
+##      x.theta(k) = prior_pick(1./x0_theta(k).^2, scale, columns(X));
+##      else
+##      x.theta(k) = prior_pick(mean.thetaP(k), scale, columns(X));
+##      endif
+##      x.theta(k) = e^x.theta(k);
+##    endfor
+
     ## step 2: calcuate the probability of move
     [q_new, x.beta, x.sigma] = krig_likelihood(x.theta, X, y, F, nugget);
 
-    ## if the berger prior is required transform sigma
-    if (strcmp(prior, "Berger"))
-      x.sigma = bergerPrior(x.sigma);
-    endif
-  
-    pi_new = 1 / x.sigma;
+##    pi_new = x.sigma^-2;
+    pi_new = x.theta.^-2;
 
-    ratio = (pi_new * q_old) / (pi_old * q_new);
+    ratio = (q_new / q_old) * (pi_old / pi_new);
+##    ratio = (pi_new * q_old) / (pi_old * q_new);
 
     ## step 3: accept, if u < alpha(x, x')
-    u = rand();
-    
-    if u <= min(ratio, 1)
+    if rand() <= min(ratio, 1)
       ## reject also above a certain threshold
       chain.accepted++;
       pi_old = pi_new;
@@ -112,7 +110,12 @@ function chain = mcmc_mh(scale, x0_theta, X, y, n, prior = "Jeffrey", \
       chain.theta(chain.accepted, :) = x_old.theta;
       chain.sigma(chain.accepted) = x_old.sigma;
       chain.l(chain.accepted) = q_old;
-      mean.thetaP = welford_mean(i, mean.thetaP, 1./x.theta.^2);
+      mean.thetaP = x.theta.^-2; ##welford_mean(i, mean.thetaP, 1./x.theta.^2);
+
+      ## if the berger prior is required transform sigma
+      if (strcmp(prior, "Berger"))
+        mean.thetaP = bergerPrior(mean.thetaP);
+      endif
     endif
   endfor
 
@@ -124,7 +127,7 @@ endfunction
 
 
 function berger = bergerPrior(sigma)
-  berger = sqrt(sigma)^3;
+  berger = sqrt(sigma).^3;
 endfunction
 
 

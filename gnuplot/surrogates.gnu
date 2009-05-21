@@ -12,7 +12,7 @@ MINY=$4;
 MAXY=$5;
 XLABEL=$6;
 YLABEL=$7;
-ZLABEL=$8;
+TITLE=$8;
 
 # Check whether the command-line parameters are present
 if [ -z "$DATAFILE" ] ; then
@@ -70,6 +70,6 @@ set xlabel "$XLABEL" -1,-1
 set ylabel "$YLABEL" 1,0
 set zlabel "$ZLABEL" 1,4
 
-splot "rand-$DATAFILE.dat" every :4:4 title "ER Model" w l,\
-      "soc-$DATAFILE.dat" every :4:4 title "BBV Model" w l 
+splot "rand-$DATAFILE.dat" every :4:4 title "$TITLE (ER Model)" w l,\
+      "soc-$DATAFILE.dat" every :4:4 title "$TITLE (BBV Model)" w l 
 EOF

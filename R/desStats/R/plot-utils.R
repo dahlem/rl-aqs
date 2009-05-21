@@ -15,14 +15,14 @@
 
 des.plot.powerlaw.fit <- function(data, fit=FALSE) {
   if (fit) {
-    pl <- plfit(data$x)
+    pl <- plfit(data$x[data$x > 0])
     dfPL <- data.frame(x=pl$xmin:max(data$x),y=10*(pl$xmin:max(data$x))^(-pl$alpha+1))
     dfPL <- dfPL[dfPL$y < max(data$y) & dfPL$y > min(data$y),]
     p <- p + geom_line(data=dfPL, aes(x=x,y=y))
-##    label <- bquote(paste(lambda, "=", .(pl$alpha)))
-##    dfT <- data.frame(x=(max(data$x) - min(data$x))/2,
-##                      y=10*((max(data$y) - min(data$y))/2)^(-pl$alpha+1))
-##    p <- p + geom_text(data=dfT, label=paste(pl$alpha))
+##     label <- bquote(paste(lambda, "=", .(pl$alpha)))
+##     dfT <- data.frame(x=(max(data$x) - min(data$x))/2,
+##                       y=10*((max(data$y) - min(data$y))/2)^(-pl$alpha+1))
+##     p <- p + geom_text(data=dfT, label=paste(pl$alpha))
     return(p)
   }
 }

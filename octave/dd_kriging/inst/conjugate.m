@@ -1,4 +1,4 @@
-## Copyright (C) 2007, 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+## Copyright (C) 2007, 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 ##  
 ## This file is free software; as a special exception the author gives
 ## unlimited permission to copy and/or distribute it, with or without 
@@ -20,22 +20,22 @@
 ## @end deftypefn
 
 
-function [x_bar, x_error, max_error, k] = dd_conjugate(A, b, x, thresh=e^-12)
+function [x_bar, x_error, max_error, k] = dd_conjugate(A, b, x, thresh=1.0e-9)
   if (nargin != 4)
     usage("dd_conjugate(A, b, x, threshold)");
   endif
 
-  if (matrix_type(A) != "Positive Definite")
-    error("The matrix A has to be positive definite.");
-  endif
+#  if (matrix_type(A) != "Positive Definite")
+#    error("The matrix A has to be positive definite.");
+#  endif
 
-  if (rows(b) != rows(A))
-    error("The vector b has to have the same dimension as rows in matrix A");
-  endif
+#  if (rows(b) != rows(A))
+#    error("The vector b has to have the same dimension as rows in matrix A");
+#  endif
 
-  if (!isvector(b))
-    error("b must be an array.");
-  endif
+#  if (!isvector(b))
+#    error("b must be an array.");
+#  endif
 
   x_bar = x;
   p = b - A * x_bar;

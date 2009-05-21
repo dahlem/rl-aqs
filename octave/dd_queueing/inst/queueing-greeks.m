@@ -38,7 +38,7 @@ function calcGreeks(prefix, X, yU, yD, min, max, betas, thetas, step, nugget, FU
 
   thetaU = [];
   for i = 1:thetas
-    file = [prefix "-Rho-chain-theta" int2str(i) "-sampled.dat"];
+    file = [prefix "-Rho-chain-theta_" int2str(i) "-sampled.dat"];
     temp = csvread(file);
     temp = temp(2:end,:);
     thetaU = [thetaU, mean(temp)];
@@ -46,7 +46,7 @@ function calcGreeks(prefix, X, yU, yD, min, max, betas, thetas, step, nugget, FU
 
   thetaD = [];
   for i = 1:thetas
-    file = [prefix "-W-chain-theta" int2str(i) "-sampled.dat"];
+    file = [prefix "-W-chain-theta_" int2str(i) "-sampled.dat"];
     temp = csvread(file);
     temp = temp(2:end,:);
     thetaD = [thetaD, mean(temp)];

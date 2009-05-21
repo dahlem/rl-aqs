@@ -65,7 +65,7 @@ function mse_avg = mse_average(X, x, y, F, chain, nugget=0, FUN)
   mses = zeros(1, rows(chain.theta));
   
   for i = 1:rows(chain.theta)
-    mses(i) = mse_pred(X, x, y, F, chain.beta(:,i), chain.theta(i,:), nugget, FUN);
+    mses(i) = mse_pred(X, x, y, F, chain.beta(:,i), chain.theta(i,:), chain.sigma(i), nugget, FUN);
   endfor
 
   mse_avg = mean(mses);
@@ -92,20 +92,10 @@ endfunction
 ## y: the observed outputs
 ## F: the matrix of 1s
 ## theta: the estimated theta value from MCMC
-function mse_p = mse_pred(X, x, y, F, beta, theta, nugget=0, FUN = @(x) 1)
+function mse_p = mse_pred(X, x, y, F, beta, theta, sigma, nugget=0, FUN = @(x) 1)
   R = scf_gaussianm(X, theta, nugget);
   r = scf_gaussianu(X, x, theta);
-  n = rows(y);
-  
-  temp1 = (F' * (R\F));
-  beta = (temp1\F') * (R\y);
-  temp = y - F * beta;
-  sigma_sq = 1 / n * temp' * (R\temp);
-
-  rtemp = R\r;
-  z = FUN(x)' - F' * rtemp;
-
-  mse_p = sigma_sq * (1 - r' * rtemp) + sigma_sq * (z' * (temp1\z));
+  mse_p = sigma * (1 - r' * (R\r));
 endfunction
 
 function mse_p = mse_pred_nonconst(X, x, y, F, beta, eta, xi, nugget=0, FUN = @(x) 1)

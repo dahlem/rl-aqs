@@ -48,3 +48,44 @@ des.rl.epsilon.queueing.Q.matrix <- function(graph, epsilon) {
 
   return(Q)
 }
+
+
+des.rl.boltzmann.queueing.Q.matrix <- function(graph, tau) {
+  vertices <- vcount(graph)
+  Q <- matrix(rep(0, vertices^2), nrow=vertices, ncol=vertices)
+
+  ## for all vertices
+  for (vertexFrom in V(graph)) {
+    ## all out-going neighbours
+    outV <- neighbors(graph, vertexFrom, mode="out")
+
+    if (length(outV) == 1) {
+      Q[(vertexFrom + 1), (outV[1] + 1)] <- 1
+    } else if (length(outV) > 1) {
+      ## all qvalues of the vertex vertexFrom to calculate the probabilities
+      qvals <- E(graph)[from(c(vertexFrom)) & to(outV)]$q_value
+      ##inEdgesQval <- E(graph)[from(c(vertexFrom)) & to(outV)]$q_value
+
+      ## calculate the boltzmann probabilities
+      if (length(which(qvals == 0)) > 0) {
+          boltzProb <- rep(1/length(qvals), length(qvals))
+      } else {
+        inEdgesQval <- -log(-qvals)
+        sumQval <- sum(exp(inEdgesQval/tau))
+        if (sumQval == 0) {
+          boltzProb <- 1/length(inEdgesQval)
+        } else {
+          boltzProb <- exp(inEdgesQval/tau) / sumQval
+        }
+      }
+
+
+      ## fill the matrix
+      for (i in 1:length(outV)) {
+        Q[(vertexFrom + 1), (outV[i] + 1)] <- boltzProb[i]
+      }
+    }
+  }
+
+  return(Q)
+}

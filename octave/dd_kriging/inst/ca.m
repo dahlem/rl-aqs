@@ -14,6 +14,17 @@
 ## Created: 10.11.2008
 ## Version: 0.1
 
+function D = gen3fact(n)
+  dim = 3^n;
+  D = zeros(dim, n);
+  for i = 1:dim
+    j = i - 1;
+    for l = 1:n
+      D(i, l) = 1 + mod(j, 3);
+      j = floor(j / 3);
+    endfor
+  endfor
+endfunction
 
 ## boundaries: the boundaries of the input variables. The first row
 ## represents the minimum and the 2nd row the maximum
@@ -33,13 +44,16 @@ endfunction
 function D = ca_mesh(boundaries, meshsize)
   stepsize1 = (boundaries(2, 1) - boundaries(1, 1)) / meshsize;
   stepsize2 = (boundaries(2, 2) - boundaries(1, 2)) / meshsize;
-  stepsize3 = (boundaries(2, 3) - boundaries(1, 3)) / meshsize;
+##  stepsize3 = (boundaries(2, 3) - boundaries(1, 3)) / meshsize;
 
-  [xx, yy, zz] = meshgrid(boundaries(1, 1):stepsize1:boundaries(2, 1),
-                          boundaries(1, 2):stepsize2:boundaries(2, 2),
-                          boundaries(1, 3):stepsize3:boundaries(2, 3));
+##  [xx, yy, zz] = meshgrid(boundaries(1, 1):stepsize1:boundaries(2, 1),
+##                          boundaries(1, 2):stepsize2:boundaries(2, 2),
+##                          boundaries(1, 3):stepsize3:boundaries(2, 3));
+  [xx, yy] = meshgrid(boundaries(1, 1):stepsize1:boundaries(2, 1),
+                      boundaries(1, 2):stepsize2:boundaries(2, 2));
 
-  D = [vec(xx), vec(yy), vec(zz)];
+##  D = [vec(xx), vec(yy), vec(zz)];
+  D = [vec(xx), vec(yy)];
 endfunction
 
 
@@ -118,9 +132,10 @@ endfunction
 
 ## Stationary point within the design domain
 function [y,z,w] = ca_modelW(yS, xS, M, B, x)
-  w = ca_w(x, xS);
-  z = M' * w;
-  L = M' * B * M;
+  w = ca_w(x, xS); ## w equivalent to z
+  z = M' * w; ## M equivalent to P in "response surface methodology" by
+              ## Myers et.a.
+  L = M' * B * M; ## L equivalent to inverse V
   y = yS + z' * L * z;
 endfunction
 
@@ -186,20 +201,29 @@ function [X_r, y_r] = ca_reducedModel(X, yk, y_upper)
   endfor
 endfunction
 
+function [y] = ca_sndOrderModel(x, b0, b, B)
+  y = b0 + x' * b + x' * B * x;
+endfunction
 
-function [ym,z,w,b,B,D,M,lambda,thetam] = ca_analyse(meshsize, boundaries, yS, xS, \
+function [y] = ca_sndOrderModel1(x, b, B)
+  y = -(b(1) + x' * b(2:3) + x' * B * x);
+endfunction
+
+
+function [ym,z,w,b,B,D,M,lambda,thetam] = ca_analyse(boundaries, yS, xS, \
                                                      S, R, beta, theta, \
                                                      y, F, FUN)
-  D = ca_mesh(boundaries, meshsize);
+  D = gen3fact(columns(boundaries));
+
+  for i = 1:columns(boundaries)
+    D(:,i) = boundaries(1,i) + ((D(:,i) - 1) / 2) * (boundaries(2,i) - boundaries(1,i));
+  endfor
   X = ca_modelM(D);
 
-  x1_vec = D(:,1)';
-  x2_vec = D(:,2)';
-  x3_vec = D(:,3)';
   yk = zeros(rows(X), 1);
 
-  for i = 1:columns(x1_vec)
-    yk(i) = krig([x1_vec(i), x2_vec(i), x3_vec(i)], S, R, beta, theta, y, F, FUN);
+  for i = 1:rows(D)
+    yk(i) = krig(D(i,:), S, R, beta, theta, y, F, FUN);
   endfor
 
   b = ca_lse(X, yk);
@@ -220,6 +244,110 @@ function [ym,z,w,b,B,D,M,lambda,thetam] = ca_analyse(meshsize, boundaries, yS, x
     ## perform saddle point analysis
     [ym,z,thetam] = ca_modelXM(M, D, B, b);
   endif
+endfunction
+
+
+function ca_serialiseRidge(prefix, B, b0, b, f, lambdas, increment, dist, thresh=0.01)
+  outfile = [prefix "-ridge_path.dat"];
+  fd = fopen(outfile, "wt");
+  ## calculate the ridge path
+  [xP, RP, yP, incr] = ca_analyseRidgeFocalIntermediate(B, b0, b, f, 0:increment:floor(lambdas(1) - increment), dist, thresh);
+
+  ## serialise the ridge path
+  for r = 1:rows(incr)
+    fprintf(fd, "%.10f,%.10f,%.10f,%.10f,%.10f,0\n", incr(r), RP(r), yP(r), xP(r,:));
+  endfor
+
+  for i = 1:(rows(lambdas) - 1)
+    ## calculate the ridge path
+    [xP, RP, yP, incr] = ca_analyseRidgeFocalIntermediate(B, b0, b, f, floor(lambdas(i) + increment):increment:floor(lambdas(i+1) - increment), dist, thresh);
+
+    ## serialise the ridge path
+    for r = 1:rows(incr)
+      fprintf(fd, "%.10f,%.10f,%.10f,%.10f,%.10f,%d\n", incr(r), RP(r), yP(r), xP(r,:), i);
+    endfor
+  endfor
+
+  ## calculate the 2q ridge path
+  [xP, RP, yP, incr] = ca_analyseRidgeFocal(B, b0, b, f, \
+                                            lambdas(rows(lambdas)), \
+                                            increment, dist, thresh);
+
+  ## serialise the 2q ridge path
+  for r = 1:rows(incr)
+    fprintf(fd, "%.10f,%.10f,%.10f,%.10f,%.10f,%d\n", incr(r), RP(r), yP(r), xP(r,:), rows(lambdas));
+  endfor
+  fclose(fd);
+endfunction
+
+
+## path is specified by the eigenvalue and the increment
+function [xP, RP, yP, incr] = ca_analyseRidgeFocalIntermediate(B, b0, b, f, \
+                                                               increments, dist, \
+                                                               thresh=0.01)
+  R = +Inf;
+  xP = RP = yP = incr = [];
+  
+  for i = increments
+    ## 1. choose a value of my according to the path
+    mu = i;
+
+    ## 2. obtain x and R
+    [x, R] = ca_ridgeAnalysisWithFocal(B, b, f, mu);
+
+    if (R <= dist)
+      ## 3. evaluate the model y
+      yh = ca_sndOrderModel(x, b0, b, B);
+      
+      ## 4. tabulate x, R, model y
+      xP = [xP; x'];
+      RP = [RP; R];
+      yP = [yP; yh];
+      incr = [incr; mu];
+    endif
+  endfor
+endfunction
+
+
+## path is specified by the eigenvalue and the increment
+function [xP, RP, yP, incr] = ca_analyseRidgeFocal(B, b0, b, f, lambda, \
+                                                   increment, dist, \
+                                                   thresh=0.01)
+  R = +Inf;
+  mu = lambda;
+  xP = RP = yP = incr = [];
+  
+  while (R > thresh)
+    ## 1. choose a value of my according to the path
+    mu = mu + increment;
+
+    ## 2. obtain x and R
+    [x, R] = ca_ridgeAnalysisWithFocal(B, b, f, mu);
+
+    if (R <= dist)
+      ## 3. evaluate the model y
+      yh = ca_sndOrderModel(x, b0, b, B);
+      
+      ## 4. tabulate x, R, model y
+      xP = [xP; x'];
+      RP = [RP; R];
+      yP = [yP; yh];
+      incr = [incr; mu];
+    endif
+  endwhile
+endfunction
+
+
+## b must only contain the linear terms, i.e., b_1, b_2, ..., b_n
+function [x, R] = ca_ridgeAnalysis(B, b, mu)
+  x = -0.5 * (B - mu * eye(rows(B)))^-1 * b;
+  R = sqrt(x' * x);
+endfunction
+
+
+function [x, R] = ca_ridgeAnalysisWithFocal(B, b, f, mu)
+  x = -0.5 * (B - mu * eye(rows(B)))^-1 * (b + 2 * mu * f);
+  R = sqrt((x - f)' * (x - f));
 endfunction
 
 

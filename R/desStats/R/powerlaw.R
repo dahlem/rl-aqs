@@ -13,19 +13,25 @@
 ## Keywords: utilities, power law
 ## Created: 11.02.2009
 
+is.discrete <- function(x, tol = .Machine$double.eps) {
+  (x - floor(x)) < tol
+}
+
+
 des.power.law.dist <- function(x) {
   ## remove zeros, because logs can't deal with them
   x <- x[x>0]
   n <- length(x)
 
-  if (is.discrete(x)) {
+  ## is.discrete part of plyr
+  if (all(is.discrete(x))) {
     xsorted <- sort(x)
     vals <- unique(x)
     cumFreq <- tabulate(match(xsorted, vals))/n
   } else {
-    xsorted <- sort(x)
+    vals <- sort(x)
     cumFreq <- seq(n, 1)/n
   }
 
-  return(list(x=xsorted, cumFreq=cumFreq))
+  return(list(x=vals, cumFreq=cumFreq))
 }

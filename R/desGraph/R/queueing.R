@@ -160,7 +160,6 @@ des.queueing.Q.matrix <- function(graph) {
 
   for (outV in V(graph)) {
     for (inV in neighbors(graph, outV, mode="out")) {
-##      print(paste(V(graph)$id[outV + 1] + 1, V(graph)$id[inV + 1] + 1, E(graph)[from(inV) & to(outV)]$weight))
       Q[(V(graph)$id[outV + 1] + 1), (V(graph)$id[inV + 1] + 1)] <- E(graph)[from(outV) & to(inV)]$weight
     }
   }

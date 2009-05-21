@@ -1,10 +1,10 @@
 #!/bin/sh
-# 2d-surrogate.gnu
-# create a surrogate model given the data.
+# queue-delta.gnu
+# create a delta plots
 #
-# Usage: ./queue-delta <data-file><Title> <xlabel> <ylabel>
+# Usage: ./queue-delta.gnu <data-file> <xmin> <xmax> <ymin> <ymax> <xlabel> <ylabel> <zlabel>
 
-USAGE="./queue-delta.gnu <data-file> <Title> <xlabel> <ylabel>";
+USAGE="./queue-delta.gnu <data-file> <xmin> <xmax> <ymin> <ymax> <xlabel> <ylabel> <zlabel>";
 DATAFILE=$1;
 MINX=$2;
 MAXX=$3;

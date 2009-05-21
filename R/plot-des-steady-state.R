@@ -28,7 +28,7 @@
 
 library(desGraph)
 
-des.steady.power.law.degree <- function(prefix, graph, ps=TRUE, fit=FALSE, width=7, height=7, pts=12) {
+des.steady.power.law.degree <- function(prefix, graph, ps=TRUE, fit=FALSE, width=7, height=7, pts=12, breaks=NULL) {
   if (ps) {
     filename <- paste(prefix, "steady-state-degree-power-law-plot.eps", sep="")
     des.postscript(filename, width, height, pointsize=pts)
@@ -38,15 +38,22 @@ des.steady.power.law.degree <- function(prefix, graph, ps=TRUE, fit=FALSE, width
   res <- des.power.law.dist(degree)
 
   df <- data.frame(x=res$x, y=res$cumFreq)
+  n <- length(degree)
+  orig <- data.frame(x=sort(degree), y=seq(n, 1)/n)
 
   p <- ggplot(df, aes(x=x, y=y))
   p <- p + geom_point()
   if (fit) {
-    p <- des.plot.powerlaw.fit(df, fit)
+    p <- des.plot.powerlaw.fit(orig, fit)
   }
   p <- p + coord_trans(x = "log", y = "log")
   p <- p + scale_y_continuous("P(k)")
-  p <- p + scale_x_continuous("Node In-Degree (k)")
+
+  if (is.null(breaks)) {
+    p <- p + scale_x_continuous("Node In-Degree (k)")
+  } else {
+    p <- p + scale_x_continuous("Node In-Degree (k)", breaks=breaks)
+  }
   p <- p + theme_bw(base_size=pts)
   print(p)
 
