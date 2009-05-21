@@ -167,7 +167,11 @@ public:
                     gsl_vector_set(max, LhsUtils::getRLEpsilonIndex(p_desArgs), p_desArgs->max_rl_policy_epsilon);
                 }
 
-                dsample::LHS::sample(rng.get(), min, max, p_desArgs->simulations, &sample);
+                if (p_desArgs->lhs_optimal) {
+                    dsample::LHS::sample(rng.get(), min, max, p_desArgs->simulations, &sample, p_desArgs->lhs_r);
+                } else {
+                    dsample::LHS::sample(rng.get(), min, max, p_desArgs->simulations, &sample);
+                }
             }
 
             std::stringstream outDir, simDir, csv_line;
@@ -189,7 +193,7 @@ public:
             csv_line.str("");
 
             // 3. run experiment
-            for (boost::uint16_t i = 0; i < p_desArgs->simulations; ++i) {
+            for (boost::uint16_t i = 0; i < sample->size1; ++i) {
                 // start initial number of experiments
                 // copy the desArgs into the mpi desargs
                 tSimArgsMPI desArgsMPI;

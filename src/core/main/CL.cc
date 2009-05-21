@@ -114,6 +114,8 @@ CL::CL()
     po::options_description opt_lhs("Latin Hypercube Configuration");
     opt_lhs.add_options()
         (WITH_LHS.c_str(), po::value <bool>()->default_value(false), "Perform LHS sampling for the experiments.")
+        (LHS_optimal.c_str(), po::value <bool>()->default_value(false), "Perform optimal LHS sampling.")
+        (LHS_R.c_str(), po::value <boost::uint16_t>()->default_value(10), "set the number of optimisation iterations for oLHS.")
         (SIMULATIONS.c_str(), po::value <boost::uint32_t>()->default_value(7), "set the number of simulations to run.")
         (MINSIZE.c_str(), po::value <boost::uint16_t>()->default_value(
             std::numeric_limits<boost::uint16_t>::max()), "set the min. network size.")
@@ -401,10 +403,20 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
     std::cout << "LHS enabled: " << desArgs->lhs << std::endl;
 
     if (desArgs->lhs == 1) {
+        if (vm.count(LHS_OPTIMAL.c_str())) {
+            desArgs->lhs_optimal = vm[LHS_OPTIMAL.c_str()].as <bool>();
+        }
+        std::cout << "oLHS enabled: " << desArgs->lhs_optimal << std::endl;
+
         if (vm.count(SIMULATIONS.c_str())) {
             desArgs->simulations = vm[SIMULATIONS.c_str()].as <boost::uint32_t>();
         }
         std::cout << "Number of simulations set to " << desArgs->simulations << "." << std::endl;
+
+        if (vm.count(LHS_R.c_str())) {
+            desArgs->lhs_r = vm[LHS_R.c_str()].as <boost::uint16_t>();
+        }
+        std::cout << "Number of oLHS iterations set to " << desArgs->lhs_r << "." << std::endl;
 
         if (vm.count(MIN_BOOST_ARRIVAL.c_str())) {
             desArgs->min_boost_arrival = vm[MIN_BOOST_ARRIVAL.c_str()].as <double>();

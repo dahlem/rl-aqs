@@ -61,10 +61,12 @@ const std::string ADD_SIM = "add_sim";
 
 const std::string WITH_CI = "confidence";
 const std::string WITH_LHS = "lhs";
+const std::string LHS_OPTIMAL = "lhs_optimal";
 const std::string REPLICATIONS = "replications";
 const std::string SIMULATIONS = "simulations";
 const std::string ALPHA = "alpha";
 const std::string ERROR = "error";
+const std::string LHS_ITER = "lhs_r";
 
 const std::string SIZE = "size";
 const std::string MINSIZE = "min_size";
@@ -129,10 +131,12 @@ struct desArgs_t {
     boost::int32_t generations;     /* number of generations for the event simulation */
     bool confidence;                /* run experiments within a confidence band */
     bool lhs;                       /* run experiments with lhs sampling */
+    bool lhs_optimal;               /* lhs sampling with optimal design */
     double alpha;                   /* 100(1 - alpha) confidence interval for the experiments */
     double error;                   /* error threshold for the ci calculations */
     boost::uint16_t replications;   /* initial replications required */
     boost::uint16_t simulations;    /* initial number of simulations */
+    boost::uint16_t lhs_r;          /* optimal design iterations */
 
     boost::uint16_t sim_num;        /* simulation number */
     boost::uint16_t rep_num;        /* replication number */
@@ -186,7 +190,8 @@ struct desArgs_t {
           rl_q_alpha(args.rl_q_alpha), min_rl_q_alpha(args.min_rl_q_alpha), max_rl_q_alpha(args.max_rl_q_alpha),
           rl_q_lambda(args.rl_q_lambda), min_rl_q_lambda(args.min_rl_q_lambda), max_rl_q_lambda(args.max_rl_q_lambda),
           rl_policy(args.rl_policy), rl_policy_epsilon(args.rl_policy_epsilon), min_rl_policy_epsilon(args.min_rl_policy_epsilon),
-          max_rl_policy_epsilon(args.max_rl_policy_epsilon), rl_policy_boltzmann_t(args.rl_policy_boltzmann_t)
+          max_rl_policy_epsilon(args.max_rl_policy_epsilon), rl_policy_boltzmann_t(args.rl_policy_boltzmann_t),
+          lhs_optimal(args.lhs_optimal), lhs_r(args.lhs_r)
         {}
 
     desArgs_t()
@@ -206,7 +211,8 @@ struct desArgs_t {
           rl_q_alpha(0.0), min_rl_q_alpha(0.0), max_rl_q_alpha(0.0),
           rl_q_lambda(0.0), min_rl_q_lambda(0.0), max_rl_q_lambda(0.0),
           rl_policy(0), rl_policy_epsilon(0.0), min_rl_policy_epsilon(0.0),
-          max_rl_policy_epsilon(0.0), rl_policy_boltzmann_t(0.0)
+          max_rl_policy_epsilon(0.0), rl_policy_boltzmann_t(0.0),
+          lhs_optimal(false), lhs_r(10)
         {}
 
     friend std::ostream& operator <<(std::ostream &p_os, const desArgs_t &desArgs)

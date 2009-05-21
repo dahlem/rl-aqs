@@ -148,7 +148,11 @@ public:
                 gsl_vector_set(max, LhsUtils::getRLEpsilonIndex(p_desArgs), p_desArgs->max_rl_policy_epsilon);
             }
 
-            dsample::LHS::sample(rng.get(), min, max, p_desArgs->simulations, &sample);
+            if (p_desArgs->lhs_optimal) {
+                dsample::LHS::sample(rng.get(), min, max, p_desArgs->simulations, &sample, p_desArgs->lhs_r);
+            } else {
+                dsample::LHS::sample(rng.get(), min, max, p_desArgs->simulations, &sample);
+            }
 
             // 2. print header into log-file
             std::stringstream outDir, csv_line;
@@ -165,7 +169,7 @@ public:
             }
 
             // 3. run experiment
-            for (boost::uint16_t i = 0; i < p_desArgs->simulations; ++i) {
+            for (boost::uint16_t i = 0; i < sample->size1; ++i) {
                 p_desArgs->sim_num = i + 1;
 
                 // set the i-th experiment conditions
