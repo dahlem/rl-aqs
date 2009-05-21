@@ -1,0 +1,11 @@
+Package: kriging
+Version: @VERSION@
+Date: 2009-05-11
+Title: Kriging for spatial point processes
+Author: Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+Maintainer: Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+Depends: R (>= 2.6), spbayes
+Description: Kriging analysis.
+License: GPL-2
+URL: http://www.r-project.org
+     
