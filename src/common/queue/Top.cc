@@ -66,7 +66,9 @@ dcommon::Top::~Top()
     m_fifo->erase_and_dispose(m_fifo->begin(), m_fifo->end(),
                               dcommon::delete_disposer());
 
-    delete m_fifo;
+    if (m_fifo != NULL) {
+        delete m_fifo;
+    }
 }
 
 
@@ -82,25 +84,25 @@ void dcommon::Top::record()
 #endif /* HAVE_LADDERSTATS */
 
 
-const double dcommon::Top::getMaxTS()
+double dcommon::Top::getMaxTS()
 {
     return m_maxTS;
 }
 
 
-const double dcommon::Top::getMinTS()
+double dcommon::Top::getMinTS()
 {
     return m_minTS;
 }
 
 
-const double dcommon::Top::getTopStart()
+double dcommon::Top::getTopStart()
 {
     return m_topStart;
 }
 
 
-const boost::uint32_t dcommon::Top::getNTop()
+boost::uint32_t dcommon::Top::getNTop()
 {
     return static_cast<boost::uint32_t> (m_fifo->size());
 }
@@ -133,7 +135,7 @@ void dcommon::Top::setMinTS(double p_minTS)
 }
 
 
-const bool dcommon::Top::push(dcommon::Entry *p_entry) throw (dcommon::QueueException)
+bool dcommon::Top::push(dcommon::Entry *p_entry) throw (dcommon::QueueException)
 {
 #ifdef HAVE_LADDERSTATS
     events_in++;
@@ -159,7 +161,7 @@ void dcommon::Top::push(dcommon::EntryList* p_list)
 }
 
 
-dcommon::EntryList* const dcommon::Top::delist()
+dcommon::EntryList* dcommon::Top::delist()
 {
     double width = 1.0;
 

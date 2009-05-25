@@ -1,4 +1,4 @@
-# Copyright (C) 2007, 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+# Copyright (C) 2007, 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 #  
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without 
@@ -11,6 +11,7 @@
 noinst_LTLIBRARIES = libcommonlist.la
 
 libcommonlist_la_SOURCES =                                            \
+	StackException.cc                                             \
 	Entry.cc
 
 libcommonlist_la_CPPFLAGS =                                           \

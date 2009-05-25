@@ -310,6 +310,8 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
                                                      desArgs->max_arrival, desArgs->boost_arrival,
                                                      desArgs->boost_edge, r1, seed, edge_prob, max_edges);
             }
+
+            std::cout << "Graph generated." << std::endl;
         }
 
         num_vertices = boost::num_vertices(*graph);
@@ -511,7 +513,7 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
                 new RLResponseHandler(*graph, rl_q_alpha, rl_q_lambda, *pol));
             ackEvent.attach(*rlResponseHandler);
         } else {
-            pol = tPolicySP();
+            pol = tPolicySP(new drl::DummyPolicy());
             selection = tSelectionSP(
                 new drl::RandomSelection(*pol, *graph, departureCRNs));
             departureHandler = tDepartureHandlerSP(

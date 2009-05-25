@@ -104,7 +104,7 @@ public:
     /**
      * @see Queue#push(dcommon::Entry*) throw (QueueException)
      */
-    const bool push(dcommon::Entry *p_entry) throw (dcommon::QueueException);
+    bool push(dcommon::Entry *p_entry) throw (dcommon::QueueException);
 
     /**
      * @see Queue#dequeue()

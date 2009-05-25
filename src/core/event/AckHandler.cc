@@ -45,22 +45,36 @@ void dcore::AckHandler::update(dcore::AckEvent *subject)
 {
     dcommon::Entry *entry = subject->getEvent();
 
+#ifndef NDEBUG_EVENTS
+    std::cout << "** Acknowledge for vertex: " << entry->getDestination() << std::endl;
+#endif /* NDEBUG_EVENTS */
+
     if (entry->isEventQueueEmpty()) {
+#ifndef NDEBUG_EVENTS
+        std::cout << "Schedule leave event." << std::endl;
+#endif /* NDEBUG_EVENTS */
+
         // schedule leave event
-        dcommon::Entry *new_entry = new dcommon::Entry(
-            const_cast <const dcommon::Entry&> (*entry));
+        dcommon::Entry *new_entry = new dcommon::Entry(*entry);
 
         new_entry->leave(dcore::EXTERNAL_EVENT, dcore::LEAVE_EVENT);
         m_queue.push(new_entry);
     } else {
+#ifndef NDEBUG_EVENTS
+        std::cout << "Schedule acknowledge event." << std::endl;
+#endif /* NDEBUG_EVENTS */
+
         // schedule ack events
         boost::int32_t origin = entry->getDestination();
         boost::int32_t destination = entry->popEvent();
 
-        dcommon::Entry *new_entry = new dcommon::Entry(
-            const_cast <const dcommon::Entry&> (*entry));
+        dcommon::Entry *new_entry = new dcommon::Entry(*entry);
 
         new_entry->acknowledge(origin, destination, dcore::ACK_EVENT);
         m_queue.push(new_entry);
     }
+
+#ifndef NDEBUG_EVENTS
+    std::cout << "** Acknowledge handler done." << std::endl;
+#endif /* NDEBUG_EVENTS */
 }

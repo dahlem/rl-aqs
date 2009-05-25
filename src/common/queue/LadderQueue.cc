@@ -98,7 +98,7 @@ void LadderQueue::record()
 #endif /* HAVE_LADDERSTATS */
 
 
-const bool LadderQueue::push(Entry *p_entry) throw (QueueException)
+bool LadderQueue::push(Entry *p_entry) throw (QueueException)
 {
 #ifndef NDEBUG_QUEUE
     std::cout << "LQ -- Push event: " << const_cast <const dcommon::Entry&> (*p_entry) << std::endl;

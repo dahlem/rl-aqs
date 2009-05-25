@@ -70,7 +70,7 @@ public:
     /**
      * @see Queue#enqueue(dcommon::Entry) throw (QueueException)
      */
-    const bool push(dcommon::Entry *p_entry) throw (dcommon::QueueException);
+    bool push(dcommon::Entry *p_entry) throw (dcommon::QueueException);
 
     /**
      * @see Queue#dequeue() throw (QueueException)
@@ -79,22 +79,22 @@ public:
     void pop_front() throw (dcommon::QueueException);
 
     void push(dcommon::EntryList* );
-    dcommon::EntryList* const list();
+    dcommon::EntryList* list();
 
     /**
      * @return the maximum arrival timestamp of the events in the bottom.
      */
-    const double getMaxTS();
+    double getMaxTS();
 
     /**
      * @return the minimum arrival timestamp of the events in the bottom.
      */
-    const double getMinTS();
+    double getMinTS();
 
     /**
      * @return the size of the event queue in the bottom
      */
-    const boost::uint32_t size();
+    boost::uint32_t size();
 
 private:
     double m_lastEvent;

@@ -67,29 +67,29 @@ public:
     void record();
 #endif /* HAVE_LADDERSTATS */
 
-    const bool push(dcommon::Entry *p_entry) throw (dcommon::QueueException);
+    bool push(dcommon::Entry *p_entry) throw (dcommon::QueueException);
     void push(dcommon::EntryList* );
-    dcommon::EntryList* const delist();
+    dcommon::EntryList* delist();
 
     /**
      * @return double the maximum arrival timestamp
      */
-    const double getMaxTS();
+    double getMaxTS();
 
     /**
      * @return double the minimum arrival timestamp
      */
-    const double getMinTS();
+    double getMinTS();
 
     /**
      * @return double the starting timestamp
      */
-    const double getTopStart();
+    double getTopStart();
 
     /**
      * @return double the number of events
      */
-    const boost::uint32_t getNTop();
+    boost::uint32_t getNTop();
 
     /**
      * Reset the internal variables.

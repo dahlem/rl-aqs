@@ -250,14 +250,14 @@ int main(int argc, char *argv[])
         r3 = dsample::CRN::getInstance().get(arrival_rng_index);
 
         // use the WEvonet class
-        std::cout << "Generating Graph..." << std::endl;
-
         dnet::tGraphSP g;
 
         if (net_gen == 1) {
+            std::cout << "Generating BBV Graph..." << std::endl;
             g = dnet::WEvonet::createBBVGraph(net_size, max_edges, edge_fixed,
                                               max_arrival, boost_arrival, boost_edge, r1, r2, r3);
         } else if (net_gen == 2) {
+            std::cout << "Generating Erdos-Renyi Graph..." << std::endl;
             seed = dsample::Seeds::getInstance().getSeed();
             g = dnet::WEvonet::createERGraph(net_size, edge_fixed, max_arrival,
                                              boost_arrival, boost_edge, r1, seed, edge_prob,

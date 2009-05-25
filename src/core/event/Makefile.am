@@ -62,6 +62,7 @@ libcoreevent_la_LIBADD =                                                   \
 	$(OPENMP_CXXFLAGS)                                                 \
 	$(GSL_LIBS)                                                        \
 	$(top_srcdir)/src/io/libdesio.la                                   \
+	$(top_srcdir)/src/common/list/libcommonlist.la                     \
 	$(top_srcdir)/src/sampling/common/libsamplingcommon.la             \
 	$(top_srcdir)/src/statistics/analysis/libstatisticsanalysis.la     \
 	$(top_srcdir)/src/network/evolution/libnetevo.la                   \

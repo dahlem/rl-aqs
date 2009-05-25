@@ -56,7 +56,9 @@ void dcore::NullUnprocessedEventsHandler::update(dcore::PostEvent *subject)
     // record the events left over
     if (entry != NULL) {
         do {
-            delete entry;
+            if (entry != NULL) {
+                delete entry;
+            }
 #ifndef NDEBUG
             num++;
 #endif /* NDEBUG */

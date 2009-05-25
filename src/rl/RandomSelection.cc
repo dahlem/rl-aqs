@@ -68,7 +68,7 @@ boost::int32_t RandomSelection::operator() (boost::int32_t p_source)
         destination = vertex_index_map[target(*out_edge_it, m_graph)];
     } else if (degree > 1) {
         std::vector <dnet::Edge> edges(degree);
-        std::vector <double> edge_weights;
+        std::vector <double> edge_weights(degree);
         std::vector <int> sorted_edge_weights(degree);
         boost::integer_range <int> range(0, degree);
 
@@ -78,8 +78,9 @@ boost::int32_t RandomSelection::operator() (boost::int32_t p_source)
         // copy the index range into the service_rate_order vector
         std::copy(range.begin(), range.end(), sorted_edge_weights.begin());
 
+        int count = 0;
         BOOST_FOREACH(dnet::Edge e, (boost::out_edges(vertex, m_graph))) {
-            edge_weights.push_back(edge_weight_map[e]);
+            edge_weights[count++] = edge_weight_map[e];
         }
 
         // sort the sorted_edge_weights according to the edge_weights in descending order

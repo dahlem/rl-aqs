@@ -52,7 +52,7 @@ BoltzmannPolicy::BoltzmannPolicy(
 
 
 boost::uint16_t BoltzmannPolicy::operator() (
-    boost::uint16_t p_source, tValuesVecSP p_values, PAttr p_attr)
+    boost::uint16_t p_source, tValuesVec &p_values, PAttr p_attr)
 {
 #ifndef NDEBUG_EVENTS
     std::cout << "** Boltzmann Policy" << std::endl;
@@ -60,14 +60,14 @@ boost::uint16_t BoltzmannPolicy::operator() (
 
     boost::int16_t action = -1;
 
-    if (p_values->size() > 1) {
+    if (p_values.size() > 1) {
         double tau = m_tau;
 
 //         tau = p_attr->tau;
 
         // calculate the exps first
         std::vector<double> exps;
-        BOOST_FOREACH(tValues v, (*(p_values.get()))) {
+        BOOST_FOREACH(tValues v, p_values) {
             exps.push_back(exp(v.second/tau));
         }
 
@@ -78,7 +78,7 @@ boost::uint16_t BoltzmannPolicy::operator() (
         for (boost::uint16_t i = 0; i < exps.size(); ++i) {
             tValues prob;
 
-            prob.first = (*(p_values.get()))[i].first;
+            prob.first = p_values[i].first;
             prob.second = exps[i]/denominator;
             probabilities.push_back(prob);
         }
@@ -107,8 +107,8 @@ boost::uint16_t BoltzmannPolicy::operator() (
         if (action == -1) {
             action = probabilities[probabilities.size() - 1].first;
         }
-    } else if (p_values->size() == 1) {
-        action = p_values->front().first;
+    } else if (p_values.size() == 1) {
+        action = p_values.front().first;
     }
 #ifndef NDEBUG_EVENTS
     std::cout << "Destination: " << action << std::endl;

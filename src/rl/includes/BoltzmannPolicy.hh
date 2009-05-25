@@ -52,7 +52,7 @@ public:
         {}
 
     virtual boost::uint16_t operator() (
-        boost::uint16_t p_source, tValuesVecSP p_values, PAttr p_attr);
+        boost::uint16_t p_source, tValuesVec &p_values, PAttr p_attr);
 
 private:
     double m_tau;

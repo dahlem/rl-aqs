@@ -529,7 +529,7 @@ protected:
 
 
 const std::string EDGE_WEIGHT                       = "weight";
-const std::string VERTEX_ID                         = "id";
+const std::string VERTEX_ID                         = "vindex";
 const std::string SERVICE_RATE                      = "service_rate";
 const std::string ARRIVAL_RATE                      = "arrival_rate";
 const std::string BUSY                              = "busy";

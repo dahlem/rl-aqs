@@ -68,7 +68,9 @@ dcommon::Bottom::~Bottom()
     m_list->erase_and_dispose(m_list->begin(), m_list->end(),
                               dcommon::delete_disposer());
 
-    delete m_list;
+    if (m_list != NULL) {
+        delete m_list;
+    }
 }
 
 
@@ -84,7 +86,7 @@ void dcommon::Bottom::record()
 #endif /* HAVE_LADDERSTATS */
 
 
-const boost::uint32_t dcommon::Bottom::size()
+boost::uint32_t dcommon::Bottom::size()
 {
     return static_cast<boost::uint32_t> (m_list->size());
 }
@@ -98,7 +100,7 @@ const boost::uint32_t dcommon::Bottom::size()
  *
  * @see Queue#push(dcommon::Entry) throw (QueueException)
  */
-const bool dcommon::Bottom::push(dcommon::Entry *p_entry) throw (dcommon::QueueException)
+bool dcommon::Bottom::push(dcommon::Entry *p_entry) throw (dcommon::QueueException)
 {
 #ifndef NDEBUG_QUEUE
     std::cout << std::setprecision(14) << "Bottom -- Push event: " << const_cast <const dcommon::Entry&> (*p_entry)
@@ -202,7 +204,7 @@ void dcommon::Bottom::push(dcommon::EntryList* p_list)
 }
 
 
-dcommon::EntryList* const dcommon::Bottom::list()
+dcommon::EntryList* dcommon::Bottom::list()
 {
     return m_list;
 }
@@ -234,7 +236,7 @@ void dcommon::Bottom::pop_front() throw (dcommon::QueueException)
     m_list->pop_front();
 }
 
-const double dcommon::Bottom::getMaxTS()
+double dcommon::Bottom::getMaxTS()
 {
     if (!m_list->empty()) {
         return m_list->back().getArrival();
@@ -243,7 +245,7 @@ const double dcommon::Bottom::getMaxTS()
     return m_lastEvent;
 }
 
-const double dcommon::Bottom::getMinTS()
+double dcommon::Bottom::getMinTS()
 {
     if (!m_list->empty()) {
         return m_list->front().getArrival();

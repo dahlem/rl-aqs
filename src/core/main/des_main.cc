@@ -21,6 +21,11 @@
 #include <iostream>
 #include <sstream>
 
+#ifndef NDEBUG
+# include <cassert>
+# include <boost/assert.hpp>
+#endif /* NDEBUG */
+
 #ifdef HAVE_MPI
 # include <mpi.h>
 #endif /* HAVE_MPI */

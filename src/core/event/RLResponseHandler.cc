@@ -91,8 +91,9 @@ void RLResponseHandler::update(AckEvent *subject)
 #endif /* NDEBUG_EVENTS */
 
         // choose new action based on new state
-        drl::tValuesVecSP values = drl::tValuesVecSP(new drl::tValuesVec);
+        drl::tValuesVec values(boost::out_degree(vertex, m_graph));
 
+        int count = 0;
         BOOST_FOREACH(dnet::Edge e, (boost::out_edges(vertex, m_graph))) {
             drl::tValues value;
             int target_vertex = vertex_index_map[boost::target(e, m_graph)];
@@ -102,11 +103,12 @@ void RLResponseHandler::update(AckEvent *subject)
 #ifndef NDEBUG_EVENTS
             std::cout << "Action-Value Pair: " << value.first << ", " << value.second << std::endl;
 #endif /* NDEBUG_EVENTS */
-            values->push_back(value);
+            values[count++] = value;
         }
 
         drl::PAttr attr;
         newAction = m_policy(entry->getDestination(), values, attr);
+
 #ifndef NDEBUG_EVENTS
         std::cout << "New Action: " << newAction << std::endl;
 #endif /* NDEBUG_EVENTS */

@@ -88,8 +88,7 @@ void dcore::DepartureHandler::update(dcore::DepartureEvent *subject)
         boost::out_degree(vertex, m_graph);
 
     if (degree > 0) {
-        dcommon::Entry *new_entry = new dcommon::Entry(
-            const_cast <const dcommon::Entry&> (*entry));
+        dcommon::Entry *new_entry = new dcommon::Entry(*entry);
         boost::int32_t destination = m_selection(entry->getDestination());
 
 #ifndef NDEBUG
@@ -112,14 +111,15 @@ void dcore::DepartureHandler::update(dcore::DepartureEvent *subject)
 #endif /* NDEBUG_EVENTS */
         } catch (dcommon::QueueException &qe) {
             std::cout << "Error scheduling arrival event: " << new_entry->getArrival() << " " << qe.what() << std::endl;
-            delete new_entry;
+            if (new_entry != NULL) {
+                delete new_entry;
+            }
             throw;
         }
     } else {
         if (entry->isEventQueueEmpty()) {
             // schedule leave event
-            dcommon::Entry *new_entry = new dcommon::Entry(
-                const_cast <const dcommon::Entry&> (*entry));
+            dcommon::Entry *new_entry = new dcommon::Entry(*entry);
 
             new_entry->leave(dcore::EXTERNAL_EVENT, dcore::LEAVE_EVENT);
 
@@ -135,7 +135,9 @@ void dcore::DepartureHandler::update(dcore::DepartureEvent *subject)
 #endif /* NDEBUG_EVENTS */
             } catch (dcommon::QueueException &qe) {
                 std::cout << "Error scheduling leave event: " << new_entry->getArrival() << " " << qe.what() << std::endl;
-                delete new_entry;
+                if (new_entry != NULL) {
+                    delete new_entry;
+                }
                 throw;
             }
         } else {
@@ -159,7 +161,9 @@ void dcore::DepartureHandler::update(dcore::DepartureEvent *subject)
 #endif /* NDEBUG_EVENTS */
             } catch (dcommon::QueueException &qe) {
                 std::cout << "Error scheduling acknowledge event: " << new_entry->getArrival() << " " << qe.what() << std::endl;
-                delete new_entry;
+                if (new_entry != NULL) {
+                    delete new_entry;
+                }
                 throw;
             }
         }

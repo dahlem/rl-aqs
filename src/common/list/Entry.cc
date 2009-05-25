@@ -18,15 +18,31 @@
  * Implementation of the @ref{Entry.hh} declaration.
  */
 #include "Entry.hh"
-namespace dcommon = des::common;
+
+#include <iostream>
 
 
-boost::uintmax_t dcommon::Entry::uid = 0;
+namespace des
+{
+namespace common
+{
 
 
-dcommon::Entry::Entry(double del, double a, int d, int o, int t)
+boost::uintmax_t Entry::uid = 0;
+
+
+Entry::Entry()
+    : delay(0.0), arrival(0.0), externalArrival(0), destination(0), origin(0), type(0),
+      event_path(50), event_arrivals(50)
+{
+    uid++;
+    id = uid;
+    gid = uid;
+}
+
+Entry::Entry(double del, double a, int d, int o, int t)
     : delay(del), arrival(a), externalArrival(a), destination(d), origin(o), type(t),
-      event_path(new StackInt()), event_arrivals(new StackDouble())
+      event_path(50), event_arrivals(50)
 {
     uid++;
     id = uid;
@@ -34,20 +50,24 @@ dcommon::Entry::Entry(double del, double a, int d, int o, int t)
 }
 
 
-dcommon::Entry::Entry(const Entry &p_entry)
-    : boost::intrusive::list_base_hook<>(p_entry),
+Entry::Entry(const Entry &p_entry)
+    : boost::intrusive::list_base_hook<>(),
       id(p_entry.id), delay(p_entry.delay), arrival(p_entry.arrival),
       externalArrival(p_entry.externalArrival),
       destination(p_entry.destination), origin(p_entry.origin), type(p_entry.type),
-      event_path(new StackInt(*p_entry.event_path)),
-      event_arrivals(new StackDouble(*p_entry.event_arrivals))
+      event_path(p_entry.event_path),
+      event_arrivals(p_entry.event_arrivals)
 {
     uid++;
     gid = uid;
 }
 
+Entry::~Entry()
+{
+}
 
-bool dcommon::Entry::operator< (const dcommon::Entry& rhs) const
+
+bool Entry::operator< (const Entry& rhs) const
 {
     if (arrival == rhs.arrival) {
         return gid < rhs.gid;
@@ -57,7 +77,7 @@ bool dcommon::Entry::operator< (const dcommon::Entry& rhs) const
 }
 
 
-bool dcommon::Entry::operator< (const dcommon::Entry& rhs)
+bool Entry::operator< (const Entry& rhs)
 {
     if (arrival == rhs.arrival) {
         return gid < rhs.gid;
@@ -67,14 +87,13 @@ bool dcommon::Entry::operator< (const dcommon::Entry& rhs)
 }
 
 
-
-void dcommon::Entry::pushArrival(double p_arrival)
+void Entry::pushArrival(double p_arrival)
 {
-    event_arrivals->push(p_arrival);
+    event_arrivals.push(p_arrival);
 }
 
 
-void dcommon::Entry::delayed(double p_delay, double p_newArrival, boost::int32_t p_type)
+void Entry::delayed(double p_delay, double p_newArrival, boost::int32_t p_type)
 {
     // update the delay
     delay += p_delay;
@@ -90,7 +109,7 @@ void dcommon::Entry::delayed(double p_delay, double p_newArrival, boost::int32_t
 }
 
 
-void dcommon::Entry::service(double p_departure, boost::int32_t p_type)
+void Entry::service(double p_departure, boost::int32_t p_type)
 {
     // remember the original arrival rate
     pushArrival(arrival);
@@ -105,7 +124,7 @@ void dcommon::Entry::service(double p_departure, boost::int32_t p_type)
 }
 
 
-void dcommon::Entry::depart(boost::int32_t p_destination, boost::int32_t p_type)
+void Entry::depart(boost::int32_t p_destination, boost::int32_t p_type)
 {
     destination = p_destination;
 
@@ -113,8 +132,7 @@ void dcommon::Entry::depart(boost::int32_t p_destination, boost::int32_t p_type)
 }
 
 
-
-void dcommon::Entry::acknowledge(boost::int32_t p_origin,
+void Entry::acknowledge(boost::int32_t p_origin,
                                  boost::int32_t p_destination,
                                  boost::int32_t p_type)
 {
@@ -125,8 +143,7 @@ void dcommon::Entry::acknowledge(boost::int32_t p_origin,
 }
 
 
-
-void dcommon::Entry::leave(boost::int32_t p_destination, boost::int32_t p_type)
+void Entry::leave(boost::int32_t p_destination, boost::int32_t p_type)
 {
     origin = destination;
     destination = p_destination;
@@ -135,79 +152,82 @@ void dcommon::Entry::leave(boost::int32_t p_destination, boost::int32_t p_type)
 }
 
 
-
-double dcommon::Entry::getDelay() const
+double Entry::getDelay() const
 {
     return delay;
 }
 
 
-boost::uintmax_t dcommon::Entry::getId() const
+boost::uintmax_t Entry::getId() const
 {
     return id;
 }
 
 
-double dcommon::Entry::getArrival() const
+double Entry::getArrival() const
 {
     return arrival;
 }
 
 
-int dcommon::Entry::getDestination() const
+int Entry::getDestination() const
 {
     return destination;
 }
 
 
-int dcommon::Entry::getOrigin() const
+int Entry::getOrigin() const
 {
     return origin;
 }
 
 
-int dcommon::Entry::getType() const
+int Entry::getType() const
 {
     return type;
 }
 
 
-void dcommon::Entry::pushEvent(int origin)
+void Entry::pushEvent(int origin)
 {
-    event_path->push(origin);
+    event_path.push(origin);
 }
 
 
-int dcommon::Entry::popEvent()
+int Entry::popEvent()
 {
-    int dest = event_path->top();
-    event_path->pop();
-    event_arrivals->pop();
+    int dest = event_path.top();
+    event_path.pop();
+    event_arrivals.pop();
 
     return dest;
 }
 
 
-bool dcommon::Entry::isEventQueueEmpty()
+bool Entry::isEventQueueEmpty()
 {
-    return event_path->empty();
+    return event_path.empty();
 }
 
 
-int dcommon::Entry::topEvent()
+int Entry::topEvent()
 {
-    return event_path->top();
+    return event_path.top();
 }
 
 
-double dcommon::Entry::topArrival()
+double Entry::topArrival()
 {
-    return event_arrivals->top();
+    return event_arrivals.top();
 }
 
 
-
-double dcommon::Entry::getExternalArrival()
+double Entry::getExternalArrival()
 {
     return externalArrival;
+}
+
+
+
+}
 }

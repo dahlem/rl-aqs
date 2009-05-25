@@ -114,7 +114,7 @@ CL::CL()
     po::options_description opt_lhs("Latin Hypercube Configuration");
     opt_lhs.add_options()
         (WITH_LHS.c_str(), po::value <bool>()->default_value(false), "Perform LHS sampling for the experiments.")
-        (LHS_optimal.c_str(), po::value <bool>()->default_value(false), "Perform optimal LHS sampling.")
+        (LHS_OPTIMAL.c_str(), po::value <bool>()->default_value(false), "Perform optimal LHS sampling.")
         (LHS_R.c_str(), po::value <boost::uint16_t>()->default_value(10), "set the number of optimisation iterations for oLHS.")
         (SIMULATIONS.c_str(), po::value <boost::uint32_t>()->default_value(7), "set the number of simulations to run.")
         (MINSIZE.c_str(), po::value <boost::uint16_t>()->default_value(

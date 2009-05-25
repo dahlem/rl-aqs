@@ -62,8 +62,19 @@ public:
         {}
 
     virtual boost::uint16_t operator() (
-        boost::uint16_t p_source, tValuesVecSP p_values, PAttr p_attr) = 0;
+        boost::uint16_t p_source, tValuesVec &p_values, PAttr p_attr) = 0;
 
+};
+
+class DummyPolicy : public Policy
+{
+public:
+    DummyPolicy()
+        {}
+
+    virtual boost::uint16_t operator() (
+        boost::uint16_t p_source, tValuesVec &p_values, PAttr p_attr)
+        {}
 };
 
 

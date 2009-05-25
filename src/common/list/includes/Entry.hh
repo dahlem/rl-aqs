@@ -29,15 +29,18 @@
 # define __STDC_CONSTANT_MACROS
 #endif /* __STDC_CONSTANT_MACROS */
 
+#if NDEBUG
+# include <boost/assert.hpp>
+#endif
+
 #include <iostream>
-#include <stack>
 #include <string>
 
 #include <boost/cstdint.hpp>
-#include <boost/scoped_ptr.hpp>
 #include <boost/shared_array.hpp>
 #include <boost/intrusive/list.hpp>
 
+#include "Stack.hh"
 
 
 namespace des
@@ -45,10 +48,8 @@ namespace des
 namespace common
 {
 
-typedef std::stack <int> StackInt;
-typedef std::stack <double> StackDouble;
-typedef boost::scoped_ptr <StackInt> StackIntSP;
-typedef boost::scoped_ptr <StackDouble> StackDoubleSP;
+typedef Stack <int> StackInt;
+typedef Stack <double> StackDouble;
 
 
 static const std::string HEADER = "uid,id,arrivalTime,delay,origin,destination,type,eventPathSize";
@@ -64,12 +65,13 @@ static const std::string HEADER = "uid,id,arrivalTime,delay,origin,destination,t
 class Entry : public boost::intrusive::list_base_hook<>
 {
 public:
+    Entry();
+
     explicit Entry(double del, double a, int d, int o, int t);
 
     explicit Entry(const Entry &p_entry);
 
-    ~Entry()
-        {}
+    ~Entry();
 
     static std::string header()
         {
@@ -109,7 +111,7 @@ public:
         {
             p_os << p_entry.gid << "," << p_entry.id << "," << p_entry.arrival << ","
                  << p_entry.delay << "," << p_entry.origin << "," << p_entry.destination << ","
-                 << p_entry.type << "," << p_entry.event_path->size();
+                 << p_entry.type << "," << p_entry.event_path.size();
 
             return p_os;
         }
@@ -117,10 +119,7 @@ public:
 
 
 private:
-    Entry()
-        {}
-
-    void operator=(const Entry& other) {  }
+    Entry& operator=(const Entry&) { return *this; }
 
     void pushArrival(double);
 
@@ -132,13 +131,13 @@ private:
     int destination;
     int origin;
     int type;
-    StackIntSP event_path;
-    StackDoubleSP event_arrivals;
+    StackInt event_path;
+    StackDouble event_arrivals;
     boost::uintmax_t gid;
 
 };
 
-typedef boost::intrusive::make_list <Entry>::type EntryList;
+typedef boost::intrusive::make_list <Entry, boost::intrusive::link_mode<boost::intrusive::auto_unlink> >::type EntryList;
 typedef boost::shared_array <EntryList> EntryListSA;
 typedef boost::shared_array <EntryListSA> EntryListSM;
 

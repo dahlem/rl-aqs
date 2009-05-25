@@ -23,6 +23,7 @@
 
 #ifndef NDEBUG
 # include <cassert>
+# include <boost/assert.hpp>
 #endif /* NDEBUG */
 
 #include <iostream>
@@ -181,7 +182,9 @@ bool EventProcessor::process()
                 std::cout << "** EventProcessor : post any event finished" << std::endl;
 #endif /* NDEBUG_EVENTS */
 
-                delete entry;
+                if (entry != NULL) {
+                    delete entry;
+                }
             }
         }
 

@@ -110,7 +110,9 @@ void dcore::EventGenerator::generate(
 #endif /* NDEBUG_EVENTS */
             } catch (dcommon::QueueException &qe) {
                 std::cout << "Error scheduling external arrival event: " << entry->getArrival() << " " << qe.what() << std::endl;
-                delete entry;
+                if (entry != NULL) {
+                    delete entry;
+                }
                 throw;
             }
             cur_arrival -= new_arrival;
@@ -135,7 +137,9 @@ void dcore::EventGenerator::generate(
 #endif /* NDEBUG_EVENTS */
             } catch (dcommon::QueueException &qe) {
                 std::cout << "Error scheduling external last arrival event: " << entry->getArrival() << " " << qe.what() << std::endl;
-                delete entry;
+                if (entry != NULL) {
+                    delete entry;
+                }
                 throw;
             }
 
@@ -176,7 +180,9 @@ void dcore::EventGenerator::generate(
 #endif /* NDEBUG_EVENTS */
     } catch (dcommon::QueueException &qe) {
         std::cout << "Error scheduling external arrival event: " << entry->getArrival() << " " << qe.what() << std::endl;
-        delete entry;
+        if (entry != NULL) {
+            delete entry;
+        }
         throw;
     }
 }
@@ -204,7 +210,9 @@ void dcore::EventGenerator::generateLogGraph(
 #endif /* NDEBUG_EVENTS */
         } catch (dcommon::QueueException &qe) {
             std::cout << "Error scheduling admin log graph event: " << entry->getArrival() << " " << qe.what() << std::endl;
-            delete entry;
+            if (entry != NULL) {
+                delete entry;
+            }
             throw;
         }
     }

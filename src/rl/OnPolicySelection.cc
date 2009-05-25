@@ -53,11 +53,30 @@ boost::int32_t OnPolicySelection::operator() (boost::int32_t p_source)
     dnet::Vertex vertex = boost::vertex(p_source, m_graph);
     boost::int32_t destination = vertex_next_action_map[vertex];
 
-    if (destination < 0) {
-        dnet::EdgeQValueMap edge_q_val_map = get(edge_q_val, m_graph);
-        dnet::VertexIndexMap vertex_index_map = get(boost::vertex_index, m_graph);
-        tValuesVecSP values = tValuesVecSP(new tValuesVec);
+#ifndef NDEBUG_EVENTS
+    std::cout << "Destination: " << destination << std::endl;
+#endif /* NDEBUG_EVENTS */
 
+    if (destination < 0) {
+#ifndef NDEBUG_EVENTS
+        std::cout << "get edge_q_val map" << std::endl;
+#endif /* NDEBUG_EVENTS */
+        dnet::EdgeQValueMap edge_q_val_map = get(edge_q_val, m_graph);
+
+#ifndef NDEBUG_EVENTS
+        std::cout << "get vertex_index map" << std::endl;
+#endif /* NDEBUG_EVENTS */
+        dnet::VertexIndexMap vertex_index_map = get(boost::vertex_index, m_graph);
+
+#ifndef NDEBUG_EVENTS
+        std::cout << "instantiate the vector of action/values: " << boost::out_degree(vertex, m_graph) << std::endl;
+#endif /* NDEBUG_EVENTS */
+        tValuesVec values(boost::out_degree(vertex, m_graph));
+
+#ifndef NDEBUG_EVENTS
+        std::cout << "populate the action/value vector" << std::endl;
+#endif /* NDEBUG_EVENTS */
+        int count = 0;
         BOOST_FOREACH(dnet::Edge e, (boost::out_edges(vertex, m_graph))) {
             tValues value;
             int target_vertex = vertex_index_map[boost::target(e, m_graph)];
@@ -67,7 +86,10 @@ boost::int32_t OnPolicySelection::operator() (boost::int32_t p_source)
 #ifndef NDEBUG_EVENTS
             std::cout << "Action-Value Pair: " << value.first << ", " << value.second << std::endl;
 #endif /* NDEBUG_EVENTS */
-            values->push_back(value);
+            values[count++] = value;
+#ifndef NDEBUG_EVENTS
+            std::cout << "Pushed value." << std::endl;
+#endif /* NDEBUG_EVENTS */
         }
 
         PAttr attr;

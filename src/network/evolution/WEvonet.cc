@@ -101,6 +101,8 @@ tGraphSP WEvonet::createBBVGraph(boost::uint32_t p_size, boost::uint32_t max_edg
         = get(vertex_next_event_time, *g);
     VertexAvgEventInSystemTimeMap vertex_avg_event_in_system_time_map
         = get(vertex_avg_event_in_system_time, *g);
+    EdgeIndexMap edge_index_map
+        = get(edge_eindex, *g);
 
     // set the graph properties
     boost::set_property(*g, graph_generator, 1);
@@ -128,6 +130,12 @@ tGraphSP WEvonet::createBBVGraph(boost::uint32_t p_size, boost::uint32_t max_edg
 
     advance(p_size - 1, g, num_edges_rng, uniform_rng, vertex_arrival_rng,
             fixed_edge_weight, max_arrival_rate, boost_arrival, boost_edge, max_edges);
+
+    // assign edge indeces
+    boost::uint16_t num_edges = 0;
+    BOOST_FOREACH(Edge e, (boost::edges(*g))) {
+        edge_index_map[e] = num_edges++;
+    }
 
     return g;
 }
@@ -173,8 +181,6 @@ void WEvonet::advance(boost::uint32_t p_steps, tGraphSP g,
         = get(vertex_next_action, *g);
     EdgeQValueMap edge_q_val_map
         = get(edge_q_val, *g);
-    EdgeIndexMap edge_index_map
-        = get(edge_eindex, *g);
     VertexNextEventTimeMap vertex_next_event_time_map
         = get(vertex_next_event_time, *g);
     VertexAvgEventInSystemTimeMap vertex_avg_event_in_system_time_map
@@ -264,7 +270,6 @@ void WEvonet::advance(boost::uint32_t p_steps, tGraphSP g,
                     if (!edge(v, z, *g).second) {
                         std::pair<Edge, bool> e = add_edge(v, z, *g);
                         edge_q_val_map[e.first] = 0.0;
-                        edge_index_map[e.first] = num_edges++;
                         break;
                     }
                 }
@@ -372,6 +377,7 @@ tGraphSP WEvonet::createERGraph(boost::uint32_t p_size, double fixed_edge_weight
                 ERGen(), p_size));
     }
 
+
     // set the graph properties
     boost::set_property(*g, graph_generator, 2);
 
@@ -462,10 +468,53 @@ tGraphSP WEvonet::createERGraph(boost::uint32_t p_size, double fixed_edge_weight
     cycle_detector <EdgesToBeRemoved> vis(edgesToBeRemoved);
     boost::depth_first_search(*g, visitor(vis));
 
+#ifndef NDEBUG_NETWORK
+    std::cout << "WEvonet -- Remove " << edgesToBeRemoved.size() << " edges." <<  std::endl;
+#endif /* NDEBUG_NETWORK */
+
     EdgesToBeRemoved::iterator it(edgesToBeRemoved.begin()),
         it_end(edgesToBeRemoved.end());
     for (; it != it_end; ++it) {
+#ifndef NDEBUG_NETWORK
+        std::cout << "WEvonet -- Remove edge: " << edge_index_map[*it] <<  std::endl;
+#endif /* NDEBUG_NETWORK */
         boost::remove_edge(*it, *g);
+    }
+
+    // assign ids, arrival and service rates
+#ifndef NDEBUG_NETWORK
+    std::cout << "WEvonet -- Assign IDs and arrival rates." <<  std::endl;
+#endif /* NDEBUG_NETWORK */
+
+    i = 0;
+    for (p_v = boost::vertices(*g); p_v.first != p_v.second; ++p_v.first) {
+        vertex_index_props_map[*p_v.first] = i++;
+        vertex_arrival_props_map[*p_v.first] =
+            (gsl_rng_uniform(p_vertex_arrival_rng.get()) * max_arrival_rate);
+        vertex_service_props_map[*p_v.first] =
+            boost_arrival * vertex_arrival_props_map[*p_v.first];
+        vertex_busy_map[*p_v.first] = false;
+        vertex_time_service_ends_map[*p_v.first] = 0.0;
+        vertex_number_in_queue_map[*p_v.first] = 0;
+        vertex_average_delay_in_queue_map[*p_v.first] = 0.0;
+        vertex_num_events_map[*p_v.first] = 0;
+        vertex_utilisation_map[*p_v.first] = 0.0;
+        vertex_Bdt_map[*p_v.first] = 0.0;
+        vertex_Qdt_map[*p_v.first] = 0.0;
+        vertex_last_event_time_map[*p_v.first] = 0.0;
+        vertex_expected_average_number_event_map[*p_v.first] = 0.0;
+        vertex_num_events_processed_map[*p_v.first] = 0;
+        vertex_mean_reward_map[*p_v.first] = 0.0;
+        vertex_next_action_map[*p_v.first] = -1;
+        vertex_next_event_time_map[*p_v.first] = 0.0;
+        vertex_avg_event_in_system_time_map[*p_v.first] = 0.0;
+    }
+
+    // re-assign edge indeces
+    num_edges = 0;
+    BOOST_FOREACH(Edge e, (boost::edges(*g))) {
+        edge_q_val_map[e] = 0.0;
+        edge_index_map[e] = num_edges++;
     }
 
     // balance the service rates
@@ -482,17 +531,17 @@ tGraphSP WEvonet::createERGraph(boost::uint32_t p_size, double fixed_edge_weight
 
     for (BalanceOrder::iterator it = balance_order.begin(); it != balance_order.end(); ++it) {
 #ifndef NDEBUG_NETWORK
-        std::cout << "WEvonet -- Balance vertex: " << vertexIndexMap[*it] << std::endl;
+        std::cout << "WEvonet -- Balance vertex: " << vertex_index_props_map[*it] << std::endl;
 #endif /* NDEBUG_NETWORK */
         if (boost::out_degree(*it, *g) > 0) {
 #ifndef NDEBUG_NETWORK
-            std::cout << "WEvonet -- Vertex[" << vertexIndexMap[*it] << "] outdegree: "
+            std::cout << "WEvonet -- Vertex[" << vertex_index_props_map[*it] << "] outdegree: "
                       << boost::out_degree(*it, *g) << std::endl;
 #endif /* NDEBUG_NETWORK */
             balance_vertex_strength(*it, g, fixed_edge_weight, boost_arrival, boost_edge);
 #ifndef NDEBUG_NETWORK
         } else {
-            std::cout << "WEvonet -- Vertex not balanced: " << vertexIndexMap[*it] << std::endl;
+            std::cout << "WEvonet -- Vertex not balanced: " << vertex_index_props_map[*it] << std::endl;
 #endif /* NDEBUG_NETWORK */
         }
     }

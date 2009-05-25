@@ -40,6 +40,7 @@ namespace bio = boost::iostreams;
 
 #include <cmath>
 #include <cstddef>
+#include <cstring>
 #include <limits>
 
 #include <gsl/gsl_math.h>
@@ -218,7 +219,7 @@ void Ladder::updateNEvents(boost::uint32_t p_rung, boost::int32_t size)
 }
 
 
-const bool Ladder::push(Entry *p_entry) throw (QueueException)
+bool Ladder::push(Entry *p_entry) throw (QueueException)
 {
 #ifndef NDEBUG_QUEUE
     std::cout << "Ladder -- Push event: " << const_cast <const Entry&> (*p_entry) << std::endl;
@@ -394,7 +395,7 @@ void Ladder::push(EntryList *p_list, double p_maxTS, double p_minTS)
     push(m_lowestRung, p_list);
 }
 
-EntryList* const Ladder::delist() throw (QueueException)
+EntryList* Ladder::delist() throw (QueueException)
 {
 #ifndef NDEBUG_QUEUE
     std::cout << "Ladder -- Delist" << std::endl;

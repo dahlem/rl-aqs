@@ -66,7 +66,7 @@ const std::string REPLICATIONS = "replications";
 const std::string SIMULATIONS = "simulations";
 const std::string ALPHA = "alpha";
 const std::string ERROR = "error";
-const std::string LHS_ITER = "lhs_r";
+const std::string LHS_R = "lhs_r";
 
 const std::string SIZE = "size";
 const std::string MINSIZE = "min_size";
@@ -131,12 +131,10 @@ struct desArgs_t {
     boost::int32_t generations;     /* number of generations for the event simulation */
     bool confidence;                /* run experiments within a confidence band */
     bool lhs;                       /* run experiments with lhs sampling */
-    bool lhs_optimal;               /* lhs sampling with optimal design */
     double alpha;                   /* 100(1 - alpha) confidence interval for the experiments */
     double error;                   /* error threshold for the ci calculations */
     boost::uint16_t replications;   /* initial replications required */
     boost::uint16_t simulations;    /* initial number of simulations */
-    boost::uint16_t lhs_r;          /* optimal design iterations */
 
     boost::uint16_t sim_num;        /* simulation number */
     boost::uint16_t rep_num;        /* replication number */
@@ -172,6 +170,8 @@ struct desArgs_t {
     double min_rl_policy_epsilon;                   /* min epsilon-greedy */
     double max_rl_policy_epsilon;                   /* max epsilon-greedy */
     double rl_policy_boltzmann_t;                   /* the temperature value for boltzmann */
+    bool lhs_optimal;               /* lhs sampling with optimal design */
+    boost::uint16_t lhs_r;          /* optimal design iterations */
 
     desArgs_t(desArgs_t const &args)
         : graph_filename(args.graph_filename), seeds_filename(args.seeds_filename), results_dir(args.results_dir),

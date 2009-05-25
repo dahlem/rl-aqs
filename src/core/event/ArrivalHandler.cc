@@ -112,8 +112,7 @@ void ArrivalHandler::update(ArrivalEvent *subject)
     }
 
 
-    dcommon::Entry *new_entry = new dcommon::Entry(
-        const_cast <const dcommon::Entry&> (*entry));
+    dcommon::Entry *new_entry = new dcommon::Entry(*entry);
 
 #ifndef NDEBUG_EVENTS
     std::cout << "** Arrival for vertex: " << entry->getDestination() << std::endl;
@@ -188,7 +187,10 @@ void ArrivalHandler::update(ArrivalEvent *subject)
 #endif /* NDEBUG_EVENTS */
     } catch (dcommon::QueueException &qe) {
         std::cout << "Error scheduling departure event: " << new_entry->getArrival() << " " << qe.what() << std::endl;
-        delete new_entry;
+        if (new_entry != NULL) {
+            delete new_entry;
+        }
+
         throw;
     }
 }

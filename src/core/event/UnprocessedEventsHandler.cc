@@ -69,7 +69,10 @@ void dcore::UnprocessedEventsHandler::update(dcore::PostEvent *subject)
             s.str("");
             s << std::setprecision(14) << const_cast<const dcommon::Entry&> (*entry);
             m_unprocessedEvents.print(s);
-            delete entry;
+
+            if (entry != NULL) {
+                delete entry;
+            }
 #ifndef NDEBUG
             num++;
 #endif /* NDEBUG */

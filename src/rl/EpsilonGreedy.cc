@@ -23,6 +23,7 @@
 
 #ifndef NDEBUG_EVENTS
 # include <iostream>
+# include <boost/foreach.hpp>
 #endif /* NDEBUG_EVENTS */
 
 #include <algorithm>
@@ -47,32 +48,39 @@ EpsilonGreedy::EpsilonGreedy(
 
 
 boost::uint16_t EpsilonGreedy::operator() (
-    boost::uint16_t p_source, tValuesVecSP p_values, PAttr p_attr)
+    boost::uint16_t p_source, tValuesVec &p_values, PAttr p_attr)
 {
     double epsilon = 0.0;
     boost::uint16_t action = 0;
 
-    if (p_values->size() > 1) {
-        std::sort((p_values.get())->begin(), (p_values.get())->end(), val_greater);
+    if (p_values.size() > 1) {
+        std::sort(p_values.begin(), p_values.end(), val_greater);
+
+#ifndef NDEBUG_EVENTS
+        std::cout << "Consider Action-Value Pairs... " << std::endl;
+        BOOST_FOREACH(tValues v, p_values) {
+            std::cout << "Action-Value Pair: " << v.first << ", " << v.second << std::endl;
+        }
+#endif /* NDEBUG_EVENTS */
 
         epsilon = gsl_rng_uniform(m_epsilon_rng.get());
         if (epsilon <= (1 - m_epsilon)) {
             // choose the greedy action
-            action = p_values->front().first;
+            action = p_values.front().first;
 #ifndef NDEBUG_EVENTS
             std::cout << "Greedy action: " << action << std::endl;
 #endif /* NDEBUG_EVENTS */
         } else {
             // choose randomly among the other ones
             boost::uint16_t index =
-                gsl_rng_uniform_int(m_uniform_rng.get(), p_values.get()->size() - 1) + 1;
-            action = (*(p_values.get()))[index].first;
+                gsl_rng_uniform_int(m_uniform_rng.get(), p_values.size() - 1) + 1;
+            action = p_values[index].first;
 #ifndef NDEBUG_EVENTS
             std::cout << "random action: " << action << std::endl;
 #endif /* NDEBUG_EVENTS */
         }
-    } else if (p_values->size() == 1) {
-        action = p_values->front().first;
+    } else if (p_values.size() == 1) {
+        action = p_values.front().first;
     }
 
     return action;

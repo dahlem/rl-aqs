@@ -1,4 +1,4 @@
-// Copyright (C) 2007, 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2007, 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This file is free software; as a special exception the author gives
 // unlimited permission to copy and/or distribute it, with or without
@@ -79,7 +79,7 @@ public:
      * @param Entry the entry structure to be enqueued into a queue.
      * @throws QueueException throw, if the queue cannot enqueue the entry.
      */
-    virtual const bool push(dcommon::Entry *p_entry) throw (dcommon::QueueException) = 0;
+    virtual bool push(dcommon::Entry *p_entry) throw (dcommon::QueueException) = 0;
 
 #ifdef HAVE_LADDERSTATS
 protected:

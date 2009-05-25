@@ -79,7 +79,7 @@ void GraphUtil::print_graphml(Graph &p_graph, const std::string& filename)
 
     if (out.is_open()) {
         boost::dynamic_properties dp = getProperties(p_graph);
-        boost::write_graphml(out, p_graph, dp, true);
+        boost::write_graphml(out, p_graph, get(boost::vertex_index, p_graph), dp, false);
         out.close();
     }
 }

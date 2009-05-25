@@ -78,8 +78,8 @@ public:
     dcommon::Entry* front() throw (dcommon::QueueException);
     void pop_front() throw (dcommon::QueueException);
 
-    const bool push(dcommon::Entry *p_entry) throw (dcommon::QueueException);
-    dcommon::EntryList* const delist() throw (dcommon::QueueException);
+    bool push(dcommon::Entry *p_entry) throw (dcommon::QueueException);
+    dcommon::EntryList* delist() throw (dcommon::QueueException);
 
 #ifndef NDEBUG
     void printEvents();

@@ -22,12 +22,12 @@ libcommonqueue_la_CPPFLAGS =                                          \
 	$(BOOST_CPPFLAGS)                                             \
 	$(GSL_CFLAGS)                                                 \
 	-I./includes                                                  \
-	-I../list/includes
+	-I$(top_srcdir)/src/common/list/includes
 
 libcommonqueue_la_LIBADD =                                            \
 	$(BOOST_LDFLAGS)                                              \
 	$(GSL_LIBS)                                                   \
-	../list/libcommonlist.la
+	$(top_srcdir)/src/common/list/libcommonlist.la
 
 include_HEADERS = includes
 
