@@ -141,13 +141,12 @@ if test "x$SAMPLINGDEBUGGING" = xno; then
 fi
 
 # Check for debug
+#  AC_DEFINE(BOOST_ENABLE_ASSERT_HANDLER, 1, [enable boost asserts])
 AC_ARG_ENABLE(debug, AS_HELP_STRING(
 		     [--enable-debug], 
 		     [enable debug @<:@default=no@:>@]), 
 		     [DEBUGGING=$enableval], [DEBUGGING=no])
-if test "x$DEBUGGING" = xyes; then
-  AC_DEFINE(BOOST_DISABLE_ASSERTS, 0, [disable boost asserts, if enabled])
-else
+if test "x$DEBUGGING" = xno; then
   AC_DEFINE(NDEBUG, 1, [define debugging, if disabled])
   AC_DEFINE(BOOST_DISABLE_ASSERTS, 1, [disable boost asserts, if enabled])
 fi
