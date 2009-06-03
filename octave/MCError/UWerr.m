@@ -1,5 +1,3 @@
-function [value,dvalue,ddvalue,tauint,dtauint,wopt,Qval] = UWerr(Data,Stau,Nrep,Name,Quantity,varargin)
-##
 ## call:
 ## [value,dvalue,ddvalue,tauint,dtauint,Qval] = ...
 ## UWerr(Data,Stau,Nrep,Name,Quantity,P1,P2,....)
@@ -58,13 +56,12 @@ function [value,dvalue,ddvalue,tauint,dtauint,wopt,Qval] = UWerr(Data,Stau,Nrep,
 ##             (goodness of fit to a constant)
 ##----------------------------------------------------------------------------
 ##
-
+function [value,dvalue,ddvalue,tauint,dtauint,wopt,Qval] = UWerr(Data,Stau,Nrep,Name,Quantity,varargin)
 ## mlock  # this locks the function in memory and preserves persistent variables
 ## between calls; munlock('UWerr') required before a clear command
 ## persistent f1 f2 f3  # figure handles for plot windows
 
 ## analyze input arguments:
-
   [N,Nalpha]=size(Data); ## number of measurements and observables
   results_outdir="./";
 
