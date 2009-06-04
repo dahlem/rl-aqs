@@ -80,15 +80,14 @@ function [chain, acceptanceRate] = \
     tuning(i) = log(tuning(i));
   endfor
 
+  [q_old, x.beta, x.sigma] = krig_likelihood(3./logitinv(x.theta, aTheta, bTheta), X, y, F, nugget);
+  phi_cand = logitinv(x.theta, aTheta, bTheta);
+  pi_old = sum(log(phi_cand - aTheta) + log(bTheta - phi_cand));
+
   for b = 0:(batches-1)
     for i = 1:batchlength
-
       ## gibbs steps
       for thetas = 1:dims
-        [q_old, x.beta, x.sigma] = krig_likelihood(3./logitinv(x.theta, aTheta, bTheta), X, y, F, nugget);
-        phi_cand = logitinv(x.theta, aTheta, bTheta);
-        pi_old = sum(log(phi_cand - aTheta) + log(bTheta - phi_cand));
-
         thetaj = x.theta(thetas);
         x.theta(thetas) = normrnd(x.theta(thetas), exp(tuning(thetas)));
 
@@ -107,6 +106,8 @@ function [chain, acceptanceRate] = \
           beta_accept = x.beta;
           theta_accept = x.theta;
           sigma_accept = x.sigma;
+	  q_old = q_new;
+	  pi_old = pi_new;
         else
           x.theta(thetas) = thetaj;
         endif
@@ -132,13 +133,18 @@ function [chain, acceptanceRate] = \
     endfor
 
     if (verbose)
-      printf("Batch: %d of %d\n", b, batches)
-      printf("Metropolis batch acceptance rate:\n")
+      fprintf(stdout, "Batch: %d of %d\n", b, batches);
+      fprintf(stdout, "Metropolis batch acceptance rate:\n");
 
       for j = 1:dims
-        printf("%1.3f\t", acceptanceRate(b+1, j))
+        fprintf(stdout, "   %1.3f   ", acceptanceRate(b+1, j));
       endfor
-      printf("\n")
+      fprintf(stdout, "\n");
+      for j = 1:dims
+        fprintf(stdout, "+/-%1.3f   ", tuning(j));
+      endfor
+      fprintf(stdout, "\n\n");
+      fflush(stdout);
     endif
   endfor
 
