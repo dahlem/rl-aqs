@@ -38,6 +38,10 @@ libcoreevent_la_SOURCES =                                                  \
 	DepartureHandler.cc                                                \
 	ResponseStatsHandler.cc                                            \
 	DefaultResponseHandler.cc                                          \
+	ExpertNormalHandler.cc                                             \
+	ExpertAbsoluteHandler.cc                                           \
+	ExpertPositiveHandler.cc                                           \
+	ExpertNegativeHandler.cc                                           \
 	RLResponseHandler.cc
 
 libcoreevent_la_CPPFLAGS =                                                 \

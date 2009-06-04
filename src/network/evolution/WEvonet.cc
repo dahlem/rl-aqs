@@ -101,6 +101,14 @@ tGraphSP WEvonet::createBBVGraph(boost::uint32_t p_size, boost::uint32_t max_edg
         = get(vertex_next_event_time, *g);
     VertexAvgEventInSystemTimeMap vertex_avg_event_in_system_time_map
         = get(vertex_avg_event_in_system_time, *g);
+    VertexExpertNormalMap vertex_expert_normal_map
+        = get(vertex_expert_normal, *g);
+    VertexExpertAbsoluteMap vertex_expert_absolute_map
+        = get(vertex_expert_absolute, *g);
+    VertexExpertPositiveMap vertex_expert_positive_map
+        = get(vertex_expert_positive, *g);
+    VertexExpertNegativeMap vertex_expert_negative_map
+        = get(vertex_expert_negative, *g);
     EdgeIndexMap edge_index_map
         = get(edge_eindex, *g);
 
@@ -127,6 +135,10 @@ tGraphSP WEvonet::createBBVGraph(boost::uint32_t p_size, boost::uint32_t max_edg
     vertex_next_action_map[v1] = -1;
     vertex_next_event_time_map[v1] = 0.0;
     vertex_avg_event_in_system_time_map[v1] = 0.0;
+    vertex_expert_normal_map[v1] = 0.0;
+    vertex_expert_absolute_map[v1] = 0.0;
+    vertex_expert_positive_map[v1] = 0.0;
+    vertex_expert_negative_map[v1] = 0.0;
 
     advance(p_size - 1, g, num_edges_rng, uniform_rng, vertex_arrival_rng,
             fixed_edge_weight, max_arrival_rate, boost_arrival, boost_edge, max_edges);
@@ -185,6 +197,14 @@ void WEvonet::advance(boost::uint32_t p_steps, tGraphSP g,
         = get(vertex_next_event_time, *g);
     VertexAvgEventInSystemTimeMap vertex_avg_event_in_system_time_map
         = get(vertex_avg_event_in_system_time, *g);
+    VertexExpertNormalMap vertex_expert_normal_map
+        = get(vertex_expert_normal, *g);
+    VertexExpertAbsoluteMap vertex_expert_absolute_map
+        = get(vertex_expert_absolute, *g);
+    VertexExpertPositiveMap vertex_expert_positive_map
+        = get(vertex_expert_positive, *g);
+    VertexExpertNegativeMap vertex_expert_negative_map
+        = get(vertex_expert_negative, *g);
 
     double accum_service_rate;
     size_t vertices;
@@ -242,6 +262,10 @@ void WEvonet::advance(boost::uint32_t p_steps, tGraphSP g,
         vertex_next_action_map[v] = -1;
         vertex_next_event_time_map[v] = 0.0;
         vertex_avg_event_in_system_time_map[v] = 0.0;
+        vertex_expert_normal_map[v] = 0.0;
+        vertex_expert_absolute_map[v] = 0.0;
+        vertex_expert_positive_map[v] = 0.0;
+        vertex_expert_negative_map[v] = 0.0;
 
         // select vertices to connect to
         boost::uint32_t edges = 0;
@@ -422,6 +446,14 @@ tGraphSP WEvonet::createERGraph(boost::uint32_t p_size, double fixed_edge_weight
         = get(vertex_next_event_time, *g);
     VertexAvgEventInSystemTimeMap vertex_avg_event_in_system_time_map
         = get(vertex_avg_event_in_system_time, *g);
+    VertexExpertNormalMap vertex_expert_normal_map
+        = get(vertex_expert_normal, *g);
+    VertexExpertAbsoluteMap vertex_expert_absolute_map
+        = get(vertex_expert_absolute, *g);
+    VertexExpertPositiveMap vertex_expert_positive_map
+        = get(vertex_expert_positive, *g);
+    VertexExpertNegativeMap vertex_expert_negative_map
+        = get(vertex_expert_negative, *g);
 
     // assign ids, arrival and service rates
 #ifndef NDEBUG_NETWORK
@@ -450,6 +482,10 @@ tGraphSP WEvonet::createERGraph(boost::uint32_t p_size, double fixed_edge_weight
         vertex_next_action_map[*p_v.first] = -1;
         vertex_next_event_time_map[*p_v.first] = 0.0;
         vertex_avg_event_in_system_time_map[*p_v.first] = 0.0;
+        vertex_expert_normal_map[*p_v.first] = 0.0;
+        vertex_expert_absolute_map[*p_v.first] = 0.0;
+        vertex_expert_positive_map[*p_v.first] = 0.0;
+        vertex_expert_negative_map[*p_v.first] = 0.0;
     }
 
     // assign edge indeces
@@ -508,6 +544,10 @@ tGraphSP WEvonet::createERGraph(boost::uint32_t p_size, double fixed_edge_weight
         vertex_next_action_map[*p_v.first] = -1;
         vertex_next_event_time_map[*p_v.first] = 0.0;
         vertex_avg_event_in_system_time_map[*p_v.first] = 0.0;
+        vertex_expert_normal_map[*p_v.first] = 0.0;
+        vertex_expert_absolute_map[*p_v.first] = 0.0;
+        vertex_expert_positive_map[*p_v.first] = 0.0;
+        vertex_expert_negative_map[*p_v.first] = 0.0;
     }
 
     // re-assign edge indeces

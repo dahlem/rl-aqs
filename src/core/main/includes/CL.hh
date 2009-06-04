@@ -101,6 +101,11 @@ const std::string MIN_RL_POLICY_EPSILON = "min_rl_policy_epsilon";
 const std::string MAX_RL_POLICY_EPSILON = "max_rl_policy_epsilon";
 const std::string RL_POLICY_BOLTZMANN_T = "rl_policy_boltzmann_t";
 
+const std::string CL_EXPERT_NORMAL = "expert_normal";
+const std::string CL_EXPERT_ABSOLUTE = "expert_absolute";
+const std::string CL_EXPERT_POSITIVE = "expert_positive";
+const std::string CL_EXPERT_NEGATIVE = "expert_negative";
+
 
 /** @typedef tOptDescSP
  * Specifies shared pointer to the boost options description
@@ -173,6 +178,11 @@ struct desArgs_t {
     bool lhs_optimal;               /* lhs sampling with optimal design */
     boost::uint16_t lhs_r;          /* optimal design iterations */
 
+    bool expert_normal;             /* expert metrics from "Expertness Based Cooperative Q-Learning" */
+    bool expert_absolute;
+    bool expert_positive;
+    bool expert_negative;
+
     desArgs_t(desArgs_t const &args)
         : graph_filename(args.graph_filename), seeds_filename(args.seeds_filename), results_dir(args.results_dir),
           events_unprocessed(args.events_unprocessed), events_processed(args.events_processed), add_sim(args.add_sim),
@@ -191,7 +201,8 @@ struct desArgs_t {
           rl_q_lambda(args.rl_q_lambda), min_rl_q_lambda(args.min_rl_q_lambda), max_rl_q_lambda(args.max_rl_q_lambda),
           rl_policy(args.rl_policy), rl_policy_epsilon(args.rl_policy_epsilon), min_rl_policy_epsilon(args.min_rl_policy_epsilon),
           max_rl_policy_epsilon(args.max_rl_policy_epsilon), rl_policy_boltzmann_t(args.rl_policy_boltzmann_t),
-          lhs_optimal(args.lhs_optimal), lhs_r(args.lhs_r)
+          lhs_optimal(args.lhs_optimal), lhs_r(args.lhs_r), expert_normal(args.expert_normal), expert_absolute(args.expert_absolute),
+          expert_positive(args.expert_positive), expert_negative(args.expert_negative)
         {}
 
     desArgs_t()
@@ -212,7 +223,8 @@ struct desArgs_t {
           rl_q_lambda(0.0), min_rl_q_lambda(0.0), max_rl_q_lambda(0.0),
           rl_policy(0), rl_policy_epsilon(0.0), min_rl_policy_epsilon(0.0),
           max_rl_policy_epsilon(0.0), rl_policy_boltzmann_t(0.0),
-          lhs_optimal(false), lhs_r(10)
+          lhs_optimal(false), lhs_r(10), expert_normal(false), expert_absolute(false),
+          expert_positive(false), expert_negative(false)
         {}
 
     friend std::ostream& operator <<(std::ostream &p_os, const desArgs_t &desArgs)

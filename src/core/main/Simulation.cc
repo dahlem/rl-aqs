@@ -74,6 +74,10 @@
 #include "Simulation.hh"
 #include "UnprocessedEventsHandler.hh"
 #include "UtilisationHandler.hh"
+#include "ExpertNormalHandler.hh"
+#include "ExpertAbsoluteHandler.hh"
+#include "ExpertPositiveHandler.hh"
+#include "ExpertNegativeHandler.hh"
 
 #include "Results.hh"
 namespace dio = des::io;
@@ -110,6 +114,10 @@ typedef boost::shared_ptr<drl::Selection> tSelectionSP;
 typedef boost::shared_ptr<DepartureHandler> tDepartureHandlerSP;
 typedef boost::shared_ptr<RLResponseHandler> tRLResponseHandlerSP;
 typedef boost::shared_ptr<DefaultResponseHandler> tDefaultResponseHandlerSP;
+typedef boost::shared_ptr<ExpertNormalHandler> tExpertNormalHandlerSP;
+typedef boost::shared_ptr<ExpertAbsoluteHandler> tExpertAbsoluteHandlerSP;
+typedef boost::shared_ptr<ExpertPositiveHandler> tExpertPositiveHandlerSP;
+typedef boost::shared_ptr<ExpertNegativeHandler> tExpertNegativeHandlerSP;
 
 
 Int32SA arrivalCRN(boost::uint16_t p_num_vertices)
@@ -468,6 +476,29 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
 
         arrivalEvent.attach(numEventsHandler);
         arrivalEvent.attach(arrivalHandler);
+
+        // configure the expert metrics
+        tExpertNormalHandlerSP expertNormalHandler;
+        tExpertAbsoluteHandlerSP expertAbsoluteHandler;
+        tExpertPositiveHandlerSP expertPositiveHandler;
+        tExpertNegativeHandlerSP expertNegativeHandler;
+
+        if (desArgs->expert_normal) {
+            expertNormalHandler = tExpertNormalHandlerSP(new ExpertNormalHandler(*graph));
+            ackEvent.attach(*expertNormalHandler);
+        }
+        if (desArgs->expert_absolute) {
+            expertAbsoluteHandler = tExpertAbsoluteHandlerSP(new ExpertAbsoluteHandler(*graph));
+            ackEvent.attach(*expertAbsoluteHandler);
+        }
+        if (desArgs->expert_positive) {
+            expertPositiveHandler = tExpertPositiveHandlerSP(new ExpertPositiveHandler(*graph));
+            ackEvent.attach(*expertPositiveHandler);
+        }
+        if (desArgs->expert_negative) {
+            expertNegativeHandler = tExpertNegativeHandlerSP(new ExpertNegativeHandler(*graph));
+            ackEvent.attach(*expertNegativeHandler);
+        }
 
         // configure reinforcement learning
         tPolicySP pol;

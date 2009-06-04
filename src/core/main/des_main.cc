@@ -273,13 +273,20 @@ int main(int argc, char *argv[])
         dio::Results sim_results(file, dir);
 
         if (desArgs->add_sim.empty()) {
-            csv_line << "sim_num," << dcore::ARGS_HEADER << ",actual_reps";
+            csv_line << "sim_num," << dcore::ARGS_HEADER << ",actual_reps,meanDelay,varDelay,meanAvgNumEvents,varAvgNumEvents,meanAvgEventInSystem,varAvgEventInSystem";
             sim_results.print(csv_line);
         }
 
         csv_line.str("");
-        csv_line << desArgs->sim_num << "," << const_cast <const dcore::desArgs_t&> (*desArgs)
-                 << "," << output.replications;
+        csv_line << desArgs->sim_num << ","
+                 << const_cast <const dcore::desArgs_t&> (*desArgs)
+                 << "," << output.replications
+                 << "," << output.mean_system_average_delay
+                 << "," << output.sd_system_average_delay
+                 << "," << output.mean_system_expected_average_num_in_queue
+                 << "," << output.sd_system_expected_average_num_in_queue
+                 << "," << output.mean_system_total_q
+                 << "," << output.sd_system_total_q;
         sim_results.print(csv_line);
     }
 #endif /* HAVE_MPI */

@@ -182,6 +182,10 @@ boost::dynamic_properties GraphUtil::getProperties(Graph &p_graph)
     dp.property(NEXT_ACTION, get(vertex_next_action, p_graph));
     dp.property(NEXT_EVENT_TIME, get(vertex_next_event_time, p_graph));
     dp.property(AVG_EVENT_IN_SYSTEM_TIME, get(vertex_avg_event_in_system_time, p_graph));
+    dp.property(EXPERT_NORMAL, get(vertex_expert_normal, p_graph));
+    dp.property(EXPERT_ABSOLUTE, get(vertex_expert_absolute, p_graph));
+    dp.property(EXPERT_POSITIVE, get(vertex_expert_positive, p_graph));
+    dp.property(EXPERT_NEGATIVE, get(vertex_expert_negative, p_graph));
 
     boost::ref_property_map<Graph*, boost::uint16_t>
         graphGenerator(get_property(p_graph, graph_generator));

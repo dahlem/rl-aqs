@@ -162,6 +162,30 @@ enum vertex_next_event_time_t { vertex_next_event_time = 1129 };
 enum vertex_avg_event_in_system_time_t { vertex_avg_event_in_system_time = 1130 };
 
 
+/** @enum vertex_expert_normal_t
+ * This enum extends the vertex properties by an expert metric (normal) argument
+ */
+enum vertex_expert_normal_t { vertex_expert_normal = 1131 };
+
+
+/** @enum vertex_expert_absolute_t
+ * This enum extends the vertex properties by an expert metric (absolute) argument
+ */
+enum vertex_expert_absolute_t { vertex_expert_absolute = 1132 };
+
+
+/** @enum vertex_expert_positive_t
+ * This enum extends the vertex properties by an expert metric (positive) argument
+ */
+enum vertex_expert_positive_t { vertex_expert_positive = 1133 };
+
+
+/** @enum vertex_expert_negative_t
+ * This enum extends the vertex properties by an expert metric (negative) argument
+ */
+enum vertex_expert_negative_t { vertex_expert_negative = 1134 };
+
+
 // install the vertex service rate property
 namespace boost
 {
@@ -182,6 +206,10 @@ BOOST_INSTALL_PROPERTY(vertex, mean_reward);
 BOOST_INSTALL_PROPERTY(vertex, next_action);
 BOOST_INSTALL_PROPERTY(vertex, next_event_time);
 BOOST_INSTALL_PROPERTY(vertex, avg_event_in_system_time);
+BOOST_INSTALL_PROPERTY(vertex, expert_normal);
+BOOST_INSTALL_PROPERTY(vertex, expert_absolute);
+BOOST_INSTALL_PROPERTY(vertex, expert_positive);
+BOOST_INSTALL_PROPERTY(vertex, expert_negative);
 BOOST_INSTALL_PROPERTY(graph, generator);
 BOOST_INSTALL_PROPERTY(edge, q_val);
 BOOST_INSTALL_PROPERTY(edge, eindex);
@@ -276,10 +304,30 @@ typedef boost::property <vertex_next_event_time_t, double, VertexNextActionPrope
  */
 typedef boost::property <vertex_avg_event_in_system_time_t, double, VertexNextEventTimeProperty> VertexAvgEventInSystemTimeProperty;
 
+/** @typedef VertexExpertNormalProperty
+ * Specifies the property for the normal expert metric of a vertex
+ */
+typedef boost::property <vertex_expert_normal_t, double, VertexAvgEventInSystemTimeProperty> VertexExpertNormalProperty;
+
+/** @typedef VertexExpertAbsoluteProperty
+ * Specifies the property for the absolute expert metric of a vertex
+ */
+typedef boost::property <vertex_expert_absolute_t, double, VertexExpertNormalProperty> VertexExpertAbsoluteProperty;
+
+/** @typedef VertexExpertPositiveProperty
+ * Specifies the property for the positive expert metric of a vertex
+ */
+typedef boost::property <vertex_expert_positive_t, double, VertexExpertAbsoluteProperty> VertexExpertPositiveProperty;
+
+/** @typedef VertexExpertNegativeProperty
+ * Specifies the property for the negative expert metric of a vertex
+ */
+typedef boost::property <vertex_expert_negative_t, double, VertexExpertPositiveProperty> VertexExpertNegativeProperty;
+
 /** @typedef VertexProperties
  * This type definition assembles all the properties for the vertices of the graph
  */
-typedef boost::property <boost::vertex_index_t, int, VertexAvgEventInSystemTimeProperty> VertexProperties;
+typedef boost::property <boost::vertex_index_t, int, VertexExpertNegativeProperty> VertexProperties;
 
 /** @typedef EdgeWeightProperty
  * Specifies the property for the edge weight
@@ -416,6 +464,26 @@ typedef boost::property_map <Graph, vertex_next_event_time_t>::type VertexNextEv
  */
 typedef boost::property_map <Graph, vertex_avg_event_in_system_time_t>::type VertexAvgEventInSystemTimeMap;
 
+/** @typedef VertexExpertNormalMap
+ * Specifies the map that stores the vertex attribute expert_normal
+ */
+typedef boost::property_map <Graph, vertex_expert_normal_t>::type VertexExpertNormalMap;
+
+/** @typedef VertexExpertAbsoluteMap
+ * Specifies the map that stores the vertex attribute expert_absolute
+ */
+typedef boost::property_map <Graph, vertex_expert_absolute_t>::type VertexExpertAbsoluteMap;
+
+/** @typedef VertexExpertPositiveMap
+ * Specifies the map that stores the vertex attribute expert_positive
+ */
+typedef boost::property_map <Graph, vertex_expert_positive_t>::type VertexExpertPositiveMap;
+
+/** @typedef VertexExpertNegativeMap
+ * Specifies the map that stores the vertex attribute expert_negative
+ */
+typedef boost::property_map <Graph, vertex_expert_negative_t>::type VertexExpertNegativeMap;
+
 /** @typedef EdgeQValueMap
  * Specifies the map that stores the edge q-value attribute
  */
@@ -550,6 +618,10 @@ const std::string NEXT_ACTION                       = "next_action";
 const std::string GRAPH_GENERATOR                   = "graph_generator";
 const std::string NEXT_EVENT_TIME                   = "next_event_time";
 const std::string AVG_EVENT_IN_SYSTEM_TIME          = "avg_event_in_system_time";
+const std::string EXPERT_NORMAL                     = "expert_normal";
+const std::string EXPERT_ABSOLUTE                   = "expert_absolute";
+const std::string EXPERT_POSITIVE                   = "expert_positive";
+const std::string EXPERT_NEGATIVE                   = "expert_negative";
 
 
     }

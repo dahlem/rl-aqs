@@ -174,6 +174,14 @@ CL::CL()
             100.0), "Temperator for Boltzmann policy.")
         ;
 
+    po::options_description opt_expert("Expert Metrics Configuration");
+    opt_expert.add_options()
+        (CL_EXPERT_NORMAL.c_str(), po::value <bool>()->default_value(false), "Set the normal expert metric.")
+        (CL_EXPERT_ABSOLUTE.c_str(), po::value <bool>()->default_value(false), "Set the absolute expert metric.")
+        (CL_EXPERT_POSITIVE.c_str(), po::value <bool>()->default_value(false), "Set the positive expert metric.")
+        (CL_EXPERT_NEGATIVE.c_str(), po::value <bool>()->default_value(false), "Set the negative expert metric.")
+        ;
+
     po::options_description opt_debug("Debug Configuration");
     opt_debug.add_options()
         (TRACE.c_str(), po::value <bool>()->default_value(false), "Set debugging.")
@@ -190,6 +198,7 @@ CL::CL()
     opt_desc->add(opt_rl);
     opt_desc->add(opt_rl_policy_epsilon);
     opt_desc->add(opt_rl_policy_boltzmann);
+    opt_desc->add(opt_expert);
     opt_desc->add(opt_debug);
 }
 
@@ -499,7 +508,28 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
         std::cout << "Maximum epsilon set to " << desArgs->max_rl_policy_epsilon << "." << std::endl;
     }
 
-    std::cout << std::endl << "7) Output Files" << std::endl;
+    std::cout << std::endl << "7) Expert Metrics Configuration" << std::endl;
+    if (vm.count(CL_EXPERT_NORMAL.c_str())) {
+        desArgs->expert_normal = vm[CL_EXPERT_NORMAL.c_str()].as <bool>();
+    }
+    std::cout << "Expert Normal enabled: " << desArgs->expert_normal << std::endl;
+
+    if (vm.count(CL_EXPERT_ABSOLUTE.c_str())) {
+        desArgs->expert_absolute = vm[CL_EXPERT_ABSOLUTE.c_str()].as <bool>();
+    }
+    std::cout << "Expert Absolute enabled: " << desArgs->expert_absolute << std::endl;
+
+    if (vm.count(CL_EXPERT_POSITIVE.c_str())) {
+        desArgs->expert_positive = vm[CL_EXPERT_POSITIVE.c_str()].as <bool>();
+    }
+    std::cout << "Expert Positive enabled: " << desArgs->expert_positive << std::endl;
+
+    if (vm.count(CL_EXPERT_NEGATIVE.c_str())) {
+        desArgs->expert_negative = vm[CL_EXPERT_NEGATIVE.c_str()].as <bool>();
+    }
+    std::cout << "Expert Negative enabled: " << desArgs->expert_negative << std::endl;
+
+    std::cout << std::endl << "8) Output Files" << std::endl;
     desArgs->events_unprocessed = "events_unprocessed.dat";
     desArgs->events_processed = "events_processed.dat";
 
@@ -510,7 +540,7 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
         desArgs->trace_event = vm[TRACE.c_str()].as <bool>();
     }
     if (desArgs->trace_event) {
-        std::cout << std::endl << "7) Debug Configuration" << std::endl;
+        std::cout << std::endl << "9) Debug Configuration" << std::endl;
         if (vm.count(VERTEX.c_str())) {
             desArgs->vertex = vm[VERTEX.c_str()].as <boost::int32_t>();
             std::cout << std::endl << "Trace vertex " << desArgs->vertex << "." << std::endl;
