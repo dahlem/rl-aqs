@@ -166,7 +166,11 @@ int main(int argc, char *argv[])
 
     // otherwise use the one supplied on the command-line
     if (desArgs->add_sim.empty()) {
-        dateStr = ddate::CurDateSingleton::getInstance().get();
+        if (desArgs->sim_dir.empty()) {
+            dateStr = ddate::CurDateSingleton::getInstance().get();
+        } else {
+            dateStr = desArgs->sim_dir;
+        }
     } else {
         dateStr = desArgs->add_sim;
     }

@@ -92,6 +92,7 @@ CL::CL()
         (BOOST_EDGE.c_str(), po::value <double>()->default_value(1.0), "Boost the edge weight.")
         (MAX_EDGES.c_str(), po::value<boost::uint32_t>()->default_value(UINT_MAX), "set the maximum number of edges to connect a new vertex")
         (ADD_SIM.c_str(), po::value<std::string>()->default_value(std::string("")), "add to existing experiments")
+        (SIMULATION_DIR.c_str(), po::value<std::string>()->default_value(std::string("")), "simulation results directory")
         ;
 
     po::options_description opt_soc("Social Network Configuration");
@@ -158,8 +159,8 @@ CL::CL()
         (RL_RESPONSE_REWARD.c_str(), po::value <std::string>(), "Reward Scalars above respective levels.")
         (RL_Q_ALPHA.c_str(), po::value <double>()->default_value(0.1), "Learning Rate.")
         (RL_Q_LAMBDA.c_str(), po::value <double>()->default_value(0.1), "Action-value Rate.")
-        (RL_POLICY.c_str(), po::value <boost::uint16_t>()->default_value(
-            1), "Policy (1=Epsilon-Greedy, 2=Boltzmann).")
+        (RL_POLICY.c_str(), po::value <boost::uint16_t>()->default_value(1), "Policy (1=Epsilon-Greedy, 2=Boltzmann).")
+        (CL_RL_STATE_IDS.c_str(), po::value <std::string>()->default_value(""), "State representation.")
        ;
 
     po::options_description opt_rl_policy_epsilon("RL Epsilon Policy Configuration");
@@ -293,6 +294,12 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
     std::cout << "Add to existing experiments "
               << desArgs->add_sim << "." << std::endl;
 
+    if (vm.count(SIMULATION_DIR.c_str())) {
+        desArgs->sim_dir = vm[SIMULATION_DIR.c_str()].as <std::string>();
+    }
+    std::cout << "Simulation results directory "
+              << desArgs->sim_dir << "." << std::endl;
+
     if (vm.count(STOPTIME.c_str())) {
         desArgs->stop_time = vm[STOPTIME.c_str()].as <double>();
     }
@@ -379,6 +386,26 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
             }
             std::cout << "RL Boltzmann T: " << desArgs->rl_policy_boltzmann_t << "." << std::endl;
         }
+
+        // parse the command-line
+        std::string ids;
+        if (vm.count(CL_RL_STATE_IDS.c_str())) {
+            ids = vm[CL_RL_STATE_IDS.c_str()].as <std::string>();
+        }
+
+        // tokenize and store in vector as ints
+        boost::tokenizer<> tok(ids);
+        BOOST_FOREACH(std::string id, tok)
+        {
+            desArgs->rl_state_representation.push_back(boost::lexical_cast<int>(id));
+        }
+
+        std::cout << "State IDs are: " << desArgs->rl_state_representation.size() << "." << std::endl;
+        BOOST_FOREACH(int id, desArgs->rl_state_representation)
+        {
+            std::cout << id << " ";
+        }
+        std::cout << std::endl;
     }
 
     std::cout << std::endl << "5) Confidence Interval Configuration" << std::endl;

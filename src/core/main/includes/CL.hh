@@ -28,6 +28,7 @@
 #endif /* __STDC_CONSTANT_MACROS */
 
 #include <string>
+#include <vector>
 
 #include <boost/cstdint.hpp>
 #include <boost/shared_array.hpp>
@@ -58,6 +59,7 @@ const std::string LOG_GRAPHS = "log_graphs";
 const std::string LOG_GRAPH_RATE = "graph_generation";
 const std::string LOG_EVENTS = "log_events";
 const std::string ADD_SIM = "add_sim";
+const std::string SIMULATION_DIR = "sim_dir";
 
 const std::string WITH_CI = "confidence";
 const std::string WITH_LHS = "lhs";
@@ -106,6 +108,9 @@ const std::string CL_EXPERT_ABSOLUTE = "expert_absolute";
 const std::string CL_EXPERT_POSITIVE = "expert_positive";
 const std::string CL_EXPERT_NEGATIVE = "expert_negative";
 
+const std::string CL_NN_HIDDENLAYER_NEURONS = "nn_hidden_neurons";
+const std::string CL_RL_STATE_IDS = "rl_state_representation";
+
 
 /** @typedef tOptDescSP
  * Specifies shared pointer to the boost options description
@@ -124,6 +129,7 @@ struct desArgs_t {
     std::string events_unprocessed; /* filename for the unprocessed events */
     std::string events_processed;   /* filename for the processed events */
     std::string add_sim;            /* add to existing experiments */
+    std::string sim_dir;            /* simulation results directory */
 
     bool trace_event;               /* trace an event */
     bool log_events;                /* log the events */
@@ -183,10 +189,14 @@ struct desArgs_t {
     bool expert_positive;
     bool expert_negative;
 
+    std::vector<int> rl_state_representation;
+    boost::uint16_t nn_hidden_neurons;
+
+
     desArgs_t(desArgs_t const &args)
         : graph_filename(args.graph_filename), seeds_filename(args.seeds_filename), results_dir(args.results_dir),
           events_unprocessed(args.events_unprocessed), events_processed(args.events_processed), add_sim(args.add_sim),
-          trace_event(args.trace_event), log_events(args.log_events), log_graphs(args.log_graphs),
+          sim_dir(args.sim_dir), trace_event(args.trace_event), log_events(args.log_events), log_graphs(args.log_graphs),
           vertex(args.vertex), graph_rate(args.graph_rate), max_arrival(args.max_arrival),
           stop_time(args.stop_time), generations(args.generations), confidence(args.confidence),
           lhs(args.lhs), alpha(args.alpha), error(args.error),
@@ -202,12 +212,13 @@ struct desArgs_t {
           rl_policy(args.rl_policy), rl_policy_epsilon(args.rl_policy_epsilon), min_rl_policy_epsilon(args.min_rl_policy_epsilon),
           max_rl_policy_epsilon(args.max_rl_policy_epsilon), rl_policy_boltzmann_t(args.rl_policy_boltzmann_t),
           lhs_optimal(args.lhs_optimal), lhs_r(args.lhs_r), expert_normal(args.expert_normal), expert_absolute(args.expert_absolute),
-          expert_positive(args.expert_positive), expert_negative(args.expert_negative)
+          expert_positive(args.expert_positive), expert_negative(args.expert_negative), rl_state_representation(args.rl_state_representation),
+          nn_hidden_neurons(args.nn_hidden_neurons)
         {}
 
     desArgs_t()
         : graph_filename(""), seeds_filename(""), results_dir(""),
-          events_unprocessed(""), events_processed(""), add_sim(""),
+          events_unprocessed(""), events_processed(""), add_sim(""), sim_dir(""),
           trace_event(0), log_events(0), log_graphs(0),
           vertex(0), graph_rate(0), max_arrival(0.0),
           stop_time(0.0), generations(0), confidence(0),
@@ -224,7 +235,8 @@ struct desArgs_t {
           rl_policy(0), rl_policy_epsilon(0.0), min_rl_policy_epsilon(0.0),
           max_rl_policy_epsilon(0.0), rl_policy_boltzmann_t(0.0),
           lhs_optimal(false), lhs_r(10), expert_normal(false), expert_absolute(false),
-          expert_positive(false), expert_negative(false)
+          expert_positive(false), expert_negative(false), rl_state_representation(),
+          nn_hidden_neurons(5)
         {}
 
     friend std::ostream& operator <<(std::ostream &p_os, const desArgs_t &desArgs)
