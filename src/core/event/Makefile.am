@@ -42,6 +42,7 @@ libcoreevent_la_SOURCES =                                                  \
 	ExpertAbsoluteHandler.cc                                           \
 	ExpertPositiveHandler.cc                                           \
 	ExpertNegativeHandler.cc                                           \
+	FullRLResponseHandler.cc                                           \
 	RLResponseHandler.cc
 
 libcoreevent_la_CPPFLAGS =                                                 \
@@ -57,6 +58,8 @@ libcoreevent_la_CPPFLAGS =                                                 \
 	-I$(top_srcdir)/src/common/queue/includes                          \
 	-I$(top_srcdir)/src/network/evolution/includes                     \
 	-I$(top_srcdir)/src/io/includes                                    \
+	-I$(top_srcdir)/src/nnet/includes                                  \
+	-I$(top_srcdir)/src/utils/vector/includes                          \
 	-I$(top_srcdir)/src/common/list/includes
 
 libcoreevent_la_LIBADD =                                                   \
@@ -71,6 +74,7 @@ libcoreevent_la_LIBADD =                                                   \
 	$(top_srcdir)/src/statistics/analysis/libstatisticsanalysis.la     \
 	$(top_srcdir)/src/network/evolution/libnetevo.la                   \
 	$(top_srcdir)/src/rl/librl.la                                      \
+	$(top_srcdir)/src/utils/vector/libutils_vector.la                  \
 	$(top_srcdir)/src/common/queue/libcommonqueue.la
 
 include_HEADERS = includes

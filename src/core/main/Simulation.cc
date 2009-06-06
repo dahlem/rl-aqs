@@ -58,6 +58,11 @@
 #include "EventGenerator.hh"
 #include "EventProcessor.hh"
 #include "ExpectedAverageEventInQueueHandler.hh"
+#include "ExpertNormalHandler.hh"
+#include "ExpertAbsoluteHandler.hh"
+#include "ExpertPositiveHandler.hh"
+#include "ExpertNegativeHandler.hh"
+#include "FullRLResponseHandler.hh"
 #include "GenerateEventHandler.hh"
 #include "LastArrivalEvent.hh"
 #include "LastEventHandler.hh"
@@ -74,10 +79,6 @@
 #include "Simulation.hh"
 #include "UnprocessedEventsHandler.hh"
 #include "UtilisationHandler.hh"
-#include "ExpertNormalHandler.hh"
-#include "ExpertAbsoluteHandler.hh"
-#include "ExpertPositiveHandler.hh"
-#include "ExpertNegativeHandler.hh"
 
 #include "Results.hh"
 namespace dio = des::io;
@@ -102,6 +103,17 @@ namespace dcommon = des::common;
 #include "GraphUtil.hh"
 namespace dnet = des::network;
 
+#include "Backpropagation.hh"
+#include "CL.hh"
+#include "ConjugateGradient.hh"
+#include "FeedforwardNetwork.hh"
+#include "Identity.hh"
+#include "HTangent.hh"
+#include "Logistic.hh"
+#include "MSE.hh"
+#include "Statistics.hh"
+namespace dnnet = des::nnet;
+
 
 namespace des
 {
@@ -113,6 +125,7 @@ typedef boost::shared_ptr<drl::Policy> tPolicySP;
 typedef boost::shared_ptr<drl::Selection> tSelectionSP;
 typedef boost::shared_ptr<DepartureHandler> tDepartureHandlerSP;
 typedef boost::shared_ptr<RLResponseHandler> tRLResponseHandlerSP;
+typedef boost::shared_ptr<FullRLResponseHandler> tFullRLResponseHandlerSP;
 typedef boost::shared_ptr<DefaultResponseHandler> tDefaultResponseHandlerSP;
 typedef boost::shared_ptr<ExpertNormalHandler> tExpertNormalHandlerSP;
 typedef boost::shared_ptr<ExpertAbsoluteHandler> tExpertAbsoluteHandlerSP;
@@ -505,6 +518,7 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
         tSelectionSP selection;
         tDepartureHandlerSP departureHandler;
         tRLResponseHandlerSP rlResponseHandler;
+        tFullRLResponseHandlerSP fullRlResponseHandler;
         tDefaultResponseHandlerSP defaultResponseHandler;
 
         if (desArgs->rl) {
@@ -539,10 +553,24 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
             departureHandler = tDepartureHandlerSP(new DepartureHandler(queue, *graph, *selection));
             departureEvent.attach(*departureHandler);
 
-            // configure the simple on-policy SARSA control RL handler
-            rlResponseHandler = tRLResponseHandlerSP(
-                new RLResponseHandler(*graph, rl_q_alpha, rl_q_lambda, *pol));
-            ackEvent.attach(*rlResponseHandler);
+            if (desArgs->rl_state_representation.size() > 0) {
+                boost::uint32_t seed = dsample::Seeds::getInstance().getSeed();
+                boost::uint32_t nn_uniform_rng_index
+                    = dsample::CRN::getInstance().init(seed);
+                dsample::CRN::getInstance().log(seed, "Neural Network uniform");
+
+                // configure the full reinforcement handler with function approximation
+                fullRlResponseHandler = tFullRLResponseHandlerSP(
+                    new FullRLResponseHandler(*graph, rl_q_alpha, rl_q_lambda, *pol,
+                                              desArgs->rl_state_representation, desArgs->nn_hidden_neurons,
+                                              nn_uniform_rng_index));
+                ackEvent.attach(*fullRlResponseHandler);
+            } else {
+                // configure the simple on-policy SARSA control RL handler
+                rlResponseHandler = tRLResponseHandlerSP(
+                    new RLResponseHandler(*graph, rl_q_alpha, rl_q_lambda, *pol));
+                ackEvent.attach(*rlResponseHandler);
+            }
         } else {
             pol = tPolicySP(new drl::DummyPolicy());
             selection = tSelectionSP(

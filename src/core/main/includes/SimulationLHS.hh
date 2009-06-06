@@ -149,8 +149,14 @@ public:
             }
 
             if (p_desArgs->lhs_optimal) {
+#ifndef NDEBUG
+                std::cout << "Perform optimal LHS sampling..." << std::endl;
+#endif /* NDEBUG */
                 dsample::LHS::sample(rng.get(), min, max, p_desArgs->simulations, &sample, p_desArgs->lhs_r);
             } else {
+#ifndef NDEBUG
+                std::cout << "Perform LHS sampling..." << std::endl;
+#endif /* NDEBUG */
                 dsample::LHS::sample(rng.get(), min, max, p_desArgs->simulations, &sample);
             }
 
@@ -167,6 +173,10 @@ public:
                 csv_line << "sim_num," << ARGS_HEADER << ",actual_reps,meanDelay,varDelay,meanAvgNumEvents,varAvgNumEvents,meanAvgEventInSystem,varAvgEventInSystem";
                 sim_output.print(csv_line);
             }
+
+#ifndef NDEBUG
+            std::cout << "Perform " << sample->size1 << " simulations..." << std::endl;
+#endif /* NDEBUG */
 
             // 3. run experiment
             for (boost::uint16_t i = 0; i < sample->size1; ++i) {

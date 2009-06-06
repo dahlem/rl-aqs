@@ -14,23 +14,25 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-/** @file Policy.hh
- * Declaration of an abstract policy class
+/** @file RLStateHelper.hh
+ * Helper methods to retrieve RL State information
  *
  * @author Dominik Dahlem
  */
-#ifndef __DES_RL_POLICY_HH__
-#define __DES_RL_POLICY_HH__
+#ifndef __DES_RL_RLSTATEHELPER_HH__
+#define __DES_RL_RLSTATEHELPER_HH__
 
 #ifndef __STDC_CONSTANT_MACROS
 # define __STDC_CONSTANT_MACROS
 #endif /* __STDC_CONSTANT_MACROS */
 
-#include <utility>
+
 #include <vector>
 
-#include <boost/cstdint.hpp>
-#include <boost/shared_ptr.hpp>
+#include <boost/shared_array.hpp>
+
+#include "DirectedGraph.hh"
+namespace dnet = des::network;
 
 
 namespace des
@@ -38,45 +40,24 @@ namespace des
 namespace rl
 {
 
-
-typedef std::pair<boost::uint16_t, double> tValues;
-typedef std::vector<tValues> tValuesVec;
-typedef boost::shared_ptr<tValuesVec> tValuesVecSP;
+typedef boost::shared_array <double> DoubleSA;
 
 
-bool val_greater(tValues const& v1, tValues const& v2);
-
-
-struct PAttr
-{
-    double tau; // boltzmann policy temperature
-};
-
-class Policy
+class RLStateHelper
 {
 public:
-    Policy()
+    static void fillStateVector(dnet::Edge &p_edge,
+                                dnet::Graph &p_graph,
+                                std::vector<int> &p_stateRepresentation,
+                                DoubleSA p_inputs);
+    
+
+private:
+    RLStateHelper()
+        {}
+    ~RLStateHelper()
         {}
 
-    virtual ~Policy()
-        {}
-
-    virtual boost::uint16_t operator() (
-        boost::uint16_t p_source, tValuesVec &p_values, PAttr p_attr) = 0;
-
-};
-
-class DummyPolicy : public Policy
-{
-public:
-    DummyPolicy()
-        {}
-
-    virtual boost::uint16_t operator() (
-        boost::uint16_t p_source, tValuesVec &p_values, PAttr p_attr)
-        {
-            return 0;
-        }
 };
 
 
@@ -85,4 +66,4 @@ public:
 
 
 
-#endif /* __DES_RL_POLICY_HH__ */
+#endif /* __DES_RL_RLSTATEHELPER_HH__ */

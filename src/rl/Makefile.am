@@ -15,6 +15,7 @@ librl_la_SOURCES =                                                      \
 	EpsilonGreedy.cc                                                \
 	BoltzmannPolicy.cc                                              \
 	RandomSelection.cc                                              \
+	RLStateHelper.cc                                                \
 	OnPolicySelection.cc
 
 librl_la_CPPFLAGS =                                                     \

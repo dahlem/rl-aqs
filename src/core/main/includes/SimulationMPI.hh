@@ -92,23 +92,31 @@ public:
             MPI_Status status;
             int jobs = 1;
             int rc;
+            int runs, already_run;
 
             // 1. perform lhs
+            // calculate the number of simulations
+            if (p_desArgs->lhs_optimal) {
+                runs = (1 << p_desArgs->simulations) + 1;
+            } else {
+                runs = p_desArgs->simulations;
+            }
+
             gsl_vector *min, *max;
             gsl_matrix *sample;
-            int *simReplications = new int[p_desArgs->simulations];
+            int *simReplications = new int[runs];
 
             // keep track of the significance of the experiments and their replication count
-            tBoolSA areExpsSignificant = tBoolSA(new bool[p_desArgs->simulations]);
-            for (boost::uint16_t i = 0; i < p_desArgs->simulations; ++i) {
+            tBoolSA areExpsSignificant = tBoolSA(new bool[runs]);
+            for (boost::uint16_t i = 0; i < runs; ++i) {
                 areExpsSignificant[i] = false;
                 simReplications[i] = p_desArgs->replications;
             }
 
             // online statistics for the experiments
-            std::vector<dstats::OnlineStats> avgDelays(p_desArgs->simulations);
-            std::vector<dstats::OnlineStats> avgNumEvents(p_desArgs->simulations);
-            std::vector<dstats::OnlineStats> totalQs(p_desArgs->simulations);
+            std::vector<dstats::OnlineStats> avgDelays(runs);
+            std::vector<dstats::OnlineStats> avgNumEvents(runs);
+            std::vector<dstats::OnlineStats> totalQs(runs);
             std::vector<int> idleNodes;
 
             // 2. init the crn for the lhs permutation
@@ -168,8 +176,14 @@ public:
                 }
 
                 if (p_desArgs->lhs_optimal) {
+#ifndef NDEBUG
+                    std::cout << "Perform optimal LHS sampling..." << std::endl;
+#endif /* NDEBUG */
                     dsample::LHS::sample(rng.get(), min, max, p_desArgs->simulations, &sample, p_desArgs->lhs_r);
                 } else {
+#ifndef NDEBUG
+                    std::cout << "Perform LHS sampling..." << std::endl;
+#endif /* NDEBUG */
                     dsample::LHS::sample(rng.get(), min, max, p_desArgs->simulations, &sample);
                 }
             }
@@ -179,27 +193,31 @@ public:
 
             simDir << p_desArgs->results_dir << "/";
 
-            std::stringstream *sim_results_lines = new std::stringstream[p_desArgs->simulations];
+            std::stringstream *sim_results_lines = new std::stringstream[runs];
 
             std::string dir = simDir.str();
             std::string file = "simulations.dat";
 
             dio::Results sim_results(file, dir);
 
-            if (p_desArgs->add_sim.empty()) {
+            // adjust the simulation number by already_run
+            if (!p_desArgs->add_sim.empty()) {
+                already_run = dio::FsUtils::directories(dir) + 1;
+            } else {
                 csv_line << "sim_num," << ARGS_HEADER << ",actual_reps,meanDelay,varDelay,meanAvgNumEvents,varAvgNumEvents,meanAvgEventInSystem,varAvgEventInSystem";
                 sim_results.print(csv_line);
+                already_run = 0;
             }
             csv_line.str("");
 
             // 3. run experiment
-            for (boost::uint16_t i = 0; i < sample->size1; ++i) {
+            for (boost::uint16_t i = 0; i < runs; ++i) {
                 // start initial number of experiments
                 // copy the desArgs into the mpi desargs
                 tSimArgsMPI desArgsMPI;
 
                 // set the i-th experiment conditions
-                desArgsMPI.sim_num = i + 1;
+                desArgsMPI.sim_num = i + 1 + already_run;
                 assignParams(p_desArgs, desArgsMPI, sample);
 
                 for (desArgsMPI.rep_num = 1; desArgsMPI.rep_num <= p_desArgs->replications;
@@ -264,7 +282,7 @@ public:
             }
 
             // 4. continue with as many experiments as needed
-            while (!areAllSignificant(areExpsSignificant, p_desArgs->simulations)) {
+            while (!areAllSignificant(areExpsSignificant, runs)) {
                 sim_output *output = new sim_output[1];
 
 #ifndef NDEBUG
@@ -401,7 +419,7 @@ public:
             std::cout.flush();
 #endif /* NDEBUG */
 
-            for (boost::uint16_t i = 0; i < p_desArgs->simulations; ++i) {
+            for (boost::uint16_t i = 0; i < runs; ++i) {
                 sim_results.print(sim_results_lines[i]);
             }
 

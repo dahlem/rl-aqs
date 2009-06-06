@@ -161,6 +161,7 @@ CL::CL()
         (RL_Q_LAMBDA.c_str(), po::value <double>()->default_value(0.1), "Action-value Rate.")
         (RL_POLICY.c_str(), po::value <boost::uint16_t>()->default_value(1), "Policy (1=Epsilon-Greedy, 2=Boltzmann).")
         (CL_RL_STATE_IDS.c_str(), po::value <std::string>()->default_value(""), "State representation.")
+        (CL_NN_HIDDENLAYER_NEURONS.c_str(), po::value <boost::uint16_t>()->default_value(5), "Hidden number of Neurons.")
        ;
 
     po::options_description opt_rl_policy_epsilon("RL Epsilon Policy Configuration");
@@ -406,6 +407,11 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
             std::cout << id << " ";
         }
         std::cout << std::endl;
+
+        if (vm.count(CL_NN_HIDDENLAYER_NEURONS.c_str())) {
+            desArgs->nn_hidden_neurons = vm[CL_NN_HIDDENLAYER_NEURONS.c_str()].as <boost::uint16_t>();
+        }
+        std::cout << "Hidden Neurons: " << desArgs->nn_hidden_neurons << "." << std::endl;
     }
 
     std::cout << std::endl << "5) Confidence Interval Configuration" << std::endl;

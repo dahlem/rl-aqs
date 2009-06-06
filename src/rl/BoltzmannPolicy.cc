@@ -42,6 +42,33 @@ namespace des
 namespace rl
 {
 
+/** @class OREqZero
+ * Find out whether an element in a sequence evaluates to zero
+ */
+class OREqZero {
+private:
+    bool m_result;
+
+public:
+    OREqZero () : m_result(false)
+        {}
+
+    /** @fn void operator() (int elem)
+     * Process an element of the sequence and evaluate whether it is equal to zero
+     */
+    void operator() (tValues elem)
+        {
+            m_result = m_result || (elem.second == 0.0);
+        }
+
+    /** @fn bool value()
+     * @return return the result of the logical OR of all elements evaluated to zero
+     */
+    bool value() {
+        return m_result;
+    }
+};
+
 
 
 BoltzmannPolicy::BoltzmannPolicy(
@@ -62,26 +89,44 @@ boost::uint16_t BoltzmannPolicy::operator() (
 
     if (p_values.size() > 1) {
         double tau = m_tau;
+        tValuesVec probabilities;
 
+        OREqZero orEqZero = std::for_each(p_values.begin(), p_values.end(), OREqZero());
+
+        // if one element in the vector is zero, then we can't log transform
+        if (orEqZero.value()) {
+            double equalProb = 1.0 / p_values.size();
+
+            for (boost::uint16_t i = 0; i < p_values.size(); ++i) {
+                tValues prob;
+
+                prob.first = p_values[i].first;
+                prob.second = equalProb;
+                probabilities.push_back(prob);
+            }
+        } else {
 //         tau = p_attr->tau;
 
-        // calculate the exps first
-        std::vector<double> exps;
-        BOOST_FOREACH(tValues v, p_values) {
-            exps.push_back(exp(v.second/tau));
+            // calculate the exps first
+            std::vector<double> exps;
+            BOOST_FOREACH(tValues v, p_values) {
+                // log-transform the v.second value
+                double logTransform = -log10(-v.second);
+                exps.push_back(exp(logTransform/tau));
+            }
+
+            // calculate the denominator, i.e. sum of all exps
+            double denominator = accumulate(exps.begin(), exps.end(), 0);
+
+            for (boost::uint16_t i = 0; i < exps.size(); ++i) {
+                tValues prob;
+
+                prob.first = p_values[i].first;
+                prob.second = exps[i]/denominator;
+                probabilities.push_back(prob);
+            }
         }
 
-        // calculate the denominator, i.e. sum of all exps
-        double denominator = accumulate(exps.begin(), exps.end(), 0);
-
-        tValuesVec probabilities;
-        for (boost::uint16_t i = 0; i < exps.size(); ++i) {
-            tValues prob;
-
-            prob.first = p_values[i].first;
-            prob.second = exps[i]/denominator;
-            probabilities.push_back(prob);
-        }
 
         // sort the vector in descending order
         std::sort(probabilities.begin(), probabilities.end(), val_greater);

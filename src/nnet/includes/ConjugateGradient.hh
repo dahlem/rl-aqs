@@ -31,6 +31,8 @@
 #include <boost/cstdint.hpp>
 #include <boost/shared_array.hpp>
 
+#include <gsl/gsl_math.h>
+
 #include "Vector.hh"
 namespace dutil = des::utils;
 
@@ -128,7 +130,7 @@ public:
                 p_targets, m_optimalTrainingRate, error, weights, m_trainingDirection);
 
             // double - double < tol
-            if (m_optimalTrainingRate == 0.0) {
+            if (gsl_fcmp(m_optimalTrainingRate, 0.0, 1e-9) == 0) {
                 return;
             }
 
