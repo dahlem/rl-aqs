@@ -44,9 +44,6 @@ template <class NeuralNetwork,
 class MSE
 {
 public:
-    MSE()
-        {}
-
     MSE(NeuralNetwork p_nnet)
         : m_nnet(p_nnet), m_sse(0.0), m_size(0)
         {
@@ -193,6 +190,9 @@ public:
 
 
 private:
+    MSE()
+        {}
+
     MSE(const MSE&)
         {}
 
