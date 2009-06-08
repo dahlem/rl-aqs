@@ -116,7 +116,7 @@ boost::uint16_t BoltzmannPolicy::operator() (
             }
 
             // calculate the denominator, i.e. sum of all exps
-            double denominator = accumulate(exps.begin(), exps.end(), 0);
+            double denominator = accumulate(exps.begin(), exps.end(), 0.0);
 
             for (boost::uint16_t i = 0; i < exps.size(); ++i) {
                 tValues prob;
