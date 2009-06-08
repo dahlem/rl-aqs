@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This file is free software; as a spevectoral exception the author gives
 // unlimited permission to copy and/or distribute it, with or without
@@ -46,9 +46,6 @@ typedef boost::shared_ptr <FFNet> FFNetSP;
 typedef dnnet::MSE <FFNetSP, dnnet::HTangent, dnnet::Identity> ObjMse;
 typedef boost::shared_ptr <ObjMse> ObjMseSP;
 
-typedef dnnet::Statistics <FFNetSP, ObjMse> FFNetStats;
-typedef boost::shared_ptr <FFNetStats> FFNetStatsSP;
-
 typedef dnnet::Backpropagation <FFNetSP, ObjMseSP> BackProp;
 typedef boost::shared_ptr <BackProp> BackPropSP;
 
@@ -65,24 +62,23 @@ double gaussian(double x)
 
 void printSample(FFNetSP p_net, dnnet::tNnetArgsSP p_netArgs)
 {
-    FFNetStatsSP stats = FFNetStatsSP(new FFNetStats(p_net));
     std::ofstream out(p_netArgs->filename.c_str(), std::ios::out);
 
     if (out.is_open()) {
-        double result;
         double step = 6.0 / 600;
         double start = -3.0;
         DoubleSA input = DoubleSA(new double[1]);
         DoubleSA target = DoubleSA(new double[1]);
+        DoubleSA output = DoubleSA(new double[1]);
 
         out << "x,y,error" << std::endl;
         for (boost::uint16_t i = 0; i <= 600; ++i) {
             input[0] = start + i * step;
-            result = p_net->present(input)[0];
+            output[0] = p_net->present(input)[0];
 
             target[0] = gaussian(input[0]);
-            out << input[0] << "," << result
-                << "," << stats->error(target) << std::endl;
+            out << input[0] << "," << output[0]
+                << "," << dnnet::Statistics::error(target, output, p_net->getNumOutputs()) << std::endl;
         }
 
         out.close();

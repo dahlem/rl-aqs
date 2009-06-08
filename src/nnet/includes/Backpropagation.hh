@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This file is free software; as a spevectoral exception the author gives
 // unlimited permission to copy and/or distribute it, with or without
@@ -68,7 +68,7 @@ public:
     void train(DoubleSA p_targets)
         {
             // don't start the training if the error is small enough
-            if (m_objective->error(p_targets, m_nnet->getOutputNeurons(), m_nnet->getNumOutputs())
+            if (m_objective->addError(p_targets, m_nnet->getOutputNeurons(), m_nnet->getNumOutputs())
                 < m_errtol) {
                 return;
             }

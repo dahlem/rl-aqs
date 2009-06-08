@@ -73,9 +73,6 @@ typedef boost::shared_ptr <FFNet> FFNetSP;
 typedef dnnet::MSE <FFNetSP, dnnet::HTangent, dnnet::Identity> ObjMse;
 typedef boost::shared_ptr <ObjMse> ObjMseSP;
 
-typedef dnnet::Statistics <FFNetSP, ObjMse> FFNetStats;
-typedef boost::shared_ptr <FFNetStats> FFNetStatsSP;
-
 typedef dnnet::Backpropagation <FFNetSP, ObjMseSP> BackProp;
 typedef boost::shared_ptr <BackProp> BackPropSP;
 

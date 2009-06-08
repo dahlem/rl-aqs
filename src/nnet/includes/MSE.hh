@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This file is free software; as a spevectoral exception the author gives
 // unlimited permission to copy and/or distribute it, with or without
@@ -48,7 +48,7 @@ public:
         {}
 
     MSE(NeuralNetwork p_nnet)
-        : m_nnet(p_nnet)
+        : m_nnet(p_nnet), m_sse(0.0), m_size(0)
         {
             init();
         }
@@ -82,7 +82,7 @@ public:
             DoubleSA newOutputs = m_nnet->present(origInputs);
 
             // calc the error
-            double error = MSE::error(p_targets, newOutputs, m_nnet->getNumOutputs());
+            double err = error(p_targets, newOutputs, m_nnet->getNumOutputs());
 
             // reset the weights to the old values
             index = 0;
@@ -101,19 +101,40 @@ public:
                 }
             }
 
-            return error;
+            return err;
         }
 
-    static double error(DoubleSA p_targets, DoubleSA p_outputs, boost::uint16_t p_size)
+    inline
+    double error()
         {
-            double d, sum = 0.0;
+            return m_sse / static_cast<double> (m_size);
+        }
+
+    double addError(DoubleSA p_targets, DoubleSA p_outputs, boost::uint16_t p_size)
+        {
+            double d = 0.0;
+            m_size++;
 
             for (boost::uint16_t i = 0; i < p_size; ++i) {
                 d = p_targets[i] - p_outputs[i];
-                sum += d * d;
+                m_sse += d * d;
             }
 
-            return sum / static_cast<double> (p_size);
+            return m_sse / static_cast<double> (m_size);
+        }
+
+    double error(DoubleSA p_targets, DoubleSA p_outputs, boost::uint16_t p_size)
+        {
+            double d = 0.0;
+            double sse = m_sse;
+            boost::uint32_t size = m_size + 1;
+
+            for (boost::uint16_t i = 0; i < p_size; ++i) {
+                d = p_targets[i] - p_outputs[i];
+                sse += d * d;
+            }
+
+            return sse / static_cast<double> (size);
         }
 
     void calc_gradient(DoubleSA p_targets)
@@ -240,6 +261,9 @@ private:
 
     DoubleSA m_deltaHidden;
     DoubleSA m_deltaOutput;
+
+    double m_sse;
+    boost::uint32_t m_size;
 
 };
 

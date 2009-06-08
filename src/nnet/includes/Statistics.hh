@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This file is free software; as a spevectoral exception the author gives
 // unlimited permission to copy and/or distribute it, with or without
@@ -30,29 +30,30 @@ namespace des
 namespace nnet
 {
 
-template <class NeuralNetwork, class Objective>
 class Statistics
 {
-public:
-    Statistics(NeuralNetwork p_nnet)
-        : m_nnet(p_nnet)
+private:
+    Statistics()
         {
         }
 
     ~Statistics()
         {}
 
+public:
     inline
-    double error(DoubleSA p_targets)
+    static double error(DoubleSA p_targets, DoubleSA p_outputs, boost::uint16_t p_size)
         {
-            return  Objective::error(p_targets,
-                                     m_nnet->getOutputNeurons(),
-                                     m_nnet->getNumOutputs());
+            double error = 0.0;
+            double temp = 0.0;
 
+            for (boost::uint16_t i = 0; i < p_size; ++i) {
+                temp = p_targets[i] - p_outputs[i];
+                error += temp * temp;
+            }
+
+            return error;
         }
-
-private:
-    NeuralNetwork m_nnet;
 };
 
 }

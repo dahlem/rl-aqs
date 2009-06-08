@@ -91,7 +91,7 @@ public:
 
     void train(DoubleSA p_targets)
         {
-            double error = m_objective->error(
+            double error = m_objective->addError(
                 p_targets, m_nnet->getOutputNeurons(), m_nnet->getNumOutputs());
 
             // don't start the training if the error is small enough
@@ -109,9 +109,8 @@ public:
                     m_trainingDirection[i] = -gradient[i];
                 }
             } else {
-                DoubleSA trainingDir =
+                m_trainingDirection =
                     getTrainingDirection(m_gradientOld, gradient, m_trainingDirection);
-                m_trainingDirection = trainingDir;
             }
 
             double slope = dutil::Vector::dotproduct(
