@@ -401,7 +401,7 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
             desArgs->rl_state_representation.push_back(boost::lexical_cast<int>(id));
         }
 
-        std::cout << "State IDs are: " << desArgs->rl_state_representation.size() << "." << std::endl;
+        std::cout << "The " << desArgs->rl_state_representation.size() << " state IDs are: " << std::endl;
         BOOST_FOREACH(int id, desArgs->rl_state_representation)
         {
             std::cout << id << " ";
