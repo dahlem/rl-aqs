@@ -56,6 +56,7 @@ namespace dstats = des::statistics;
 #include "Logistic.hh"
 #include "MSE.hh"
 #include "Statistics.hh"
+#include "DefaultLossPolicy.hh"
 namespace dnnet = des::nnet;
 
 #include "AckEvent.hh"
@@ -70,7 +71,7 @@ namespace core
 typedef dnnet::FeedforwardNetwork <dnnet::HTangent, dnnet::Identity> FFNet;
 typedef boost::shared_ptr <FFNet> FFNetSP;
 
-typedef dnnet::MSE <FFNetSP, dnnet::HTangent, dnnet::Identity> ObjMse;
+typedef dnnet::MSE <dnnet::DefaultLossPolicy, FFNetSP, dnnet::HTangent, dnnet::Identity> ObjMse;
 typedef boost::shared_ptr <ObjMse> ObjMseSP;
 
 typedef dnnet::Backpropagation <FFNetSP, ObjMseSP> BackProp;

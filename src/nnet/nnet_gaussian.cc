@@ -37,13 +37,15 @@ namespace dsample = des::sampling;
 #include "Logistic.hh"
 #include "MSE.hh"
 #include "Statistics.hh"
+#include "DefaultLossPolicy.hh"
+#include "SlidingWindowLossPolicy.hh"
 namespace dnnet = des::nnet;
 
 
 typedef dnnet::FeedforwardNetwork <dnnet::HTangent, dnnet::Identity> FFNet;
 typedef boost::shared_ptr <FFNet> FFNetSP;
 
-typedef dnnet::MSE <FFNetSP, dnnet::HTangent, dnnet::Identity> ObjMse;
+typedef dnnet::MSE <dnnet::SlidingWindowLossPolicy<50>, FFNetSP, dnnet::HTangent, dnnet::Identity> ObjMse;
 typedef boost::shared_ptr <ObjMse> ObjMseSP;
 
 typedef dnnet::Backpropagation <FFNetSP, ObjMseSP> BackProp;

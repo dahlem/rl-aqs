@@ -38,14 +38,15 @@ namespace des { namespace nnet {
  *
  * @author Dominik Dahlem
  */
-template <class NeuralNetwork,
-          class Activation,
-          class ActivationOutput = Activation>
-class MSE
+template <typename LossPolicy,
+          typename NeuralNetwork,
+          typename Activation,
+          typename ActivationOutput = Activation>
+class MSE : public LossPolicy
 {
 public:
     MSE(NeuralNetwork p_nnet)
-        : m_nnet(p_nnet), m_sse(0.0), m_size(0)
+        : LossPolicy(), m_nnet(p_nnet)
         {
             init();
         }
@@ -99,39 +100,6 @@ public:
             }
 
             return err;
-        }
-
-    inline
-    double error()
-        {
-            return m_sse / static_cast<double> (m_size);
-        }
-
-    double addError(DoubleSA p_targets, DoubleSA p_outputs, boost::uint16_t p_size)
-        {
-            double d = 0.0;
-            m_size++;
-
-            for (boost::uint16_t i = 0; i < p_size; ++i) {
-                d = p_targets[i] - p_outputs[i];
-                m_sse += d * d;
-            }
-
-            return m_sse / static_cast<double> (m_size);
-        }
-
-    double error(DoubleSA p_targets, DoubleSA p_outputs, boost::uint16_t p_size)
-        {
-            double d = 0.0;
-            double sse = m_sse;
-            boost::uint32_t size = m_size + 1;
-
-            for (boost::uint16_t i = 0; i < p_size; ++i) {
-                d = p_targets[i] - p_outputs[i];
-                sse += d * d;
-            }
-
-            return sse / static_cast<double> (size);
         }
 
     void calc_gradient(DoubleSA p_targets)
@@ -261,9 +229,6 @@ private:
 
     DoubleSA m_deltaHidden;
     DoubleSA m_deltaOutput;
-
-    double m_sse;
-    boost::uint32_t m_size;
 
 };
 
