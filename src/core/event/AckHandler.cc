@@ -31,9 +31,10 @@ namespace dcore = des::core;
 namespace dcommon = des::common;
 
 
-dcore::AckHandler::AckHandler(dcommon::Queue &p_queue)
-    : m_queue(p_queue)
+dcore::AckHandler::AckHandler(dcommon::Queue &p_queue, dnet::Graph &p_graph)
+    : m_queue(p_queue), m_graph(p_graph)
 {
+    vertex_num_events_processed_map = get(vertex_num_events_processed, m_graph);
 }
 
 
@@ -44,6 +45,7 @@ dcore::AckHandler::~AckHandler()
 void dcore::AckHandler::update(dcore::AckEvent *subject)
 {
     dcommon::Entry *entry = subject->getEvent();
+    dnet::Vertex vertex = boost::vertex(entry->getDestination(), m_graph);
 
 #ifndef NDEBUG_EVENTS
     std::cout << "** Acknowledge for vertex: " << entry->getDestination() << std::endl;
@@ -73,6 +75,12 @@ void dcore::AckHandler::update(dcore::AckEvent *subject)
         new_entry->acknowledge(origin, destination, dcore::ACK_EVENT);
         m_queue.push(new_entry);
     }
+
+#ifndef NDEBUG_EVENTS
+    std::cout << "** Update the events processed." << std::endl;
+#endif /* NDEBUG_EVENTS */
+
+    vertex_num_events_processed_map[vertex]++;
 
 #ifndef NDEBUG_EVENTS
     std::cout << "** Acknowledge handler done." << std::endl;

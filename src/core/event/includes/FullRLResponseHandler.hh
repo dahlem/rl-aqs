@@ -57,6 +57,7 @@ namespace dstats = des::statistics;
 #include "MSE.hh"
 #include "Statistics.hh"
 #include "DefaultLossPolicy.hh"
+#include "SlidingWindowLossPolicy.hh"
 namespace dnnet = des::nnet;
 
 #include "AckEvent.hh"
@@ -71,15 +72,14 @@ namespace core
 typedef dnnet::FeedforwardNetwork <dnnet::HTangent, dnnet::Identity> FFNet;
 typedef boost::shared_ptr <FFNet> FFNetSP;
 
-typedef dnnet::MSE <dnnet::DefaultLossPolicy, FFNetSP, dnnet::HTangent, dnnet::Identity> ObjMse;
-typedef boost::shared_ptr <ObjMse> ObjMseSP;
+// typedef dnnet::MSE <dnnet::DefaultLossPolicy, FFNetSP, dnnet::HTangent, dnnet::Identity> ObjMse;
+// typedef boost::shared_ptr <ObjMse> ObjMseSP;
 
-typedef dnnet::Backpropagation <FFNetSP, ObjMseSP> BackProp;
-typedef boost::shared_ptr <BackProp> BackPropSP;
+typedef dnnet::MSE <dnnet::SlidingWindowLossPolicy<30>, FFNetSP, dnnet::HTangent, dnnet::Identity> ObjMse;
+typedef boost::shared_ptr <ObjMse> ObjMseSP;
 
 typedef dnnet::ConjugateGradient <FFNetSP, ObjMseSP> ConjGrad;
 typedef boost::shared_ptr <ConjGrad> ConjGradSP;
-
 
 typedef boost::scoped_array <dstats::OnlineStats> tQOnlineStatsSA;
 typedef boost::shared_array <double> DoubleSA;
@@ -119,7 +119,7 @@ private:
     std::vector<FFNetSP> m_nets;
     std::vector<ObjMseSP> m_objectives;
     std::vector<ConjGradSP> m_conjs;
-    
+
     DoubleSA m_inputs;
     DoubleSA m_target;
 };

@@ -59,13 +59,13 @@ public:
         {
             double d = 0.0;
             double error = 0.0;
-            
+
             for (boost::uint16_t i = 0; i < p_size; ++i) {
                 d = p_targets[i] - p_outputs[i];
                 error += d * d;
             }
             m_circBuffer.push_back(error);
-    
+
             return std::accumulate(m_circBuffer.begin(), m_circBuffer.end(), 0.0)
                 / static_cast<double> (m_circBuffer.size());
         }
@@ -86,7 +86,7 @@ public:
 
 private:
     CircularBuffer m_circBuffer;
-    
+
 
 };
 

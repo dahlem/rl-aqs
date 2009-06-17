@@ -455,7 +455,7 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
         LastEventHandler lastEventHandler(*graph);
         UtilisationHandler utilisationHandler(*graph);
         ExpectedAverageEventInQueueHandler expectedAverageEventInQueueHandler(*graph);
-        AckHandler ackHandler(queue);
+        AckHandler ackHandler(queue, *graph);
         LeaveHandler leaveHandler(queue, *graph);
 
         leaveEvent.attach(leaveHandler);

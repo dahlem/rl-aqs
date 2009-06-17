@@ -28,6 +28,9 @@ namespace dcore = des::core;
 #include "LadderQueue.hh"
 namespace dcommon = des::common;
 
+#include "DirectedGraph.hh"
+namespace dnet = des::network;
+
 #include "Observer.hh"
 namespace design = des::design;
 
@@ -43,13 +46,16 @@ namespace des
 class AckHandler : public design::Observer<dcore::AckEvent>
 {
 public:
-    AckHandler(dcommon::Queue &p_queue);
+    AckHandler(dcommon::Queue &p_queue, dnet::Graph &p_graph);
     ~AckHandler();
 
     void update(dcore::AckEvent *subject);
 
 private:
     dcommon::Queue &m_queue;
+    dnet::Graph &m_graph;
+
+    dnet::VertexNumEventsProcessedMap vertex_num_events_processed_map;
 };
 
 

@@ -70,6 +70,7 @@ FullRLResponseHandler::FullRLResponseHandler(dnet::Graph &p_graph, double p_q_al
         FFNetSP net = FFNetSP(
             new FFNet(
                 p_state_representation.size(), p_hidden_neurons, 1, m_uniform_rng_index));
+
         ObjMseSP mse = ObjMseSP(new ObjMse(net));
         ConjGradSP conjgrad = ConjGradSP(new ConjGrad(net, mse, m_q_alpha, 1e-6, 500));
 
@@ -128,7 +129,7 @@ void FullRLResponseHandler::update(AckEvent *subject)
 
             // collect the input vector
             drl::RLStateHelper::fillStateVector(e, m_graph, m_state_representation, m_inputs);
-            
+
             // calculate the neural network prediction given current state
             int edge_index = edge_index_map[e];
             value.second = m_nets[edge_index]->present(m_inputs)[0];
