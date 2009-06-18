@@ -15,13 +15,14 @@
 
 sims <- read.csv("./simulations.dat", header=T)
 
-l <- length(sims$sim_num)
+simNum <- sims$sim_num
+l <- length(simNum)
 df <- data.frame(alpha=rep(0, l), lambda=rep(0, l), epsilon=rep(0, l),
                  delay=rep(0, l), numEvents=rep(0, l),
                  avgEventInSystemTime=rep(0, l),
                  util=rep(0, l))
 
-for (i in sims$sim_num) {
+for (i in simNum) {
   print(paste("Read sim: ", i))
   repFile <- paste(i, "/replica_results.dat", sep="")
 
