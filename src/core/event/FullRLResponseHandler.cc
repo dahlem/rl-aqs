@@ -53,7 +53,10 @@ namespace core
 
 FullRLResponseHandler::FullRLResponseHandler(dnet::Graph &p_graph, double p_q_alpha, double p_q_lambda,
                                              drl::Policy &p_policy, std::vector<int> &p_state_representation,
-                                             boost::uint16_t p_hidden_neurons, boost::int32_t p_uniform_rng_index)
+                                             boost::uint16_t p_hidden_neurons, boost::int32_t p_uniform_rng_index,
+                                             bool p_cg, boost::uint16_t p_loss_policy,
+                                             boost::uint16_t p_window, boost::uint16_t p_brent_iter,
+                                             double p_momentum)
     : m_graph(p_graph), m_q_alpha(p_q_alpha), m_q_lambda(p_q_lambda), m_policy(p_policy),
       m_state_representation(p_state_representation), m_hidden_neurons(p_hidden_neurons),
       m_uniform_rng_index(p_uniform_rng_index),
@@ -67,17 +70,28 @@ FullRLResponseHandler::FullRLResponseHandler(dnet::Graph &p_graph, double p_q_al
     // init the neural network for each edge
     for (boost::uint16_t i = 0; i < boost::num_edges(m_graph); ++i) {
         // create the neural network for edge i
-        FFNetSP net = FFNetSP(
-            new FFNet(
-                p_state_representation.size(), p_hidden_neurons, 1, m_uniform_rng_index));
+        dnnet::FFNetSP net = dnnet::NNetFactory::createNNet(p_state_representation.size(), p_hidden_neurons, 1, m_uniform_rng_index);
 
-        ObjMseSP mse = ObjMseSP(new ObjMse(net));
-        ConjGradSP conjgrad = ConjGradSP(new ConjGrad(net, mse, m_q_alpha, 1e-6, 500));
+        dnnet::ObjMseSP mse;
+        if (p_loss_policy == 1) {
+            mse = dnnet::NNetFactory::createDefaultMSEObjective(net);
+        } else if (p_loss_policy == 2) {
+            mse = dnnet::NNetFactory::createSlidingWindowMSEObjective(net, p_window);
+        }
+
+        dnnet::TrainingSP training;
+        if (p_cg) {
+            training = dnnet::NNetFactory::createConjugateGradientTraining(
+                net, mse, m_q_alpha, 1e-6, p_brent_iter);
+        } else {
+            training = dnnet::NNetFactory::createBackpropagationTraining(
+                net, mse, m_q_alpha, p_momentum, 1e-6);
+        }
 
         // store the neural network, objective function, and training method into vectors
         m_nets.push_back(net);
         m_objectives.push_back(mse);
-        m_conjs.push_back(conjgrad);
+        m_trainings.push_back(training);
     }
 
     // allocate memory here for the input vector and the target
@@ -88,7 +102,7 @@ FullRLResponseHandler::FullRLResponseHandler(dnet::Graph &p_graph, double p_q_al
 
 FullRLResponseHandler::~FullRLResponseHandler()
 {
-    m_conjs.clear();
+    m_trainings.clear();
     m_objectives.clear();
     m_nets.clear();
 }
@@ -153,22 +167,28 @@ void FullRLResponseHandler::update(AckEvent *subject)
         dnet::Edge newE = boost::edge(
             vertex, boost::vertex(newAction, m_graph), m_graph).first;
 
-        m_target[0] = reward + m_q_lambda * edge_q_val_map[newE];
+        // calculate the target
+        drl::RLStateHelper::fillStateVector(newE, m_graph, m_state_representation, m_inputs);
+        m_target[0] = reward + m_q_lambda * m_nets[edge_index_map[newE]]->present(m_inputs)[0];;
 
         int edge_index = edge_index_map[oldE];
 
+#ifndef NDEBUG_EVENTS
+        std::cout << "Train NN for edge: " << edge_index << std::endl;
+#endif /* NDEBUG_EVENTS */
+
         // train NN towards the target
-        m_conjs[edge_index]->train(m_target);
+        m_trainings[edge_index]->train(m_target);
 
         // fill the state vector of the current edge
         drl::RLStateHelper::fillStateVector(oldE, m_graph, m_state_representation, m_inputs);
 
+#ifndef NDEBUG_EVENTS
+        std::cout << "Old Q-value: " << edge_q_val_map[oldE] << ", new Q-value: " << m_nets[edge_index]->present(m_inputs)[0] << std::endl;
+#endif /* NDEBUG_EVENTS */
+
         // update the q_value
         edge_q_val_map[oldE] = m_nets[edge_index]->present(m_inputs)[0];
-
-#ifndef NDEBUG_EVENTS
-        std::cout << "Old Q-value: " << oldQ << ", new Q-value: " << newQ << std::endl;
-#endif /* NDEBUG_EVENTS */
     } else if (degree == 1) {
         dnet::Edge e = *(boost::out_edges(vertex, m_graph).first);
         newAction = vertex_index_map[boost::target(e, m_graph)];

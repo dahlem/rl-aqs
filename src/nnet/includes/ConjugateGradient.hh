@@ -36,9 +36,8 @@
 #include "Vector.hh"
 namespace dutil = des::utils;
 
-
-typedef boost::shared_array <double> DoubleSA;
-typedef boost::shared_array <DoubleSA> DoubleSM;
+#include "nnet.hh"
+#include "Training.hh"
 
 
 namespace des
@@ -46,7 +45,6 @@ namespace des
 namespace nnet
 {
 
-#define ERRTOL          1e-6
 #define TRAINING_RATE   1.0
 #define GOLD            1.618034
 #define GLIMIT          100.0
@@ -55,21 +53,14 @@ namespace nnet
 #define CGOLD           0.3819660
 
 
-template<class T>
-inline T SIGN(const T &a, const T &b)
-{
-    return b >= 0 ? (a >= 0 ? a : -a) : (a >= 0 ? -a : a);
-}
-
-
 
 template <class NeuralNetwork,
           class Objective>
-class ConjugateGradient
+class ConjugateGradient : public Training
 {
 public:
     ConjugateGradient(NeuralNetwork p_nnet, Objective p_objective)
-        : m_nnet(p_nnet), m_objective(p_objective), m_errtol(ERRTOL),
+        : Training(), m_nnet(p_nnet), m_objective(p_objective), m_errtol(ERRTOL),
           m_optimalTrainingRate(TRAINING_RATE), m_initialTrainingRate(TRAINING_RATE),
           m_isFirst(true), m_iterMax(ITMAX)
         {
@@ -78,7 +69,7 @@ public:
 
     ConjugateGradient(NeuralNetwork p_nnet, Objective p_objective, double p_trainingRate,
                       double p_errtol, boost::uint16_t p_iterMax)
-        : m_nnet(p_nnet), m_objective(p_objective), m_errtol(p_errtol),
+        : Training(), m_nnet(p_nnet), m_objective(p_objective), m_errtol(p_errtol),
           m_optimalTrainingRate(p_trainingRate), m_initialTrainingRate(p_trainingRate),
           m_isFirst(true), m_iterMax(p_iterMax)
         {

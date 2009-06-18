@@ -25,13 +25,22 @@
 
 #include <boost/cstdint.hpp>
 
-namespace des { namespace nnet {
 
-class DefaultLossPolicy
+#include "nnet.hh"
+#include "LossPolicy.hh"
+
+
+namespace des
+{
+namespace nnet
+{
+
+
+class DefaultLossPolicy : public LossPolicy
 {
 public:
     DefaultLossPolicy()
-        : m_sse(0.0), m_size(0)
+        : LossPolicy(), m_sse(0.0), m_size(0)
         {}
 
     ~DefaultLossPolicy()

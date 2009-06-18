@@ -563,7 +563,9 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
                 fullRlResponseHandler = tFullRLResponseHandlerSP(
                     new FullRLResponseHandler(*graph, rl_q_alpha, rl_q_lambda, *pol,
                                               desArgs->rl_state_representation, desArgs->nn_hidden_neurons,
-                                              nn_uniform_rng_index));
+                                              nn_uniform_rng_index, desArgs->nn_cg,
+                                              desArgs->nn_loss_policy, desArgs->nn_window,
+                                              desArgs->nn_brent_iter, desArgs->nn_momentum));
                 ackEvent.attach(*fullRlResponseHandler);
             } else {
                 // configure the simple on-policy SARSA control RL handler

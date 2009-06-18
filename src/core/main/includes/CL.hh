@@ -109,6 +109,11 @@ const std::string CL_EXPERT_POSITIVE = "expert_positive";
 const std::string CL_EXPERT_NEGATIVE = "expert_negative";
 
 const std::string CL_NN_HIDDENLAYER_NEURONS = "nn_hidden_neurons";
+const std::string CL_NN_LOSS_POLICY = "nn_loss_policy";
+const std::string CL_NN_WINDOW = "nn_window";
+const std::string CL_NN_BRENT_ITER = "nn_brent_iter";
+const std::string CL_NN_MOMENTUM = "nn_momentum";
+const std::string CL_NN_CG = "nn_cg";
 const std::string CL_RL_STATE_IDS = "rl_state_representation";
 
 
@@ -191,6 +196,11 @@ struct desArgs_t {
 
     std::vector<int> rl_state_representation;
     boost::uint16_t nn_hidden_neurons;
+    boost::uint16_t nn_loss_policy;
+    boost::uint16_t nn_window;
+    boost::uint16_t nn_brent_iter;
+    double nn_momentum;
+    bool nn_cg;
 
 
     desArgs_t(desArgs_t const &args)
@@ -213,7 +223,9 @@ struct desArgs_t {
           max_rl_policy_epsilon(args.max_rl_policy_epsilon), rl_policy_boltzmann_t(args.rl_policy_boltzmann_t),
           lhs_optimal(args.lhs_optimal), lhs_r(args.lhs_r), expert_normal(args.expert_normal), expert_absolute(args.expert_absolute),
           expert_positive(args.expert_positive), expert_negative(args.expert_negative), rl_state_representation(args.rl_state_representation),
-          nn_hidden_neurons(args.nn_hidden_neurons)
+          nn_hidden_neurons(args.nn_hidden_neurons), nn_loss_policy(args.nn_loss_policy),
+          nn_window(args.nn_window), nn_brent_iter(args.nn_brent_iter), nn_momentum(args.nn_momentum),
+          nn_cg(args.nn_cg)
         {}
 
     desArgs_t()
@@ -236,7 +248,9 @@ struct desArgs_t {
           max_rl_policy_epsilon(0.0), rl_policy_boltzmann_t(0.0),
           lhs_optimal(false), lhs_r(10), expert_normal(false), expert_absolute(false),
           expert_positive(false), expert_negative(false), rl_state_representation(),
-          nn_hidden_neurons(5)
+          nn_hidden_neurons(5), nn_loss_policy(1),
+          nn_window(100), nn_brent_iter(500), nn_momentum(1.0),
+          nn_cg(true)
         {}
 
     friend std::ostream& operator <<(std::ostream &p_os, const desArgs_t &desArgs)

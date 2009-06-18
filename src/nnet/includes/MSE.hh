@@ -27,10 +27,14 @@
 #include <boost/shared_array.hpp>
 
 
-typedef boost::shared_array <double> DoubleSA;
+#include "nnet.hh"
+#include "LossPolicy.hh"
 
 
-namespace des { namespace nnet {
+namespace des
+{
+namespace nnet
+{
 
 
 /** @class MSE
@@ -38,15 +42,14 @@ namespace des { namespace nnet {
  *
  * @author Dominik Dahlem
  */
-template <typename LossPolicy,
-          typename NeuralNetwork,
+template <typename NeuralNetwork,
           typename Activation,
           typename ActivationOutput = Activation>
 class MSE : public LossPolicy
 {
 public:
-    MSE(NeuralNetwork p_nnet)
-        : LossPolicy(), m_nnet(p_nnet)
+    MSE(NeuralNetwork p_nnet, LossPolicySP p_policy)
+        : LossPolicy(), m_nnet(p_nnet), m_policy(p_policy)
         {
             init();
         }
@@ -80,7 +83,7 @@ public:
             DoubleSA newOutputs = m_nnet->present(origInputs);
 
             // calc the error
-            double err = error(p_targets, newOutputs, m_nnet->getNumOutputs());
+            double err = m_policy->error(p_targets, newOutputs, m_nnet->getNumOutputs());
 
             // reset the weights to the old values
             index = 0;
@@ -156,6 +159,20 @@ public:
             return gradient;
         }
 
+    double error()
+        {
+            return m_policy->error();
+        }
+
+    double addError(DoubleSA p_targets, DoubleSA p_outputs, boost::uint16_t p_size)
+        {
+            return m_policy->addError(p_targets, p_outputs, p_size);
+        }
+
+    double error(DoubleSA p_targets, DoubleSA p_outputs, boost::uint16_t p_size)
+        {
+            return m_policy->error(p_targets, p_outputs, p_size);
+        }
 
 private:
     MSE()
@@ -221,15 +238,14 @@ private:
             return Activation::deriv(net) * sum;
         }
 
-
     NeuralNetwork m_nnet;
+    LossPolicySP m_policy;
 
     DoubleSM m_gradientInputHidden;
     DoubleSM m_gradientHiddenOutput;
 
     DoubleSA m_deltaHidden;
     DoubleSA m_deltaOutput;
-
 };
 
 

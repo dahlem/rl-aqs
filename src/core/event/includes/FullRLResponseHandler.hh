@@ -48,16 +48,19 @@ namespace drl = des::rl;
 namespace dstats = des::statistics;
 
 #include "Backpropagation.hh"
-#include "CL.hh"
 #include "ConjugateGradient.hh"
+#include "DefaultLossPolicy.hh"
 #include "FeedforwardNetwork.hh"
 #include "Identity.hh"
 #include "HTangent.hh"
 #include "Logistic.hh"
+#include "LossPolicy.hh"
 #include "MSE.hh"
+#include "nnet.hh"
+#include "NNetFactory.hh"
 #include "Statistics.hh"
-#include "DefaultLossPolicy.hh"
 #include "SlidingWindowLossPolicy.hh"
+#include "Training.hh"
 namespace dnnet = des::nnet;
 
 #include "AckEvent.hh"
@@ -68,21 +71,7 @@ namespace des
 namespace core
 {
 
-
-typedef dnnet::FeedforwardNetwork <dnnet::HTangent, dnnet::Identity> FFNet;
-typedef boost::shared_ptr <FFNet> FFNetSP;
-
-// typedef dnnet::MSE <dnnet::DefaultLossPolicy, FFNetSP, dnnet::HTangent, dnnet::Identity> ObjMse;
-// typedef boost::shared_ptr <ObjMse> ObjMseSP;
-
-typedef dnnet::MSE <dnnet::SlidingWindowLossPolicy<30>, FFNetSP, dnnet::HTangent, dnnet::Identity> ObjMse;
-typedef boost::shared_ptr <ObjMse> ObjMseSP;
-
-typedef dnnet::ConjugateGradient <FFNetSP, ObjMseSP> ConjGrad;
-typedef boost::shared_ptr <ConjGrad> ConjGradSP;
-
 typedef boost::scoped_array <dstats::OnlineStats> tQOnlineStatsSA;
-typedef boost::shared_array <double> DoubleSA;
 
 /** @class FullRLResponseHandler
  * The class @code{FullRLResponseHandler} handles the RL update statistic.
@@ -92,7 +81,10 @@ class FullRLResponseHandler : public design::Observer<AckEvent>
 public:
     FullRLResponseHandler(dnet::Graph &p_graph, double p_q_alpha, double p_q_lambda,
                           drl::Policy &p_policy, std::vector<int> &p_state_representation,
-                          boost::uint16_t p_hidden_neurons, boost::int32_t p_uniform_rng_index);
+                          boost::uint16_t p_hidden_neurons, boost::int32_t p_uniform_rng_index,
+                          bool p_cg, boost::uint16_t p_loss_policy,
+                          boost::uint16_t p_window, boost::uint16_t p_brent_iter,
+                          double p_momentum);
 
     ~FullRLResponseHandler();
 
@@ -116,9 +108,9 @@ private:
     dnet::EdgeQValueMap edge_q_val_map;
 
     // neural networks
-    std::vector<FFNetSP> m_nets;
-    std::vector<ObjMseSP> m_objectives;
-    std::vector<ConjGradSP> m_conjs;
+    std::vector<dnnet::FFNetSP> m_nets;
+    std::vector<dnnet::ObjMseSP> m_objectives;
+    std::vector<dnnet::TrainingSP> m_trainings;
 
     DoubleSA m_inputs;
     DoubleSA m_target;

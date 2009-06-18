@@ -162,6 +162,11 @@ CL::CL()
         (RL_POLICY.c_str(), po::value <boost::uint16_t>()->default_value(1), "Policy (1=Epsilon-Greedy, 2=Boltzmann).")
         (CL_RL_STATE_IDS.c_str(), po::value <std::string>()->default_value(""), "State representation.")
         (CL_NN_HIDDENLAYER_NEURONS.c_str(), po::value <boost::uint16_t>()->default_value(5), "Hidden number of Neurons.")
+        (CL_NN_LOSS_POLICY.c_str(), po::value <boost::uint16_t>()->default_value(1), "Loss Policy (1=default, 2=sliding window).")
+        (CL_NN_WINDOW.c_str(), po::value <boost::uint16_t>()->default_value(100), "Sliding Window Size.")
+        (CL_NN_BRENT_ITER.c_str(), po::value <boost::uint16_t>()->default_value(500), "Brent Iterations in the CG Training.")
+        (CL_NN_MOMENTUM.c_str(), po::value <double>()->default_value(1.0), "Momentum for the Backpropagation Training.")
+        (CL_NN_CG.c_str(), po::value <bool>()->default_value(true), "Training method (1=CG, 2=BP).")
        ;
 
     po::options_description opt_rl_policy_epsilon("RL Epsilon Policy Configuration");
@@ -387,6 +392,31 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
             }
             std::cout << "RL Boltzmann T: " << desArgs->rl_policy_boltzmann_t << "." << std::endl;
         }
+
+        if (vm.count(CL_NN_LOSS_POLICY.c_str())) {
+            desArgs->nn_loss_policy = vm[CL_NN_LOSS_POLICY.c_str()].as <boost::uint16_t>();
+        }
+        std::cout << "NN Loss Policy: " << desArgs->nn_loss_policy << "." << std::endl;
+
+        if (vm.count(CL_NN_WINDOW.c_str())) {
+            desArgs->nn_window = vm[CL_NN_WINDOW.c_str()].as <boost::uint16_t>();
+        }
+        std::cout << "NN sliding window size: " << desArgs->nn_window << "." << std::endl;
+
+        if (vm.count(CL_NN_BRENT_ITER.c_str())) {
+            desArgs->nn_brent_iter = vm[CL_NN_BRENT_ITER.c_str()].as <boost::uint16_t>();
+        }
+        std::cout << "NN Brent Iterations: " << desArgs->nn_brent_iter << "." << std::endl;
+
+        if (vm.count(CL_NN_MOMENTUM.c_str())) {
+            desArgs->nn_momentum = vm[CL_NN_MOMENTUM.c_str()].as <double>();
+        }
+        std::cout << "NN BP Momentum: " << desArgs->nn_momentum << "." << std::endl;
+
+        if (vm.count(CL_NN_CG.c_str())) {
+            desArgs->nn_cg = vm[CL_NN_CG.c_str()].as <bool>();
+        }
+        std::cout << "NN Training Method: " << desArgs->nn_cg << "." << std::endl;
 
         // parse the command-line
         std::string ids;

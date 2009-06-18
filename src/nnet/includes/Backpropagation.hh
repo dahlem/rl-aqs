@@ -25,12 +25,9 @@
 #include <cstring>
 
 #include <boost/cstdint.hpp>
-#include <boost/shared_array.hpp>
 
-
-typedef boost::shared_array <double> DoubleSA;
-typedef boost::shared_array <DoubleSA> DoubleSM;
-
+#include "nnet.hh"
+#include "Training.hh"
 
 namespace des
 {
@@ -39,16 +36,15 @@ namespace nnet
 
 #define LEARNING_RATE   0.001
 #define MOMENTUM        0.9
-#define ERRTOL          1e-6
 
 
 template <class NeuralNetwork,
           class Objective>
-class Backpropagation
+class Backpropagation : public Training
 {
 public:
     Backpropagation(NeuralNetwork p_nnet, Objective p_objective)
-        : m_nnet(p_nnet), m_objective(p_objective),
+        : Training(), m_nnet(p_nnet), m_objective(p_objective),
           m_learningRate(LEARNING_RATE), m_momentum(MOMENTUM), m_errtol(ERRTOL)
         {
             init();
@@ -56,7 +52,7 @@ public:
 
     Backpropagation(NeuralNetwork p_nnet, Objective p_objective,
                     double p_learningRate, double p_momentum, double p_errtol)
-        : m_nnet(p_nnet), m_objective(p_objective),
+        : Training(), m_nnet(p_nnet), m_objective(p_objective),
           m_learningRate(p_learningRate), m_momentum(p_momentum), m_errtol(p_errtol)
         {
             init();

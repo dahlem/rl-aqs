@@ -31,21 +31,25 @@ namespace dsample = des::sampling;
 #include "Backpropagation.hh"
 #include "CL.hh"
 #include "ConjugateGradient.hh"
+#include "DefaultLossPolicy.hh"
 #include "FeedforwardNetwork.hh"
 #include "Identity.hh"
 #include "HTangent.hh"
 #include "Logistic.hh"
+#include "LossPolicy.hh"
 #include "MSE.hh"
+#include "nnet.hh"
+#include "NNetFactory.hh"
 #include "Statistics.hh"
-#include "DefaultLossPolicy.hh"
 #include "SlidingWindowLossPolicy.hh"
+#include "Training.hh"
 namespace dnnet = des::nnet;
 
 
 typedef dnnet::FeedforwardNetwork <dnnet::HTangent, dnnet::Identity> FFNet;
 typedef boost::shared_ptr <FFNet> FFNetSP;
 
-typedef dnnet::MSE <dnnet::SlidingWindowLossPolicy<50>, FFNetSP, dnnet::HTangent, dnnet::Identity> ObjMse;
+typedef dnnet::MSE <FFNetSP, dnnet::HTangent, dnnet::Identity> ObjMse;
 typedef boost::shared_ptr <ObjMse> ObjMseSP;
 
 typedef dnnet::Backpropagation <FFNetSP, ObjMseSP> BackProp;
@@ -127,8 +131,8 @@ int main(int argc, char *argv[])
     uniform_rng_index = dsample::CRN::getInstance().init(seed);
     dsample::CRN::getInstance().log(seed, "uniform weight assignment seed");
 
-    FFNetSP net = FFNetSP(new FFNet(1, 4, 1, uniform_rng_index));
-    ObjMseSP mse = ObjMseSP(new ObjMse(net));
+    FFNetSP net = dnnet::NNetFactory::createNNet(1, 4, 1, uniform_rng_index);
+    ObjMseSP mse = dnnet::NNetFactory::createDefaultMSEObjective(net);
 
     // training
     // validation in the range of [-2.5; 2.5]
@@ -140,8 +144,8 @@ int main(int argc, char *argv[])
     printData(data);
 
     if (nnetArgs->cg) {
-        ConjGradSP conjgrad = ConjGradSP(
-            new ConjGrad(net, mse, nnetArgs->learning_rate, 1e-6, nnetArgs->iterations));
+        dnnet::TrainingSP conjgrad = dnnet::NNetFactory::createConjugateGradientTraining(
+            net, mse, nnetArgs->learning_rate, 1e-6, nnetArgs->iterations);
 
         for (boost::uint16_t l = 0; l < nnetArgs->epochs; ++l) {
             for (boost::uint16_t i = 0; i <= 10; ++i) {
@@ -153,8 +157,8 @@ int main(int argc, char *argv[])
             }
         }
     } else {
-        BackPropSP backprop = BackPropSP(
-            new BackProp(net, mse, nnetArgs->learning_rate, nnetArgs->momentum, 1e-6));
+        dnnet::TrainingSP backprop = dnnet::NNetFactory::createBackpropagationTraining(
+            net, mse, nnetArgs->learning_rate, nnetArgs->momentum, 1e-6);
 
         for (boost::uint16_t l = 0; l < nnetArgs->epochs; ++l) {
             for (boost::uint16_t i = 0; i <= 10; ++i) {

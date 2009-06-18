@@ -30,17 +30,24 @@
 #include <boost/circular_buffer.hpp>
 
 
-namespace des { namespace nnet {
+#include "nnet.hh"
+#include "LossPolicy.hh"
+
+
+namespace des
+{
+namespace nnet
+{
 
 
 typedef boost::circular_buffer<double> CircularBuffer;
 
-template <int Window>
-class SlidingWindowLossPolicy
+
+class SlidingWindowLossPolicy : public LossPolicy
 {
 public:
-    SlidingWindowLossPolicy()
-        : m_circBuffer(Window)
+    SlidingWindowLossPolicy(int p_window)
+        : LossPolicy(), m_circBuffer(p_window)
         {}
 
     ~SlidingWindowLossPolicy()
