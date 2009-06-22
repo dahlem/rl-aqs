@@ -28,6 +28,110 @@ function fi =  logitinv(z, a, b)
   fi = b-(b-a)./(1+exp(z));
 endfunction
 
+## This function implements the metropolis hastings algorithm for
+## estimating the model parameters of the bayesian likelihood equation,
+## where s1 is the constant standard deviation, x0_beta is an initial
+## values of beta, x0_theta is a vector of initial values for theta,
+## x0_sigma is the initial value for sigma, X is the matrix of n
+## observations (rows) with d dimensions (columns), y is the output
+## vector at the n observations, and n is the number of iterations for
+## the monte carlo sampling.
+function chain = mcmc_mh(a1, x0_theta, X, y, n, prior = "Jeffrey", \
+                         nugget = 0, FUN = @(x) 1)
+  if (rows(y) != rows(X))
+    error("The vector y has to have the same dimension as matrix columns.");
+  endif
+
+  if (columns(x0_theta) != columns(X))
+    error("The vector x0_theta has to have the same dimension as matrix columns.");
+  endif
+
+  if (!strcmp(prior, "Jeffrey") && !strcmp(prior, "Berger"))
+    error("The given prior is not supported");
+  endif
+
+  dims = columns(X);
+  F = FUN(X);
+
+  ## initialise the x values
+  x.theta = zeros(1, dims);
+  x_old.theta = x0_theta;
+
+  x.beta = zeros(columns(F), 1);
+  x.sigma = 0.0;
+
+  ## "krig_likelihood(sigma, theta, X, y, beta, f)"
+  [q_old, x_old.beta, x_old.sigma] = krig_likelihood(x0_theta, X, y, F, nugget);
+
+  ## initialise the chain
+  chain.accepted = 0;
+  chain.beta = zeros(columns(F), n);
+  chain.theta = zeros(n, dims);
+  chain.sigma = zeros(1, n);
+  chain.l = zeros(1, n);
+
+  mean.thetaP = x0_theta.^-2;
+##  pi_old = x_old.sigma^-2;
+  pi_old = mean.thetaP;
+
+  ## if the berger prior is required transform sigma
+  if (strcmp(prior, "Berger"))
+    mean.thetaP = bergerPrior(mean.thetaP);
+  endif
+  
+  for i = 1:n
+##    x.theta = gamrnd(a1/2, a1/2 * mean.thetaP);
+    x.theta = gamrnd(a1/2, a1/2 * x0_theta.^-2);
+    ## step 1: generate x from the proposal distribution
+    ## theta has to be positive
+##    for k = 1:dims
+##      if (chain.accepted == 0)
+##      x.theta(k) = prior_pick(1./x0_theta(k).^2, scale, columns(X));
+##      else
+##      x.theta(k) = prior_pick(mean.thetaP(k), scale, columns(X));
+##      endif
+##      x.theta(k) = e^x.theta(k);
+##    endfor
+
+    ## step 2: calcuate the probability of move
+    [q_new, x.beta, x.sigma] = krig_likelihood(x.theta, X, y, F, nugget);
+
+##    pi_new = x.sigma^-2;
+    pi_new = x.theta.^-2;
+
+    ratio = (q_new / q_old) * (pi_old / pi_new);
+##    ratio = (pi_new * q_old) / (pi_old * q_new);
+
+    ## step 3: accept, if u < alpha(x, x')
+    if rand() <= min(ratio, 1)
+      ## reject also above a certain threshold
+      chain.accepted++;
+      pi_old = pi_new;
+      q_old = q_new;
+      x_old.beta = x.beta;
+      x_old.theta = x.theta;
+      x_old.sigma = x.sigma;
+
+      ## put results into markov chain
+      chain.beta(:, chain.accepted) = x_old.beta;
+      chain.theta(chain.accepted, :) = x_old.theta;
+      chain.sigma(chain.accepted) = x_old.sigma;
+      chain.l(chain.accepted) = q_old;
+      mean.thetaP = x.theta.^-2; ##welford_mean(i, mean.thetaP, 1./x.theta.^2);
+
+      ## if the berger prior is required transform sigma
+      if (strcmp(prior, "Berger"))
+        mean.thetaP = bergerPrior(mean.thetaP);
+      endif
+    endif
+  endfor
+
+  chain.beta = chain.beta(:, 1:chain.accepted);
+  chain.sigma = chain.sigma(1:chain.accepted);
+  chain.l = chain.l(1:chain.accepted);
+  chain.theta = chain.theta(1:chain.accepted,:);
+endfunction
+
 
 ## This function implements the metropolis hastings algorithm for
 ## estimating the model parameters of the bayesian likelihood equation,
