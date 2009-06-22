@@ -91,6 +91,8 @@ bool EventProcessor::process()
 
 #ifndef NDEBUG
             double newTime = entry->getArrival();
+            std::cout << setprecision(21) << "new Time : " << newTime
+                      << ", old Time: " << m_oldTime << std::endl;
 
             assert(newTime >= m_oldTime);
             m_oldTime = newTime;

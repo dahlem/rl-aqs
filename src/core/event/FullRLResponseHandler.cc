@@ -142,11 +142,12 @@ void FullRLResponseHandler::update(AckEvent *subject)
             value.first = target_vertex;
 
             // collect the input vector
-            drl::RLStateHelper::fillStateVector(e, m_graph, m_state_representation, m_inputs);
+//             drl::RLStateHelper::fillStateVector(e, m_graph, m_state_representation, m_inputs);
 
-            // calculate the neural network prediction given current state
-            int edge_index = edge_index_map[e];
-            value.second = m_nets[edge_index]->present(m_inputs)[0];
+//             // calculate the neural network prediction given current state
+//             int edge_index = edge_index_map[e];
+//             value.second = m_nets[edge_index]->present(m_inputs)[0];
+            value.second = edge_q_val_map[e];
 
 #ifndef NDEBUG_EVENTS
             std::cout << "Action-Value Pair: " << value.first << ", " << value.second << std::endl;
@@ -168,8 +169,9 @@ void FullRLResponseHandler::update(AckEvent *subject)
             vertex, boost::vertex(newAction, m_graph), m_graph).first;
 
         // calculate the target
-        drl::RLStateHelper::fillStateVector(newE, m_graph, m_state_representation, m_inputs);
-        m_target[0] = reward + m_q_lambda * m_nets[edge_index_map[newE]]->present(m_inputs)[0];;
+//        drl::RLStateHelper::fillStateVector(newE, m_graph, m_state_representation, m_inputs);
+//        m_target[0] = reward + m_q_lambda * m_nets[edge_index_map[newE]]->present(m_inputs)[0];;
+        m_target[0] = reward + m_q_lambda * edge_q_val_map[newE];
 
         int edge_index = edge_index_map[oldE];
 
