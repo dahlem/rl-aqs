@@ -46,17 +46,18 @@ gnuplot << EOF
 set terminal pdf colour solid rounded
 set output "$DATAFILE.eps"
 
+set datafile separator ","
+
 set yrange [$MINY:$MAXY]
 set xrange [$MINX:$MAXX]
 
-set hidden3d offset 1 trianglepattern 3 undefined 1 altdiagonal bentover
-set style data lines
-set contour base
-set cntrparam levels 10
-set pm3d
+#set hidden3d offset 1 trianglepattern 3 undefined 1 altdiagonal bentover
+#set style data lines
+#set contour base
+#set cntrparam levels 10
+#set pm3d
 # set grid nopolar
 # set grid xtics ytics ztics
-
 unset key
 
 # change the angle the plot is shown

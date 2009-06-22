@@ -23,6 +23,7 @@
 
 #ifndef NDEBUG
 # include <cassert>
+# include <iomanip>
 # include <boost/assert.hpp>
 #endif /* NDEBUG */
 
@@ -91,7 +92,7 @@ bool EventProcessor::process()
 
 #ifndef NDEBUG
             double newTime = entry->getArrival();
-            std::cout << setprecision(21) << "new Time : " << newTime
+            std::cout << std::setprecision(21) << "new Time : " << newTime
                       << ", old Time: " << m_oldTime << std::endl;
 
             assert(newTime >= m_oldTime);
