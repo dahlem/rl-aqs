@@ -45,53 +45,58 @@ namespace des
 namespace nnet
 {
 
-typedef FeedforwardNetwork <HTangent, Identity> FFNet;
-typedef boost::shared_ptr <FFNet> FFNetSP;
-
-typedef MSE <FFNetSP, HTangent, Identity> ObjMse;
-typedef boost::shared_ptr <ObjMse> ObjMseSP;
-
-typedef Backpropagation <FFNetSP, ObjMseSP> BackProp;
-typedef boost::shared_ptr <BackProp> BackPropSP;
-
-typedef ConjugateGradient <FFNetSP, ObjMseSP> ConjGrad;
-typedef boost::shared_ptr <ConjGrad> ConjGradSP;
-
 
 class NNetFactory
 {
 public:
 
-    static FFNetSP createNNet(boost::uint16_t p_num_inputs, boost::uint16_t p_num_hidden,
-                              boost::uint16_t p_num_outputs, boost::uint32_t p_uniform_idx) 
+    template <typename Activation, typename ActivationOutput>
+    static boost::shared_ptr <FeedforwardNetwork <Activation, ActivationOutput> >
+    createNNet(boost::uint16_t p_num_inputs, boost::uint16_t p_num_hidden,
+               boost::uint16_t p_num_outputs, boost::uint32_t p_uniform_idx) 
         {
-            return FFNetSP(new FFNet(p_num_inputs, p_num_hidden, p_num_outputs, p_uniform_idx));
+            return boost::shared_ptr <FeedforwardNetwork <Activation, ActivationOutput> >
+                (new FeedforwardNetwork <Activation, ActivationOutput>(p_num_inputs, p_num_hidden, p_num_outputs, p_uniform_idx));
         }
 
-    static ObjMseSP createDefaultMSEObjective(FFNetSP p_net) 
+    template <typename Activation, typename ActivationOutput>
+    static boost::shared_ptr <MSE <boost::shared_ptr <FeedforwardNetwork <Activation, ActivationOutput> >, Activation, ActivationOutput> >
+    createDefaultMSEObjective(boost::shared_ptr <FeedforwardNetwork <Activation, ActivationOutput> > p_net) 
         {
             LossPolicySP policy = LossPolicySP(new DefaultLossPolicy());
-            return ObjMseSP(new ObjMse(p_net, policy));
+            return boost::shared_ptr <MSE <boost::shared_ptr <FeedforwardNetwork <Activation, ActivationOutput> >, Activation, ActivationOutput> >
+                (new MSE <boost::shared_ptr <FeedforwardNetwork <Activation, ActivationOutput> >, Activation, ActivationOutput>(p_net, policy));
         }
 
-    static ObjMseSP createSlidingWindowMSEObjective(FFNetSP p_net, int p_window) 
+    template <typename Activation, typename ActivationOutput>
+    static boost::shared_ptr <MSE <boost::shared_ptr <FeedforwardNetwork <Activation, ActivationOutput> >, Activation, ActivationOutput> >
+    createSlidingWindowMSEObjective(boost::shared_ptr <FeedforwardNetwork <Activation, ActivationOutput> > p_net, int p_window) 
         {
             LossPolicySP policy = LossPolicySP(new SlidingWindowLossPolicy(p_window));
-            return ObjMseSP(new ObjMse(p_net, policy));
+            return boost::shared_ptr <MSE <boost::shared_ptr <FeedforwardNetwork <Activation, ActivationOutput> >, Activation, ActivationOutput> >
+                (new MSE <boost::shared_ptr <FeedforwardNetwork <Activation, ActivationOutput> >, Activation, ActivationOutput>(p_net, policy));
         }
 
-    static TrainingSP createConjugateGradientTraining(FFNetSP p_nnet, ObjMseSP p_objective,
-                                                      double p_trainingRate, double p_errtol,
+    template <typename Activation, typename ActivationOutput>
+    static TrainingSP createConjugateGradientTraining(boost::shared_ptr <FeedforwardNetwork <Activation, ActivationOutput> > p_nnet,
+                                                      boost::shared_ptr <MSE <boost::shared_ptr <FeedforwardNetwork <Activation, ActivationOutput> >, Activation, ActivationOutput> > p_objective,
+                                                      double p_trainingRate,
+                                                      double p_errtol,
                                                       boost::uint16_t p_iterMax)
         {
-            return TrainingSP(new ConjGrad(p_nnet, p_objective, p_trainingRate, p_errtol, p_iterMax));
+            return TrainingSP(new ConjugateGradient <boost::shared_ptr <FeedforwardNetwork <Activation, ActivationOutput> >, boost::shared_ptr <MSE <boost::shared_ptr <FeedforwardNetwork <Activation, ActivationOutput> >, Activation, ActivationOutput> > >
+                              (p_nnet, p_objective, p_trainingRate, p_errtol, p_iterMax));
         }
 
-    static TrainingSP createBackpropagationTraining(FFNetSP p_nnet, ObjMseSP p_objective,
-                                                    double p_trainingRate, double p_momentum,
+    template <typename Activation, typename ActivationOutput>
+    static TrainingSP createBackpropagationTraining(boost::shared_ptr <FeedforwardNetwork <Activation, ActivationOutput> > p_nnet,
+                                                    boost::shared_ptr <MSE <boost::shared_ptr <FeedforwardNetwork <Activation, ActivationOutput> >, Activation, ActivationOutput> > p_objective,
+                                                    double p_trainingRate,
+                                                    double p_momentum,
                                                     double p_errtol)
         {
-            return TrainingSP(new BackProp(p_nnet, p_objective, p_trainingRate, p_momentum, p_errtol));
+            return TrainingSP(new Backpropagation <boost::shared_ptr <FeedforwardNetwork <Activation, ActivationOutput> >, boost::shared_ptr <MSE <boost::shared_ptr <FeedforwardNetwork <Activation, ActivationOutput> >, Activation, ActivationOutput> > >
+                              (p_nnet, p_objective, p_trainingRate, p_momentum, p_errtol));
         }
     
     

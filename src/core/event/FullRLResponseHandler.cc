@@ -70,21 +70,22 @@ FullRLResponseHandler::FullRLResponseHandler(dnet::Graph &p_graph, double p_q_al
     // init the neural network for each edge
     for (boost::uint16_t i = 0; i < boost::num_edges(m_graph); ++i) {
         // create the neural network for edge i
-        dnnet::FFNetSP net = dnnet::NNetFactory::createNNet(p_state_representation.size(), p_hidden_neurons, 1, m_uniform_rng_index);
+        FFNetSP net = dnnet::NNetFactory::createNNet<dnnet::HTangent, dnnet::Identity>
+            (p_state_representation.size(), p_hidden_neurons, 1, m_uniform_rng_index);
 
-        dnnet::ObjMseSP mse;
+        ObjMseSP mse;
         if (p_loss_policy == 1) {
-            mse = dnnet::NNetFactory::createDefaultMSEObjective(net);
+            mse = dnnet::NNetFactory::createDefaultMSEObjective<dnnet::HTangent, dnnet::Identity>(net);
         } else if (p_loss_policy == 2) {
-            mse = dnnet::NNetFactory::createSlidingWindowMSEObjective(net, p_window);
+            mse = dnnet::NNetFactory::createSlidingWindowMSEObjective<dnnet::HTangent, dnnet::Identity>(net, p_window);
         }
 
         dnnet::TrainingSP training;
         if (p_cg) {
-            training = dnnet::NNetFactory::createConjugateGradientTraining(
+            training = dnnet::NNetFactory::createConjugateGradientTraining<dnnet::HTangent, dnnet::Identity>(
                 net, mse, m_q_alpha, 1e-6, p_brent_iter);
         } else {
-            training = dnnet::NNetFactory::createBackpropagationTraining(
+            training = dnnet::NNetFactory::createBackpropagationTraining<dnnet::HTangent, dnnet::Identity>(
                 net, mse, m_q_alpha, p_momentum, 1e-6);
         }
 

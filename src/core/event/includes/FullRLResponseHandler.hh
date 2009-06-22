@@ -73,6 +73,19 @@ namespace core
 
 typedef boost::scoped_array <dstats::OnlineStats> tQOnlineStatsSA;
 
+typedef dnnet::FeedforwardNetwork <dnnet::HTangent, dnnet::Identity> FFNet;
+typedef boost::shared_ptr <FFNet> FFNetSP;
+
+typedef dnnet::MSE <FFNetSP, dnnet::HTangent, dnnet::Identity> ObjMse;
+typedef boost::shared_ptr <ObjMse> ObjMseSP;
+
+typedef dnnet::Backpropagation <FFNetSP, ObjMseSP> BackProp;
+typedef boost::shared_ptr <BackProp> BackPropSP;
+
+typedef dnnet::ConjugateGradient <FFNetSP, ObjMseSP> ConjGrad;
+typedef boost::shared_ptr <ConjGrad> ConjGradSP;
+
+
 /** @class FullRLResponseHandler
  * The class @code{FullRLResponseHandler} handles the RL update statistic.
  */
@@ -108,8 +121,8 @@ private:
     dnet::EdgeQValueMap edge_q_val_map;
 
     // neural networks
-    std::vector<dnnet::FFNetSP> m_nets;
-    std::vector<dnnet::ObjMseSP> m_objectives;
+    std::vector<FFNetSP> m_nets;
+    std::vector<ObjMseSP> m_objectives;
     std::vector<dnnet::TrainingSP> m_trainings;
 
     DoubleSA m_inputs;

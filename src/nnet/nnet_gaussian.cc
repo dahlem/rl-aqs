@@ -131,8 +131,8 @@ int main(int argc, char *argv[])
     uniform_rng_index = dsample::CRN::getInstance().init(seed);
     dsample::CRN::getInstance().log(seed, "uniform weight assignment seed");
 
-    FFNetSP net = dnnet::NNetFactory::createNNet(1, 4, 1, uniform_rng_index);
-    ObjMseSP mse = dnnet::NNetFactory::createDefaultMSEObjective(net);
+    FFNetSP net = dnnet::NNetFactory::createNNet<dnnet::HTangent, dnnet::Identity>(1, 4, 1, uniform_rng_index);
+    ObjMseSP mse = dnnet::NNetFactory::createDefaultMSEObjective<dnnet::HTangent, dnnet::Identity>(net);
 
     // training
     // validation in the range of [-2.5; 2.5]
@@ -144,8 +144,9 @@ int main(int argc, char *argv[])
     printData(data);
 
     if (nnetArgs->cg) {
-        dnnet::TrainingSP conjgrad = dnnet::NNetFactory::createConjugateGradientTraining(
-            net, mse, nnetArgs->learning_rate, 1e-6, nnetArgs->iterations);
+        dnnet::TrainingSP conjgrad =
+            dnnet::NNetFactory::createConjugateGradientTraining<dnnet::HTangent, dnnet::Identity>(
+                net, mse, nnetArgs->learning_rate, 1e-6, nnetArgs->iterations);
 
         for (boost::uint16_t l = 0; l < nnetArgs->epochs; ++l) {
             for (boost::uint16_t i = 0; i <= 10; ++i) {
@@ -157,8 +158,9 @@ int main(int argc, char *argv[])
             }
         }
     } else {
-        dnnet::TrainingSP backprop = dnnet::NNetFactory::createBackpropagationTraining(
-            net, mse, nnetArgs->learning_rate, nnetArgs->momentum, 1e-6);
+        dnnet::TrainingSP backprop =
+            dnnet::NNetFactory::createBackpropagationTraining<dnnet::HTangent, dnnet::Identity>(
+                net, mse, nnetArgs->learning_rate, nnetArgs->momentum, 1e-6);
 
         for (boost::uint16_t l = 0; l < nnetArgs->epochs; ++l) {
             for (boost::uint16_t i = 0; i <= 10; ++i) {
