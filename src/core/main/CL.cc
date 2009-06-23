@@ -150,6 +150,10 @@ CL::CL()
             std::numeric_limits<double>::max()), "set the min. epsilon for epsilon-greedy policy.")
         (MAX_RL_POLICY_EPSILON.c_str(), po::value <double>()->default_value(
             std::numeric_limits<double>::max()), "set the max. epsilon for epsilon-greedy policy.")
+        (MIN_NN_MOMENTUM.c_str(), po::value <double>()->default_value(
+            std::numeric_limits<double>::max()), "set the min. momentum for backpropagation.")
+        (MAX_NN_MOMENTUM.c_str(), po::value <double>()->default_value(
+            std::numeric_limits<double>::max()), "set the max. momentum for backpropagation.")
         ;
 
     po::options_description opt_rl("RL Configuration");
@@ -569,6 +573,16 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
             desArgs->max_rl_policy_epsilon = vm[MAX_RL_POLICY_EPSILON.c_str()].as <double>();
         }
         std::cout << "Maximum epsilon set to " << desArgs->max_rl_policy_epsilon << "." << std::endl;
+
+        if (vm.count(MIN_NN_MOMENTUM.c_str())) {
+            desArgs->min_nn_momentum = vm[MIN_NN_MOMENTUM.c_str()].as <double>();
+        }
+        std::cout << "Minimum momentum set to " << desArgs->min_nn_momentum << "." << std::endl;
+
+        if (vm.count(MAX_NN_MOMENTUM.c_str())) {
+            desArgs->max_nn_momentum = vm[MAX_NN_MOMENTUM.c_str()].as <double>();
+        }
+        std::cout << "Maximum momentum set to " << desArgs->max_nn_momentum << "." << std::endl;
     }
 
     std::cout << std::endl << "7) Expert Metrics Configuration" << std::endl;

@@ -200,19 +200,31 @@ function [chain, acceptanceRate] = \
         phi_cand = logitinv(x.theta, aTheta, bTheta);
         pi_new = sum(log(phi_cand - aTheta) + log(bTheta - phi_cand));
 
+##	ratio = (q_new / q_old) * (pi_old / pi_new);
         ratio = (q_new + pi_new) - (q_old + pi_old);
+	##    ratio = (pi_new * q_old) / (pi_old * q_new);
 
         ## step 3: accept, if u < alpha(x, x')
-        if rand() <= exp(ratio)
+##      if rand() <= min(ratio, 1)
+        ## step 3: accept, if u < alpha(x, x')
+        u = rand();
+        if u <= exp(ratio)
           batchaccept(thetas)++;
           pi_accept = pi_new;
           q_accept = q_new;
           beta_accept = x.beta;
           theta_accept = x.theta;
           sigma_accept = x.sigma;
-	  q_old = q_new;
-	  pi_old = pi_new;
+          q_old = q_new;
+          pi_old = pi_new;
         else
+          u
+          exp(ratio)
+          ratio
+          q_new
+          pi_new
+          q_old
+          pi_old
           x.theta(thetas) = thetaj;
         endif
       endfor

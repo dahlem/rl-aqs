@@ -115,6 +115,8 @@ const std::string CL_NN_BRENT_ITER = "nn_brent_iter";
 const std::string CL_NN_MOMENTUM = "nn_momentum";
 const std::string CL_NN_CG = "nn_cg";
 const std::string CL_RL_STATE_IDS = "rl_state_representation";
+const std::string MIN_NN_MOMENTUM = "min_nn_momentum";
+const std::string MAX_NN_MOMENTUM = "max_nn_momentum";
 
 
 /** @typedef tOptDescSP
@@ -122,7 +124,7 @@ const std::string CL_RL_STATE_IDS = "rl_state_representation";
  */
 typedef boost::shared_ptr <po::options_description> tOptDescSP;
 
-static const std::string ARGS_HEADER = "stop_time,generations,graphs,max_arrival,boost_arrival,boost_edge,confidence,alpha,error,initial_reps,network_type,network_size,max_edges,edgeProb,edgeDiffusion,rl,rlq_alpha,rlq_lambda,rl_policy,rl_policy_epsilon,rl_policy_boltzmann_t";
+static const std::string ARGS_HEADER = "stop_time,generations,graphs,max_arrival,boost_arrival,boost_edge,confidence,alpha,error,initial_reps,network_type,network_size,max_edges,edgeProb,edgeDiffusion,rl,rlq_alpha,rlq_lambda,rl_policy,rl_policy_epsilon,rl_policy_boltzmann_t,nn_momentum";
 
 /** @struct
  * structure specifying the command line variables.
@@ -201,6 +203,8 @@ struct desArgs_t {
     boost::uint16_t nn_brent_iter;
     double nn_momentum;
     bool nn_cg;
+    double min_nn_momentum;          /* min momentum */
+    double max_nn_momentum;          /* max momentum */
 
 
     desArgs_t(desArgs_t const &args)
@@ -225,7 +229,7 @@ struct desArgs_t {
           expert_positive(args.expert_positive), expert_negative(args.expert_negative), rl_state_representation(args.rl_state_representation),
           nn_hidden_neurons(args.nn_hidden_neurons), nn_loss_policy(args.nn_loss_policy),
           nn_window(args.nn_window), nn_brent_iter(args.nn_brent_iter), nn_momentum(args.nn_momentum),
-          nn_cg(args.nn_cg)
+          nn_cg(args.nn_cg), min_nn_momentum(args.min_nn_momentum), max_nn_momentum(args.max_nn_momentum)
         {}
 
     desArgs_t()
@@ -250,7 +254,7 @@ struct desArgs_t {
           expert_positive(false), expert_negative(false), rl_state_representation(),
           nn_hidden_neurons(5), nn_loss_policy(1),
           nn_window(100), nn_brent_iter(500), nn_momentum(1.0),
-          nn_cg(true)
+          nn_cg(true), min_nn_momentum(0.0), max_nn_momentum(0.0)
         {}
 
     friend std::ostream& operator <<(std::ostream &p_os, const desArgs_t &desArgs)
@@ -275,7 +279,8 @@ struct desArgs_t {
                  << desArgs.rl_q_lambda << ","
                  << desArgs.rl_policy << ","
                  << desArgs.rl_policy_epsilon << ","
-                 << desArgs.rl_policy_boltzmann_t;
+                 << desArgs.rl_policy_boltzmann_t << ","
+                 << desArgs.nn_momentum;
 
             return p_os;
         }

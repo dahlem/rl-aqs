@@ -211,7 +211,9 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
 {
     boost::uint16_t sim_num, rep_num, num_vertices;
     boost::uint16_t net_size, max_edges;
-    double edge_prob, rl_q_alpha, rl_q_lambda, rl_policy_epsilon, rl_policy_boltz_t;
+    double edge_prob,
+        rl_q_alpha, rl_q_lambda, rl_policy_epsilon, rl_policy_boltz_t,
+        nn_momentum;
 
     // receive the input arguments via mpi
 #ifdef HAVE_MPI
@@ -247,6 +249,7 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
         rl_q_lambda = simArgs.rl_q_lambda;
         rl_policy_epsilon = simArgs.rl_policy_epsilon;
         rl_policy_boltz_t = simArgs.rl_policy_boltzmann_t;
+        nn_momentum = simArgs.nn_momentum;
 
 #else
         sim_num = desArgs->sim_num;
@@ -258,6 +261,7 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
         rl_q_lambda = desArgs->rl_q_lambda;
         rl_policy_epsilon = desArgs->rl_policy_epsilon;
         rl_policy_boltz_t = desArgs->rl_policy_boltzmann_t;
+        nn_momentum = desArgs->nn_momentum;
 
 #endif /* HAVE_MPI */
 
@@ -266,7 +270,8 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
                   << "Sim Num: " << sim_num << ", rep num: " << rep_num << std::endl
                   << "RL alpha: " << rl_q_alpha << ", RL lambda: " << rl_q_lambda << std::endl
                   << "RL Policy epsilon: " << rl_policy_epsilon << std::endl
-                  << "RL Policy Boltz T: " << rl_policy_boltz_t << std::endl;
+                  << "RL Policy Boltz T: " << rl_policy_boltz_t << std::endl
+                  << "NN Momentum: " << nn_momentum << std::endl;
         std::cout.flush();
 # endif /* NDEBUG */
 
@@ -565,7 +570,7 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
                                               desArgs->rl_state_representation, desArgs->nn_hidden_neurons,
                                               nn_uniform_rng_index, desArgs->nn_cg,
                                               desArgs->nn_loss_policy, desArgs->nn_window,
-                                              desArgs->nn_brent_iter, desArgs->nn_momentum));
+                                              desArgs->nn_brent_iter, nn_momentum));
                 ackEvent.attach(*fullRlResponseHandler);
             } else {
                 // configure the simple on-policy SARSA control RL handler

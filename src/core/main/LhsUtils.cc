@@ -70,6 +70,9 @@ int LhsUtils::dimensions(tDesArgsSP p_desArgs)
     if (p_desArgs->min_rl_policy_epsilon < std::numeric_limits<double>::max()) {
         dims++;
     }
+    if (p_desArgs->min_nn_momentum < std::numeric_limits<double>::max()) {
+        dims++;
+    }
 
     return dims;
 }
@@ -260,6 +263,44 @@ int LhsUtils::getRLEpsilonIndex(tDesArgsSP p_desArgs)
             index++;
         }
         if (p_desArgs->min_rl_policy_epsilon < std::numeric_limits<double>::max()) {
+            index++;
+        }
+    }
+
+    return index;
+}
+
+
+int LhsUtils::getNNMomentumIndex(tDesArgsSP p_desArgs)
+{
+    int index = -1;
+
+    if (p_desArgs->min_nn_momentum < std::numeric_limits<double>::max()) {
+        if (p_desArgs->min_size < std::numeric_limits<boost::uint16_t>::max()) {
+            index++;
+        }
+        if (p_desArgs->min_max_edges < std::numeric_limits<boost::uint16_t>::max()) {
+            index++;
+        }
+        if (p_desArgs->min_edge_prob < std::numeric_limits<double>::max()) {
+            index++;
+        }
+        if (p_desArgs->min_boost_arrival < std::numeric_limits<double>::max()) {
+            index++;
+        }
+        if (p_desArgs->min_boost_edge < std::numeric_limits<double>::max()) {
+            index++;
+        }
+        if (p_desArgs->min_rl_q_alpha < std::numeric_limits<double>::max()) {
+            index++;
+        }
+        if (p_desArgs->min_rl_q_lambda < std::numeric_limits<double>::max()) {
+            index++;
+        }
+        if (p_desArgs->min_rl_policy_epsilon < std::numeric_limits<double>::max()) {
+            index++;
+        }
+        if (p_desArgs->min_nn_momentum < std::numeric_limits<double>::max()) {
             index++;
         }
     }
