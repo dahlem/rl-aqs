@@ -218,13 +218,6 @@ function [chain, acceptanceRate] = \
           q_old = q_new;
           pi_old = pi_new;
         else
-          u
-          exp(ratio)
-          ratio
-          q_new
-          pi_new
-          q_old
-          pi_old
           x.theta(thetas) = thetaj;
         endif
       endfor
