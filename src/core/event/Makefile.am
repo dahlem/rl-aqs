@@ -43,6 +43,7 @@ libcoreevent_la_SOURCES =                                                  \
 	ExpertPositiveHandler.cc                                           \
 	ExpertNegativeHandler.cc                                           \
 	FullRLResponseHandler.cc                                           \
+	HybridFullRLResponseHandler.cc                                     \
 	RLResponseHandler.cc
 
 libcoreevent_la_CPPFLAGS =                                                 \

@@ -64,6 +64,7 @@
 #include "ExpertNegativeHandler.hh"
 #include "FullRLResponseHandler.hh"
 #include "GenerateEventHandler.hh"
+#include "HybridFullRLResponseHandler.hh"
 #include "LastArrivalEvent.hh"
 #include "LastEventHandler.hh"
 #include "LeaveHandler.hh"
@@ -126,6 +127,7 @@ typedef boost::shared_ptr<drl::Selection> tSelectionSP;
 typedef boost::shared_ptr<DepartureHandler> tDepartureHandlerSP;
 typedef boost::shared_ptr<RLResponseHandler> tRLResponseHandlerSP;
 typedef boost::shared_ptr<FullRLResponseHandler> tFullRLResponseHandlerSP;
+typedef boost::shared_ptr<HybridFullRLResponseHandler> tHybridFullRLResponseHandlerSP;
 typedef boost::shared_ptr<DefaultResponseHandler> tDefaultResponseHandlerSP;
 typedef boost::shared_ptr<ExpertNormalHandler> tExpertNormalHandlerSP;
 typedef boost::shared_ptr<ExpertAbsoluteHandler> tExpertAbsoluteHandlerSP;
@@ -524,6 +526,7 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
         tDepartureHandlerSP departureHandler;
         tRLResponseHandlerSP rlResponseHandler;
         tFullRLResponseHandlerSP fullRlResponseHandler;
+        tHybridFullRLResponseHandlerSP hybridFullRlResponseHandler;
         tDefaultResponseHandlerSP defaultResponseHandler;
 
         if (desArgs->rl) {
@@ -565,13 +568,24 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
                 dsample::CRN::getInstance().log(seed, "Neural Network uniform");
 
                 // configure the full reinforcement handler with function approximation
-                fullRlResponseHandler = tFullRLResponseHandlerSP(
-                    new FullRLResponseHandler(*graph, rl_q_alpha, rl_q_lambda, *pol,
-                                              desArgs->rl_state_representation, desArgs->nn_hidden_neurons,
-                                              nn_uniform_rng_index, desArgs->nn_cg,
-                                              desArgs->nn_loss_policy, desArgs->nn_window,
-                                              desArgs->nn_brent_iter, nn_momentum));
-                ackEvent.attach(*fullRlResponseHandler);
+                if (desArgs->rl_hybrid) {
+                    hybridFullRlResponseHandler = tHybridFullRLResponseHandlerSP(
+                        new HybridFullRLResponseHandler(*graph, rl_q_alpha, rl_q_lambda, *pol,
+                                                        desArgs->rl_state_representation, desArgs->nn_hidden_neurons,
+                                                        nn_uniform_rng_index, desArgs->nn_cg,
+                                                        desArgs->nn_loss_policy, desArgs->nn_window,
+                                                        desArgs->nn_brent_iter, nn_momentum,
+                                                        desArgs->rl_hybrid_warmup));
+                    ackEvent.attach(*hybridFullRlResponseHandler);
+                } else {
+                    fullRlResponseHandler = tFullRLResponseHandlerSP(
+                        new FullRLResponseHandler(*graph, rl_q_alpha, rl_q_lambda, *pol,
+                                                  desArgs->rl_state_representation, desArgs->nn_hidden_neurons,
+                                                  nn_uniform_rng_index, desArgs->nn_cg,
+                                                  desArgs->nn_loss_policy, desArgs->nn_window,
+                                                  desArgs->nn_brent_iter, nn_momentum));
+                    ackEvent.attach(*fullRlResponseHandler);
+                }
             } else {
                 // configure the simple on-policy SARSA control RL handler
                 rlResponseHandler = tRLResponseHandlerSP(

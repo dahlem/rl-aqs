@@ -159,6 +159,8 @@ CL::CL()
     po::options_description opt_rl("RL Configuration");
     opt_rl.add_options()
         (RL.c_str(), po::value <bool>()->default_value(false), "Enable Reinforcement Learning.")
+        (RL_HYBRID.c_str(), po::value <bool>()->default_value(false), "Enable hybrid Reinforcement Learning.")
+        (RL_HYBRID_WARMUP.c_str(), po::value <boost::uint16_t>()->default_value(1000), "hybrid Reinforcement Learning warmup phase.")
         (RL_RESPONSE_ALPHA.c_str(), po::value <std::string>(), "Reward Levels for response Time.")
         (RL_RESPONSE_REWARD.c_str(), po::value <std::string>(), "Reward Scalars above respective levels.")
         (RL_Q_ALPHA.c_str(), po::value <double>()->default_value(0.1), "Learning Rate.")
@@ -446,6 +448,18 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
             desArgs->nn_hidden_neurons = vm[CL_NN_HIDDENLAYER_NEURONS.c_str()].as <boost::uint16_t>();
         }
         std::cout << "Hidden Neurons: " << desArgs->nn_hidden_neurons << "." << std::endl;
+
+        if (vm.count(RL_HYBRID.c_str())) {
+            desArgs->rl_hybrid = vm[RL_HYBRID.c_str()].as <bool>();
+        }
+        std::cout << "hybrid RL enabled: " << desArgs->rl_hybrid << std::endl;
+
+        if (desArgs->rl_hybrid) {
+            if (vm.count(RL_HYBRID_WARMUP.c_str())) {
+                desArgs->rl_hybrid_warmup = vm[RL_HYBRID_WARMUP.c_str()].as <boost::uint16_t>();
+            }
+            std::cout << "hybrid RL warmup phase: " << desArgs->rl_hybrid_warmup << std::endl;
+        }
     }
 
     std::cout << std::endl << "5) Confidence Interval Configuration" << std::endl;

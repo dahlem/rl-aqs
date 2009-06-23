@@ -103,6 +103,9 @@ const std::string MIN_RL_POLICY_EPSILON = "min_rl_policy_epsilon";
 const std::string MAX_RL_POLICY_EPSILON = "max_rl_policy_epsilon";
 const std::string RL_POLICY_BOLTZMANN_T = "rl_policy_boltzmann_t";
 
+const std::string RL_HYBRID = "rl_hybrid";
+const std::string RL_HYBRID_WARMUP = "rl_hybrid_warmup";
+
 const std::string CL_EXPERT_NORMAL = "expert_normal";
 const std::string CL_EXPERT_ABSOLUTE = "expert_absolute";
 const std::string CL_EXPERT_POSITIVE = "expert_positive";
@@ -124,7 +127,7 @@ const std::string MAX_NN_MOMENTUM = "max_nn_momentum";
  */
 typedef boost::shared_ptr <po::options_description> tOptDescSP;
 
-static const std::string ARGS_HEADER = "stop_time,generations,graphs,max_arrival,boost_arrival,boost_edge,confidence,alpha,error,initial_reps,network_type,network_size,max_edges,edgeProb,edgeDiffusion,rl,rlq_alpha,rlq_lambda,rl_policy,rl_policy_epsilon,rl_policy_boltzmann_t,nn_momentum";
+static const std::string ARGS_HEADER = "stop_time,generations,graphs,max_arrival,boost_arrival,boost_edge,confidence,alpha,error,initial_reps,network_type,network_size,max_edges,edgeProb,edgeDiffusion,rl,rlq_alpha,rlq_lambda,rl_policy,rl_policy_epsilon,rl_policy_boltzmann_t,rl_hybrid,rl_hybrid_warmup,nn_momentum";
 
 /** @struct
  * structure specifying the command line variables.
@@ -177,6 +180,8 @@ struct desArgs_t {
     double max_edge_prob;           /* max. probability of vertices connecting */
 
     bool rl;                        /* switch to enable reinforcement learning */
+    bool rl_hybrid;                 /* switch to enable hybrid reinforcement learning */
+    boost::uint16_t rl_hybrid_warmup;        /* rl hybrid warmup phase */
     double rl_q_alpha;                              /* q-learning rate */
     double min_rl_q_alpha;                          /* min q-learning rate */
     double max_rl_q_alpha;                          /* max q-learning rate */
@@ -220,7 +225,7 @@ struct desArgs_t {
           boost_arrival(args.boost_arrival), min_boost_arrival(args.min_boost_arrival), max_boost_arrival(args.max_boost_arrival),
           boost_edge(args.boost_edge), min_boost_edge(args.min_boost_edge), max_boost_edge(args.max_boost_edge),
           net_gen(args.net_gen), edge_fixed(args.edge_fixed), edge_prob(args.edge_prob),
-          min_edge_prob(args.min_edge_prob), max_edge_prob(args.max_edge_prob), rl(args.rl),
+          min_edge_prob(args.min_edge_prob), max_edge_prob(args.max_edge_prob), rl(args.rl), rl_hybrid(args.rl_hybrid), rl_hybrid_warmup(args.rl_hybrid_warmup),
           rl_q_alpha(args.rl_q_alpha), min_rl_q_alpha(args.min_rl_q_alpha), max_rl_q_alpha(args.max_rl_q_alpha),
           rl_q_lambda(args.rl_q_lambda), min_rl_q_lambda(args.min_rl_q_lambda), max_rl_q_lambda(args.max_rl_q_lambda),
           rl_policy(args.rl_policy), rl_policy_epsilon(args.rl_policy_epsilon), min_rl_policy_epsilon(args.min_rl_policy_epsilon),
@@ -245,7 +250,7 @@ struct desArgs_t {
           boost_arrival(0.0), min_boost_arrival(0.0), max_boost_arrival(0.0),
           boost_edge(0.0), min_boost_edge(0.0), max_boost_edge(0.0),
           net_gen(0), edge_fixed(0.0), edge_prob(0.0),
-          min_edge_prob(0.0), max_edge_prob(0.0), rl(0),
+          min_edge_prob(0.0), max_edge_prob(0.0), rl(0), rl_hybrid(false), rl_hybrid_warmup(1000),
           rl_q_alpha(0.0), min_rl_q_alpha(0.0), max_rl_q_alpha(0.0),
           rl_q_lambda(0.0), min_rl_q_lambda(0.0), max_rl_q_lambda(0.0),
           rl_policy(0), rl_policy_epsilon(0.0), min_rl_policy_epsilon(0.0),
@@ -280,6 +285,8 @@ struct desArgs_t {
                  << desArgs.rl_policy << ","
                  << desArgs.rl_policy_epsilon << ","
                  << desArgs.rl_policy_boltzmann_t << ","
+                 << desArgs.rl_hybrid << ","
+                 << desArgs.rl_hybrid_warmup << ","
                  << desArgs.nn_momentum;
 
             return p_os;
