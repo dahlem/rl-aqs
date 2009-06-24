@@ -80,6 +80,31 @@ function [l, beta, sigma_squared] = krig_likelihood(theta, X, y, F, nugget = 0)
 endfunction
 
 
+function f = logit(theta, a, b)
+  f = log((theta-a)./(b-theta));
+endfunction
+
+function fi =  logitinv(z, a, b)
+  fi = b-(b-a)./(1+exp(z));
+endfunction
+
+function l = logLikeli(beta, theta, aTheta, bTheta, sigmaSq, aSigma, \
+                       bSigma, X, y, F, nugget = 0)
+  ## params are in log domain, so do back transformation
+  sigmaSq.cand = log(sigmaSq);
+  beta.cand = beta;
+  theta.cand = logitinv(theta, aTheta, bTheta);
+  
+  R = sigmaSq.cand * scf_gaussianm(X, theta.cand, nugget);
+  R_inv = cholinv(R);
+  n = rows(y);
+  temp = y - F * beta.cand;
+  l = (-(aSigma + 1) * log(sigmaSq.cand) - bSigma/sigmaSq.cand + \
+       log(sigmaSq.cand) + sum(log(theta.cand - aTheta) + log(bTheta - \
+       theta.cand)) -0.5 * log(det(R)) -0.5 * (temp' * R_inv * temp));
+endfunction
+
+
 function l = likelihood(y, F, beta, sigma, R, R_inv, nugget = 0)
   n = rows(y);
   temp = y - F * beta;
