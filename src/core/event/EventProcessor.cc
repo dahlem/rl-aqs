@@ -28,6 +28,7 @@
 #endif /* NDEBUG */
 
 #include <iostream>
+#include <limits>
 
 #include "Entry.hh"
 #include "LadderQueue.hh"
@@ -92,10 +93,18 @@ bool EventProcessor::process()
 
 #ifndef NDEBUG
             double newTime = entry->getArrival();
-            std::cout << std::setprecision(21) << "new Time : " << newTime
-                      << ", old Time: " << m_oldTime << std::endl;
 
-            assert(newTime >= m_oldTime);
+            // correct a possible floating point error
+            if (newTime < m_oldTime) {
+                std::cout << std::setprecision(21)
+                          << "Correct new Time : " << newTime
+                          << ", old Time: " << m_oldTime
+                          << " to " << m_oldTime + std::numeric_limits<double>::epsilon()
+                          << std::endl;
+                newTime = m_oldTime + std::numeric_limits<double>::epsilon();
+                entry->setArrival(newTime);
+            }
+
             m_oldTime = newTime;
 #endif /* NDEBUG */
 

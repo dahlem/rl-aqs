@@ -169,6 +169,11 @@ double Entry::getArrival() const
     return arrival;
 }
 
+void Entry::setArrival(double p_arrival)
+{
+    arrival = p_arrival;
+}
+
 
 int Entry::getDestination() const
 {

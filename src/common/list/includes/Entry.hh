@@ -92,6 +92,7 @@ public:
     boost::uintmax_t getId() const;
 
     double getArrival() const;
+    void setArrival(double p_arrival);
 
     int getDestination() const;
 
