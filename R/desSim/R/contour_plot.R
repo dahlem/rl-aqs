@@ -23,7 +23,7 @@ des.contour.plot <- function(prefix="2d-shdf", xs=c("x1", "x2"), xtitle, ytitle,
   names(data) <- c("x", "y", "z")
   
   p <- ggplot(data, aes(x, y, z = z))
-  p <- p + geom_tile(aes(fill = z)) + stat_contour(bins = 1000)
+  p <- p + geom_tile(aes(fill = z)) + stat_contour(bins = 50)
   p <- p + scale_fill_gradientn(colours=c("blue", "cyan", "yellow", "red"))
   p <- p + scale_x_continuous(xtitle)
   p <- p + scale_y_continuous(ytitle)
