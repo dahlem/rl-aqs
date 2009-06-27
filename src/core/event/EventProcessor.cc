@@ -91,22 +91,22 @@ bool EventProcessor::process()
                 break;
             }
 
-#ifndef NDEBUG
             double newTime = entry->getArrival();
 
             // correct a possible floating point error
             if (newTime < m_oldTime) {
+#ifndef NDEBUG
                 std::cout << std::setprecision(21)
                           << "Correct new Time : " << newTime
                           << ", old Time: " << m_oldTime
                           << " to " << m_oldTime + std::numeric_limits<double>::epsilon()
                           << std::endl;
+#endif /* NDEBUG */
                 newTime = m_oldTime + std::numeric_limits<double>::epsilon();
                 entry->setArrival(newTime);
             }
 
             m_oldTime = newTime;
-#endif /* NDEBUG */
 
 #ifndef NDEBUG_EVENTS
             std::cout << "** EventProcessor : Handle event: " << const_cast <const dcommon::Entry&> (*entry) << std::endl;
