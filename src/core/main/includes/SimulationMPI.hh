@@ -284,6 +284,8 @@ public:
                                      << p_desArgs->rl_policy << ","
                                      << desArgsMPI.rl_policy_epsilon << ","
                                      << desArgsMPI.rl_policy_boltzmann_t << ","
+                                     << p_desArgs.rl_hybrid << ","
+                                     << p_desArgs.rl_hybrid_warmup << ","
                                      << desArgsMPI.nn_momentum;
             }
 
