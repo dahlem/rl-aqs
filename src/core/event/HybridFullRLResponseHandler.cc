@@ -167,7 +167,7 @@ void HybridFullRLResponseHandler::update(AckEvent *subject)
             values[count++] = value;
         }
 
-        drl::PAttr attr;
+        drl::PAttr attr(0.0, drl::PolicyContext::learning());
         newAction = m_policy(entry->getDestination(), values, attr);
 
 #ifndef NDEBUG_EVENTS
@@ -185,7 +185,7 @@ void HybridFullRLResponseHandler::update(AckEvent *subject)
         if (qStatsSA[edge_index].getNumValues() < m_randomIter) {
             qStatsSA[edge_index].push(reward);
         }
-        
+
         // calculate the target
         drl::RLStateHelper::fillStateVector(newE, m_graph, m_state_representation, m_inputs);
         m_target[0] = reward + m_q_lambda * m_nets[edge_index_map[newE]]->present(m_inputs)[0];

@@ -102,6 +102,7 @@ const std::string RL_POLICY_EPSILON = "rl_policy_epsilon";
 const std::string MIN_RL_POLICY_EPSILON = "min_rl_policy_epsilon";
 const std::string MAX_RL_POLICY_EPSILON = "max_rl_policy_epsilon";
 const std::string RL_POLICY_BOLTZMANN_T = "rl_policy_boltzmann_t";
+const std::string RL_POLICY_WPL_ETA = "rl_policy_wpl_eta";
 
 const std::string RL_HYBRID = "rl_hybrid";
 const std::string RL_HYBRID_WARMUP = "rl_hybrid_warmup";
@@ -127,7 +128,7 @@ const std::string MAX_NN_MOMENTUM = "max_nn_momentum";
  */
 typedef boost::shared_ptr <po::options_description> tOptDescSP;
 
-static const std::string ARGS_HEADER = "stop_time,generations,graphs,max_arrival,boost_arrival,boost_edge,confidence,alpha,error,initial_reps,network_type,network_size,max_edges,edgeProb,edgeDiffusion,rl,rlq_alpha,rlq_lambda,rl_policy,rl_policy_epsilon,rl_policy_boltzmann_t,rl_hybrid,rl_hybrid_warmup,nn_momentum";
+static const std::string ARGS_HEADER = "stop_time,generations,graphs,max_arrival,boost_arrival,boost_edge,confidence,alpha,error,initial_reps,network_type,network_size,max_edges,edgeProb,edgeDiffusion,rl,rlq_alpha,rlq_lambda,rl_policy,rl_policy_epsilon,rl_policy_boltzmann_t,rl_hybrid,rl_hybrid_warmup,nn_momentum,rl_policy_wpl_eta";
 
 /** @struct
  * structure specifying the command line variables.
@@ -210,6 +211,7 @@ struct desArgs_t {
     bool nn_cg;
     double min_nn_momentum;          /* min momentum */
     double max_nn_momentum;          /* max momentum */
+    double rl_policy_wpl_eta;          /* wpl learning rate */
 
 
     desArgs_t(desArgs_t const &args)
@@ -234,7 +236,8 @@ struct desArgs_t {
           expert_positive(args.expert_positive), expert_negative(args.expert_negative), rl_state_representation(args.rl_state_representation),
           nn_hidden_neurons(args.nn_hidden_neurons), nn_loss_policy(args.nn_loss_policy),
           nn_window(args.nn_window), nn_brent_iter(args.nn_brent_iter), nn_momentum(args.nn_momentum),
-          nn_cg(args.nn_cg), min_nn_momentum(args.min_nn_momentum), max_nn_momentum(args.max_nn_momentum)
+          nn_cg(args.nn_cg), min_nn_momentum(args.min_nn_momentum), max_nn_momentum(args.max_nn_momentum),
+          rl_policy_wpl_eta(args.rl_policy_wpl_eta)
         {}
 
     desArgs_t()
@@ -259,7 +262,7 @@ struct desArgs_t {
           expert_positive(false), expert_negative(false), rl_state_representation(),
           nn_hidden_neurons(5), nn_loss_policy(1),
           nn_window(100), nn_brent_iter(500), nn_momentum(1.0),
-          nn_cg(true), min_nn_momentum(0.0), max_nn_momentum(0.0)
+          nn_cg(true), min_nn_momentum(0.0), max_nn_momentum(0.0), rl_policy_wpl_eta(0.0)
         {}
 
     friend std::ostream& operator <<(std::ostream &p_os, const desArgs_t &desArgs)
@@ -287,7 +290,8 @@ struct desArgs_t {
                  << desArgs.rl_policy_boltzmann_t << ","
                  << desArgs.rl_hybrid << ","
                  << desArgs.rl_hybrid_warmup << ","
-                 << desArgs.nn_momentum;
+                 << desArgs.nn_momentum << ","
+                 << desArgs.rl_policy_wpl_eta;
 
             return p_os;
         }

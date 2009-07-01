@@ -80,6 +80,7 @@
 #include "Simulation.hh"
 #include "UnprocessedEventsHandler.hh"
 #include "UtilisationHandler.hh"
+#include "WeightedPolicyLearner.hh"
 
 #include "Results.hh"
 namespace dio = des::io;
@@ -554,6 +555,17 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
                     = dsample::CRN::getInstance().get(pol_uniform_rng_index);
 
                 pol = tPolicySP(new drl::BoltzmannPolicy(desArgs->rl_policy_boltzmann_t, r1));
+            } else if (desArgs->rl_policy == 3) {
+                boost::uint32_t seed = dsample::Seeds::getInstance().getSeed();
+                boost::uint32_t pol_uniform_rng_index
+                    = dsample::CRN::getInstance().init(seed);
+                dsample::CRN::getInstance().log(seed, "epsilon uniform");
+                dsample::tGslRngSP r2
+                    = dsample::CRN::getInstance().get(pol_uniform_rng_index);
+
+                pol = tPolicySP(
+                    new drl::WeightedPolicyLearner(
+                        desArgs->rl_policy_epsilon, desArgs->rl_policy_wpl_eta, *graph, r2));
             }
 
             // configure the on-policy selection

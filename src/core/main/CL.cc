@@ -165,7 +165,8 @@ CL::CL()
         (RL_RESPONSE_REWARD.c_str(), po::value <std::string>(), "Reward Scalars above respective levels.")
         (RL_Q_ALPHA.c_str(), po::value <double>()->default_value(0.1), "Learning Rate.")
         (RL_Q_LAMBDA.c_str(), po::value <double>()->default_value(0.1), "Action-value Rate.")
-        (RL_POLICY.c_str(), po::value <boost::uint16_t>()->default_value(1), "Policy (1=Epsilon-Greedy, 2=Boltzmann).")
+        (RL_POLICY.c_str(), po::value <boost::uint16_t>()->default_value(1), "Policy (1=Epsilon-Greedy, 2=Boltzmann, 3=WPL).")
+        (RL_POLICY_WPL_ETA.c_str(), po::value <double>()->default_value(0.001), "Learning rate for WPL.")
         (CL_RL_STATE_IDS.c_str(), po::value <std::string>()->default_value(""), "State representation.")
         (CL_NN_HIDDENLAYER_NEURONS.c_str(), po::value <boost::uint16_t>()->default_value(5), "Hidden number of Neurons.")
         (CL_NN_LOSS_POLICY.c_str(), po::value <boost::uint16_t>()->default_value(1), "Loss Policy (1=default, 2=sliding window).")
@@ -397,6 +398,16 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
                 desArgs->rl_policy_boltzmann_t = vm[RL_POLICY_BOLTZMANN_T.c_str()].as <double>();
             }
             std::cout << "RL Boltzmann T: " << desArgs->rl_policy_boltzmann_t << "." << std::endl;
+        } else if (desArgs->rl_policy == 3) {
+            if (vm.count(RL_POLICY_EPSILON.c_str())) {
+                desArgs->rl_policy_epsilon = vm[RL_POLICY_EPSILON.c_str()].as <double>();
+            }
+            std::cout << "RL Epsilon: " << desArgs->rl_policy_epsilon << "." << std::endl;
+
+            if (vm.count(RL_POLICY_WPL_ETA.c_str())) {
+                desArgs->rl_policy_wpl_eta = vm[RL_POLICY_WPL_ETA.c_str()].as <double>();
+            }
+            std::cout << "RL WPL: " << desArgs->rl_policy_wpl_eta << "." << std::endl;
         }
 
         if (vm.count(CL_NN_LOSS_POLICY.c_str())) {

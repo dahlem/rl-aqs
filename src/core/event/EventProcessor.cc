@@ -63,9 +63,7 @@ EventProcessor::EventProcessor(dcommon::LadderQueue &p_queue,
       m_lastArrivalEvent(p_lastArrivalEvent), m_ackEvent(p_ackEvent),
       m_leaveEvent(p_leaveEvent), m_stopTime(p_stopTime)
 {
-#ifndef NDEBUG
     m_oldTime = 0.0;
-#endif /* NDEBUG */
 }
 
 

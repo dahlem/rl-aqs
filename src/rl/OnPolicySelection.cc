@@ -92,7 +92,7 @@ boost::int32_t OnPolicySelection::operator() (boost::int32_t p_source)
 #endif /* NDEBUG_EVENTS */
         }
 
-        PAttr attr;
+        PAttr attr(0.0, PolicyContext::selection());
         destination = m_policy(p_source, values, attr);
     }
 

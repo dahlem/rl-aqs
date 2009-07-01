@@ -79,10 +79,7 @@ private:
     dcore::LeaveEvent &m_leaveEvent;
 
     double m_stopTime;
-
-#ifndef NDEBUG
     double m_oldTime;
-#endif /* NDEBUG */
 
 };
 

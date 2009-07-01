@@ -106,7 +106,7 @@ void RLResponseHandler::update(AckEvent *subject)
             values[count++] = value;
         }
 
-        drl::PAttr attr;
+        drl::PAttr attr(0.0, drl::PolicyContext::learning());
         newAction = m_policy(entry->getDestination(), values, attr);
 
 #ifndef NDEBUG_EVENTS

@@ -32,6 +32,9 @@
 #include <boost/cstdint.hpp>
 #include <boost/shared_ptr.hpp>
 
+#include "TypeSafeEnum.hh"
+namespace ddesign = des::design;
+
 
 namespace des
 {
@@ -46,10 +49,38 @@ typedef boost::shared_ptr<tValuesVec> tValuesVecSP;
 
 bool val_greater(tValues const& v1, tValues const& v2);
 
+struct PolicyContext
+{
+    // self typedef
+    typedef PolicyContext self;
+
+    // 'ctors
+    template<int N>
+    PolicyContext(const ddesign::enumerator<self, N>& x) : value(N) { }
+    PolicyContext(const self& x) : value(x.value) { }
+
+    // enumerations
+    typedef ddesign::enumerator<self, 0> selection;
+    typedef selection::next learning;
+    typedef learning::next invalid;
+
+    friend bool operator==(const PolicyContext& x, const PolicyContext& y) { return x.value == y.value; }
+    friend bool operator!=(const PolicyContext& x, const PolicyContext& y) { return x.value != y.value; }
+    operator int() const { return value; }
+
+    // fields
+    int value;
+};
+
 
 struct PAttr
 {
+    explicit PAttr(double p_tau, PolicyContext p_context)
+        : tau(p_tau), context(p_context)
+        {}
+
     double tau; // boltzmann policy temperature
+    PolicyContext context; // 1=selection, 2=learning
 };
 
 class Policy
