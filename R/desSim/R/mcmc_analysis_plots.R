@@ -561,10 +561,10 @@ des.kriging.mcmc.sigma.likeli.plot <- function(prefix="2d-shdf", ps=TRUE) {
 
 des.kriging.mcmc.theta.likeli.plot <- function(prefix="2d-shdf", idx=1, ps=TRUE) {
   if (ps) {
-    postscript(paste(prefix, "-chain-theta", idx, "-likelihood.eps", sep=""), onefile=FALSE)
+    postscript(paste(prefix, "-chain-theta_", idx, "-likelihood.eps", sep=""), onefile=FALSE)
   }
 
-  chain <- read.table(paste(prefix, "-chain-theta", idx, "-likelihood.dat", sep=""), header=TRUE,
+  chain <- read.table(paste(prefix, "-chain-theta_", idx, "-likelihood.dat", sep=""), header=TRUE,
                       col.names=c("likelihood_theta", "theta"), sep=",")
   df <- data.frame(x=chain$theta,y=(chain$likelihood_theta/sum(chain$likelihood_theta)))
   p <- ggplot(df, aes(x=x, y=y))
@@ -627,7 +627,7 @@ des.kriging.mcmc.beta.marginal.plot <- function(prefix="2d-shdf", idx="1", ps=TR
   }
 
   chain <- read.table(paste(prefix, "-chain-beta_", idx, "-sampled.dat", sep=""), header=TRUE)
-  df <- data.frame(x=chain$sampled_beta)
+  df <- data.frame(x=chain[,1])
 
   i <- as.numeric(idx)
   xtitle <- bquote(paste(beta[.(i)]))
@@ -655,7 +655,7 @@ des.kriging.mcmc.sigma.marginal.plot <- function(prefix="2d-shdf", ps=TRUE, adj=
   }
 
   chain <- read.table(paste(prefix, "-chain-sigma-sampled.dat", sep=""), header=TRUE)
-  df <- data.frame(x=chain$sampled_sigma)
+  df <- data.frame(x=chain[,1])
 
   ytitle <- bquote(paste("p(", sigma^2, ")"))
   title <- bquote(paste("Marginal Probability of ", sigma^2))
@@ -682,7 +682,7 @@ des.kriging.mcmc.theta.marginal.plot <- function(prefix="2d-shdf", ps=TRUE, idx=
 
   chain <- read.table(paste(prefix, "-chain-theta_", idx, "-sampled.dat", sep=""), header=TRUE,
                       col.names=c("sampled_theta"))
-  df <- data.frame(x=chain$sampled_theta)
+  df <- data.frame(x=chain[,1])
 
 
   i <- as.numeric(idx)
