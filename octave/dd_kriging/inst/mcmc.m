@@ -20,10 +20,12 @@ function x_bar_new = welford_mean(n, x_bar, x)
   x_bar_new = x_bar + d / n;
 endfunction
 
+## squashing function with a minimum value a and a maximum value b
 function f = logit(theta, a, b)
-  f = log((theta-a)./(b-theta));
+  f = log(theta-a) - log(b-theta);
 endfunction
 
+## inverse squashing function with a minimum value a and a maximum value b
 function fi =  logitinv(z, a, b)
   fi = b-(b-a)./(1+exp(z));
 endfunction
