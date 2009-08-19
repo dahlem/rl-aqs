@@ -107,7 +107,8 @@ CL::CL()
     po::options_description opt_ci("Confidence Interval Configuration");
     opt_ci.add_options()
         (WITH_CI.c_str(), po::value <bool>()->default_value(false), "Obtain a specified experiment precision.")
-        (REPLICATIONS.c_str(), po::value <boost::uint16_t>()->default_value(2), "Initial number of replications.")
+        (REPLICATIONS.c_str(), po::value <boost::uint16_t>()->default_value(2), "minimum replications required.")
+        (INIT_REPLICATIONS.c_str(), po::value <boost::uint16_t>()->default_value(2), "Initial number of replications.")
         (ALPHA.c_str(), po::value <double>()->default_value(0.05), "100(1-alpha) percent confidence interval.")
         (ERROR.c_str(), po::value <double>()->default_value(0.1), "Relative error threshold for the CI calculations.")
         ;
@@ -483,7 +484,12 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
         if (vm.count(REPLICATIONS.c_str())) {
             desArgs->replications = vm[REPLICATIONS.c_str()].as <boost::uint16_t>();
         }
-        std::cout << "Number of replications: " << desArgs->replications << std::endl;
+        std::cout << "Minimum number of replications: " << desArgs->replications << std::endl;
+
+        if (vm.count(INIT_REPLICATIONS.c_str())) {
+            desArgs->init_replications = vm[INIT_REPLICATIONS.c_str()].as <boost::uint16_t>();
+        }
+        std::cout << "Initial number of replications: " << desArgs->init_replications << std::endl;
 
         if (vm.count(ALPHA.c_str())) {
             desArgs->alpha = vm[ALPHA.c_str()].as <double>();

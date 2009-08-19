@@ -10,7 +10,7 @@
 
 AC_PREREQ(2.61)
 AC_INIT([Discrete Event Simulation for Service Interaction],
-        [3.1],
+        [3.2],
         [Dominik Dahlem Dominik.Dahlem@cs.tcd.ie], 
         [des])
 
@@ -103,6 +103,15 @@ if test "x$USE_OPENMP" = xyes; then
    AC_DEFINE(HAVE_OPENMP, 1, [define openmp, if enabled])
 fi
 
+
+# Check for WPL debug
+AC_ARG_ENABLE(debug-wpl, AS_HELP_STRING(
+		     [--enable-debug-wpl], 
+		     [enable WPL debugging @<:@default=no@:>@]), 
+		     [WPLDEBUGGING=$enableval], [WPLDEBUGGING=no])
+if test "x$WPLDEBUGGING" = xno; then
+  AC_DEFINE(NDEBUG_WPL, 1, [define wpl debugging, if disabled])
+fi
 
 # Check for queue debug
 AC_ARG_ENABLE(debug-queue, AS_HELP_STRING(
@@ -261,6 +270,7 @@ AC_CONFIG_FILES([
    src/statistics/correlation/Makefile
    src/utils/Makefile
    src/utils/numbers/Makefile
+   src/utils/simplex/Makefile
    src/utils/vector/Makefile
    tests/Makefile
    tests/common/Makefile

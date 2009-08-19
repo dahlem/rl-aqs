@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This file is free software; as a spevectoral exception the author gives
 // unlimited permission to copy and/or distribute it, with or without
@@ -11,11 +11,17 @@
 /** @file Vector.cc
  * Implementation of the declarations in @ref{Vector.hh}
  */
+#include <cmath>
+
 #include "Vector.hh"
-namespace dutil = des::utils;
+
+namespace des
+{
+namespace utils
+{
 
 
-double dutil::Vector::dotproduct(int p_n, DoubleSA p_vec1, DoubleSA p_vec2)
+double Vector::dotproduct(int p_n, DoubleSA p_vec1, DoubleSA p_vec2)
 {
     int k, m, i = 0;
     double sum = 0.0;
@@ -45,7 +51,7 @@ double dutil::Vector::dotproduct(int p_n, DoubleSA p_vec1, DoubleSA p_vec2)
 }
 
 
-void dutil::Vector::mult(int p_n, DoubleSA p_vec, double p_scalar)
+void Vector::mult(int p_n, DoubleSA p_vec, double p_scalar)
 {
     int k, m, i = 0;
 
@@ -69,4 +75,33 @@ void dutil::Vector::mult(int p_n, DoubleSA p_vec, double p_scalar)
       case 1:
           p_vec[i] = p_vec[i] * p_scalar;
     }
+}
+
+
+void Vector::add(int p_n, DoubleSA p_vec1, DoubleSA p_vec2)
+{
+    for (int i = 0; i < p_n; i ++) {
+        p_vec1[i] += p_vec2[i];
+    }
+}
+
+
+void Vector::normalise(int p_n, DoubleSA p_vec)
+{
+    double length = 0.0;
+
+    for (int i = 0; i < p_n; i ++) {
+        length += p_vec[i] * p_vec[i];
+    }
+
+    length = std::sqrt(length);
+
+    if (length > 0.0) {
+        for (int i = 0; i < p_n; i ++) {
+            p_vec[i] /= length;
+        }
+    }
+}
+
+}
 }

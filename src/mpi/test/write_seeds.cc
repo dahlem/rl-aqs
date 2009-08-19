@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -47,10 +47,10 @@ int main(int argc, char *argv[])
     int rank, rc;
     MPI_File fh_write;
     MPI_Status status;
-    std::string seeds_file = "/home/tecsc/ddahlem/seeds.dat";
-    std::string seeds_file_mpi = "/home/tecsc/ddahlem/seeds-mpi.dat";
+    std::string seeds_file = "/home/tecsc/dahlemd/seeds.dat";
+    std::string seeds_file_mpi = "/home/tecsc/dahlemd/seeds-mpi.dat";
     gsl_permutation *p;
-    
+
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
 
         for (int i = 0; i < SIZE; i++) {
             int newSeed = p->data[i];
-        
+
             MPI_File_write(fh_write, &newSeed, 1, MPI_INT, &status);
             os << newSeed << std::endl;
         }
@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
         gsl_rng_free(rng);
     }
 
-    
+
     MPI_Finalize();
 #endif /* HAVE_MPI */
 

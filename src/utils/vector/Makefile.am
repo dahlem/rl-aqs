@@ -12,11 +12,17 @@ noinst_LTLIBRARIES = libutils_vector.la
 
 libutils_vector_la_SOURCES = Vector.cc
 
-libutils_vector_la_CPPFLAGS =                                         \
-	$(BOOST_CPPFLAGS)                                             \
+
+libutils_vector_la_CPPFLAGS =                                           \
+	$(BOOST_CPPFLAGS)                                               \
 	-I./includes
+
+libutils_vector_la_LIBADD =                                             \
+	-lm                                                             \
+	$(BOOST_LDFLAGS)
 
 
 include_HEADERS = includes
+MAINTAINERCLEANFILES = Makefile.in
 
 include $(top_srcdir)/mk/mpi.am

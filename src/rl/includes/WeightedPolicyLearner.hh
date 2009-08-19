@@ -49,10 +49,12 @@ class WeightedPolicyLearner : public Policy
 {
 public:
     WeightedPolicyLearner(
-        double p_epsilon,
-        double p_eta,
-        dnet::Graph &p_graph,
-        dsample::tGslRngSP p_uniform_rng);
+        double,
+        double,
+        dnet::Graph &,
+        dsample::tGslRngSP,
+        dsample::tGslRngSP);
+
     ~WeightedPolicyLearner()
         {}
 
@@ -64,6 +66,7 @@ private:
     double m_eta;
     dnet::Graph &m_graph;
     dsample::tGslRngSP m_uniform_rng;
+    dsample::tGslRngSP m_simplex_rng;
 
     dnet::EdgeWeightMap edge_weight_map;
 };

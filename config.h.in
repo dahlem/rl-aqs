@@ -129,6 +129,9 @@
 /* define sampling debugging, if disabled */
 #undef NDEBUG_SAMPLING
 
+/* define wpl debugging, if disabled */
+#undef NDEBUG_WPL
+
 /* Name of package */
 #undef PACKAGE
 

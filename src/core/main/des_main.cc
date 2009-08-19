@@ -199,7 +199,7 @@ int main(int argc, char *argv[])
     if (rank == 0) {
 
         // check whether we have enough nodes
-        if ((desArgs->simulations * desArgs->replications + 1) > num_tasks) {
+        if ((desArgs->simulations * desArgs->init_replications + 1) > num_tasks) {
             std::cerr << "Error: Not enough nodes available!" << std::endl;
             MPI_Abort(MPI_COMM_WORLD, 911);
         }

@@ -21,7 +21,7 @@
 # include <config.h>
 #endif
 
-#ifndef NDEBUG_EVENTS
+#if !defined(NDEBUG_WPL) || !defined(NDEBUG_EVENTS)
 # include <iostream>
 #endif /* NDEBUG_EVENTS */
 
@@ -29,6 +29,10 @@
 
 #include <boost/foreach.hpp>
 #include <boost/shared_array.hpp>
+
+#include "Simplex.hh"
+#include "Vector.hh"
+namespace dutils = des::utils;
 
 #include "Policy.hh"
 #include "WeightedPolicyLearner.hh"
@@ -44,8 +48,10 @@ WeightedPolicyLearner::WeightedPolicyLearner(
     double p_epsilon,
     double p_eta,
     dnet::Graph &p_graph,
-    dsample::tGslRngSP p_uniform_rng)
-    : m_epsilon(p_epsilon), m_eta(p_eta), m_graph(p_graph), m_uniform_rng(p_uniform_rng)
+    dsample::tGslRngSP p_uniform_rng,
+    dsample::tGslRngSP p_simplex_rng)
+    : m_epsilon(p_epsilon), m_eta(p_eta), m_graph(p_graph),
+      m_uniform_rng(p_uniform_rng), m_simplex_rng(p_simplex_rng)
 {
     edge_weight_map = get(boost::edge_weight, m_graph);
 }
@@ -54,97 +60,75 @@ WeightedPolicyLearner::WeightedPolicyLearner(
 boost::uint16_t WeightedPolicyLearner::operator() (
     boost::uint16_t p_source, tValuesVec &p_values, PAttr p_attr)
 {
-    double epsilon = 0.0;
-    boost::uint16_t action = -1;
+    int action = -1;
 
-#ifndef NDEBUG_EVENTS
+#if !defined(NDEBUG_WPL) || !defined(NDEBUG_EVENTS)
     std::cout << "Consider Action-Value Pairs... " << std::endl;
     BOOST_FOREACH(tValues v, p_values) {
         std::cout << "Action-Value: " << v.first << ", " << v.second << std::endl;
     }
-#endif /* NDEBUG_EVENTS */
+    std::cout << std::endl;
+#endif /* !defined(NDEBUG_WPL) || !defined(NDEBUG_EVENTS) */
 
     if (p_values.size() > 1) {
         boost::shared_array<double> diff = boost::shared_array<double>(new double[p_values.size()]);
-        boost::shared_array<double> probs = boost::shared_array<double>(new double[p_values.size()]);
-        
+        boost::shared_array<double> gradient = boost::shared_array<double>(new double[p_values.size()]);
+        boost::shared_array<double> orig = boost::shared_array<double>(new double[p_values.size()]);
+
         // 1. calc the mean of the q-values
         double q_mean = 0.0;
         for (boost::uint16_t i = 0; i < p_values.size(); ++i) {
-            q_mean += p_values[i].second;
-        }
-        q_mean = q_mean / static_cast<double> (p_values.size());
-        
-        // 2. for each action
-        for (boost::uint16_t i = 0; i < p_values.size(); ++i) {
-            // 2.1. calc the difference between current Q and average Q
-            diff[i] = p_values[i].second - q_mean;
             dnet::Edge edge = boost::edge(
                 boost::vertex(p_source, m_graph),
                 boost::vertex(p_values[i].first, m_graph),
                 m_graph).first;
-            double piA = edge_weight_map[edge];
-            
+            orig[i] = edge_weight_map[edge];
+            q_mean += p_values[i].second * orig[i];
+        }
+
+        // 2. for each action
+        for (boost::uint16_t i = 0; i < p_values.size(); ++i) {
+            // 2.1. calc the difference between current Q and average Q
+            diff[i] = p_values[i].second - q_mean;
+
             if (diff[i] > 0) {
                 // 2.2.1 if diff > 0 then update diff <- diff * (1 - probability_of_action)
-                diff[i] = diff[i] * (1 - piA);
+                diff[i] = diff[i] * (1 - orig[i]);
             } else {
                 // 2.2.2 else diff <- diff * (probability_of_action)
-                diff[i] = diff[i] * piA;
+                diff[i] = diff[i] * orig[i];
             }
             // 2.3. calculate new policy
-            probs[i] = piA + m_eta * diff[i];
+            gradient[i] = orig[i] + m_eta * diff[i];
         }
-        
-        // 3. check that no action probability is below epsilon
-        bool canUpdate = true;
+
+#if !defined(NDEBUG_WPL) || !defined(NDEBUG_EVENTS)
         for (boost::uint16_t i = 0; i < p_values.size(); ++i) {
-            if (probs[i] < m_epsilon) {
-                canUpdate = false;
-                break;
-            }
+            std::cout << "diff: " << diff[i] << ", gradient: " << gradient[i] << std::endl;
         }
+        std::cout << std::endl;
+#endif /* !defined(NDEBUG_WPL) || !defined(NDEBUG_EVENTS) */
 
-        // 4. update policy
+        dutils::Vector::normalise(p_values.size(), gradient);
+
+        dutils::Simplex::projectionDuchi(p_values.size(), gradient, 1.0, m_simplex_rng);
+
+#if !defined(NDEBUG_WPL) || !defined(NDEBUG_EVENTS)
+        for (boost::uint16_t i = 0; i < p_values.size(); ++i) {
+            std::cout << "projected gradient: " << gradient[i] << std::endl;
+        }
+        std::cout << std::endl;
+#endif /* !defined(NDEBUG_WPL) || !defined(NDEBUG_EVENTS) */
+
+        // update the probabilities according to gradient projection
         tValuesVec probabilities(p_values.size());
-        if (canUpdate) {
-            double length = 0.0;
-            
-            for (boost::uint16_t i = 0; i < p_values.size(); ++i) {
-                length += probs[i];
-            }
-
-            // normalise the vector
-            // and put the props with the target index into a separate vector
-            for (boost::uint16_t i = 0; i < p_values.size(); ++i) {
-                dnet::Edge edge = boost::edge(
-                    boost::vertex(p_source, m_graph),
-                    boost::vertex(p_values[i].first, m_graph),
-                    m_graph).first;
-                
-                double prob = probs[i] / length;
-                edge_weight_map[edge] = prob;
-
-                tValues value;
-                value.first = p_values[i].first;
-                value.second = prob;
-                probabilities[i] = value;
-            }
-        } else {
-            // otherwise use the previous vector
-            for (boost::uint16_t i = 0; i < p_values.size(); ++i) {
-                dnet::Edge edge = boost::edge(
-                    boost::vertex(p_source, m_graph),
-                    boost::vertex(p_values[i].first, m_graph),
-                    m_graph).first;
-
-                tValues value;
-                value.first = p_values[i].first;
-                value.second = edge_weight_map[edge];
-                probabilities[i] = value;
-            }
+        for (boost::uint16_t i = 0; i < p_values.size(); ++i) {
+            tValues value;
+            value.first = p_values[i].first;
+            value.second = gradient[i];
+            probabilities[i] = value;
         }
-        
+
         // 5. select action
         std::sort(probabilities.begin(), probabilities.end(), val_greater);
 
@@ -182,7 +166,7 @@ boost::uint16_t WeightedPolicyLearner::operator() (
         action = 0;
     }
 
-    return action;
+    return static_cast<boost::uint16_t> (action);
 }
 
 

@@ -110,7 +110,7 @@ public:
             tBoolSA areExpsSignificant = tBoolSA(new bool[runs]);
             for (boost::uint16_t i = 0; i < runs; ++i) {
                 areExpsSignificant[i] = false;
-                simReplications[i] = p_desArgs->replications;
+                simReplications[i] = p_desArgs->init_replications;
             }
 
             // online statistics for the experiments
@@ -225,7 +225,7 @@ public:
                 desArgsMPI.sim_num = i + 1 + already_run;
                 assignParams(p_desArgs, desArgsMPI, sample);
 
-                for (desArgsMPI.rep_num = 1; desArgsMPI.rep_num <= p_desArgs->replications;
+                for (desArgsMPI.rep_num = 1; desArgsMPI.rep_num <= p_desArgs->init_replications;
                      ++desArgsMPI.rep_num) {
                     // send the desargs to the slave nodes
 #ifndef NDEBUG
@@ -284,9 +284,10 @@ public:
                                      << p_desArgs->rl_policy << ","
                                      << desArgsMPI.rl_policy_epsilon << ","
                                      << desArgsMPI.rl_policy_boltzmann_t << ","
-                                     << p_desArgs.rl_hybrid << ","
-                                     << p_desArgs.rl_hybrid_warmup << ","
-                                     << desArgsMPI.nn_momentum;
+                                     << p_desArgs->rl_hybrid << ","
+                                     << p_desArgs->rl_hybrid_warmup << ","
+                                     << desArgsMPI.nn_momentum << ","
+                                     << p_desArgs->rl_policy_wpl_eta;
             }
 
             // 4. continue with as many experiments as needed
@@ -341,12 +342,13 @@ public:
                             totalQs[output->simulation_id - 1].variance(),
                             totalQs[output->simulation_id - 1].getNumValues(),
                             p_desArgs->alpha, p_desArgs->error)
-                        ;
+                        &&
+                        (avgDelays[output->simulation_id - 1].getNumValues() >= p_desArgs->replications);
 
                     // if not send another replica
                     if (!isConfident) {
                         // do progressive parallel job execution
-                        int moreJobs = (p_desArgs->replications > idleNodes.size()) ? idleNodes.size() : p_desArgs->replications;
+                        int moreJobs = (p_desArgs->init_replications > idleNodes.size()) ? idleNodes.size() : p_desArgs->init_replications;
 
 #ifndef NDEBUG
                         std::cout << "Simulation " << output->simulation_id << ", replications: "

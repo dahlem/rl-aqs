@@ -216,7 +216,7 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
     boost::uint16_t net_size, max_edges;
     double edge_prob,
         rl_q_alpha, rl_q_lambda, rl_policy_epsilon, rl_policy_boltz_t,
-        nn_momentum;
+        nn_momentum, boost_arrival, boost_edge;
 
     // receive the input arguments via mpi
 #ifdef HAVE_MPI
@@ -253,6 +253,8 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
         rl_policy_epsilon = simArgs.rl_policy_epsilon;
         rl_policy_boltz_t = simArgs.rl_policy_boltzmann_t;
         nn_momentum = simArgs.nn_momentum;
+        boost_arrival = simArgs.boost_arrival;
+        boost_edge = simArgs.boost_edge;
 
 #else
         sim_num = desArgs->sim_num;
@@ -265,6 +267,8 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
         rl_policy_epsilon = desArgs->rl_policy_epsilon;
         rl_policy_boltz_t = desArgs->rl_policy_boltzmann_t;
         nn_momentum = desArgs->nn_momentum;
+        boost_arrival = desArgs->boost_arrival;
+        boost_edge = desArgs->boost_edge;
 
 #endif /* HAVE_MPI */
 
@@ -312,6 +316,8 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
                 std::cout << "Generate social graph..." << std::endl;
                 std::cout << "Size: " << desArgs->net_size << std::endl
                           << "Max edges: " << max_edges << std::endl
+                          << "boost arrival: " << boost_arrival << std::endl
+                          << "boost edge: " << boost_edge << std::endl
                           << "Fix edge weight: " << desArgs->edge_fixed << std::endl;
 
                 boost::int32_t arrival_rng_index;
@@ -327,17 +333,19 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
                 r2 = dsample::CRN::getInstance().get(uniform_rng_index);
                 r3 = dsample::CRN::getInstance().get(arrival_rng_index);
                 graph = dnet::WEvonet::createBBVGraph(desArgs->net_size, desArgs->max_edges, desArgs->edge_fixed,
-                                                      desArgs->max_arrival, desArgs->boost_arrival, desArgs->boost_edge,
+                                                      desArgs->max_arrival, boost_arrival, boost_edge,
                                                       r1, r2, r3);
             } else if (desArgs->net_gen == 2) {
                 std::cout << "Generate Erdos-Renyi graph..." << std::endl
                           << "Max edges: " << max_edges << std::endl
+                          << "boost arrival: " << boost_arrival << std::endl
+                          << "boost edge: " << boost_edge << std::endl
                           << "Fix edge weight: " << desArgs->edge_fixed << std::endl
                           << "Edge prob.: " << edge_prob << std::endl;
                 seed = dsample::Seeds::getInstance().getSeed();
                 graph = dnet::WEvonet::createERGraph(desArgs->net_size, desArgs->edge_fixed,
-                                                     desArgs->max_arrival, desArgs->boost_arrival,
-                                                     desArgs->boost_edge, r1, seed, edge_prob, max_edges);
+                                                     desArgs->max_arrival, boost_arrival,
+                                                     boost_edge, r1, seed, edge_prob, max_edges);
             }
 
             std::cout << "Graph generated." << std::endl;
@@ -539,6 +547,7 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
                 dsample::tGslRngSP r1
                     = dsample::CRN::getInstance().get(pol_epsilon_rng_index);
 
+                seed = dsample::Seeds::getInstance().getSeed();
                 boost::uint32_t pol_uniform_rng_index
                     = dsample::CRN::getInstance().init(seed);
                 dsample::CRN::getInstance().log(seed, "epsilon uniform");
@@ -563,9 +572,16 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
                 dsample::tGslRngSP r2
                     = dsample::CRN::getInstance().get(pol_uniform_rng_index);
 
+                seed = dsample::Seeds::getInstance().getSeed();
+                boost::uint32_t simplex_rng_index
+                    = dsample::CRN::getInstance().init(seed);
+                dsample::CRN::getInstance().log(seed, "simplex uniform");
+                dsample::tGslRngSP r3
+                    = dsample::CRN::getInstance().get(simplex_rng_index);
+
                 pol = tPolicySP(
                     new drl::WeightedPolicyLearner(
-                        desArgs->rl_policy_epsilon, desArgs->rl_policy_wpl_eta, *graph, r2));
+                        desArgs->rl_policy_epsilon, desArgs->rl_policy_wpl_eta, *graph, r2, r3));
             }
 
             // configure the on-policy selection

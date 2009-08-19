@@ -121,32 +121,32 @@ des.kriging.mcmc.theta.plot <- function(prefix="2d-shdf", idx="1", ps=TRUE) {
 }
 
 
-des.kriging.mcmc.eta.plot <- function(prefix="2d-shdf", dim="1", idx="1", ps=TRUE) {
-  if (ps) {
-    postscript(paste(prefix, "-nonst-chain-eta", dim, "_", idx, ".eps", sep=""), onefile=FALSE)
-  }
+## des.kriging.mcmc.eta.plot <- function(prefix="2d-shdf", dim="1", idx="1", ps=TRUE) {
+##   if (ps) {
+##     postscript(paste(prefix, "-nonst-chain-eta", dim, "_", idx, ".eps", sep=""), onefile=FALSE)
+##   }
 
-  chain <- read.table(paste(prefix, "-nonst-chain-eta", dim, "_", idx, ".dat", sep=""),
-                      header=TRUE, col.names=c("eta"))
-  df <- data.frame(x=1:length(chain$eta), y=chain$eta)
-  i <- as.numeric(idx)
-  j <- as.numeric(dim)
-  ytitle <- bquote(paste(eta[.(i)]^(.(j))))
-  title <- bquote(paste("Evolution of ", eta[.(i)]^(.(j))))
+##   chain <- read.table(paste(prefix, "-nonst-chain-eta", dim, "_", idx, ".dat", sep=""),
+##                       header=TRUE, col.names=c("eta"))
+##   df <- data.frame(x=1:length(chain$eta), y=chain$eta)
+##   i <- as.numeric(idx)
+##   j <- as.numeric(dim)
+##   ytitle <- bquote(paste(eta[.(i)]^(.(j))))
+##   title <- bquote(paste("Evolution of ", eta[.(i)]^(.(j))))
 
-  p <- ggplot(df, aes(x=x, y=y))
-  p <- p + layer(geom = "line")
-  p <- p + scale_y_continuous(ytitle)
-  p <- p + scale_x_continuous("")
-  p <- p + opts(title=title)
+##   p <- ggplot(df, aes(x=x, y=y))
+##   p <- p + layer(geom = "line")
+##   p <- p + scale_y_continuous(ytitle)
+##   p <- p + scale_x_continuous("")
+##   p <- p + opts(title=title)
   
-  p <- p + theme_bw()
-  print(p)
+##   p <- p + theme_bw()
+##   print(p)
   
-  if (ps) {
-    dev.off()
-  }
-}
+##   if (ps) {
+##     dev.off()
+##   }
+## }
 
 
 des.kriging.mcmc.mean.plot <- function(prefix="2d-shdf", betas=1, thetas=1) {
@@ -274,30 +274,30 @@ des.kriging.mcmc.theta.mean.plot <- function(prefix="2d-shdf", idx="1", ps=TRUE)
 }
 
 
-des.kriging.mcmc.eta.mean.plot <- function(prefix="2d-shdf", i, j, ps=TRUE) {
-  if (ps) {
-    postscript(paste(prefix, "-nonst-chain-eta", i, "_", j, "-mean.eps", sep=""), onefile=FALSE)
-  }
+## des.kriging.mcmc.eta.mean.plot <- function(prefix="2d-shdf", i, j, ps=TRUE) {
+##   if (ps) {
+##     postscript(paste(prefix, "-nonst-chain-eta", i, "_", j, "-mean.eps", sep=""), onefile=FALSE)
+##   }
 
-  chain <- read.table(paste(prefix, "-nonst-chain-eta", i, "_", j, "-mean.dat", sep=""),
-                      header=TRUE, col.names=c("eta"))
-  df <- data.frame(x=1:length(chain$eta), y=chain$eta)
+##   chain <- read.table(paste(prefix, "-nonst-chain-eta", i, "_", j, "-mean.dat", sep=""),
+##                       header=TRUE, col.names=c("eta"))
+##   df <- data.frame(x=1:length(chain$eta), y=chain$eta)
 
-  ytitle <- bquote(paste(bar(eta)[.(i)]^(.(j))))
-  title <- bquote(paste("Equilibration of ", bar(eta)[.(i)]^(.(j))))
+##   ytitle <- bquote(paste(bar(eta)[.(i)]^(.(j))))
+##   title <- bquote(paste("Equilibration of ", bar(eta)[.(i)]^(.(j))))
 
-  p <- ggplot(df, aes(x=x, y=y))
-  p <- p + layer(geom = "line")
-  p <- p + scale_y_continuous(ytitle)
-  p <- p + scale_x_continuous("")
-  p <- p + opts(title=title)
-  p <- p + theme_bw()
-  print(p)
+##   p <- ggplot(df, aes(x=x, y=y))
+##   p <- p + layer(geom = "line")
+##   p <- p + scale_y_continuous(ytitle)
+##   p <- p + scale_x_continuous("")
+##   p <- p + opts(title=title)
+##   p <- p + theme_bw()
+##   print(p)
   
-  if (ps) {
-    dev.off()
-  }
-}
+##   if (ps) {
+##     dev.off()
+##   }
+## }
 
 
 des.kriging.mcmc.autocorr.plots <- function(prefix="2d-shdf", betas=1, thetas=1) {
@@ -379,38 +379,38 @@ des.kriging.mcmc.autocorr.plot <- function(prefix="2d-shdf", var="beta", wopt, p
 }
 
 
-des.kriging.nonst.mcmc.autocorr.plot <- function(prefix="2d-shdf", i, j, wopt, ps=TRUE) {
-  if (ps) {
-    postscript(paste(prefix, "-nonst-normalised-autocorr-mass-eta", i, "_", j, ".eps", sep=""),
-               onefile=FALSE)
-  }
+## des.kriging.nonst.mcmc.autocorr.plot <- function(prefix="2d-shdf", i, j, wopt, ps=TRUE) {
+##   if (ps) {
+##     postscript(paste(prefix, "-nonst-normalised-autocorr-mass-eta", i, "_", j, ".eps", sep=""),
+##                onefile=FALSE)
+##   }
 
-  norCorr <- read.csv(paste(prefix, "-nonst-normalised-autocorr-mass-eta", i, "_", j, ".dat", sep=""),
-                      header=TRUE)
+##   norCorr <- read.csv(paste(prefix, "-nonst-normalised-autocorr-mass-eta", i, "_", j, ".dat", sep=""),
+##                       header=TRUE)
   
-  df <- data.frame(tauint=norCorr$tauint,
-                   rho=norCorr$rho,
-                   min=norCorr$rho-norCorr$drho,
-                   max=norCorr$rho+norCorr$drho)
+##   df <- data.frame(tauint=norCorr$tauint,
+##                    rho=norCorr$rho,
+##                    min=norCorr$rho-norCorr$drho,
+##                    max=norCorr$rho+norCorr$drho)
 
-  limits <- aes(max = max, min = min)
-  title <- bquote(paste("Normalised Autocorrelation of ", eta[.(i)]^(.(j))))
+##   limits <- aes(max = max, min = min)
+##   title <- bquote(paste("Normalised Autocorrelation of ", eta[.(i)]^(.(j))))
 
-  p <- ggplot(df, aes(x=tauint, y=rho))
-  p <- p + layer(geom = "line")
-  p <- p + geom_errorbar(limits, width=0.5)
-  p <- p + scale_y_continuous(expression(rho), breaks=c(-0.5, 0, 0.5, 1))
-  p <- p + scale_x_continuous("W")
-  p <- p + geom_vline(xintercept=wopt, colour="red")
-  p <- p + theme_bw()
-  p <- p + opts(title=title)
+##   p <- ggplot(df, aes(x=tauint, y=rho))
+##   p <- p + layer(geom = "line")
+##   p <- p + geom_errorbar(limits, width=0.5)
+##   p <- p + scale_y_continuous(expression(rho), breaks=c(-0.5, 0, 0.5, 1))
+##   p <- p + scale_x_continuous("W")
+##   p <- p + geom_vline(xintercept=wopt, colour="red")
+##   p <- p + theme_bw()
+##   p <- p + opts(title=title)
 
-  print(p)
+##   print(p)
   
-  if (ps) {
-    dev.off()
-  }
-}
+##   if (ps) {
+##     dev.off()
+##   }
+## }
 
 
 des.kriging.mcmc.tauintvsw.plot <- function(prefix="2d-shdf", var="beta", wopt, taui, ps=TRUE) {
@@ -469,37 +469,37 @@ des.kriging.mcmc.tauintvsw.plot <- function(prefix="2d-shdf", var="beta", wopt, 
 }
 
 
-des.kriging.nonst.mcmc.tauintvsw.plot <- function(prefix="2d-shdf", i, j, wopt, taui, ps=TRUE) {
-  if (ps) {
-    postscript(paste(prefix, "-nonst-tauint_vs_w-eta", i, "_", j, ".eps", sep=""), onefile=FALSE)
-  }
+## des.kriging.nonst.mcmc.tauintvsw.plot <- function(prefix="2d-shdf", i, j, wopt, taui, ps=TRUE) {
+##   if (ps) {
+##     postscript(paste(prefix, "-nonst-tauint_vs_w-eta", i, "_", j, ".eps", sep=""), onefile=FALSE)
+##   }
 
-  csv <- read.csv(paste(prefix, "-nonst-tauint_vs_w-eta", i, "_", j, ".dat", sep=""), header=TRUE)
-  df <- data.frame(w=csv$W,
-                   tauint=csv$tauint,
-                   error=csv$error,
-                   min=csv$tauint-csv$error,
-                   max=csv$tauint+csv$error)
+##   csv <- read.csv(paste(prefix, "-nonst-tauint_vs_w-eta", i, "_", j, ".dat", sep=""), header=TRUE)
+##   df <- data.frame(w=csv$W,
+##                    tauint=csv$tauint,
+##                    error=csv$error,
+##                    min=csv$tauint-csv$error,
+##                    max=csv$tauint+csv$error)
 
-  limits <- aes(max = max, min = min)
-  title <- bquote(paste(tau[int], " with Statistical Errors of ", eta[.(i)]^(.(j))))
+##   limits <- aes(max = max, min = min)
+##   title <- bquote(paste(tau[int], " with Statistical Errors of ", eta[.(i)]^(.(j))))
 
-  p <- ggplot(df, aes(x=w, y=tauint))
-  p <- p + layer(geom = "line")
-  p <- p + geom_errorbar(limits, width=0.5)
-  p <- p + scale_x_continuous("W")
-  p <- p + scale_y_continuous(expression(tau[int]))
-  p <- p + geom_hline(yintercept=taui, linetype=2, colour="blue")
-  p <- p + geom_vline(xintercept=wopt, colour="red")
-  p <- p + theme_bw()
-  p <- p + opts(title=title)
+##   p <- ggplot(df, aes(x=w, y=tauint))
+##   p <- p + layer(geom = "line")
+##   p <- p + geom_errorbar(limits, width=0.5)
+##   p <- p + scale_x_continuous("W")
+##   p <- p + scale_y_continuous(expression(tau[int]))
+##   p <- p + geom_hline(yintercept=taui, linetype=2, colour="blue")
+##   p <- p + geom_vline(xintercept=wopt, colour="red")
+##   p <- p + theme_bw()
+##   p <- p + opts(title=title)
 
-  print(p)
+##   print(p)
   
-  if (ps) {
-    dev.off()
-  }
-}
+##   if (ps) {
+##     dev.off()
+##   }
+## }
 
 
 des.kriging.mcmc.likeli.plot <- function(prefix="2d-shdf", betas=1, thetas=2, ps=TRUE) {
@@ -583,30 +583,30 @@ des.kriging.mcmc.theta.likeli.plot <- function(prefix="2d-shdf", idx=1, ps=TRUE)
 
 
 
-des.kriging.nonst.mcmc.eta.likeli.plot <- function(prefix="2d-shdf", i, j, ps=TRUE) {
-  if (ps) {
-    postscript(paste(prefix, "-chain-nonst-eta", i, "_", j, "-likelihood.eps", sep=""), onefile=FALSE)
-  }
+## des.kriging.nonst.mcmc.eta.likeli.plot <- function(prefix="2d-shdf", i, j, ps=TRUE) {
+##   if (ps) {
+##     postscript(paste(prefix, "-chain-nonst-eta", i, "_", j, "-likelihood.eps", sep=""), onefile=FALSE)
+##   }
 
-  chain <- read.table(paste(prefix, "-chain-nonst-eta", i, "_", j, "-likelihood.dat", sep=""), header=TRUE,
-                      col.names=c("likelihood_eta", "eta"), sep=",")
-  df <- data.frame(x=chain$eta,y=(chain$likelihood_eta/sum(chain$likelihood_eta)))
-  ytitle <- bquote(paste("L(", eta[.(i)]^(.(j)), ":", y, ",", beta, ",", sigma^2, ")"))
-  xtitle <- bquote(eta[.(i)]^(.(j)))
-  title <- bquote(paste("Likelihood over ", eta[.(i)]^(.(j))))
+##   chain <- read.table(paste(prefix, "-chain-nonst-eta", i, "_", j, "-likelihood.dat", sep=""), header=TRUE,
+##                       col.names=c("likelihood_eta", "eta"), sep=",")
+##   df <- data.frame(x=chain$eta,y=(chain$likelihood_eta/sum(chain$likelihood_eta)))
+##   ytitle <- bquote(paste("L(", eta[.(i)]^(.(j)), ":", y, ",", beta, ",", sigma^2, ")"))
+##   xtitle <- bquote(eta[.(i)]^(.(j)))
+##   title <- bquote(paste("Likelihood over ", eta[.(i)]^(.(j))))
   
-  p <- ggplot(df, aes(x=x, y=y))
-  p <- p + layer(geom = "line")
-  p <- p + scale_y_continuous(ytitle)
-  p <- p + scale_x_continuous(xtitle)
-  p <- p + opts(title=title)
-  p <- p + theme_bw()
-  print(p)
+##   p <- ggplot(df, aes(x=x, y=y))
+##   p <- p + layer(geom = "line")
+##   p <- p + scale_y_continuous(ytitle)
+##   p <- p + scale_x_continuous(xtitle)
+##   p <- p + opts(title=title)
+##   p <- p + theme_bw()
+##   print(p)
   
-  if (ps) {
-    dev.off()
-  }
-}
+##   if (ps) {
+##     dev.off()
+##   }
+## }
 
 
 des.kriging.mcmc.marginal.plot <- function(prefix="2d-shdf", betas, thetas, ps=TRUE) {

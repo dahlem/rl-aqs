@@ -65,6 +65,7 @@ const std::string WITH_CI = "confidence";
 const std::string WITH_LHS = "lhs";
 const std::string LHS_OPTIMAL = "lhs_optimal";
 const std::string REPLICATIONS = "replications";
+const std::string INIT_REPLICATIONS = "init_replications";
 const std::string SIMULATIONS = "simulations";
 const std::string ALPHA = "alpha";
 const std::string ERROR = "error";
@@ -156,6 +157,7 @@ struct desArgs_t {
     double alpha;                   /* 100(1 - alpha) confidence interval for the experiments */
     double error;                   /* error threshold for the ci calculations */
     boost::uint16_t replications;   /* initial replications required */
+    boost::uint16_t init_replications;   /* initial replications on cluster */
     boost::uint16_t simulations;    /* initial number of simulations */
 
     boost::uint16_t sim_num;        /* simulation number */
@@ -221,7 +223,7 @@ struct desArgs_t {
           vertex(args.vertex), graph_rate(args.graph_rate), max_arrival(args.max_arrival),
           stop_time(args.stop_time), generations(args.generations), confidence(args.confidence),
           lhs(args.lhs), alpha(args.alpha), error(args.error),
-          replications(args.replications), simulations(args.simulations), sim_num(args.sim_num),
+          replications(args.replications), init_replications(args.init_replications), simulations(args.simulations), sim_num(args.sim_num),
           rep_num(args.rep_num), net_size(args.net_size), max_size(args.max_size),
           max_edges(args.max_edges), min_max_edges(args.min_max_edges), max_max_edges(args.max_max_edges),
           boost_arrival(args.boost_arrival), min_boost_arrival(args.min_boost_arrival), max_boost_arrival(args.max_boost_arrival),
@@ -247,7 +249,7 @@ struct desArgs_t {
           vertex(0), graph_rate(0), max_arrival(0.0),
           stop_time(0.0), generations(0), confidence(0),
           lhs(0), alpha(0.0), error(0.0),
-          replications(0), simulations(0), sim_num(0),
+          replications(0), init_replications(0), simulations(0), sim_num(0),
           rep_num(0), net_size(0), max_size(0),
           max_edges(0), min_max_edges(0), max_max_edges(0),
           boost_arrival(0.0), min_boost_arrival(0.0), max_boost_arrival(0.0),
