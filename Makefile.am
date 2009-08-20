@@ -21,6 +21,7 @@ EXTRA_DIST = \
 	seeds.dat \
 	seeds-mpi.dat \
 	iitac.sh \
+	lonsdale.sh \
 	$(srcdir)/pbs \
 	$(srcdir)/bin \
 	$(srcdir)/graphs_dense.sh \

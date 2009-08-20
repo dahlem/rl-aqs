@@ -41,7 +41,7 @@ des.graph.info <- function(graph, mode=1, thres=FALSE, greedy=TRUE) {
   # for each vertex calculate the available information using
   # the weights of all out-edges
 
-  df <- data.frame(vertices=V(graph)$id,
+  df <- data.frame(vertices=V(graph)$vindex,
                    degree=degree(graph, mode="out"))
   
   if (mode == 1) {
@@ -89,7 +89,7 @@ des.graph.node.jackknife.sigma <- function(graph, mode=1, thres=FALSE) {
   # for each vertex calculate the available information using
   # the weights of all out-edges
 
-  df <- data.frame(vertices=V(graph)$id, degree=degree(graph, mode="out"))
+  df <- data.frame(vertices=V(graph)$vindex, degree=degree(graph, mode="out"))
   result <- data.frame()
   
   if (mode == 1) {
@@ -171,7 +171,7 @@ des.graph.node.jackknife.sigma <- function(graph, mode=1, thres=FALSE) {
 ## based on those we can perform a correlation analysis to identify
 ## whether the learning behaviour converges to learning shortest paths
 des.graph.node.qval.shortest.path <- function(graph) {
-  df <- data.frame(vertices=V(graph)$id, degree=degree(graph, mode="out"))
+  df <- data.frame(vertices=V(graph)$vindex, degree=degree(graph, mode="out"))
   df <- df[df$degree > 1,]
   dfs <- lapply(df$vertices, des.graph.node.qval.sp, graph=graph)
   distances <- do.call("rbind", dfs)
@@ -263,3 +263,37 @@ des.graph.info.fn <- function(outdegree, weights) {
   diff <- outdegree - weights
   return(sum(abs(diff)))
 }
+
+des.read.graph.info <- function(graphName, mode) {
+  graph <- read.graph(graphName, format="graphml")
+  info <- des.graph.info(graph, mode)
+  return(mean(info$distance))
+}
+
+des.plot.info <- function(dir, numGraphs, mode, stopTime, ps=TRUE) {
+  graphs <- paste(dir, "/graph", seq(0,numGraphs), ".gml", sep="")
+  dists <- sapply(graphs, des.read.graph.info, mode)
+
+  interval <- stopTime / numGraphs;
+  df <- data.frame(time=rep(0, numGraphs+1), dist=rep(0, numGraphs+1))
+  df$time = seq(0, numGraphs) * interval
+  df$dist = dists
+
+  if (ps) {
+    postscript("./graph-info-evo-plot.eps", onefile=FALSE)
+  }
+
+  p <- ggplot(df, aes(x=time, y=dist))
+  p <- p + layer(geom = "line")
+  p <- p + scale_y_continuous("")
+  p <- p + scale_x_continuous("Time")
+  p <- p + theme_bw()
+  print(p)
+
+  if (ps) {
+    dev.off()
+  }
+}
+
+
+des.plot.info(".", 100, 2, 100000, T)

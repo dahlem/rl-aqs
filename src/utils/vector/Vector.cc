@@ -80,7 +80,7 @@ void Vector::mult(int p_n, DoubleSA p_vec, double p_scalar)
 
 void Vector::add(int p_n, DoubleSA p_vec1, DoubleSA p_vec2)
 {
-    for (int i = 0; i < p_n; i ++) {
+    for (int i = 0; i < p_n; ++i) {
         p_vec1[i] += p_vec2[i];
     }
 }
@@ -90,14 +90,14 @@ void Vector::normalise(int p_n, DoubleSA p_vec)
 {
     double length = 0.0;
 
-    for (int i = 0; i < p_n; i ++) {
+    for (int i = 0; i < p_n; ++i) {
         length += p_vec[i] * p_vec[i];
     }
 
     length = std::sqrt(length);
 
     if (length > 0.0) {
-        for (int i = 0; i < p_n; i ++) {
+        for (int i = 0; i < p_n; ++i) {
             p_vec[i] /= length;
         }
     }
@@ -106,7 +106,7 @@ void Vector::normalise(int p_n, DoubleSA p_vec)
 
 void Vector::scale(int p_n, DoubleSA p_vec, double p_min, double p_max)
 {
-    for (int i = 0; i < p_n; i ++) {
+    for (int i = 0; i < p_n; ++i) {
         p_vec[i] = p_min + (p_max - p_min) * p_vec[i];
     }
 }
