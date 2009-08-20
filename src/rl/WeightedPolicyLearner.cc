@@ -113,6 +113,9 @@ boost::uint16_t WeightedPolicyLearner::operator() (
 
         dutils::Simplex::projectionDuchi(p_values.size(), gradient, 1.0, m_simplex_rng);
 
+        double maxEpsilon = (1.0 - (static_cast<double>(p_values.size()) - 1.0) * m_epsilon);
+        dutils::Vector::scale(p_values.size(), gradient, m_epsilon, maxEpsilon);
+
 #if !defined(NDEBUG_WPL) || !defined(NDEBUG_EVENTS)
         for (boost::uint16_t i = 0; i < p_values.size(); ++i) {
             std::cout << "projected gradient: " << gradient[i] << std::endl;
@@ -123,6 +126,12 @@ boost::uint16_t WeightedPolicyLearner::operator() (
         // update the probabilities according to gradient projection
         tValuesVec probabilities(p_values.size());
         for (boost::uint16_t i = 0; i < p_values.size(); ++i) {
+            dnet::Edge edge = boost::edge(
+                boost::vertex(p_source, m_graph),
+                boost::vertex(p_values[i].first, m_graph),
+                m_graph).first;
+            edge_weight_map[edge] = gradient[i];
+
             tValues value;
             value.first = p_values[i].first;
             value.second = gradient[i];

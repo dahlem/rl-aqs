@@ -1,4 +1,4 @@
-# Copyright (C) 2007, 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+# Copyright (C) 2007, 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 #  
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without 
@@ -23,6 +23,9 @@ libstatisticsanalysis_la_CPPFLAGS =                                   \
 libstatisticsanalysis_la_LIBADD =                                     \
 	$(BOOST_LDFLAGS)                                              \
 	$(GSL_LIBS)
+
+libstatisticsanalysis_la_LIBFLAGS =                                   \
+	$(BOOST_LDFLAGS)
 
 include_HEADERS = includes
 MAINTAINERCLEANFILES = Makefile.in

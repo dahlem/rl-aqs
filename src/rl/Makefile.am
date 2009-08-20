@@ -33,12 +33,14 @@ librl_la_CPPFLAGS =                                                     \
 
 librl_la_LIBADD =                                                       \
 	-lm                                                             \
-	$(BOOST_LDFLAGS)                                                \
 	$(OPENMP_CXXFLAGS)                                              \
 	$(GSL_LIBS)                                                     \
 	$(top_srcdir)/src/utils/vector/libutils_vector.la               \
 	$(top_srcdir)/src/utils/simplex/libutils_simplex.la             \
 	$(top_srcdir)/src/sampling/common/libsamplingcommon.la
+
+librl_la_LDFLAGS =                                                      \
+	$(BOOST_LDFLAGS)
 
 include_HEADERS = includes
 MAINTAINERCLEANFILES = Makefile.in

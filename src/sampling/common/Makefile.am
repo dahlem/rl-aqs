@@ -1,4 +1,4 @@
-# Copyright (C) 2007, 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+# Copyright (C) 2007, 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 #  
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without 
@@ -21,8 +21,10 @@ libsamplingcommon_la_CPPFLAGS =                                       \
 	-I$(top_srcdir)/src/design/pattern/includes
 
 libsamplingcommon_la_LIBADD =                                         \
-	$(BOOST_LDFLAGS)                                              \
 	$(GSL_LIBS)
+
+libsamplingcommon_la_LDFLAGS =                                        \
+	$(BOOST_LDFLAGS)
 
 
 include_HEADERS = includes

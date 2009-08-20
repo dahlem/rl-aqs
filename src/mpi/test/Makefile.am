@@ -1,4 +1,4 @@
-# Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+# Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 #  
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without 
@@ -21,13 +21,14 @@ crn_test_CPPFLAGS =                                                   \
 	-I$(top_srcdir)/src/design/pattern/includes                   \
 	-I$(top_srcdir)/src/sampling/common/includes
 
-
 crn_test_LDADD =                                                      \
-	$(BOOST_LDFLAGS)                                              \
 	$(BOOST_PROGRAM_OPTIONS_LIB)                                  \
 	$(top_srcdir)/src/sampling/crn/libsamplingcrn.la              \
 	$(top_srcdir)/src/sampling/common/libsamplingcommon.la        \
 	$(GSL_LIBS)
+
+crn_test_LDFLAGS =                                                    \
+	$(BOOST_LDFLAGS)
 
 seeds_read_SOURCES =                                                  \
 	seeds_read.cc
@@ -35,7 +36,7 @@ seeds_read_SOURCES =                                                  \
 seeds_read_CPPFLAGS =                                                 \
 	$(BOOST_CPPFLAGS)
 
-seeds_read_LDADD =                                                    \
+seeds_read_LDFLAGS =                                                  \
 	$(BOOST_LDFLAGS)
 
 struct_test_SOURCES =                                                 \
@@ -44,7 +45,7 @@ struct_test_SOURCES =                                                 \
 struct_test_CPPFLAGS =                                                \
 	$(BOOST_CPPFLAGS)
 
-struct_test_LDADD =                                                   \
+struct_test_LDFLAGS =                                                 \
 	$(BOOST_LDFLAGS)
 
 groups_test_SOURCES =                                                 \
@@ -53,7 +54,7 @@ groups_test_SOURCES =                                                 \
 groups_test_CPPFLAGS =                                                \
 	$(BOOST_CPPFLAGS)
 
-groups_test_LDADD =                                                   \
+groups_test_LDFLAGS =                                                 \
 	$(BOOST_LDFLAGS)
 
 read_graphml_SOURCES =                                                \
@@ -64,7 +65,9 @@ read_graphml_CPPFLAGS =                                               \
 	$(BOOST_CPPFLAGS)
 
 read_graphml_LDADD =                                                  \
-	$(top_srcdir)/src/network/evolution/libnetevo.la              \
+	$(top_srcdir)/src/network/evolution/libnetevo.la
+
+read_graphml_LDFLAGS =                                                \
 	$(BOOST_LDFLAGS)
 
 
@@ -76,10 +79,12 @@ write_seeds_CPPFLAGS =                                                \
 	$(GSL_CFLAGS)
 
 write_seeds_LDADD =                                                   \
-	$(BOOST_LDFLAGS)                                              \
 	$(BOOST_FILESYSTEM_LIB)                                       \
 	$(BOOST_SYSTEM_LIB)                                           \
 	$(GSL_LIBS)
+
+write_seeds_LDFLAGS =                                                 \
+	$(BOOST_LDFLAGS)
 
 
 MAINTAINERCLEANFILES = Makefile.in

@@ -17,8 +17,8 @@ libstatisticscorr_la_CPPFLAGS =                                       \
 	$(BOOST_CPPFLAGS)                                             \
 	-I../common/includes
 
-LDADD =                                                               \
-	../sort/libstatisticscommon.la                                \
+libstatisticscorr_la_LIBADD =                                                               \
+	../common/libstatisticscommon.la                              \
 	$(GSL_LIBS)
 
 

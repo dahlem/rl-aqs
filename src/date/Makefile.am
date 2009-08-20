@@ -20,7 +20,9 @@ libdesdate_la_CPPFLAGS =                                             \
 	$(BOOST_CPPFLAGS)
 
 libdesdate_la_LIBADD =                                               \
-	$(OPENMP_CXXFLAGS)                                           \
+	$(BOOST_LDFLAGS)
+
+libdesdate_la_LDFLAGS =                                               \
 	$(BOOST_LDFLAGS)
 
 include_HEADERS = includes

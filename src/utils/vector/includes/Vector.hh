@@ -74,6 +74,17 @@ public:
      */
     static void normalise(int, DoubleSA);
 
+
+    /** @ double scale(int, DoubleSA, double, double)
+     * Scale the vector between (min, max).
+     *
+     * @param int the length of the vectors
+     * @param DoubleSA the target vector
+     * @param double the min. vector value
+     * @param double the max. vector value
+     */
+    static void scale(int, DoubleSA, double, double);
+
 private:
 
     Vector()

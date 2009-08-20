@@ -39,11 +39,9 @@ des_main_CPPFLAGS =                                                      \
 
 
 des_main_LDADD =                                                         \
-	$(BOOST_LDFLAGS)                                                 \
 	$(BOOST_FILESYSTEM_LIB)                                          \
 	$(BOOST_PROGRAM_OPTIONS_LIB)                                     \
 	$(BOOST_SYSTEM_LIB)                                              \
-	$(OPENMP_CXXFLAGS)                                               \
 	$(GSL_LIBS)                                                      \
 	$(top_srcdir)/src/io/libdesio.la                                 \
 	$(top_srcdir)/src/common/list/libcommonlist.la                   \
@@ -57,6 +55,9 @@ des_main_LDADD =                                                         \
 	$(top_srcdir)/src/core/event/libcoreevent.la                     \
 	$(top_srcdir)/src/utils/vector/libutils_vector.la                \
 	$(top_srcdir)/src/common/queue/libcommonqueue.la
+
+des_main_LDFLAGS =                                                         \
+	$(BOOST_LDFLAGS)
 
 
 include_HEADERS = includes

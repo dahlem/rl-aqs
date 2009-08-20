@@ -26,13 +26,14 @@ nnet_gaussian_CPPFLAGS =                                              \
 
 
 nnet_gaussian_LDADD =                                                 \
-	$(BOOST_LDFLAGS)                                              \
 	$(BOOST_PROGRAM_OPTIONS_LIB)                                  \
-	$(OPENMP_CXXFLAGS)                                            \
 	$(top_srcdir)/src/sampling/crn/libsamplingcrn.la              \
 	$(top_srcdir)/src/utils/vector/libutils_vector.la             \
 	$(top_srcdir)/src/sampling/common/libsamplingcommon.la        \
 	$(GSL_LIBS)
+
+nnet_gaussian_LDFLAGS =                                               \
+	$(BOOST_LDFLAGS)
 
 
 include_HEADERS = includes

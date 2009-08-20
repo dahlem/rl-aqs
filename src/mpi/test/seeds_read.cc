@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -22,7 +22,9 @@
 #endif /* __STDC_CONSTANT_MACROS */
 
 #include <iostream>
+#include <cstring>
 #include <string>
+#include <cstdlib>
 #include <streambuf>
 
 #ifdef HAVE_MPI

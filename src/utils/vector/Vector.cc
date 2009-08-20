@@ -103,5 +103,13 @@ void Vector::normalise(int p_n, DoubleSA p_vec)
     }
 }
 
+
+void Vector::scale(int p_n, DoubleSA p_vec, double p_min, double p_max)
+{
+    for (int i = 0; i < p_n; i ++) {
+        p_vec[i] = p_min + (p_max - p_min) * p_vec[i];
+    }
+}
+
 }
 }

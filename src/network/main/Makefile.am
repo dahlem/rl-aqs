@@ -18,7 +18,7 @@ network_add_vertices_CPPFLAGS =                                       \
 	$(BOOST_CPPFLAGS)
 
 
-network_add_vertices_LDADD =                                          \
+network_add_vertices_LDFLAGS =                                        \
 	$(BOOST_LDFLAGS)
 
 
@@ -42,9 +42,10 @@ wevonet_main_LDADD =                                                  \
 	$(BOOST_GRAPH_LIB)                                            \
 	$(BOOST_PROGRAM_OPTIONS_LIB)                                  \
 	$(BOOST_FILESYSTEM_LIB)                                       \
-	$(BOOST_SYSTEM_LIB)                                           \
+	$(BOOST_SYSTEM_LIB)
+
+wevonet_main_LDFLAGS =                                                \
 	$(BOOST_LDFLAGS)                                              \
-	$(OPENMP_CXXFLAGS)                                            \
 	$(EXPAT_LDFLAGS)
 
 

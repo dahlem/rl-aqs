@@ -25,10 +25,12 @@ libsamplingcrn_la_CPPFLAGS =                                          \
 
 
 libsamplingcrn_la_LIBADD =                                            \
-	$(BOOST_LDFLAGS)                                              \
 	$(OPENMP_CXXFLAGS)                                            \
 	$(GSL_LIBS)                                                   \
 	$(top_srcdir)/src/sampling/common/libsamplingcommon.la
+
+libsamplingcrn_la_LDFLAGS =                                           \
+	$(BOOST_LDFLAGS)
 
 
 include_HEADERS = includes

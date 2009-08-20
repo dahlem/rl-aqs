@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
 
 #include <iostream>
 #include <cstring>
+#include <cstdlib>
 
 #ifdef HAVE_MPI
 # include <mpi.h>
@@ -30,16 +31,16 @@ enum {
 };
 
 
-int main(int argc, char *argv[]) 
-{ 
-    MPI_Comm   myComm;       /* intra-communicator of local sub-group */ 
-    MPI_Comm   COMM_TO_LHS;  /* inter-communicator */ 
-    MPI_Comm   COMM_TO_REP; /* second inter-communicator (group 1 only) */ 
-    MPI_Comm   COMM_TO_MASTER; /* second inter-communicator (group 1 only) */ 
-    int membershipKey; 
-    int rank; 
+int main(int argc, char *argv[])
+{
+    MPI_Comm   myComm;       /* intra-communicator of local sub-group */
+    MPI_Comm   COMM_TO_LHS;  /* inter-communicator */
+    MPI_Comm   COMM_TO_REP; /* second inter-communicator (group 1 only) */
+    MPI_Comm   COMM_TO_MASTER; /* second inter-communicator (group 1 only) */
+    int membershipKey;
+    int rank;
     int numLHS = 2;
-    
+
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 

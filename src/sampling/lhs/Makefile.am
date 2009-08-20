@@ -21,8 +21,10 @@ libsamplinglhs_la_CPPFLAGS =                                          \
 
 libsamplinglhs_la_LIBADD =                                            \
 	$(top_srcdir)/src/sampling/common/libsamplingcommon.la        \
-	$(BOOST_LDFLAGS)                                              \
 	$(GSL_LIBS)
+
+libsamplinglhs_la_LDFLAGS =                                           \
+	$(BOOST_LDFLAGS)
 
 
 bin_PROGRAMS = des_lhs
@@ -38,11 +40,12 @@ des_lhs_CPPFLAGS =                                                    \
 	$(BOOST_CPPFLAGS)                                             \
 	$(GSL_CFLAGS)
 
-
 des_lhs_LDADD =                                                       \
 	$(top_srcdir)/src/sampling/common/libsamplingcommon.la        \
-	$(BOOST_LDFLAGS)                                              \
 	$(GSL_LIBS)
+
+des_lhs_LDFLAGS =                                                     \
+	$(BOOST_LDFLAGS)
 
 
 include_HEADERS = includes

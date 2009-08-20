@@ -22,9 +22,11 @@ libutils_simplex_la_CPPFLAGS =                                          \
 
 libutils_simplex_la_LIBADD =                                            \
 	-lm                                                             \
-	$(BOOST_LDFLAGS)                                                \
 	$(GSL_LIBS)                                                     \
 	$(top_srcdir)/src/sampling/common/libsamplingcommon.la
+
+libutils_simplex_la_LIBFLAGS =                                          \
+	$(BOOST_LDFLAGS)
 
 
 include_HEADERS = includes

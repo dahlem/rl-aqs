@@ -18,7 +18,9 @@ libutils_vector_la_CPPFLAGS =                                           \
 	-I./includes
 
 libutils_vector_la_LIBADD =                                             \
-	-lm                                                             \
+	-lm
+
+libutils_vector_la_LDFLAGS =                                            \
 	$(BOOST_LDFLAGS)
 
 

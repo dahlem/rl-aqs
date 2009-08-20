@@ -64,10 +64,8 @@ libcoreevent_la_CPPFLAGS =                                                 \
 	-I$(top_srcdir)/src/common/list/includes
 
 libcoreevent_la_LIBADD =                                                   \
-	$(BOOST_LDFLAGS)                                                   \
 	$(BOOST_FILESYSTEM_LIB)                                            \
 	$(BOOST_SYSTEM_LIB)                                                \
-	$(OPENMP_CXXFLAGS)                                                 \
 	$(GSL_LIBS)                                                        \
 	$(top_srcdir)/src/io/libdesio.la                                   \
 	$(top_srcdir)/src/common/list/libcommonlist.la                     \
@@ -77,6 +75,9 @@ libcoreevent_la_LIBADD =                                                   \
 	$(top_srcdir)/src/rl/librl.la                                      \
 	$(top_srcdir)/src/utils/vector/libutils_vector.la                  \
 	$(top_srcdir)/src/common/queue/libcommonqueue.la
+
+libcoreevent_la_LDFLAGS =                                                   \
+	$(BOOST_LDFLAGS)
 
 include_HEADERS = includes
 MAINTAINERCLEANFILES = Makefile.in

@@ -21,8 +21,11 @@ libdesio_la_CPPFLAGS =                                               \
 
 libdesio_la_LIBADD =                                                 \
 	$(BOOST_FILESYSTEM_LIB)                                      \
-	$(BOOST_SYSTEM_LIB)                                          \
+	$(BOOST_SYSTEM_LIB)
+
+libdesio_la_LDFLAGS =                                                \
 	$(BOOST_LDFLAGS)
+
 
 include_HEADERS = includes
 MAINTAINERCLEANFILES = Makefile.in
