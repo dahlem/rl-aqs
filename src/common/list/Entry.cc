@@ -87,19 +87,10 @@ bool Entry::operator< (const Entry& rhs)
 }
 
 
-void Entry::pushArrival(double p_arrival)
-{
-    event_arrivals.push(p_arrival);
-}
-
-
 void Entry::delayed(double p_delay, double p_newArrival, boost::int32_t p_type)
 {
     // update the delay
     delay += p_delay;
-
-    // remember the original arrival rate
-    pushArrival(arrival);
 
     // reschedule the arrival
     arrival = p_newArrival;
@@ -111,9 +102,6 @@ void Entry::delayed(double p_delay, double p_newArrival, boost::int32_t p_type)
 
 void Entry::service(double p_departure, boost::int32_t p_type)
 {
-    // remember the original arrival rate
-    pushArrival(arrival);
-
     // set the departure time
     arrival = p_departure;
 
@@ -193,9 +181,15 @@ int Entry::getType() const
 }
 
 
-void Entry::pushEvent(int origin)
+void Entry::pushEventHistory(boost::int32_t p_node, double p_time)
 {
-    event_path.push(origin);
+    event_path.push(p_node);
+    event_arrivals.push(p_time);
+}
+
+int Entry::getEventHistoryLength()
+{
+    return event_path.size();
 }
 
 
@@ -212,12 +206,6 @@ int Entry::popEvent()
 bool Entry::isEventQueueEmpty()
 {
     return event_path.empty();
-}
-
-
-int Entry::topEvent()
-{
-    return event_path.top();
 }
 
 

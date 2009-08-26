@@ -65,16 +65,12 @@ void ExpertNormalHandler::update(AckEvent *subject)
 #endif /* NDEBUG_EVENTS */
 
     dnet::Vertex vertex = boost::vertex(entry->getDestination(), m_graph);
-    dnet::Graph::degree_size_type degree = boost::out_degree(vertex, m_graph);
-    boost::uint16_t newAction = 0;
-
     // observe reward (the longer it takes the smaller the reward)
     double reward = 0.0;
     reward = (gsl_fcmp(entry->topArrival(), entry->getArrival(), 1e-9) == 0)
         ? (0.0)
         : (entry->topArrival() - entry->getArrival());
 
-    // set new action
     vertex_expert_normal_map[vertex] += reward;
 
 #ifndef NDEBUG_EVENTS

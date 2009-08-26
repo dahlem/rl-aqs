@@ -26,6 +26,8 @@
 #endif /* NDEBUG_EVENTS */
 
 #include <algorithm>
+#include <cmath>
+#include <numeric>
 
 #include <boost/foreach.hpp>
 #include <boost/shared_array.hpp>
@@ -74,6 +76,7 @@ boost::uint16_t WeightedPolicyLearner::operator() (
         boost::shared_array<double> diff = boost::shared_array<double>(new double[p_values.size()]);
         boost::shared_array<double> gradient = boost::shared_array<double>(new double[p_values.size()]);
         boost::shared_array<double> orig = boost::shared_array<double>(new double[p_values.size()]);
+        double sum = 0.0;
 
         // 1. calc the mean of the q-values
         double q_mean = 0.0;
@@ -93,15 +96,20 @@ boost::uint16_t WeightedPolicyLearner::operator() (
 
             if (diff[i] > 0) {
                 // 2.2.1 if diff > 0 then update diff <- diff * (1 - probability_of_action)
-                diff[i] = diff[i] * (1 - orig[i]);
+                diff[i] = diff[i] * m_eta * (1 - orig[i]);
             } else {
                 // 2.2.2 else diff <- diff * (probability_of_action)
-                diff[i] = diff[i] * orig[i];
+                diff[i] = diff[i] * m_eta * orig[i];
             }
+
             // 2.3. calculate new policy
-            gradient[i] = orig[i] + m_eta * diff[i];
+            gradient[i] = orig[i] + diff[i];
+            sum += fabs(gradient[i]);
         }
-        dutils::Vector::normalise(p_values.size(), gradient);
+
+        double factor = 1.0/sum;
+        dutils::Vector::mult(p_values.size(), gradient, factor);
+//        dutils::Vector::normalise(p_values.size(), gradient, true);
 
 #if !defined(NDEBUG_WPL) || !defined(NDEBUG_EVENTS)
         for (boost::uint16_t i = 0; i < p_values.size(); ++i) {
@@ -111,6 +119,10 @@ boost::uint16_t WeightedPolicyLearner::operator() (
 #endif /* !defined(NDEBUG_WPL) || !defined(NDEBUG_EVENTS) */
 
         dutils::Simplex::projectionDuchi(p_values.size(), gradient, 1.0, m_simplex_rng);
+
+        sum = std::accumulate(gradient.get(), gradient.get() + p_values.size(), 0.0);
+        factor = 1.0/sum;
+        dutils::Vector::mult(p_values.size(), gradient, factor);
 
         double nMinusOne = static_cast<double>(p_values.size()) - 1.0;
         double maxEpsilon = 1.0 - nMinusOne * m_epsilon;

@@ -134,6 +134,7 @@ typedef boost::shared_ptr<ExpertNormalHandler> tExpertNormalHandlerSP;
 typedef boost::shared_ptr<ExpertAbsoluteHandler> tExpertAbsoluteHandlerSP;
 typedef boost::shared_ptr<ExpertPositiveHandler> tExpertPositiveHandlerSP;
 typedef boost::shared_ptr<ExpertNegativeHandler> tExpertNegativeHandlerSP;
+typedef boost::shared_ptr<ResponseStatsHandler> tResponseStatsHandlerSP;
 
 
 Int32SA arrivalCRN(boost::uint16_t p_num_vertices)
@@ -511,22 +512,20 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
         tExpertAbsoluteHandlerSP expertAbsoluteHandler;
         tExpertPositiveHandlerSP expertPositiveHandler;
         tExpertNegativeHandlerSP expertNegativeHandler;
+        tResponseStatsHandlerSP responseStatsHandler;
 
-        if (desArgs->expert_normal) {
+        if (desArgs->expert_normal || desArgs->expert_absolute
+            || desArgs->expert_positive || desArgs->expert_negative) {
             expertNormalHandler = tExpertNormalHandlerSP(new ExpertNormalHandler(*graph));
             ackEvent.attach(*expertNormalHandler);
-        }
-        if (desArgs->expert_absolute) {
             expertAbsoluteHandler = tExpertAbsoluteHandlerSP(new ExpertAbsoluteHandler(*graph));
             ackEvent.attach(*expertAbsoluteHandler);
-        }
-        if (desArgs->expert_positive) {
             expertPositiveHandler = tExpertPositiveHandlerSP(new ExpertPositiveHandler(*graph));
             ackEvent.attach(*expertPositiveHandler);
-        }
-        if (desArgs->expert_negative) {
             expertNegativeHandler = tExpertNegativeHandlerSP(new ExpertNegativeHandler(*graph));
             ackEvent.attach(*expertNegativeHandler);
+            responseStatsHandler = tResponseStatsHandlerSP(new ResponseStatsHandler(*graph));
+            ackEvent.attach(*responseStatsHandler);
         }
 
         // configure reinforcement learning

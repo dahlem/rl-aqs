@@ -53,27 +53,8 @@ double Vector::dotproduct(int p_n, DoubleSA p_vec1, DoubleSA p_vec2)
 
 void Vector::mult(int p_n, DoubleSA p_vec, double p_scalar)
 {
-    int k, m, i = 0;
-
-    k = p_n / 4;
-    m = p_n % 4;
-
-    for (i = 0; i < k; i += 4) {
+    for (int i = 0; i < p_n; ++i) {
         p_vec[i] = p_vec[i] * p_scalar;
-        p_vec[i + 1] = p_vec[i + 1] * p_scalar;
-        p_vec[i + 2] = p_vec[i + 2] * p_scalar;
-        p_vec[i + 3] = p_vec[i + 3] * p_scalar;
-    }
-
-    switch (m) {
-      case 3:
-          p_vec[i] = p_vec[i] * p_scalar;
-          ++i;
-      case 2:
-          p_vec[i] = p_vec[i] * p_scalar;
-          ++i;
-      case 1:
-          p_vec[i] = p_vec[i] * p_scalar;
     }
 }
 
@@ -86,7 +67,7 @@ void Vector::add(int p_n, DoubleSA p_vec1, DoubleSA p_vec2)
 }
 
 
-void Vector::normalise(int p_n, DoubleSA p_vec)
+void Vector::normalise(int p_n, DoubleSA p_vec, bool onlyLarge)
 {
     double length = 0.0;
 
@@ -96,7 +77,11 @@ void Vector::normalise(int p_n, DoubleSA p_vec)
 
     length = std::sqrt(length);
 
-    if (length > 0.0) {
+    if (length > 1.0) {
+        for (int i = 0; i < p_n; ++i) {
+            p_vec[i] /= length;
+        }
+    } else if ((length > 0.0) && !onlyLarge) {
         for (int i = 0; i < p_n; ++i) {
             p_vec[i] /= length;
         }

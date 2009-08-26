@@ -30,6 +30,8 @@ namespace dcore = des::core;
 #include "LadderQueue.hh"
 namespace dcommon = des::common;
 
+#include "events.hh"
+
 
 dcore::AckHandler::AckHandler(dcommon::Queue &p_queue, dnet::Graph &p_graph)
     : m_queue(p_queue), m_graph(p_graph)
@@ -51,30 +53,23 @@ void dcore::AckHandler::update(dcore::AckEvent *subject)
     std::cout << "** Acknowledge for vertex: " << entry->getDestination() << std::endl;
 #endif /* NDEBUG_EVENTS */
 
-    if (entry->isEventQueueEmpty()) {
-#ifndef NDEBUG_EVENTS
-        std::cout << "Schedule leave event." << std::endl;
-#endif /* NDEBUG_EVENTS */
+    // schedule ack events
+    boost::int32_t origin = entry->getDestination();
+    boost::int32_t destination = entry->popEvent();
 
-        // schedule leave event
-        dcommon::Entry *new_entry = new dcommon::Entry(*entry);
+    dcommon::Entry *new_entry = new dcommon::Entry(*entry);
 
+    if (destination == EXTERNAL_EVENT) {
         new_entry->leave(dcore::EXTERNAL_EVENT, dcore::LEAVE_EVENT);
-        m_queue.push(new_entry);
     } else {
 #ifndef NDEBUG_EVENTS
         std::cout << "Schedule acknowledge event." << std::endl;
 #endif /* NDEBUG_EVENTS */
 
-        // schedule ack events
-        boost::int32_t origin = entry->getDestination();
-        boost::int32_t destination = entry->popEvent();
-
-        dcommon::Entry *new_entry = new dcommon::Entry(*entry);
-
         new_entry->acknowledge(origin, destination, dcore::ACK_EVENT);
-        m_queue.push(new_entry);
     }
+
+    m_queue.push(new_entry);
 
 #ifndef NDEBUG_EVENTS
     std::cout << "** Update the events processed." << std::endl;

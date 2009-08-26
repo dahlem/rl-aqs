@@ -14,6 +14,12 @@
 ## Created: 08.02.2009
 
 
+des.rl.weights.queueing.Q.matrix <- function(graph) {
+  Q <- get.adjacency(graph, attr="weight")  
+  return(Q)
+}
+
+
 des.rl.epsilon.queueing.Q.matrix <- function(graph, epsilon) {
   vertices <- vcount(graph)
   Q <- matrix(rep(0, vertices^2), nrow=vertices, ncol=vertices)
@@ -23,7 +29,7 @@ des.rl.epsilon.queueing.Q.matrix <- function(graph, epsilon) {
     neighbours <- neighbors(graph, outV, mode="out")
 
     if (length(neighbours) == 1) {
-        Q[(V(graph)$id[outV + 1] + 1), (V(graph)$id[neighbours[1] + 1] + 1)] <- 1
+        Q[(V(graph)$vindex[outV + 1] + 1), (V(graph)$vindex[neighbours[1] + 1] + 1)] <- 1
     } else if (length(neighbours) > 1) {
       ## use structure to store inV and qvalues
       df <- data.frame(inV=neighbours, qvals=rep(0, length(neighbours)))
@@ -37,11 +43,11 @@ des.rl.epsilon.queueing.Q.matrix <- function(graph, epsilon) {
       df <- df[order(df$qvals, decreasing=TRUE),] 
 
       ## calc epsilon for epsilon-greedy and assign the probabilities
-      Q[(V(graph)$id[outV + 1] + 1), (V(graph)$id[neighbours[1] + 1] + 1)] <- (1 - epsilon)
+      Q[(V(graph)$vindex[outV + 1] + 1), (V(graph)$vindex[neighbours[1] + 1] + 1)] <- (1 - epsilon)
       prob <- epsilon / (length(neighbours) - 1)
 
       for (i in 2:length(neighbours)) {
-        Q[(V(graph)$id[outV + 1] + 1), (V(graph)$id[neighbours[i] + 1] + 1)] <- prob
+        Q[(V(graph)$vindex[outV + 1] + 1), (V(graph)$vindex[neighbours[i] + 1] + 1)] <- prob
       }
     }
   }

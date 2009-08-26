@@ -72,7 +72,7 @@ public:
      * @param int the length of the vectors
      * @param DoubleSA the target vector
      */
-    static void normalise(int, DoubleSA);
+    static void normalise(int, DoubleSA, bool);
 
 
     /** @ double scale(int, DoubleSA, double, double)

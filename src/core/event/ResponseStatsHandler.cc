@@ -50,7 +50,7 @@ namespace core
 ResponseStatsHandler::ResponseStatsHandler(dnet::Graph &p_graph)
     : m_graph(p_graph)
 {
-    vertex_mean_response_map = get(vertex_mean_reward, m_graph);
+    vertex_mean_reward_map = get(vertex_mean_reward, m_graph);
     vertex_num_events_processed_map = get(vertex_num_events_processed, m_graph);
 }
 
@@ -70,10 +70,10 @@ void ResponseStatsHandler::update(AckEvent *subject)
 
     dnet::Vertex vertex = boost::vertex(entry->getDestination(), m_graph);
     double size = vertex_num_events_processed_map[vertex];
-    double xbar = vertex_mean_response_map[vertex];
-    double x = (gsl_fcmp(entry->getArrival(), entry->topArrival(), 1e-9) <= 0)
+    double xbar = vertex_mean_reward_map[vertex];
+    double x = (gsl_fcmp(entry->topArrival(), entry->getArrival(), 1e-9) == 0)
         ? (0.0)
-        : (entry->getArrival() - entry->topArrival());
+        : (entry->topArrival() - entry->getArrival());
 
 #ifndef NDEBUG_EVENTS
     std::cout << "old stats -- size: " << size << ", xbar: " << xbar
@@ -81,22 +81,19 @@ void ResponseStatsHandler::update(AckEvent *subject)
 #endif /* NDEBUG_EVENTS */
 
     double mean = 0.0;
-    size++;
 
     if (size < 2) {
         mean = x;
     } else {
-        mean = dstats::Stats::mean(size, xbar, x);
+        mean = dstats::Stats::mean(size+1, xbar, x);
     }
 
 #ifndef NDEBUG_EVENTS
     std::cout << "new stats -- mean: " << mean << ", size: "
-              << size << std::endl;
+              << size+1 << std::endl;
 #endif /* NDEBUG_EVENTS */
 
-    // update the delay statistics
-    vertex_num_events_processed_map[vertex] = size;
-    vertex_mean_response_map[vertex] = mean;
+    vertex_mean_reward_map[vertex] = mean;
 }
 
 

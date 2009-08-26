@@ -10,7 +10,7 @@
 
 AC_PREREQ(2.61)
 AC_INIT([Discrete Event Simulation for Service Interaction],
-        [3.2],
+        [3.3],
         [Dominik Dahlem Dominik.Dahlem@cs.tcd.ie], 
         [des])
 

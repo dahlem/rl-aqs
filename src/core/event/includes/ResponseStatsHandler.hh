@@ -50,7 +50,7 @@ private:
     dnet::Graph &m_graph;
 
     // derived fields
-    dnet::VertexMeanRewardMap vertex_mean_response_map;
+    dnet::VertexMeanRewardMap vertex_mean_reward_map;
     dnet::VertexNumEventsProcessedMap vertex_num_events_processed_map;
 };
 

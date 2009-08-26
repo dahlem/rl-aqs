@@ -63,6 +63,7 @@ private:
 
     // derived fields
     dnet::VertexExpertPositiveMap vertex_expert_positive_map;
+    dnet::VertexMeanRewardMap vertex_mean_response_map;
     dnet::EdgeQValueMap edge_q_val_map;
 };
 

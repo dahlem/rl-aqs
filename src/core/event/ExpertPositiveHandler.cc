@@ -54,6 +54,7 @@ ExpertPositiveHandler::ExpertPositiveHandler(dnet::Graph &p_graph)
     : m_graph(p_graph)
 {
     vertex_expert_positive_map = get(vertex_expert_positive, m_graph);
+    vertex_mean_response_map = get(vertex_mean_reward, m_graph);
     edge_q_val_map = get(edge_q_val, m_graph);
 }
 
@@ -72,6 +73,8 @@ void ExpertPositiveHandler::update(AckEvent *subject)
 #endif /* NDEBUG_EVENTS */
 
     dnet::Vertex vertex = boost::vertex(entry->getDestination(), m_graph);
+    dnet::Graph::degree_size_type degree =
+        boost::out_degree(vertex, m_graph);
 
     // observe reward (the longer it takes the smaller the reward)
     double reward =
@@ -79,16 +82,26 @@ void ExpertPositiveHandler::update(AckEvent *subject)
         ? (0.0)
         : (entry->topArrival() - entry->getArrival());
 
-    dnet::Edge edge = boost::edge(
-        vertex, boost::vertex(entry->getOrigin(), m_graph), m_graph).first;
+    double qval = 0.0;
 
-    double qval = edge_q_val_map[edge];
+    if (degree > 0) {
+        dnet::Edge edge = boost::edge(
+            vertex, boost::vertex(entry->getOrigin(), m_graph), m_graph).first;
+
+        qval = edge_q_val_map[edge];
+    } else {
+        qval = vertex_mean_response_map[vertex];
+    }
 
     // only record improvement in the reward
     if (reward > qval) {
         vertex_expert_positive_map[vertex] += (reward - qval);
     }
 
+#ifndef NDEBUG_EVENTS
+    std::cout << "Added reward: " << reward << std::endl;
+    std::cout << "To pos sum: " << vertex_expert_positive_map[vertex] << std::endl;
+#endif /* NDEBUG_EVENTS */
 }
 
 

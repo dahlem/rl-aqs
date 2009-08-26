@@ -102,8 +102,6 @@ void dcore::DepartureHandler::update(dcore::DepartureEvent *subject)
                   << std::endl;
 #endif /* NDEBUG_EVENTS */
 
-        new_entry->pushEvent(new_entry->getOrigin());
-
         try {
             m_queue.push(new_entry);
 #ifndef NDEBUG_EVENTS
@@ -118,6 +116,7 @@ void dcore::DepartureHandler::update(dcore::DepartureEvent *subject)
         }
     } else {
         if (entry->isEventQueueEmpty()) {
+            assert(false);
             // schedule leave event
             dcommon::Entry *new_entry = new dcommon::Entry(*entry);
 
@@ -141,9 +140,9 @@ void dcore::DepartureHandler::update(dcore::DepartureEvent *subject)
                 throw;
             }
         } else {
-            // schedule ack events
+            // schedule ack event to self
             boost::int32_t origin = entry->getDestination();
-            boost::int32_t destination = entry->popEvent();
+            boost::int32_t destination = origin;
             dcommon::Entry *new_entry = new dcommon::Entry(
                 const_cast <const dcommon::Entry&> (*entry));
 

@@ -113,6 +113,8 @@ void ArrivalHandler::update(ArrivalEvent *subject)
 
 
     dcommon::Entry *new_entry = new dcommon::Entry(*entry);
+    // add the arrival time to the event queue
+    new_entry->pushEventHistory(entry->getOrigin(), entry->getArrival());
 
 #ifndef NDEBUG_EVENTS
     std::cout << "** Arrival for vertex: " << entry->getDestination() << std::endl;

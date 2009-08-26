@@ -101,12 +101,13 @@ public:
     int getType() const;
 
     bool isEventQueueEmpty();
-    void pushEvent(int);
-    int topEvent();
     int popEvent();
 
     double topArrival();
     double getExternalArrival();
+
+    void pushEventHistory(boost::int32_t, double);
+    int getEventHistoryLength();
 
     friend std::ostream& operator <<(std::ostream &p_os, const Entry &p_entry)
         {
@@ -121,8 +122,6 @@ public:
 
 private:
     Entry& operator=(const Entry&) { return *this; }
-
-    void pushArrival(double);
 
     static boost::uintmax_t uid;
     boost::uintmax_t id;
