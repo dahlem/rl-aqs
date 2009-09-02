@@ -155,14 +155,6 @@ des.queueing.lambda.vec <- function(graph, Q=NULL) {
 
 ## returns transition probabilities
 des.queueing.Q.matrix <- function(graph) {
-  vertices <- vcount(graph)
-  Q <- matrix(rep(0, vertices^2), nrow=vertices, ncol=vertices)
-
-  for (outV in V(graph)) {
-    for (inV in neighbors(graph, outV, mode="out")) {
-      Q[(V(graph)$id[outV + 1] + 1), (V(graph)$id[inV + 1] + 1)] <- E(graph)[from(outV) & to(inV)]$weight
-    }
-  }
-
+  Q <- get.adjacency(graph, attr="weight")
   return(Q)
 }

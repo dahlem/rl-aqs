@@ -12,6 +12,7 @@ SUBDIRS = desGraph desSim analysis
 
 EXTRA_DIST = \
 	assortativity.pbs \
+	diagnostics.pbs \
 	*.R \
 	graphs.dat
 

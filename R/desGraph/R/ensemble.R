@@ -68,6 +68,7 @@ des.ensemble.cluster <- function(P) {
 }
 
 des.ensemble.distance.beta <- function(A, i, j, m) {
+  
 }
 
 des.ensemble.distance.alpha <- function(A, i, j, m) {
