@@ -381,6 +381,293 @@ function [chain, acceptanceRate] = \
 endfunction
 
 
+## add log transforms to the mcmc target
+## add the log transform elements to the mcmc target
+## This function implements the metropolis hastings algorithm for
+## estimating the model parameters of the bayesian likelihood equation,
+## where s1 is the constant standard deviation, x0_beta is an initial
+## values of beta, x0_theta is a vector of initial values for theta,
+## x0_sigma is the initial value for sigma, X is the matrix of n
+## observations (rows) with d dimensions (columns), y is the output
+## vector at the n observations, and n is the number of iterations for
+## the monte carlo sampling.
+function [chain, acceptanceRate] = \
+      mcmc_mhgibbsStochastic(x0_theta, X, y, C, x0_sigma, batchlength, batches, \
+                   p_tuning, p_acceptance = 0.23, aTheta = 3/500, bTheta = 1, \
+                   nugget = 0, FUN = @(x) 1, verbose = 0, p=2)
+
+  if (rows(y) != rows(X))
+    error("The vector y has to have the same dimension as matrix columns.");
+  endif
+
+  if (columns(x0_theta) != columns(X))
+    error("The vector x0_theta has to have the same dimension as matrix columns.");
+  endif
+
+  samples = batches * batchlength;
+  dims = columns(X) + 1;
+  F = FUN(X);
+
+  ## initialise the x values
+  x.theta = logit(x0_theta, aTheta, bTheta);
+  n = rows(X);
+  x.sigma = log(x0_sigma);
+  
+  ## tuning for the thetas
+  tuning = zeros(1, dims);
+  ## batch acceptance rate
+  batchaccept = zeros(1, dims);
+  acceptanceRate = zeros(batches, dims);
+
+  ## temporary accepted values
+  pi_accept = q_accept = beta_accept = theta_accept = sigma_accept = [];
+
+  ## initialise the chain
+  chain.accepted = 0;
+  chain.beta = zeros(columns(F), samples);
+  chain.theta = zeros(samples, length(x.theta));
+  chain.sigma = zeros(1, samples);
+  chain.l = zeros(1, samples);
+
+  ## init the batch variables for adaptive tuning
+  tuning = log(p_tuning);
+  for i = 1:dims
+    batchaccept(i) = 0;
+  endfor
+
+  [q_old, x.beta] = krig_likelihoodStochastic(logitinv(x.theta, aTheta, bTheta),C,X, y, F, exp(x.sigma),nugget,p);
+  phi_cand = logitinv(x.theta, aTheta, bTheta);
+  pi_old = sum(log(phi_cand - aTheta) + log(bTheta - phi_cand)) + x.sigma;
+
+  for b = 0:(batches-1)
+    for i = 1:batchlength
+      ## gibbs steps
+      for thetas = 1:length(x.theta)
+        thetaj = x.theta(thetas);
+        x.theta(thetas) = normrnd(x.theta(thetas), exp(tuning(thetas)));
+
+        ## step 2: calcuate the probability of move
+        [q_new, x.beta] = krig_likelihoodStochastic(logitinv(x.theta, aTheta, bTheta),C,X, y, F, exp(x.sigma),nugget,p);
+        phi_cand = logitinv(x.theta, aTheta, bTheta);
+        pi_new = sum(log(phi_cand - aTheta) + log(bTheta - phi_cand)) + x.sigma;
+
+##      ratio = (q_new / q_old) * (pi_old / pi_new);
+        ratio = (q_new + pi_new) - (q_old + pi_old);
+        ##    ratio = (pi_new * q_old) / (pi_old * q_new);
+
+        ## step 3: accept, if u < alpha(x, x')
+##      if rand() <= min(ratio, 1)
+        ## step 3: accept, if u < alpha(x, x')
+        u = rand();
+        if u <= exp(ratio)
+          batchaccept(thetas)++;
+          q_accept = q_new;
+          beta_accept = x.beta;
+          theta_accept = x.theta;
+          sigma_accept = x.sigma;
+          q_old = q_new;
+          pi_old = pi_new;
+        else
+          x.theta(thetas) = thetaj;
+        endif
+      endfor
+
+      sigmaj = x.sigma;
+      x.sigma = gamrnd(exp(tuning(dims)), x.sigma / exp(tuning(dims)));
+
+      ## step 2: calcuate the probability of move
+      [q_new, x.beta] = krig_likelihoodStochastic(logitinv(x.theta, aTheta, bTheta), C,X, y, F, exp(x.sigma),nugget,p);
+      phi_cand = logitinv(x.theta, aTheta, bTheta);
+      pi_new = sum(log(phi_cand - aTheta) + log(bTheta - phi_cand)) + x.sigma;
+
+      ##      ratio = (q_new / q_old) * (pi_old / pi_new);
+      ratio = (q_new + pi_new) - (q_old + pi_old);
+      ##    ratio = (pi_new * q_old) / (pi_old * q_new);
+
+      ## step 3: accept, if u < alpha(x, x')
+      ##      if rand() <= min(ratio, 1)
+      ## step 3: accept, if u < alpha(x, x')
+      u = rand();
+      if u <= exp(ratio)
+        batchaccept(dims)++;
+        q_accept = q_new;
+        beta_accept = x.beta;
+        sigma_accept = x.sigma;
+        q_old = q_new;
+        pi_old = pi_new;
+      else
+        x.sigma = sigmaj;
+      endif
+
+      ## put results into markov chain
+      chain.accepted++;
+      chain.beta(:, chain.accepted) = beta_accept;
+      chain.theta(chain.accepted, :) = logitinv(theta_accept, aTheta, bTheta);
+      chain.sigma(chain.accepted) = exp(sigma_accept);
+      chain.l(chain.accepted) = q_accept;
+    endfor
+
+    ## adaptive tuning
+    acceptanceRate(b+1,:) = batchaccept/batchlength;
+    for j = 1:length(x0_theta)
+      if (batchaccept(j)/batchlength > p_acceptance)
+        tuning(j) += min(0.01, 1.0/sqrt(b+1));
+      else
+        tuning(j) -= min(0.01, 1.0/sqrt(b+1));
+      endif
+      batchaccept(j) = 0;
+    endfor
+    if (batchaccept(dims)/batchlength > p_acceptance)
+      tuning(dims) -= min(0.01, 1.0/sqrt(b+1));
+    else
+      tuning(dims) += min(0.01, 1.0/sqrt(b+1));
+    endif
+    batchaccept(dims) = 0;
+
+    if (verbose)
+      fprintf(stdout, "Batch: %d of %d\n", b, batches);
+      fprintf(stdout, "Metropolis batch acceptance rate:\n");
+
+      for j = 1:dims
+        fprintf(stdout, "   %1.3f   ", acceptanceRate(b+1, j));
+      endfor
+      fprintf(stdout, "\n");
+      for j = 1:dims
+        fprintf(stdout, "+/-%1.3f   ", tuning(j));
+      endfor
+      fprintf(stdout, "\n\n");
+      fflush(stdout);
+    endif
+  endfor
+endfunction
+
+## add log transforms to the mcmc target
+## add the log transform elements to the mcmc target
+## This function implements the metropolis hastings algorithm for
+## estimating the model parameters of the bayesian likelihood equation,
+## where s1 is the constant standard deviation, x0_beta is an initial
+## values of beta, x0_theta is a vector of initial values for theta,
+## x0_sigma is the initial value for sigma, X is the matrix of n
+## observations (rows) with d dimensions (columns), y is the output
+## vector at the n observations, and n is the number of iterations for
+## the monte carlo sampling.
+function [chain, acceptanceRate] = \
+      mcmc_mhgibbsBanerjee(x0_theta, X, y, batchlength, batches, \
+                   p_tuning = 1.0, p_acceptance = 0.23, aTheta = 3/500, bTheta = 1, \
+                   nugget = 0, FUN = @(x) 1, verbose = 0)
+
+  if (rows(y) != rows(X))
+    error("The vector y has to have the same dimension as matrix columns.");
+  endif
+
+  if (columns(x0_theta) != columns(X))
+    error("The vector x0_theta has to have the same dimension as matrix columns.");
+  endif
+
+  samples = batches * batchlength;
+  dims = columns(X);
+  F = FUN(X);
+
+  ## initialise the x values
+  x.theta = logit(x0_theta, aTheta, bTheta);
+
+  ## tuning for the thetas
+  tuning = zeros(1, dims);
+  ## batch acceptance rate
+  batchaccept = zeros(1, dims);
+  acceptanceRate = zeros(batches, dims);
+
+  ## temporary accepted values
+  pi_accept = q_accept = beta_accept = theta_accept = sigma_accept = [];
+
+  ## initialise the chain
+  chain.accepted = 0;
+  chain.beta = zeros(columns(F), samples);
+  chain.theta = zeros(samples, dims);
+  chain.sigma = zeros(1, samples);
+  chain.l = zeros(1, samples);
+
+  ## init the batch variables for adaptive tuning
+  for i = 1:dims
+    tuning(i) = p_tuning;
+    batchaccept(i) = 0;
+    tuning(i) = log(tuning(i));
+  endfor
+
+  [q_old, x.beta, x.sigma] = krig_likelihoodBanerjee(logitinv(x.theta, aTheta, bTheta), aTheta, bTheta,X, y, F, nugget);
+  phi_cand = logitinv(x.theta, aTheta, bTheta);
+  pi_old = sum(log(phi_cand - aTheta) + log(bTheta - phi_cand));
+
+  for b = 0:(batches-1)
+    for i = 1:batchlength
+      ## gibbs steps
+      for thetas = 1:dims
+        thetaj = x.theta(thetas);
+        x.theta(thetas) = normrnd(x.theta(thetas), exp(tuning(thetas)));
+
+        ## step 2: calcuate the probability of move
+        [q_new, x.beta, x.sigma] = krig_likelihoodBanerjee(logitinv(x.theta, aTheta, bTheta), aTheta, bTheta,X, y, F, nugget);
+        phi_cand = logitinv(x.theta, aTheta, bTheta);
+        pi_new = sum(log(phi_cand - aTheta) + log(bTheta - phi_cand));
+
+##      ratio = (q_new / q_old) * (pi_old / pi_new);
+        ratio = (q_new + pi_new) - (q_old + pi_old);
+        ##    ratio = (pi_new * q_old) / (pi_old * q_new);
+
+        ## step 3: accept, if u < alpha(x, x')
+##      if rand() <= min(ratio, 1)
+        ## step 3: accept, if u < alpha(x, x')
+        u = rand();
+        if u <= exp(ratio)
+          batchaccept(thetas)++;
+          q_accept = q_new;
+          beta_accept = x.beta;
+          theta_accept = x.theta;
+          sigma_accept = x.sigma;
+          q_old = q_new;
+          pi_old = pi_new;
+        else
+          x.theta(thetas) = thetaj;
+        endif
+      endfor
+
+      ## put results into markov chain
+      chain.accepted++;
+      chain.beta(:, chain.accepted) = beta_accept;
+      chain.theta(chain.accepted, :) = logitinv(theta_accept, aTheta, bTheta);
+      chain.sigma(chain.accepted) = sigma_accept;
+      chain.l(chain.accepted) = q_accept;
+    endfor
+
+    ## adaptive tuning
+    acceptanceRate(b+1,:) = batchaccept/batchlength;
+    for j = 1:dims
+      if (batchaccept(j)/batchlength > p_acceptance)
+        tuning(j) += min(0.01, 1.0/sqrt(b+1));
+      else
+        tuning(j) -= min(0.01, 1.0/sqrt(b+1));
+      endif
+      batchaccept(j) = 0;
+    endfor
+
+    if (verbose)
+      fprintf(stdout, "Batch: %d of %d\n", b, batches);
+      fprintf(stdout, "Metropolis batch acceptance rate:\n");
+
+      for j = 1:dims
+        fprintf(stdout, "   %1.3f   ", acceptanceRate(b+1, j));
+      endfor
+      fprintf(stdout, "\n");
+      for j = 1:dims
+        fprintf(stdout, "+/-%1.3f   ", tuning(j));
+      endfor
+      fprintf(stdout, "\n\n");
+      fflush(stdout);
+    endif
+  endfor
+endfunction
+
+
 ## This function implements the metropolis hastings algorithm for
 ## estimating the model parameters of the bayesian likelihood equation,
 ## where s1 is the constant standard deviation, x0_beta is an initial

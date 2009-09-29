@@ -553,7 +553,7 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
                 dsample::tGslRngSP r2
                     = dsample::CRN::getInstance().get(pol_uniform_rng_index);
 
-                pol = tPolicySP(new drl::EpsilonGreedy(desArgs->rl_policy_epsilon, r1, r2));
+                pol = tPolicySP(new drl::EpsilonGreedy(*graph, desArgs->rl_policy_epsilon, r1, r2));
             } else if (desArgs->rl_policy == 2) {
                 boost::uint32_t seed = dsample::Seeds::getInstance().getSeed();
                 boost::uint32_t pol_uniform_rng_index
@@ -610,7 +610,7 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
                                                   desArgs->rl_state_representation, desArgs->nn_hidden_neurons,
                                                   nn_uniform_rng_index, desArgs->nn_cg,
                                                   desArgs->nn_loss_policy, desArgs->nn_window,
-                                                  desArgs->nn_brent_iter, nn_momentum));
+                                                  desArgs->nn_brent_iter, nn_momentum, desArgs->nn_outsource));
                     ackEvent.attach(*fullRlResponseHandler);
                 }
             } else {

@@ -175,6 +175,7 @@ CL::CL()
         (CL_NN_BRENT_ITER.c_str(), po::value <boost::uint16_t>()->default_value(500), "Brent Iterations in the CG Training.")
         (CL_NN_MOMENTUM.c_str(), po::value <double>()->default_value(1.0), "Momentum for the Backpropagation Training.")
         (CL_NN_CG.c_str(), po::value <bool>()->default_value(true), "Training method (1=CG, 2=BP).")
+        (CL_NN_OUTSOURCE.c_str(), po::value <bool>()->default_value(false), "Outsource the NN (only valid for state representations that cover the neighbours).")
        ;
 
     po::options_description opt_rl_policy_epsilon("RL Epsilon Policy Configuration");
@@ -435,6 +436,11 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
             desArgs->nn_cg = vm[CL_NN_CG.c_str()].as <bool>();
         }
         std::cout << "NN Training Method: " << desArgs->nn_cg << "." << std::endl;
+
+        if (vm.count(CL_NN_OUTSOURCE.c_str())) {
+            desArgs->nn_outsource = vm[CL_NN_OUTSOURCE.c_str()].as <bool>();
+        }
+        std::cout << "NN Outsourcing: " << desArgs->nn_outsource << "." << std::endl;
 
         // parse the command-line
         std::string ids;

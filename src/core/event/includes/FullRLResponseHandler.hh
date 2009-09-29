@@ -97,7 +97,7 @@ public:
                           boost::uint16_t p_hidden_neurons, boost::int32_t p_uniform_rng_index,
                           bool p_cg, boost::uint16_t p_loss_policy,
                           boost::uint16_t p_window, boost::uint16_t p_brent_iter,
-                          double p_momentum);
+                          double p_momentum, bool p_outsource);
 
     ~FullRLResponseHandler();
 
@@ -113,6 +113,7 @@ private:
     boost::int32_t m_uniform_rng_index;
 
     tQOnlineStatsSA qStatsSA;
+    bool m_outsource;
 
     // derived fields
     dnet::EdgeIndexMap edge_index_map;

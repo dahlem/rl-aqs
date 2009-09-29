@@ -40,11 +40,15 @@ namespace rl
 
 
 EpsilonGreedy::EpsilonGreedy(
+    dnet::Graph &p_graph,
     double p_epsilon,
     dsample::tGslRngSP p_epsilon_rng,
     dsample::tGslRngSP p_uniform_rng)
-    : m_epsilon(p_epsilon), m_epsilon_rng(p_epsilon_rng), m_uniform_rng(p_uniform_rng)
-{}
+    : m_graph(p_graph), m_epsilon(p_epsilon), m_epsilon_rng(p_epsilon_rng),
+      m_uniform_rng(p_uniform_rng)
+{
+    edge_weight_map = get(boost::edge_weight, m_graph);
+}
 
 
 boost::uint16_t EpsilonGreedy::operator() (
@@ -78,6 +82,23 @@ boost::uint16_t EpsilonGreedy::operator() (
 #ifndef NDEBUG_EVENTS
             std::cout << "random action: " << action << std::endl;
 #endif /* NDEBUG_EVENTS */
+        }
+
+        // set the action probabilities
+        double nMinusOne = static_cast<double>(p_values.size()) - 1.0;
+        for (boost::uint16_t i = 0; i < p_values.size(); ++i) {
+            dnet::Edge edge = boost::edge(
+                boost::vertex(p_source, m_graph),
+                boost::vertex(p_values[i].first, m_graph),
+                m_graph).first;
+
+            if (i == 0) {
+                // greedy action probability
+                edge_weight_map[edge] = 1.0 - m_epsilon;
+            } else {
+                // non-greedy action probability
+                edge_weight_map[edge] = m_epsilon/nMinusOne;
+            }
         }
     } else if (p_values.size() == 1) {
         action = p_values.front().first;

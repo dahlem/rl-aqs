@@ -15,24 +15,59 @@
 ## Based on: The backbone of complex networks in corporations: Who is controlling
 ##           whom? by Glattfelder and Battiston
 
-## 1. read graphs
-des.control.evo.read.graphs <- function(dir=".", graphs, vertices, FUN) {
-  m <- cbind(matrix(0, nrow=vertices, ncol=0))
+## kendall's tau rank correlation of an n x m matrix, where the ranking is conducted over
+## successive columns
+des.control.evo.corr.i <- function(i, M, method="kendall") {
+  return(cor(M[,i], M[,i+1], method=method))
+}
+
+des.control.evo.corr <- function(M, method="kendall") {
+  return(sapply(1:(ncol(M)-1), des.control.evo.tau.corr.i, M, method))
+}
+
+des.control.evo.interval.averages <- function(M, N) {
+  Mdiff <- des.control.evo.interval.averages.A.diff(M)
+  Ndiff <- des.control.evo.interval.averages.A.diff(N)
+
+  A <- Mdiff/Ndiff
+
+  ## we might have divided by zero
+  A[is.nan(A)] <- 0
   
+  return(A)
+}
+
+des.control.evo.interval.averages.A.diff <- function(A) {
+  return(t(diff(t(A), difference=1)))
+}
+
+
+## 1. read graphs
+des.control.evo.read.graphs <- function(dir=".", takeLog=TRUE, minusFirstCol=TRUE, graphs, vertices, FUN, ...) {
+  m <- cbind(matrix(0, nrow=vertices, ncol=0))
+
   for (i in 0:(graphs-1)) {
     graphFile <- paste(dir, "/graph", i, ".gml", sep="")
     print(paste("Read graph ", graphFile))
     graph <- read.graph(graphFile, format="graphml")
 
     ## 1.1 read specified property
-    attrVals <- FUN(graph)
-    m <- cbind(m, matrix(log(attrVals), nrow=vertices))
+    attrVals <- FUN(graph, ...)
+
+    if (takeLog) {
+      attrVals <- log(attrVals)
+    }
+
+    m <- cbind(m, matrix(attrVals, nrow=vertices))
   }
 
-  m <- m[,-1]
+  if (minusFirstCol) {
+    m <- m[,-1]
+  }
+  
   m[is.nan(m)] <- 0
   m[is.infinite(m)] <- 0
-  
+
   return(m)
 }
 
@@ -101,17 +136,19 @@ des.control.evo.root.vertex <- function(M, start, end=(ncol(M)-1)) {
 
 des.control.evo.layout <- function(mst) {
   ## first create a circular layout
-  layout <- layout.reingold.tilford(mst, circular=T, root=which.max(degree(mst))-1)
-
+##  layout <- layout.reingold.tilford(mst, circular=T, root=which.max(degree(mst))-1)
+  layout <- layout.kamada.kawai(mst, niter=2000)
+##  layout <- layout.drl(mst)
+  
   ## normalise
   layout1 <- layout.norm(layout, -1, 1, -1, 1)
 
   ## make a few optimisation steps to avoid overlapping vertices
-  layout2 <- layout.graphopt(mst, niter=10, start=layout1, max.sa.movement=1/200)
+  layout2 <- layout.graphopt(mst, niter=25, start=layout1, max.sa.movement=1/200)
 
   ## scale to a large area
-  layout3 <- layout.norm(layout2, -1000000, 1000000, -1000000, 1000000)
-  
+  layout3 <- layout.norm(layout2, -1000000000, 1000000000, -1000000000, 1000000000)
+
   return(layout3)
 }
 
@@ -126,7 +163,7 @@ des.control.evo.plot.graph <- function(mst, layout, M,
                                        ) {
   percentRet <- des.control.evo.percent.log.return(M, start, end)
   colorSpec <- rep("darkblue", length(percentRet))
-  
+
   vertexLabelSpec <- seq(1, length(percentRet))
 
   for (i in 1:length(percentRet)) {
@@ -146,4 +183,26 @@ des.control.evo.plot.graph <- function(mst, layout, M,
               vertex.size=vsize, vertex.label.cex=vcex, main=paste("From", start, "to", end),
               rescale=F, asp=F, xlim=c(min(layout[,1]), max(layout[,1])),
               ylim=c(min(layout[,2]), max(layout[,2])))
+}
+
+
+des.evo.plot <- function(prefix="", df, k=3, ps=TRUE, ylab=expression(e^P), width=7, height=7, pts=12) {
+  if (ps) {
+    filename <- paste(prefix, "-evo-plot.eps", sep="")
+    des.postscript(filename, width, height, pointsize=pts)
+  }
+
+  df <- cbind(df, data.frame(movAvg=rollmean(df$y, k, na.pad=T)))
+
+  p <- ggplot(df)
+  p <- p + geom_line(aes(x=time, y=y))
+  p <- p + geom_line(colour="red", aes(x=time, y=movAvg))
+  p <- p + scale_y_continuous(ylab)
+  p <- p + scale_x_continuous("Time")
+  p <- p + theme_bw()
+  print(p)
+
+  if (ps) {
+    dev.off()
+  }
 }

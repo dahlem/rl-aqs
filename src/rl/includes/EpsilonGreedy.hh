@@ -33,6 +33,9 @@
 #include "CRN.hh"
 namespace dsample = des::sampling;
 
+#include "DirectedGraph.hh"
+namespace dnet = des::network;
+
 #include "Policy.hh"
 
 
@@ -45,6 +48,7 @@ class EpsilonGreedy : public Policy
 {
 public:
     EpsilonGreedy(
+        dnet::Graph &,
         double p_epsilon,
         dsample::tGslRngSP p_epsilon_rng,
         dsample::tGslRngSP p_uniform_rng);
@@ -55,10 +59,12 @@ public:
         boost::uint16_t p_source, tValuesVec &p_values, PAttr p_attr);
 
 private:
+    dnet::Graph &m_graph;
     double m_epsilon;
     dsample::tGslRngSP m_epsilon_rng;
     dsample::tGslRngSP m_uniform_rng;
 
+    dnet::EdgeWeightMap edge_weight_map;
 };
 
 

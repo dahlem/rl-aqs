@@ -19,8 +19,8 @@
 ## This function implements the gaussian spatial correlation between
 ## two vectors and a correlation vector theta. The correlation vector
 ## theta correlates each dimension of the two vectors.
-function r = scf_gaussian(x, y, theta)
-  if (nargin < 3)
+function r = scf_gaussian(x, y, theta, p=2)
+  if (nargin < 4)
     usage("scf_gaussianv(x, y, theta, nugget)");
   endif
 
@@ -32,13 +32,13 @@ function r = scf_gaussian(x, y, theta)
     error("The vectors x and y have to have the same dimension.");
   endif
 
-  temp = sum(-(((y - x).* theta).^2));
+  temp = sum(-((abs(y - x).* theta).^p));
   r = e^temp;
 endfunction
 
 
-function R = scf_gaussianm(X, theta, nugget = 0)
-  if (nargin != 3)
+function R = scf_gaussianm(X, theta, nugget = 0, p=2)
+  if (nargin != 4)
     usage("scf_gaussianm(X, theta, nugget)");
   endif
 
@@ -52,15 +52,15 @@ function R = scf_gaussianm(X, theta, nugget = 0)
 
   for i = 1:rows(R)
     for j = i+1:columns(R)
-      R(i, j) = scf_gaussian(X(i,:), X(j,:), theta, nugget);
+      R(i, j) = scf_gaussian(X(i,:), X(j,:), theta, nugget, p);
       R(j, i) = R(i, j);
     endfor
   endfor
 endfunction
 
 
-function Rd = scf_gaussianm_deriv(X, theta, deriv, nugget = 0)
-  if (nargin != 4)
+function Rd = scf_gaussianm_deriv(X, theta, deriv, nugget = 0, p=2)
+  if (nargin != 5)
     usage("scf_gaussianm_deriv(X, theta, deriv, nugget)");
   endif
 
@@ -72,7 +72,7 @@ function Rd = scf_gaussianm_deriv(X, theta, deriv, nugget = 0)
 
   for i = 1:rows(Rd)
     for j = i+1:columns(Rd)
-      Rd(i, j) = - scf_gaussian(X(i,deriv), X(j,deriv), theta(deriv), nugget) * \
+      Rd(i, j) = - scf_gaussian(X(i,deriv), X(j,deriv), theta(deriv), nugget, p) * \
           (X(i,deriv) - X(j,deriv))^2;
       Rd(j, i) = Rd(i, j);
     endfor
@@ -80,8 +80,8 @@ function Rd = scf_gaussianm_deriv(X, theta, deriv, nugget = 0)
 endfunction
 
 
-function r = scf_gaussianu(X, x, theta)
-  if (nargin != 3)
+function r = scf_gaussianu(X, x, theta, p=2)
+  if (nargin != 4)
     usage("scf_gaussianu(X, x, theta)");
   endif
 
@@ -96,7 +96,7 @@ function r = scf_gaussianu(X, x, theta)
   r = zeros(rows(X), 1);
 
   for i = 1:rows(X)
-    r(i,:) = scf_gaussian(x, X(i,:), theta);
+    r(i,:) = scf_gaussian(x, X(i,:), theta, p);
   endfor
 endfunction
 

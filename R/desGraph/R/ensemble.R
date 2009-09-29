@@ -14,9 +14,12 @@
 ## approach to the analysis of weighted networks" by Ahnert et al.
 
 des.ensemble.P <- function(graph) {
-  P <- get.adjacency(graph, attr="weight")
-  P <- P / rowSums(P)
-  P[is.nan(P)] <- 0
+  Q <- des.queueing.Q.matrix(graph)
+  lambda <- des.queueing.lambda.vec(graph, Q)
+
+  W <- matrix(rep(as.matrix(lambda), vcount(graph)), ncol=vcount(graph), byrow=F) * Q
+
+  P <- (W - min(W)) / (max(W) - min(W))
 
   return(P)
 }
@@ -36,7 +39,9 @@ des.ensemble.n <- function(P) {
 }
 
 des.ensemble.average.degree.neighbours.i <- function(i, P) {
-  knni <- sum(P[i,] * P) / sum(P[i,])
+  Pti <- P[i,]
+  Pti[i] <- 0
+  knni <- sum(Pt[i,] * P) / sum(Pt[i,])
   return(knni)
 }
 
@@ -44,32 +49,29 @@ des.ensemble.average.degree.neighbours <- function(P) {
   knn <- sapply(1:nrow(P), des.ensemble.average.degree.neighbours.i, P)
 }
 
-des.ensemble.cluster.i <- function(i, P) {
-  numerator <- 0.0
-  denominator <- 0.0
+des.ensemble.cluster.i <- function(i, P, graph) {
+  edges <- length(which(P[i,] > 0, arr.ind=T))
+##  edges <- degree(graph, v=(i-1), mode="total")
+  cj <- 0
 
-  for (j in 1:nrow(P)) {
-    for (k in 1:nrow(P)) {
-      if ((k != j) && (j != i) && (i != k)) {
-        temp <- P[i, j] * P[i, k]
-        numerator <- numerator + temp * P[j, k]
-        denominator <- denominator + temp
-      }
-    }
+  if (edges > 1) {
+    A <- matrix(P[i,], ncol=1) %*% matrix(P[i,], nrow=1)
+    diag(A) <- 0
+    A[i,] <- 0
+    A[,i] <- 0
+
+    Pt <- P
+    diag(Pt) <- 0
+    Pt[i,] <- 0
+    Pt[,i] <- 0
+    cj <- sum(A %*% Pt) / sum(A)
   }
 
-  ci <- numerator / denominator
-  return(ci)
+  return(cj/vcount(graph))
 }
 
-des.ensemble.cluster <- function(P) {
-  c <- sapply(1:nrow(P), des.ensemble.cluster.i, P)
+des.ensemble.cluster <- function(P, graph) {
+  c <- sapply(1:nrow(P), des.ensemble.cluster.i, P, graph)
   return(c)
 }
-
-des.ensemble.distance.beta <- function(A, i, j, m) {
-  
-}
-
-des.ensemble.distance.alpha <- function(A, i, j, m) {
 }

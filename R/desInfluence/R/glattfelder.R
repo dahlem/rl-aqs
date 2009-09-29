@@ -23,8 +23,17 @@ des.matrix.integrated <- function(A) {
 }
 
 
-des.weight.matrix <- function(graph) {
-  Q <- des.queueing.Q.matrix(graph)
+des.weight.matrix <- function(graph, policy=c("wpl", "epsilon", "boltzman"), epsilon, tau) {
+  if (policy == "wpl") {
+    Q <- des.queueing.Q.matrix(graph)
+  } else if (policy == "epsilon") {
+    Q <- des.rl.epsilon.queueing.Q.matrix(graph, epsilon)
+  } else if (policy == "boltzman") {
+    Q <- des.rl.boltzmann.queueing.Q.matrix(graph, tau)
+  } else {
+    error(paste("Policy", policy, "is not supported"))
+  }
+
   lambda <- des.queueing.lambda.vec(graph, Q)
 
   W <- matrix(rep(as.matrix(lambda), vcount(graph)), ncol=vcount(graph), byrow=F) * Q
@@ -55,7 +64,7 @@ des.concentration.index <- function(graph, W) {
 des.control.index.i.j <- function(i, j, W) {
   Hij <- W[i,j]^2/sum(W[,j]^2)
   Hij[is.nan(Hij)] <- 0
-  
+
   return(Hij)
 }
 
@@ -64,10 +73,10 @@ des.control.index.i.j <- function(i, j, W) {
 des.control.matrix <- function(W) {
   Wsquared <- W^2
   WcolsSumOfSquares <- colSums(Wsquared)
-  
+
   H <- Wsquared / matrix(rep(as.matrix(WcolsSumOfSquares), ncol(W)), ncol=ncol(W), byrow=T)
   H[is.nan(H)] <- 0
-  
+
   return(H)
 }
 
@@ -89,10 +98,34 @@ des.matrix.integrated.control <- function(H, prop) {
 }
 
 
-des.control.ownership <- function(graph, nonTopProp=NULL) {
+des.control.prop <- function(graph, method=c("qval", "positive", "negative", "normal", "absolute"),
+                             policy=c("wpl", "epsilon", "boltzman"), epsilon, tau) {
   ## calculate the weight matrix
-  W <- des.weight.matrix(graph)
-  
+  W <- des.weight.matrix(graph, policy, epsilon, tau)
+
+  ## calculate the control matrix
+  H <- des.control.matrix(W)
+
+  nonTopProp <- NULL
+  if (!is.null(method)) {
+    if (method == "qval") {
+      nonTopProp <- des.qval.average.props(graph)
+    } else if (method == "positive") {
+    } else if (method == "negative") {
+    } else if (method == "normal") {
+    } else if (method == "absolute") {
+    }
+  }
+
+  c <- des.matrix.integrated.control(H, nonTopProp)
+
+  return(c)
+}
+
+des.control.ownership <- function(graph, policy=c("wpl", "epsilon", "boltzman"), epsilon, tau, nonTopProp=NULL) {
+  ## calculate the weight matrix
+  W <- des.weight.matrix(graph, policy, epsilon, tau)
+
   ## calculate the control matrix
   H <- des.control.matrix(W)
 
@@ -105,7 +138,7 @@ des.control.ownership <- function(graph, nonTopProp=NULL) {
   df$cintCumsum <- cumsum(df$cint)
   df$cintCumsumNorm <- df$cintCumsum/sum(df$cint)
   df$cintIndex <- 1:vcount(graph)/vcount(graph)
-  
+
   df <- df[order(df$phiint, decreasing=TRUE),]
   df$phiintCumsum <- cumsum(df$phiint)
   df$phiintCumsumNorm <- df$phiintCumsum/sum(df$phiint)
@@ -118,7 +151,7 @@ des.control.ownership <- function(graph, nonTopProp=NULL) {
 des.qval.average.props.i <- function(i, graph) {
   outV <- neighbors(graph, i, mode="out")
   qval <- 0
-  
+
   if (length(outV) > 0) {
     probabilities <- E(graph)[from(c(i)) & to(outV)]$weight
     qvals <- E(graph)[from(c(i)) & to(outV)]$q_value
@@ -136,6 +169,36 @@ des.qval.average.props.i <- function(i, graph) {
 
 des.qval.average.props <- function(graph) {
   qvals <- sapply(V(graph), des.qval.average.props.i, graph=graph)
+  return(qvals)
+}
+
+
+des.expert.props <- function(graph, metric="positive") {
+  property <- paste("expert_", metric, sep="")
+  expert <- get.vertex.attribute(graph, property)
+  return(expert)
+}
+
+
+des.numEvents.props <- function(graph, metric="positive") {
+  processed <- get.vertex.attribute(graph, "num_events_processed")
+  return(processed)
+}
+
+
+des.steady.state.num.stable <- function(graph, threshold=1.0, policy=c("wpl", "epsilon", "boltzman"), epsilon, tau) {
+  if (policy == "wpl") {
+    Q <- des.queueing.Q.matrix(graph)
+  } else if (policy == "epsilon") {
+    Q <- des.rl.epsilon.queueing.Q.matrix(graph, epsilon)
+  } else if (policy == "boltzman") {
+    Q <- des.rl.boltzmann.queueing.Q.matrix(graph, tau)
+  } else {
+    error(paste("Policy", policy, "is not supported"))
+  }
+  
+  rho <- des.queueing.rho.vec(graph, Q)
+  numUnstable <- length(which(rho > threshold))
 }
 
 des.control.plot <- function(prefix="", df, ps=TRUE, width=7, height=7, pts=12) {
@@ -186,7 +249,7 @@ des.concentration.pdf <- function(prefix="", concentration, ps=TRUE, width=7, he
   h <- hist(concentration, breaks=length(concentration), plot=F)
   df <- data.frame(x=h$mids,y=h$density)
   filtered <- data[data$y>1,]
-  
+
   p <- ggplot(filtered, aes(x=x,y=y))
   p <- p + geom_line()
   p <- p + coord_trans(x = "log", y = "log")
@@ -248,3 +311,4 @@ des.control.cdf <- function(prefix="", controls, ps=TRUE, width=7, height=7, pts
     dev.off()
   }
 }
+

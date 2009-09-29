@@ -23,12 +23,7 @@
 ## equation 2.39. However, he uses some validation data set to calculate
 ## those. Do we need those here as well???
 function ttss = sst(y)
-  y_sum = 0;
-  
-  for y_i = y'
-    y_sum += y_i^2;
-  endfor
-
+  y_sum = sum(y.^2);
   ttss = y' * y - y_sum / rows(y);
 endfunction
 
@@ -43,12 +38,8 @@ endfunction
 function press = ssp(X, y, R, beta, FUN = @(x) 1)
   e = cv_error(X, y, R, beta, FUN);
 ##  H = hat_matrix(X);
-  press = 0;
-  
-  for i = 1:rows(e)
-    ##press += (e(i) / (1 - H(i, i)))^2;
-    press += e(i)^2;
-  endfor
+  press = sum(e.^2);
+##press += (e(i) / (1 - H(i, i)))^2;
 endfunction
 
 
@@ -66,7 +57,7 @@ endfunction
 ## theta: the estimated theta parameters from MLE or BA MCMC
 ## beta: the estimated beta parameters from MLE or BA MCMC
 function e = cv_error(X, y, R, beta, FUN = @(x) 1)
-  R_inf = R^-1;
+  R_inf = cholinv(R);
   F = [];
   for i = 1:rows(X)
     F = [F; FUN(X(i,:))];
@@ -87,8 +78,8 @@ endfunction
 ## y: the vector of responses from the experiment
 ## theta: the estimated theta parameters from MLE or BA MCMC
 ## beta: the estimated beta parameters from MLE or BA MCMC
-function r_p = r_pred(X, y, theta, beta, nugget=0, FUN = @(x) 1)
-  R = scf_gaussianm(X, theta, nugget);
+function r_p = r_pred(X, y, theta, beta, nugget=0, FUN = @(x) 1, p=2)
+  R = scf_gaussianm(X, theta, nugget, p);
   F = [];
   for i = 1:rows(X)
     F = [F; FUN(X(i,:))];
@@ -96,11 +87,29 @@ function r_p = r_pred(X, y, theta, beta, nugget=0, FUN = @(x) 1)
   y_s = [];
   
   for i = 1:rows(X)
-    y_s = [y_s; krig(X(i,:), X, R, beta, theta, y, F, FUN)];
+    y_s = [y_s; krig(X(i,:), X, R, beta, theta, y, F, FUN, p)];
   endfor
 
   ttss = sst(y_s);
   press = ssp(X, y_s, R, beta, FUN);
+
+  r_p = 1 - press / ttss;
+endfunction
+
+function r_p = r_predS(X, y, C, sigmaSqu, theta, beta, nugget=0, FUN = @(x) 1, p=2)
+  R = scf_gaussianm(X, theta, nugget, p);
+  F = [];
+  for i = 1:rows(X)
+    F = [F; FUN(X(i,:))];
+  endfor
+  y_s = [];
+  
+  for i = 1:rows(X)
+    y_s = [y_s; krigS(X(i,:), X, R, C, sigmaSqu, theta, y, F, FUN, p)];
+  endfor
+
+  ttss = sst(y_s);
+  press = ssp(X, y_s, (R + C), beta, FUN);
 
   r_p = 1 - press / ttss;
 endfunction
@@ -126,5 +135,12 @@ endfunction
 
 function r_pa = r_predadj(X, y, theta, beta, nugget=0, FUN = @(x) 1)
   r_p = r_pred(X, y, theta, beta, nugget, FUN);
+  r_pa = 1 - ((rows(y) - 1) / (rows(y) - columns(theta))) * (1 - r_p);
+endfunction
+
+
+function r_pa = r_predadjS(X, y, C, sigmaSqu, theta, beta, nugget=0, \
+                           FUN = @(x) 1, p=1)
+  r_p = r_predS(X, y, C, sigmaSqu, theta, beta, nugget, FUN, p);
   r_pa = 1 - ((rows(y) - 1) / (rows(y) - columns(theta))) * (1 - r_p);
 endfunction

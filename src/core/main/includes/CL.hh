@@ -119,6 +119,7 @@ const std::string CL_NN_WINDOW = "nn_window";
 const std::string CL_NN_BRENT_ITER = "nn_brent_iter";
 const std::string CL_NN_MOMENTUM = "nn_momentum";
 const std::string CL_NN_CG = "nn_cg";
+const std::string CL_NN_OUTSOURCE = "nn_outsource";
 const std::string CL_RL_STATE_IDS = "rl_state_representation";
 const std::string MIN_NN_MOMENTUM = "min_nn_momentum";
 const std::string MAX_NN_MOMENTUM = "max_nn_momentum";
@@ -211,6 +212,7 @@ struct desArgs_t {
     boost::uint16_t nn_brent_iter;
     double nn_momentum;
     bool nn_cg;
+    bool nn_outsource;
     double min_nn_momentum;          /* min momentum */
     double max_nn_momentum;          /* max momentum */
     double rl_policy_wpl_eta;          /* wpl learning rate */
@@ -238,7 +240,7 @@ struct desArgs_t {
           expert_positive(args.expert_positive), expert_negative(args.expert_negative), rl_state_representation(args.rl_state_representation),
           nn_hidden_neurons(args.nn_hidden_neurons), nn_loss_policy(args.nn_loss_policy),
           nn_window(args.nn_window), nn_brent_iter(args.nn_brent_iter), nn_momentum(args.nn_momentum),
-          nn_cg(args.nn_cg), min_nn_momentum(args.min_nn_momentum), max_nn_momentum(args.max_nn_momentum),
+          nn_cg(args.nn_cg), nn_outsource(args.nn_outsource), min_nn_momentum(args.min_nn_momentum), max_nn_momentum(args.max_nn_momentum),
           rl_policy_wpl_eta(args.rl_policy_wpl_eta)
         {}
 
@@ -264,7 +266,7 @@ struct desArgs_t {
           expert_positive(false), expert_negative(false), rl_state_representation(),
           nn_hidden_neurons(5), nn_loss_policy(1),
           nn_window(100), nn_brent_iter(500), nn_momentum(1.0),
-          nn_cg(true), min_nn_momentum(0.0), max_nn_momentum(0.0), rl_policy_wpl_eta(0.0)
+          nn_cg(true), nn_outsource(false), min_nn_momentum(0.0), max_nn_momentum(0.0), rl_policy_wpl_eta(0.0)
         {}
 
     friend std::ostream& operator <<(std::ostream &p_os, const desArgs_t &desArgs)

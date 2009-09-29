@@ -56,11 +56,12 @@ FullRLResponseHandler::FullRLResponseHandler(dnet::Graph &p_graph, double p_q_al
                                              boost::uint16_t p_hidden_neurons, boost::int32_t p_uniform_rng_index,
                                              bool p_cg, boost::uint16_t p_loss_policy,
                                              boost::uint16_t p_window, boost::uint16_t p_brent_iter,
-                                             double p_momentum)
+                                             double p_momentum, bool p_outsource)
     : m_graph(p_graph), m_q_alpha(p_q_alpha), m_q_lambda(p_q_lambda), m_policy(p_policy),
       m_state_representation(p_state_representation), m_hidden_neurons(p_hidden_neurons),
       m_uniform_rng_index(p_uniform_rng_index),
-      qStatsSA(new dstats::OnlineStats[boost::num_edges(m_graph)])
+      qStatsSA(new dstats::OnlineStats[(p_outsource) ? (boost::num_vertices(m_graph)) : (boost::num_edges(m_graph))]),
+      m_outsource(p_outsource)
 {
     vertex_next_action_map = get(vertex_next_action, m_graph);
     vertex_index_map = get(boost::vertex_index, m_graph);
@@ -68,7 +69,8 @@ FullRLResponseHandler::FullRLResponseHandler(dnet::Graph &p_graph, double p_q_al
     edge_index_map = get(edge_eindex, m_graph);
 
     // init the neural network for each edge
-    for (boost::uint16_t i = 0; i < boost::num_edges(m_graph); ++i) {
+    boost::uint16_t num_nets = (m_outsource) ? (boost::num_vertices(m_graph)) : (boost::num_edges(m_graph));
+    for (boost::uint16_t i = 0; i < num_nets; ++i) {
         // create the neural network for edge i
         FFNetSP net = dnnet::NNetFactory::createNNet<dnnet::HTangent, dnnet::Identity>
             (p_state_representation.size(), p_hidden_neurons, 1, m_uniform_rng_index);
@@ -146,8 +148,8 @@ void FullRLResponseHandler::update(AckEvent *subject)
             drl::RLStateHelper::fillStateVector(e, m_graph, m_state_representation, m_inputs);
 
             // calculate the neural network prediction given current state
-            int edge_index = edge_index_map[e];
-            value.second = m_nets[edge_index]->present(m_inputs)[0];
+            boost::uint16_t index = (m_outsource) ? (target_vertex) : (edge_index_map[e]);
+            value.second = m_nets[index]->present(m_inputs)[0];
 //            value.second = edge_q_val_map[e];
 
 #ifndef NDEBUG_EVENTS
@@ -171,42 +173,43 @@ void FullRLResponseHandler::update(AckEvent *subject)
 
         // calculate the target
         drl::RLStateHelper::fillStateVector(newE, m_graph, m_state_representation, m_inputs);
-        m_target[0] = reward + m_q_lambda * m_nets[edge_index_map[newE]]->present(m_inputs)[0];
+        boost::uint16_t index = (m_outsource) ? (newAction) : (edge_index_map[newE]);
+        m_target[0] = reward + m_q_lambda * m_nets[index]->present(m_inputs)[0];
 //         m_target[0] = reward + m_q_lambda * edge_q_val_map[newE];
 
-        int edge_index = edge_index_map[oldE];
+        index = (m_outsource) ? (entry->getOrigin()) : (edge_index_map[oldE]);
 
 #ifndef NDEBUG_EVENTS
-        std::cout << "Train NN for edge: " << edge_index << std::endl;
+        std::cout << "Train NN for edge: " << index << std::endl;
 #endif /* NDEBUG_EVENTS */
 
         // train NN towards the target
-        m_trainings[edge_index]->train(m_target);
+        m_trainings[index]->train(m_target);
 
         // fill the state vector of the current edge
         drl::RLStateHelper::fillStateVector(oldE, m_graph, m_state_representation, m_inputs);
 
 #ifndef NDEBUG_EVENTS
-        std::cout << "Old Q-value: " << edge_q_val_map[oldE] << ", new Q-value: " << m_nets[edge_index]->present(m_inputs)[0] << std::endl;
+        std::cout << "Old Q-value: " << edge_q_val_map[oldE] << ", new Q-value: " << m_nets[index]->present(m_inputs)[0] << std::endl;
 #endif /* NDEBUG_EVENTS */
 
         // update the q_value
-        edge_q_val_map[oldE] = m_nets[edge_index]->present(m_inputs)[0];
+        edge_q_val_map[oldE] = m_nets[index]->present(m_inputs)[0];
     } else if (degree == 1) {
         dnet::Edge e = *(boost::out_edges(vertex, m_graph).first);
         newAction = vertex_index_map[boost::target(e, m_graph)];
 
         // calculate q-value
-        boost::uint16_t edge_index = edge_index_map[e];
-        qStatsSA[edge_index].push(reward);
+        boost::uint16_t index = (m_outsource) ? (newAction) : (edge_index_map[e]);
+        qStatsSA[index].push(reward);
 
 #ifndef NDEBUG_EVENTS
         std::cout << "Old Q-value: " << edge_q_val_map[e]
-                  << ", new Q-value: " << qStatsSA[edge_index].mean() << std::endl;
+                  << ", new Q-value: " << qStatsSA[index].mean() << std::endl;
         std::cout << "Deterministic Target: " << newAction << std::endl;
 #endif /* NDEBUG_EVENTS */
 
-        edge_q_val_map[e] = qStatsSA[edge_index].mean();
+        edge_q_val_map[e] = qStatsSA[index].mean();
     }
 
     // set new action

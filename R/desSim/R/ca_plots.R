@@ -1,6 +1,6 @@
 des.ca.ridge.spectrum.plot <- function(prefix, paths, ps=TRUE) {
   if (ps) {
-    postscript(paste(prefix, "-ca-ridge-spectrum.eps", sep=""), onefile=FALSE)
+    des.postscript(paste(prefix, "-ca-ridge-spectrum.eps", sep=""), width=2.8, height=2.8, pointsize=8)
   }
 
   lambdas <- read.csv(paste(prefix, "-ca-eigen.dat", sep=""), header=TRUE)
@@ -9,21 +9,23 @@ des.ca.ridge.spectrum.plot <- function(prefix, paths, ps=TRUE) {
 
   for (i in 0:(paths - 1)) {
     df <- data[data$path == i,];
-    p <- p + geom_line(data=df, aes(x=incr, y=R))
+    if (length(df$incr) > 0) {
+      p <- p + geom_line(data=df, aes(x=incr, y=R))
+    }
   }
 
-  for (i in lambdas$lambda) {
+  for (i in lambdas$theta) {
     p <- p + geom_vline(xintercept=i, colour="red")
   }
 
   labels <- expression(lambda[1])
-  for (i in 2:length(lambdas$lambda)) {
+  for (i in 2:length(lambdas$theta)) {
     labels <- c(labels, bquote(lambda[.(i)]))
   }
   
-  p <- p + scale_x_continuous("", breaks=lambdas$lambda,
+  p <- p + scale_x_continuous("", breaks=lambdas$theta,
                               labels=labels)
-  p <- p + theme_bw()
+  p <- p + theme_bw(base_size=8)
   print(p)
   
   if (ps) {
@@ -34,7 +36,7 @@ des.ca.ridge.spectrum.plot <- function(prefix, paths, ps=TRUE) {
   
 des.ca.ridge.x.plot <- function(prefix, path, paths, ps=TRUE) {
   if (ps) {
-    postscript(paste(prefix, "-ca-ridge-x.eps", sep=""), onefile=FALSE)
+    des.postscript(paste(prefix, "-ca-ridge-x.eps", sep=""), width=2.8, height=2.8, pointsize=8)
   }
 
   data <- read.csv(paste(prefix, "-ridge_path.dat", sep=""), header=FALSE, col.names=c("incr", "R", "y", paste("x", 1:(paths - 1), sep=""), "path"))
@@ -45,13 +47,13 @@ des.ca.ridge.x.plot <- function(prefix, path, paths, ps=TRUE) {
   for (i in 1:(paths - 1)) {
     p <- p + geom_line(data=df, aes_string(x="R", y=paste("x", i, sep="")), linetype=i)
     labels$x[i] <- max(df$R)
-    labels$y[i] <- get.var(paste("x", i, sep=""), df)[which(df$R == maxX)]
+    labels$y[i] <- get.var(paste("x", i, sep=""), df)[which(df$R == labels$x[i])]
     labels$label[i] <- paste("x", i, sep="")
   }
 
-  p <- p + geom_text(data=labels, aes(x=x, y=y, label=label), vjust=1.5)
+  p <- p + geom_text(data=labels, aes(x=x, y=y, label=label), size=3)
   p <- p + scale_y_continuous("")
-  p <- p + theme_bw()
+  p <- p + theme_bw(base_size=8)
   print(p)
   
   if (ps) {
@@ -60,9 +62,9 @@ des.ca.ridge.x.plot <- function(prefix, path, paths, ps=TRUE) {
 }
 
   
-des.ca.ridge.maxY.plot <- function(prefix, path, ps=TRUE) {
+des.ca.ridge.y.plot <- function(prefix, paths, path, ps=TRUE) {
   if (ps) {
-    postscript(paste(prefix, "-ca-ridge-maxY.eps", sep=""), onefile=FALSE)
+    des.postscript(paste(prefix, "-ca-ridge-y.eps", sep=""), width=2.8, height=2.8, pointsize=8)
   }
 
   p <- ggplot()
@@ -72,7 +74,7 @@ des.ca.ridge.maxY.plot <- function(prefix, path, ps=TRUE) {
   p <- p + geom_line(data=df, aes(x=R, y=y))
 
   p <- p + scale_y_continuous(expression(hat(y)))
-  p <- p + theme_bw()
+  p <- p + theme_bw(base_size=8)
   print(p)
   
   if (ps) {
@@ -83,7 +85,7 @@ des.ca.ridge.maxY.plot <- function(prefix, path, ps=TRUE) {
   
 des.ca.plot <- function(prefix="2d-shdf", ps=TRUE) {
   if (ps) {
-    postscript(paste(prefix, "-ca-model.eps", sep=""), onefile=FALSE)
+    des.postscript(paste(prefix, "-ca-model.eps", sep=""), width=3.0, height=2.8, pointsize=8)
   }
 
   ca <- read.table(paste(prefix, "-ca-model.dat", sep=""), sep=",", header=TRUE)
@@ -92,9 +94,9 @@ des.ca.plot <- function(prefix="2d-shdf", ps=TRUE) {
 
   isRidge <- FALSE;
 
-  if ((eigen$lambda[1] > 0) & (eigen$lambda[2] > 0)) {
+  if ((eigen$theta[1] > 0) & (eigen$theta[2] > 0)) {
     isRidge <- FALSE;
-  } else if ((eigen$lambda[1] < 0) & (eigen$lambda[2] < 0)) {
+  } else if ((eigen$theta[1] < 0) & (eigen$theta[2] < 0)) {
     isRidge <- FALSE;
   } else {
     isRidge <- TRUE;
@@ -174,10 +176,10 @@ des.ca.plot <- function(prefix="2d-shdf", ps=TRUE) {
   }
   
   p <- ggplot(df, aes(x=x, y=y, z=z))
-  p <- p + stat_contour(aes(size = ..level..))
+  p <- p + stat_contour(aes(colour = ..level..))
   p <- p + scale_y_continuous(substitute(x[I], list(I = 2)))
   p <- p + scale_x_continuous(substitute(x[I], list(I = 1)))
-  p <- p + opts(title="Canonical Form of the Second-order Model")
+  p <- p + scale_colour("Elevation")
 
   if (!isRidge) {
     pS <- read.table(paste(prefix, "-ca-statP.dat", sep=""), sep=",", header=TRUE)
@@ -192,7 +194,7 @@ des.ca.plot <- function(prefix="2d-shdf", ps=TRUE) {
     p <- p + geom_segment(x=x221,y=x222,xend=x21,yend=x22,arrow=arrow(length=unit(0.2,"cm")))
     p <- p + geom_text(x=x21,y=x22,hjust=-1,size=4,aes(label="z1"))
   }
-  p <- p + theme_bw()
+  p <- p + theme_bw(base_size=8)
   print(p)
   
   if (ps) {

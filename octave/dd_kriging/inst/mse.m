@@ -20,12 +20,7 @@
 ## equation 5.2
 ## Use the CV errors
 function cvmse = rmse_cv(e)
-  cvmse = 0;
-
-  for i = 1:rows(e)
-    cvmse += e(i)^2;
-  endfor
-
+  cvmse = sume(e.^2);
   cvmse /= rows(e);
   cvmse = sqrt(cvmse);
 endfunction
@@ -71,6 +66,17 @@ function mse_avg = mse_average(X, x, y, F, chain, nugget=0, FUN)
   mse_avg = mean(mses);
 endfunction
 
+function mse_avg = mse_averageS(X, x, y, F, C, chain, nugget=0, FUN, p=2)
+  mses = zeros(1, rows(chain.theta));
+  
+  for i = 1:rows(chain.theta)
+    mses(i) = mse_predS(X, x, y, F, C, chain.beta(:,i), \
+                        chain.theta(i,:), chain.sigma(i), nugget, FUN, p);
+  endfor
+
+  mse_avg = mean(mses);
+endfunction
+
 function mse_avg = mse_average_nonconst(X, x, y, F, chain, xi, nugget=0)
   [r,c1,c2] = size(chain.Eta);
   mses = zeros(1, c2);
@@ -96,6 +102,13 @@ function mse_p = mse_pred(X, x, y, F, beta, theta, sigma, nugget=0, FUN = @(x) 1
   R = scf_gaussianm(X, theta, nugget);
   r = scf_gaussianu(X, x, theta);
   mse_p = sigma * (1 - r' * (R\r));
+endfunction
+
+function mse_p = mse_predS(X, x, y, F, C, beta, theta, sigma, \
+                           nugget=0, FUN = @(x) 1, p=2)
+  R = scf_gaussianm(X, theta, nugget, p);
+  r = scf_gaussianu(X, x, theta, p);
+  mse_p = sigma * (1 - r' * ((R + C)\r));
 endfunction
 
 function mse_p = mse_pred_nonconst(X, x, y, F, beta, eta, xi, nugget=0, FUN = @(x) 1)

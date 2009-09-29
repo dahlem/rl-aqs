@@ -28,7 +28,12 @@ des.plot.powerlaw.fit <- function(data, fit=FALSE) {
 }
 
 ## for one-column publications set width/height to 2.8
-des.postscript <- function(filename, width=7, height=7, pointsize=12) {
+des.postscript <- function(filename, width=2.8, height=2.8, pointsize=8) {
   postscript(filename, onefile=FALSE, pointsize=pointsize,
              paper="special", width=width, height=height)
+}
+
+des.pdf <- function(filename, width=2.8, height=2.8, pointsize=8) {
+  pdf(filename, onefile=FALSE, pointsize=pointsize,
+             version=1.4, width=width, height=height)
 }
