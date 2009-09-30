@@ -132,8 +132,9 @@ int main(int argc, char *argv[])
     char dateCStr[128];
 
 #ifdef HAVE_MPI
-    int rank, num_tasks, rc;
+    int rank, num_tasks, colour, rc;
     MPI_Datatype MPI_Simargs, MPI_Desout;
+    MPI_Comm group_comm;
     dcore::sim_output outVal;
     dcore::tSimArgsMPI desArgsMPI;
 
@@ -196,6 +197,15 @@ int main(int argc, char *argv[])
     desArgs->rep_num = 1;
 
 #ifdef HAVE_MPI
+    // split the world into groups
+    if (rank == 0) {
+        colour = 0;
+    } else {
+        colour = ((rank - 1) / desArgs->init_replications) + 1;
+    }
+
+    MPI_Comm_split(MPI_COMM_WORLD, colour, rank, &group_comm);
+
     if (rank == 0) {
 
         // check whether we have enough nodes
@@ -251,7 +261,7 @@ int main(int argc, char *argv[])
 # endif /* NDEBUG */
         // slave node
         dcore::Simulation sim;
-        sim.simulate(MPI_Simargs, MPI_Desout, desArgs);
+        sim.simulate(MPI_Simargs, MPI_Desout, group_comm, desArgs);
     }
 #else
     dcore::sim_output output;

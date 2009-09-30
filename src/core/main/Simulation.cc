@@ -42,6 +42,9 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
 
+#include <boost/filesystem.hpp>
+namespace fs = boost::filesystem;
+
 #include <gsl/gsl_randist.h>
 
 #include "AckEvent.hh"
@@ -206,9 +209,67 @@ Int32SA departureCRN(boost::uint16_t p_num_vertices)
 }
 
 
+dnet::tGraphSP Simulation::createGraph(tDesArgsSP desArgs,
+                                       boost::uint16_t net_size, boost::uint16_t max_edges,
+                                       double edge_prob, double boost_arrival, double boost_edge)
+{
+    std::cout << "Generate the graph." << std::endl;
+    dsample::tGslRngSP r1, r2, r3;
+    boost::int32_t num_edges_rng_index;
+    boost::uint32_t seed = 0;
+    dnet::tGraphSP graph;
+
+    seed = dsample::Seeds::getInstance().getSeed();
+    num_edges_rng_index = dsample::CRN::getInstance().init(seed);
+    dsample::CRN::getInstance().log(seed, "number of edges");
+
+    r1 = dsample::CRN::getInstance().get(num_edges_rng_index);
+
+    if (desArgs->net_gen == 1) {
+        std::cout << "Generate social graph..." << std::endl;
+        std::cout << "Size: " << net_size << std::endl
+                  << "Max edges: " << max_edges << std::endl
+                  << "boost arrival: " << boost_arrival << std::endl
+                  << "boost edge: " << boost_edge << std::endl
+                  << "Fix edge weight: " << desArgs->edge_fixed << std::endl;
+
+        boost::int32_t arrival_rng_index;
+        boost::int32_t uniform_rng_index;
+
+        seed = dsample::Seeds::getInstance().getSeed();
+        arrival_rng_index = dsample::CRN::getInstance().init(seed);
+        dsample::CRN::getInstance().log(seed, "vertex arrival rate");
+        seed = dsample::Seeds::getInstance().getSeed();
+        uniform_rng_index = dsample::CRN::getInstance().init(seed);
+        dsample::CRN::getInstance().log(seed, "uniform");
+
+        r2 = dsample::CRN::getInstance().get(uniform_rng_index);
+        r3 = dsample::CRN::getInstance().get(arrival_rng_index);
+        graph = dnet::WEvonet::createBBVGraph(net_size, desArgs->max_edges, desArgs->edge_fixed,
+                                              desArgs->max_arrival, boost_arrival, boost_edge,
+                                              r1, r2, r3);
+    } else if (desArgs->net_gen == 2) {
+        std::cout << "Generate Erdos-Renyi graph..." << std::endl
+                  << "Max edges: " << max_edges << std::endl
+                  << "boost arrival: " << boost_arrival << std::endl
+                  << "boost edge: " << boost_edge << std::endl
+                  << "Fix edge weight: " << desArgs->edge_fixed << std::endl
+                  << "Edge prob.: " << edge_prob << std::endl;
+        seed = dsample::Seeds::getInstance().getSeed();
+        graph = dnet::WEvonet::createERGraph(net_size, desArgs->edge_fixed,
+                                             desArgs->max_arrival, boost_arrival,
+                                             boost_edge, r1, seed, edge_prob, max_edges);
+    }
+
+    std::cout << "Graph with " << boost::num_vertices(*graph) << " vertices generated." << std::endl;
+
+    return graph;
+}
+
+
 #ifdef HAVE_MPI
 void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
-                          tDesArgsSP desArgs)
+                          MPI_Comm& group_comm, tDesArgsSP desArgs)
 #else
     sim_output Simulation::operator()(tDesArgsSP desArgs)
 #endif /* HAVE_MPI */
@@ -224,6 +285,13 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
     tSimArgsMPI simArgs;
     MPI_Status status;
     int rc;
+    int rank;
+    int *minRank;
+
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+    // store the minimum rank of a group
+    minRank = new int[1];
 
     while (true) {
 # ifndef NDEBUG
@@ -301,55 +369,50 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
 
             }
         } else {
-            // generate the graph
-            std::cout << "Generate the graph." << std::endl;
-            dsample::tGslRngSP r1, r2, r3;
-            boost::int32_t num_edges_rng_index;
-            boost::uint32_t seed = 0;
+            if (desArgs->graph_single) {
+                std::stringstream graphRepositorySS;
+                graphRepositorySS << desArgs->results_dir << "/../repository/" << desArgs->sim_dir;
+                std::string graphRepositoryDir = graphRepositorySS.str();
+                graphRepositorySS << "/graph_dv" << boost_arrival << "_de" << boost_edge << ".gml";
+                std::string graphRepository = graphRepositorySS.str();
 
-            seed = dsample::Seeds::getInstance().getSeed();
-            num_edges_rng_index = dsample::CRN::getInstance().init(seed);
-            dsample::CRN::getInstance().log(seed, "number of edges");
+                if (fs::exists(graphRepository)) {
+                    std::cout << "Read existing graph file: " << graphRepository << std::endl;
+                    dnet::GraphUtil::read(*graph, graphRepository, dnet::GraphUtil::GRAPHML);
+                } else {
+#ifdef HAVE_MPI
+                    rc = MPI_Allreduce(&rank, minRank, 1, MPI_INT, MPI_MIN, group_comm);
+                    if (rc != MPI_SUCCESS) {
+                        std::cerr << "Error finding minimum rank in group." << std::endl;
+                        MPI_Abort(MPI_COMM_WORLD, 918);
+                    }
 
-            r1 = dsample::CRN::getInstance().get(num_edges_rng_index);
+                    if (rank == *minRank) {
+#endif /* HAVE_MPI */
+                        std::cout << "Create graph: " << graphRepository << std::endl;
+                        // create the repository if it does not exist already
+                        if (!fs::exists(graphRepositoryDir)) {
+                            fs::create_directories(graphRepositoryDir);
+                        }
+                        // generate the graph
+                        graph = Simulation::createGraph(desArgs, net_size,  max_edges,
+                                                        edge_prob, boost_arrival, boost_edge);
+                        dnet::GraphUtil::print(*graph, graphRepository, dnet::GraphUtil::GRAPHML);
+#ifdef HAVE_MPI
+                    }
 
-            if (desArgs->net_gen == 1) {
-                std::cout << "Generate social graph..." << std::endl;
-                std::cout << "Size: " << desArgs->net_size << std::endl
-                          << "Max edges: " << max_edges << std::endl
-                          << "boost arrival: " << boost_arrival << std::endl
-                          << "boost edge: " << boost_edge << std::endl
-                          << "Fix edge weight: " << desArgs->edge_fixed << std::endl;
+                    // wait for the graph to be serialised
+                    MPI_Barrier(group_comm);
 
-                boost::int32_t arrival_rng_index;
-                boost::int32_t uniform_rng_index;
-
-                seed = dsample::Seeds::getInstance().getSeed();
-                arrival_rng_index = dsample::CRN::getInstance().init(seed);
-                dsample::CRN::getInstance().log(seed, "vertex arrival rate");
-                seed = dsample::Seeds::getInstance().getSeed();
-                uniform_rng_index = dsample::CRN::getInstance().init(seed);
-                dsample::CRN::getInstance().log(seed, "uniform");
-
-                r2 = dsample::CRN::getInstance().get(uniform_rng_index);
-                r3 = dsample::CRN::getInstance().get(arrival_rng_index);
-                graph = dnet::WEvonet::createBBVGraph(desArgs->net_size, desArgs->max_edges, desArgs->edge_fixed,
-                                                      desArgs->max_arrival, boost_arrival, boost_edge,
-                                                      r1, r2, r3);
-            } else if (desArgs->net_gen == 2) {
-                std::cout << "Generate Erdos-Renyi graph..." << std::endl
-                          << "Max edges: " << max_edges << std::endl
-                          << "boost arrival: " << boost_arrival << std::endl
-                          << "boost edge: " << boost_edge << std::endl
-                          << "Fix edge weight: " << desArgs->edge_fixed << std::endl
-                          << "Edge prob.: " << edge_prob << std::endl;
-                seed = dsample::Seeds::getInstance().getSeed();
-                graph = dnet::WEvonet::createERGraph(desArgs->net_size, desArgs->edge_fixed,
-                                                     desArgs->max_arrival, boost_arrival,
-                                                     boost_edge, r1, seed, edge_prob, max_edges);
+                    // everyone in the group read the graph
+                    dnet::GraphUtil::read(*graph, graphRepository, dnet::GraphUtil::GRAPHML);
+#endif /* HAVE_MPI */
+                }
+            } else {
+                // generate the graph
+                graph = Simulation::createGraph(desArgs, net_size,  max_edges,
+                                                edge_prob, boost_arrival, boost_edge);
             }
-
-            std::cout << "Graph generated." << std::endl;
         }
 
         num_vertices = boost::num_vertices(*graph);
@@ -669,6 +732,9 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
             MPI_Abort(MPI_COMM_WORLD, 914);
         }
     }
+
+    delete [] minRank;
+
 #else
     return output;
 #endif /* HAVE_MPI */

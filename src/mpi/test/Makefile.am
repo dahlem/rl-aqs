@@ -9,7 +9,7 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 bin_PROGRAMS = crn_test seeds_read struct_test groups_test \
-	read_graphml write_seeds
+	read_graphml write_seeds allreduce_test
 
 crn_test_SOURCES =                                                    \
 	crn_test.cc
@@ -85,6 +85,9 @@ write_seeds_LDADD =                                                   \
 
 write_seeds_LDFLAGS =                                                 \
 	$(BOOST_LDFLAGS)
+
+allreduce_test_SOURCES =                                              \
+	allreduce_test.cc
 
 
 MAINTAINERCLEANFILES = Makefile.in

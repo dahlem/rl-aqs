@@ -49,6 +49,7 @@ const std::string GENERATIONS = "generations";
 const std::string MAX_ARRIVAL = "max_arrival_rate";
 
 const std::string GRAPH = "graph";
+const std::string GRAPH_SINGLE = "graph_single";
 const std::string SEEDS = "seeds";
 const std::string HELP = "help";
 const std::string RESULTS = "results";
@@ -143,6 +144,7 @@ struct desArgs_t {
     std::string events_processed;   /* filename for the processed events */
     std::string add_sim;            /* add to existing experiments */
     std::string sim_dir;            /* simulation results directory */
+    bool graph_single;              /* generate a single graph only */
 
     bool trace_event;               /* trace an event */
     bool log_events;                /* log the events */
@@ -221,7 +223,7 @@ struct desArgs_t {
     desArgs_t(desArgs_t const &args)
         : graph_filename(args.graph_filename), seeds_filename(args.seeds_filename), results_dir(args.results_dir),
           events_unprocessed(args.events_unprocessed), events_processed(args.events_processed), add_sim(args.add_sim),
-          sim_dir(args.sim_dir), trace_event(args.trace_event), log_events(args.log_events), log_graphs(args.log_graphs),
+          sim_dir(args.sim_dir), graph_single(args.graph_single), trace_event(args.trace_event), log_events(args.log_events), log_graphs(args.log_graphs),
           vertex(args.vertex), graph_rate(args.graph_rate), max_arrival(args.max_arrival),
           stop_time(args.stop_time), generations(args.generations), confidence(args.confidence),
           lhs(args.lhs), alpha(args.alpha), error(args.error),
@@ -246,7 +248,7 @@ struct desArgs_t {
 
     desArgs_t()
         : graph_filename(""), seeds_filename(""), results_dir(""),
-          events_unprocessed(""), events_processed(""), add_sim(""), sim_dir(""),
+          events_unprocessed(""), events_processed(""), add_sim(""), sim_dir(""), graph_single(false),
           trace_event(0), log_events(0), log_graphs(0),
           vertex(0), graph_rate(0), max_arrival(0.0),
           stop_time(0.0), generations(0), confidence(0),

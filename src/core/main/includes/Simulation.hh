@@ -36,6 +36,9 @@
 #include "common.hh"
 #include "CL.hh"
 
+#include "DirectedGraph.hh"
+namespace dnet = des::network;
+
 
 
 namespace des
@@ -63,7 +66,7 @@ public:
      * @return the simulation output variables
      */
 #ifdef HAVE_MPI
-    void simulate(MPI_Datatype&, MPI_Datatype&, tDesArgsSP);
+    void simulate(MPI_Datatype&, MPI_Datatype&, MPI_Comm&, tDesArgsSP);
 #else
     sim_output operator()(tDesArgsSP);
 #endif /* HAVE_MPI */
@@ -75,6 +78,10 @@ private:
 
     void operator=(const Simulation&)
         {}
+
+    static dnet::tGraphSP createGraph(tDesArgsSP, boost::uint16_t, boost::uint16_t,
+                                      double, double, double);
+
 
 };
 

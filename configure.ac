@@ -226,6 +226,7 @@ AC_CONFIG_FILES([
    pbs/des_rand_500s_1000e_1000t.pbs
    pbs/des_soc_1000s_5e_1000t.pbs
    pbs/des_soc_5000s_5e_1000t.pbs
+   pbs/allreduce_test.sh
    pbs/crn_test.pbs
    pbs/seeds_read.pbs
    pbs/struct_test.pbs

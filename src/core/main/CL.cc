@@ -79,6 +79,7 @@ CL::CL()
         (LOG_GRAPHS.c_str(), po::value <bool>()->default_value(true), "log the graphs.")
         (LOG_GRAPH_RATE.c_str(), po::value <boost::int32_t>()->default_value(0), "set the graph generation rate.")
         (LOG_EVENTS.c_str(), po::value <bool>()->default_value(true), "log the events.")
+        (GRAPH_SINGLE.c_str(), po::value <bool>()->default_value(false), "generate only a single graph.")
         ;
 
     po::options_description opt_des("Simulation Configuration");
@@ -282,6 +283,12 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
     }
     std::cout << "Log the graphs "
               << desArgs->log_graphs << "." << std::endl;
+
+    if (vm.count(GRAPH_SINGLE.c_str())) {
+        desArgs->graph_single = vm[GRAPH_SINGLE.c_str()].as <bool>();
+    }
+    std::cout << "Generate single graph file: "
+              << desArgs->graph_single << "." << std::endl;
 
     if (vm.count(LOG_GRAPH_RATE.c_str())) {
         desArgs->graph_rate = vm[LOG_GRAPH_RATE.c_str()].as <boost::int32_t>();
