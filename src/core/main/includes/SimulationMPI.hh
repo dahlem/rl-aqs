@@ -179,6 +179,10 @@ public:
                     gsl_vector_set(min, LhsUtils::getNNMomentumIndex(p_desArgs), p_desArgs->min_nn_momentum);
                     gsl_vector_set(max, LhsUtils::getNNMomentumIndex(p_desArgs), p_desArgs->max_nn_momentum);
                 }
+                if (LhsUtils::getRlWplEtaIndex(p_desArgs) >= 0) {
+                    gsl_vector_set(min, LhsUtils::getRlWplEtaIndex(p_desArgs), p_desArgs->min_rl_policy_wpl_eta);
+                    gsl_vector_set(max, LhsUtils::getRlWplEtaIndex(p_desArgs), p_desArgs->max_rl_policy_wpl_eta);
+                }
 
                 if (p_desArgs->lhs_optimal) {
 #ifndef NDEBUG
@@ -287,7 +291,7 @@ public:
                                      << p_desArgs->rl_hybrid << ","
                                      << p_desArgs->rl_hybrid_warmup << ","
                                      << desArgsMPI.nn_momentum << ","
-                                     << p_desArgs->rl_policy_wpl_eta;
+                                     << desArgsMPI.rl_policy_wpl_eta;
             }
 
             // 4. continue with as many experiments as needed
@@ -534,6 +538,12 @@ private:
                         sample, desArgsMPI.sim_num - 1, LhsUtils::getNNMomentumIndex(p_desArgs));
                 } else {
                     desArgsMPI.nn_momentum = p_desArgs->nn_momentum;
+                }
+                if (LhsUtils::getRlWplEtaIndex(p_desArgs) >= 0) {
+                    desArgsMPI.rl_policy_wpl_eta = gsl_matrix_get(
+                        sample, desArgsMPI.sim_num - 1, LhsUtils::getRlWplEtaIndex(p_desArgs));
+                } else {
+                    desArgsMPI.rl_policy_wpl_eta = p_desArgs->rl_policy_wpl_eta;
                 }
         }
 };

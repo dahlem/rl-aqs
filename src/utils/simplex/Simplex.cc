@@ -14,6 +14,7 @@
 #include "Simplex.hh"
 
 #include <algorithm>
+#include <cstdlib>
 #include <functional>
 #include <iterator>
 #include <vector>
@@ -21,14 +22,18 @@
 #include <gsl/gsl_randist.h>
 
 
-namespace des 
+namespace des
 {
-namespace utils 
+namespace utils
 {
 
+int compare_double_descending(const void *a, const void *b)
+{
+    return (*(int*)b - *(int*)a);
+}
 
 void Simplex::projectionDuchi(
-    int p_n, DoubleSA p_vec, double p_z, dsample::tGslRngSP p_uniform_rng)
+    int p_n, DoubleSA p_vec, double p_z, double p_b, dsample::tGslRngSP p_uniform_rng)
 {
     double s = 0.0;
     double rho = 0.0;
@@ -71,6 +76,49 @@ void Simplex::projectionDuchi(
     }
 
     theta = (s - p_z) / rho;
+
+    for (boost::uint16_t i = 0; i < p_n; ++i) {
+        p_vec[i] = std::max(p_vec[i] - theta, p_b);
+    }
+}
+
+
+void Simplex::projectionDuchi(int p_n, DoubleSA p_vec, double p_z)
+{
+    boost::uint16_t rho = 0;
+    double temp1, temp2, theta;
+    double *mu = new double[p_n];
+
+    // copy p_vec
+    for (boost::uint16_t i = 0; i < p_n; ++i) {
+        mu[i] = p_vec[i];
+    }
+
+    // sort mu in descending order
+    qsort(mu, p_n, sizeof(double), compare_double_descending);
+
+    for (boost::uint16_t j = 0; j < p_n; ++j) {
+        temp2 = 0.0;
+
+        for (boost::uint16_t i = 0; i <= j; ++i) {
+            temp2 += mu[i] - p_z;
+        }
+
+        temp1 = mu[j] - 1.0 / static_cast<double>(j) * temp2;
+
+        if (temp1 > 0.0) {
+            if (rho < temp1) {
+                rho = j;
+            }
+        }
+    }
+
+    temp2 = 0.0;
+    for (boost::uint16_t i = 0; i <= rho; ++i) {
+        temp2 += mu[i] - p_z;
+    }
+
+    theta = 1.0 / static_cast<double>(rho) * temp2;
 
     for (boost::uint16_t i = 0; i < p_n; ++i) {
         p_vec[i] = std::max(p_vec[i] - theta, 0.0);

@@ -1,4 +1,4 @@
-function w = projSimplex(v, z, b)
+function w = projSimplex2(v, z, b)
   n = columns(v);
   U = 1:n;
   s = 0;
@@ -26,4 +26,22 @@ function w = projSimplex(v, z, b)
 
   theta = (s - z) / rho;
   w = max(v - theta, b);
+endfunction
+
+function w = projSimplex1(v, z)
+  n = columns(v);
+  mu = sort(v, 'descend');
+  rho = 0;
+  
+  for j = 1:n
+    temp = mu(j) - 1/j * sum(mu(1:j) - z);
+    if (temp > 0)
+      if (rho < temp)
+	rho = j;
+      endif
+    endif
+  endfor
+
+  theta = 1/rho * sum(mu(1:rho) - z);
+  w = max(v - theta, 0);
 endfunction

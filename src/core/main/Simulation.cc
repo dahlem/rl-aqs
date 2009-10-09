@@ -278,7 +278,7 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
     boost::uint16_t net_size, max_edges;
     double edge_prob,
         rl_q_alpha, rl_q_lambda, rl_policy_epsilon, rl_policy_boltz_t,
-        nn_momentum, boost_arrival, boost_edge;
+        nn_momentum, boost_arrival, boost_edge, rl_policy_wpl_eta;
 
     // receive the input arguments via mpi
 #ifdef HAVE_MPI
@@ -324,7 +324,7 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
         nn_momentum = simArgs.nn_momentum;
         boost_arrival = simArgs.boost_arrival;
         boost_edge = simArgs.boost_edge;
-
+        rl_policy_wpl_eta = simArgs.rl_policy_wpl_eta;
 #else
         sim_num = desArgs->sim_num;
         rep_num = desArgs->rep_num;
@@ -338,6 +338,7 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
         nn_momentum = desArgs->nn_momentum;
         boost_arrival = desArgs->boost_arrival;
         boost_edge = desArgs->boost_edge;
+        rl_policy_wpl_eta = desArgs->rl_policy_wpl_eta;
 
 #endif /* HAVE_MPI */
 
@@ -347,6 +348,7 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
                   << "RL alpha: " << rl_q_alpha << ", RL lambda: " << rl_q_lambda << std::endl
                   << "RL Policy epsilon: " << rl_policy_epsilon << std::endl
                   << "RL Policy Boltz T: " << rl_policy_boltz_t << std::endl
+                  << "RL Policy WPL eta: " << rl_policy_wpl_eta << std::endl
                   << "NN Momentum: " << nn_momentum << std::endl;
         std::cout.flush();
 # endif /* NDEBUG */

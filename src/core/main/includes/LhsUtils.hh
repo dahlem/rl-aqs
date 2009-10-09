@@ -53,6 +53,7 @@ public:
     static int getRLLambdaIndex(tDesArgsSP p_desArgs);
     static int getRLEpsilonIndex(tDesArgsSP p_desArgs);
     static int getNNMomentumIndex(tDesArgsSP p_desArgs);
+    static int getRlWplEtaIndex(tDesArgsSP p_desArgs);
 
 private:
 

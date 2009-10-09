@@ -104,11 +104,11 @@ boost::uint16_t WeightedPolicyLearner::operator() (
 
             // 2.3. calculate new policy
             gradient[i] = orig[i] + diff[i];
-            sum += fabs(gradient[i]);
+//            sum += fabs(gradient[i]);
         }
 
         double factor = 1.0/sum;
-        dutils::Vector::mult(p_values.size(), gradient, factor);
+//        dutils::Vector::mult(p_values.size(), gradient, factor);
 //        dutils::Vector::normalise(p_values.size(), gradient, true);
 
 #if !defined(NDEBUG_WPL) || !defined(NDEBUG_EVENTS)
@@ -118,7 +118,7 @@ boost::uint16_t WeightedPolicyLearner::operator() (
         std::cout << std::endl;
 #endif /* !defined(NDEBUG_WPL) || !defined(NDEBUG_EVENTS) */
 
-        dutils::Simplex::projectionDuchi(p_values.size(), gradient, 1.0, m_simplex_rng);
+        dutils::Simplex::projectionDuchi(p_values.size(), gradient, 1.0);
 
         sum = std::accumulate(gradient.get(), gradient.get() + p_values.size(), 0.0);
         factor = 1.0/sum;

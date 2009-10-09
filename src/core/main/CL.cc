@@ -156,6 +156,10 @@ CL::CL()
             std::numeric_limits<double>::max()), "set the min. momentum for backpropagation.")
         (MAX_NN_MOMENTUM.c_str(), po::value <double>()->default_value(
             std::numeric_limits<double>::max()), "set the max. momentum for backpropagation.")
+        (MIN_RL_POLICY_WPL_ETA.c_str(), po::value <double>()->default_value(
+            std::numeric_limits<double>::max()), "set the min. eta for wpl.")
+        (MAX_RL_POLICY_WPL_ETA.c_str(), po::value <double>()->default_value(
+            std::numeric_limits<double>::max()), "set the max. eta for wpl.")
         ;
 
     po::options_description opt_rl("RL Configuration");
@@ -168,7 +172,6 @@ CL::CL()
         (RL_Q_ALPHA.c_str(), po::value <double>()->default_value(0.1), "Learning Rate.")
         (RL_Q_LAMBDA.c_str(), po::value <double>()->default_value(0.1), "Action-value Rate.")
         (RL_POLICY.c_str(), po::value <boost::uint16_t>()->default_value(1), "Policy (1=Epsilon-Greedy, 2=Boltzmann, 3=WPL).")
-        (RL_POLICY_WPL_ETA.c_str(), po::value <double>()->default_value(0.001), "Learning rate for WPL.")
         (CL_RL_STATE_IDS.c_str(), po::value <std::string>()->default_value(""), "State representation.")
         (CL_NN_HIDDENLAYER_NEURONS.c_str(), po::value <boost::uint16_t>()->default_value(5), "Hidden number of Neurons.")
         (CL_NN_LOSS_POLICY.c_str(), po::value <boost::uint16_t>()->default_value(1), "Loss Policy (1=default, 2=sliding window).")
@@ -189,6 +192,11 @@ CL::CL()
     opt_rl_policy_boltzmann.add_options()
         (RL_POLICY_BOLTZMANN_T.c_str(), po::value <double>()->default_value(
             100.0), "Temperator for Boltzmann policy.")
+        ;
+
+    po::options_description opt_rl_policy_wpl("RL WPL Policy Configuration");
+    opt_rl_policy_wpl.add_options()
+        (RL_POLICY_WPL_ETA.c_str(), po::value <double>()->default_value(0.001), "Learning rate for WPL.")
         ;
 
     po::options_description opt_expert("Expert Metrics Configuration");
@@ -215,6 +223,7 @@ CL::CL()
     opt_desc->add(opt_rl);
     opt_desc->add(opt_rl_policy_epsilon);
     opt_desc->add(opt_rl_policy_boltzmann);
+    opt_desc->add(opt_rl_policy_wpl);
     opt_desc->add(opt_expert);
     opt_desc->add(opt_debug);
 }
@@ -627,6 +636,16 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
             desArgs->max_nn_momentum = vm[MAX_NN_MOMENTUM.c_str()].as <double>();
         }
         std::cout << "Maximum momentum set to " << desArgs->max_nn_momentum << "." << std::endl;
+
+        if (vm.count(MIN_RL_POLICY_WPL_ETA.c_str())) {
+            desArgs->min_rl_policy_wpl_eta = vm[MIN_RL_POLICY_WPL_ETA.c_str()].as <double>();
+        }
+        std::cout << "Minimum eta set to " << desArgs->min_rl_policy_wpl_eta << "." << std::endl;
+
+        if (vm.count(MAX_RL_POLICY_WPL_ETA.c_str())) {
+            desArgs->max_rl_policy_wpl_eta = vm[MAX_RL_POLICY_WPL_ETA.c_str()].as <double>();
+        }
+        std::cout << "Maximum eta set to " << desArgs->max_rl_policy_wpl_eta << "." << std::endl;
     }
 
     std::cout << std::endl << "7) Expert Metrics Configuration" << std::endl;

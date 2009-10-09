@@ -111,6 +111,7 @@ public:
             std::cout << "RL Q Lambda Index: " << LhsUtils::getRLLambdaIndex(p_desArgs) << std::endl;
             std::cout << "RL epsilon Index: " << LhsUtils::getRLEpsilonIndex(p_desArgs) << std::endl;
             std::cout << "NN momentum Index: " << LhsUtils::getNNMomentumIndex(p_desArgs) << std::endl;
+            std::cout << "RL policy wpl Index: " << LhsUtils::getRlWplEtaIndex(p_desArgs) << std::endl;
 #endif /* NDEBUG */
 
             min = gsl_vector_calloc(dimensions);
@@ -151,6 +152,10 @@ public:
             if (LhsUtils::getNNMomentumIndex(p_desArgs) >= 0) {
                 gsl_vector_set(min, LhsUtils::getNNMomentumIndex(p_desArgs), p_desArgs->min_nn_momentum);
                 gsl_vector_set(max, LhsUtils::getNNMomentumIndex(p_desArgs), p_desArgs->max_nn_momentum);
+            }
+            if (LhsUtils::getRlWplEtaIndex(p_desArgs) >= 0) {
+                gsl_vector_set(min, LhsUtils::getRlWplEtaIndex(p_desArgs), p_desArgs->min_rl_policy_wpl_eta);
+                gsl_vector_set(max, LhsUtils::getRlWplEtaIndex(p_desArgs), p_desArgs->max_rl_policy_wpl_eta);
             }
 
             if (p_desArgs->lhs_optimal) {
@@ -225,6 +230,10 @@ public:
                 if (LhsUtils::getNNMomentumIndex(p_desArgs) >= 0) {
                     p_desArgs->nn_momentum = gsl_matrix_get(
                         sample, i, LhsUtils::getNNMomentumIndex(p_desArgs));
+                }
+                if (LhsUtils::getRlWplEtaIndex(p_desArgs) >= 0) {
+                    p_desArgs->rl_policy_wpl_eta = gsl_matrix_get(
+                        sample, i, LhsUtils::getRlWplEtaIndex(p_desArgs));
                 }
 
                 output = m_dsim.simulate(p_desArgs);

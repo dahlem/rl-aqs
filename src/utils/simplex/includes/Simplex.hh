@@ -39,8 +39,8 @@ typedef boost::shared_array <double> DoubleSA;
 
 namespace des
 {
-    namespace utils
-    {
+namespace utils
+{
 
 
 /**
@@ -63,7 +63,8 @@ public:
      * @param DoubleSA the left simplex
      * @param DoubleSA the right simplex
      */
-    static void projectionDuchi(int, DoubleSA, double, dsample::tGslRngSP);
+    static void projectionDuchi(int, DoubleSA, double, double, dsample::tGslRngSP);
+    static void projectionDuchi(int, DoubleSA, double);
 
 private:
 

@@ -105,6 +105,8 @@ const std::string MIN_RL_POLICY_EPSILON = "min_rl_policy_epsilon";
 const std::string MAX_RL_POLICY_EPSILON = "max_rl_policy_epsilon";
 const std::string RL_POLICY_BOLTZMANN_T = "rl_policy_boltzmann_t";
 const std::string RL_POLICY_WPL_ETA = "rl_policy_wpl_eta";
+const std::string MIN_RL_POLICY_WPL_ETA = "min_rl_policy_wpl_eta";
+const std::string MAX_RL_POLICY_WPL_ETA = "max_rl_policy_wpl_eta";
 
 const std::string RL_HYBRID = "rl_hybrid";
 const std::string RL_HYBRID_WARMUP = "rl_hybrid_warmup";
@@ -218,6 +220,8 @@ struct desArgs_t {
     double min_nn_momentum;          /* min momentum */
     double max_nn_momentum;          /* max momentum */
     double rl_policy_wpl_eta;          /* wpl learning rate */
+    double min_rl_policy_wpl_eta;          /* min wpl learning rate */
+    double max_rl_policy_wpl_eta;          /* max wpl learning rate */
 
 
     desArgs_t(desArgs_t const &args)
@@ -243,7 +247,7 @@ struct desArgs_t {
           nn_hidden_neurons(args.nn_hidden_neurons), nn_loss_policy(args.nn_loss_policy),
           nn_window(args.nn_window), nn_brent_iter(args.nn_brent_iter), nn_momentum(args.nn_momentum),
           nn_cg(args.nn_cg), nn_outsource(args.nn_outsource), min_nn_momentum(args.min_nn_momentum), max_nn_momentum(args.max_nn_momentum),
-          rl_policy_wpl_eta(args.rl_policy_wpl_eta)
+          rl_policy_wpl_eta(args.rl_policy_wpl_eta), min_rl_policy_wpl_eta(args.min_rl_policy_wpl_eta), max_rl_policy_wpl_eta(args.max_rl_policy_wpl_eta)
         {}
 
     desArgs_t()
@@ -268,7 +272,8 @@ struct desArgs_t {
           expert_positive(false), expert_negative(false), rl_state_representation(),
           nn_hidden_neurons(5), nn_loss_policy(1),
           nn_window(100), nn_brent_iter(500), nn_momentum(1.0),
-          nn_cg(true), nn_outsource(false), min_nn_momentum(0.0), max_nn_momentum(0.0), rl_policy_wpl_eta(0.0)
+          nn_cg(true), nn_outsource(false), min_nn_momentum(0.0), max_nn_momentum(0.0), rl_policy_wpl_eta(0.0),
+          min_rl_policy_wpl_eta(0.0), max_rl_policy_wpl_eta(0.0)
         {}
 
     friend std::ostream& operator <<(std::ostream &p_os, const desArgs_t &desArgs)
