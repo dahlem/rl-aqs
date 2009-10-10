@@ -105,12 +105,14 @@ public:
             gsl_vector *min, *max;
             gsl_matrix *sample;
             int *simReplications = new int[runs];
+            int *simActiveReplications = new int[runs];
 
             // keep track of the significance of the experiments and their replication count
             tBoolSA areExpsSignificant = tBoolSA(new bool[runs]);
             for (boost::uint16_t i = 0; i < runs; ++i) {
                 areExpsSignificant[i] = false;
                 simReplications[i] = p_desArgs->init_replications;
+                simActiveReplications[i] = p_desArgs->init_replications;
             }
 
             // online statistics for the experiments
@@ -118,6 +120,7 @@ public:
             std::vector<dstats::OnlineStats> avgNumEvents(runs);
             std::vector<dstats::OnlineStats> totalQs(runs);
             std::vector<int> idleNodes;
+            std::vector<int> lazyNodes;
 
             // 2. init the crn for the lhs permutation
             boost::uint32_t seed = dsample::Seeds::getInstance().getSeed();
@@ -352,7 +355,8 @@ public:
                     // if not send another replica
                     if (!isConfident) {
                         // do progressive parallel job execution
-                        int moreJobs = (p_desArgs->init_replications > idleNodes.size()) ? idleNodes.size() : p_desArgs->init_replications;
+                        int moreJobs = (p_desArgs->init_replications > idleNodes.size()) ? idleNodes.size() : (simActiveReplications[output->simulation_id - 1] + lazyNodes.size());
+                        simActiveReplications[output->simulation_id - 1] = moreJobs;
 
 #ifndef NDEBUG
                         std::cout << "Simulation " << output->simulation_id << ", replications: "
@@ -361,7 +365,8 @@ public:
                         std::cout.flush();
 #endif /* NDEBUG */
 
-                        for (int i = 0; i < moreJobs; ++i) {
+                        // allocate more jobs; first the number of replications that belong to a simulation batch anyway
+                        for (int i = 0; i < (simActiveReplications[output->simulation_id - 1] - lazyNodes.size()); ++i) {
                             // update the experiment arguments
                             tSimArgsMPI desArgsMPI;
 
@@ -383,7 +388,37 @@ public:
                             simReplications[output->simulation_id - 1]++;
                             jobs++;
                         }
+
+                        // second, all the lazy nodes are allocated
+                        for (int i = (simActiveReplications[output->simulation_id - 1] - lazyNodes.size()); i < moreJobs; ++i) {
+                            // update the experiment arguments
+                            tSimArgsMPI desArgsMPI;
+
+                            desArgsMPI.rep_num = avgDelays[output->simulation_id - 1].getNumValues() + 1 + i;
+                            desArgsMPI.sim_num = output->simulation_id;
+
+                            assignParams(p_desArgs, desArgsMPI, sample);
+
+                            int destination = lazyNodes.back();
+
+                            rc = MPI_Send(&desArgsMPI, 1, mpi_desargs, destination, jobs, MPI_COMM_WORLD);
+                            if (rc != MPI_SUCCESS) {
+                                std::cerr << "Error sending task to slave." << std::endl;
+                                MPI_Abort(MPI_COMM_WORLD, 916);
+                            }
+
+                            // remove the node from the idle vector
+                            lazyNodes.pop_back();
+                            simReplications[output->simulation_id - 1]++;
+                            jobs++;
+                        }
                     } else {
+                        // transfer the previously active nodes to a lazy list
+                        for (boost::uint16_t i = 0; i < simActiveReplications[output->simulation_id - 1]; ++i) {
+                            lazyNodes.push_back(idleNodes.back());
+                            idleNodes.pop_back();
+                        }
+
 #ifndef NDEBUG
                         std::cout << "Simulation " << output->simulation_id << ", replications: "
                                   << avgDelays[output->simulation_id - 1].getNumValues() << " is confident" << std::endl;

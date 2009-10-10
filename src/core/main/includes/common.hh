@@ -78,6 +78,7 @@ typedef struct {
     double rl_policy_epsilon;   /* rl policy epsilon-greedy value */
     double rl_policy_boltzmann_t;   /* rl policy boltzmann temperature */
     double nn_momentum;             /* NN Backpropagation momentum */
+    double rl_policy_wpl_eta;             /* NN Backpropagation momentum */
 } tSimArgsMPI;
 
 
