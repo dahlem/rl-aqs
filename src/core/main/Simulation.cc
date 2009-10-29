@@ -675,7 +675,8 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
                                                   desArgs->rl_state_representation, desArgs->nn_hidden_neurons,
                                                   nn_uniform_rng_index, desArgs->nn_cg,
                                                   desArgs->nn_loss_policy, desArgs->nn_window,
-                                                  desArgs->nn_brent_iter, nn_momentum, desArgs->nn_outsource));
+                                                  desArgs->nn_brent_iter, nn_momentum, desArgs->nn_outsource,
+                                                  desArgs->regret_absolute, desArgs->incentive_deviate));
                     ackEvent.attach(*fullRlResponseHandler);
                 }
             } else {

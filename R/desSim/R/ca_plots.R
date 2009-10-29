@@ -1,4 +1,4 @@
-des.ca.ridge.spectrum.plot <- function(prefix, paths, ps=TRUE) {
+des.ca.ridge.spectrum.plot <- function(prefix, paths, start, end, ps=TRUE) {
   if (ps) {
     des.postscript(paste(prefix, "-ca-ridge-spectrum.eps", sep=""), width=2.8, height=2.8, pointsize=8)
   }
@@ -7,6 +7,9 @@ des.ca.ridge.spectrum.plot <- function(prefix, paths, ps=TRUE) {
   data <- read.csv(paste(prefix, "-ridge_path.dat", sep=""), header=FALSE, col.names=c("incr", "R", "y", paste("x", 1:(paths - 1), sep=""), "path"))
   p <- ggplot()
 
+  data <- data[data$incr < end,]
+  data <- data[data$incr > start,]
+  
   for (i in 0:(paths - 1)) {
     df <- data[data$path == i,];
     if (length(df$incr) > 0) {
@@ -14,7 +17,7 @@ des.ca.ridge.spectrum.plot <- function(prefix, paths, ps=TRUE) {
     }
   }
 
-  for (i in lambdas$theta) {
+  for (i in lambdas$lambda) {
     p <- p + geom_vline(xintercept=i, colour="red")
   }
 
@@ -23,8 +26,7 @@ des.ca.ridge.spectrum.plot <- function(prefix, paths, ps=TRUE) {
     labels <- c(labels, bquote(lambda[.(i)]))
   }
   
-  p <- p + scale_x_continuous("", breaks=lambdas$theta,
-                              labels=labels)
+  p <- p + scale_x_continuous("", breaks=lambdas$lambda, labels=labels)
   p <- p + theme_bw(base_size=8)
   print(p)
   
@@ -34,14 +36,16 @@ des.ca.ridge.spectrum.plot <- function(prefix, paths, ps=TRUE) {
 }
 
   
-des.ca.ridge.x.plot <- function(prefix, path, paths, ps=TRUE) {
+des.ca.ridge.x.plot <- function(prefix, path, paths, end, ps=TRUE) {
   if (ps) {
     des.postscript(paste(prefix, "-ca-ridge-x.eps", sep=""), width=2.8, height=2.8, pointsize=8)
   }
 
   data <- read.csv(paste(prefix, "-ridge_path.dat", sep=""), header=FALSE, col.names=c("incr", "R", "y", paste("x", 1:(paths - 1), sep=""), "path"))
+  data <- data[data$incr < end,]
   df <- data[data$path == path,]
   labels <- data.frame(x=rep(0, paths-1), y=rep(0, paths-1), label=I(letters[1:(paths-1)]))
+
   p <- ggplot()
 
   for (i in 1:(paths - 1)) {
@@ -51,8 +55,9 @@ des.ca.ridge.x.plot <- function(prefix, path, paths, ps=TRUE) {
     labels$label[i] <- paste("x", i, sep="")
   }
 
-  p <- p + geom_text(data=labels, aes(x=x, y=y, label=label), size=3)
+  p <- p + geom_text(data=labels, aes(x=x, y=y, label=label), size=3, hjust=0)
   p <- p + scale_y_continuous("")
+  p <- p + scale_linetype("Stable")
   p <- p + theme_bw(base_size=8)
   print(p)
   
@@ -62,7 +67,37 @@ des.ca.ridge.x.plot <- function(prefix, path, paths, ps=TRUE) {
 }
 
   
-des.ca.ridge.y.plot <- function(prefix, paths, path, ps=TRUE) {
+des.ca.ridge.x.plot.2 <- function(prefix, path, paths, end, ps=TRUE) {
+  if (ps) {
+    des.postscript(paste(prefix, "-ca-ridge-x.eps", sep=""), width=2.8, height=2.8, pointsize=8)
+  }
+
+  data <- read.csv(paste(prefix, "-ridge_path.dat", sep=""), header=FALSE, col.names=c("incr", "R", "y", paste("x", 1:(paths - 1), sep=""), "path"))
+  data <- data[data$incr < end,]
+  df <- data[data$path == path,]
+
+  for (i in 1:(paths - 1)) {
+    if (i == 1) {
+      dfPrep <- data.frame(R=df$R, y=df[,(3+i)], x=rep(i, length(df$R)))
+    } else {
+      dfPrep <- rbind(dfPrep, data.frame(R=df$R, y=df[,(3+i)], x=rep(i, length(df$R))))
+    }
+  }
+
+  p <- ggplot()
+  p <- p + geom_line(data=dfPrep, aes(x=R, y=y, linetype=factor(x)))
+  p <- p + scale_y_continuous("")
+  p <- p + scale_linetype("Variable", labels=c(expression(alpha), expression(lambda), expression(eta)))
+  p <- p + theme_bw(base_size=8)
+  print(p)
+  
+  if (ps) {
+    dev.off()
+  }
+}
+
+  
+des.ca.ridge.y.plot <- function(prefix, paths, path, end, ps=TRUE) {
   if (ps) {
     des.postscript(paste(prefix, "-ca-ridge-y.eps", sep=""), width=2.8, height=2.8, pointsize=8)
   }
@@ -70,6 +105,7 @@ des.ca.ridge.y.plot <- function(prefix, paths, path, ps=TRUE) {
   p <- ggplot()
 
   data <- read.csv(paste(prefix, "-ridge_path.dat", sep=""), header=FALSE, col.names=c("incr", "R", "y", paste("x", 1:(paths - 1), sep=""), "path"))
+  data <- data[data$incr < end,]
   df <- data[data$path == path,]
   p <- p + geom_line(data=df, aes(x=R, y=y))
 

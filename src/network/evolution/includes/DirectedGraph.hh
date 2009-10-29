@@ -186,6 +186,37 @@ enum vertex_expert_positive_t { vertex_expert_positive = 1133 };
 enum vertex_expert_negative_t { vertex_expert_negative = 1134 };
 
 
+/** @enum vertex_regret_absolute_t
+ * This enum extends the vertex properties by an absolute regret argument
+ */
+enum vertex_regret_absolute_t { vertex_regret_absolute = 1135 };
+
+
+/** @enum vertex_incentive_deviate_t
+ * This enum extends the vertex properties by an incentive to deviate argument
+ */
+enum vertex_incentive_deviate_t { vertex_incentive_deviate = 1136 };
+
+
+/** @enum edge_total_reward_t
+ * This enum extends the edge properties by a total reward attribute
+ */
+enum edge_total_reward_t { edge_total_reward = 1137 };
+
+
+/** @enum vertex_actual_reward_t
+ * This enum extends the vertex properties by an actual reward argument
+ */
+enum vertex_actual_reward_t { vertex_actual_reward = 1138 };
+
+
+/** @enum vertex_best_response_t
+ * This enum extends the vertex properties by an best response argument
+ */
+enum vertex_best_response_t { vertex_best_response = 1139 };
+
+
+
 // install the vertex service rate property
 namespace boost
 {
@@ -210,9 +241,14 @@ BOOST_INSTALL_PROPERTY(vertex, expert_normal);
 BOOST_INSTALL_PROPERTY(vertex, expert_absolute);
 BOOST_INSTALL_PROPERTY(vertex, expert_positive);
 BOOST_INSTALL_PROPERTY(vertex, expert_negative);
+BOOST_INSTALL_PROPERTY(vertex, regret_absolute);
+BOOST_INSTALL_PROPERTY(vertex, incentive_deviate);
+BOOST_INSTALL_PROPERTY(vertex, actual_reward);
+BOOST_INSTALL_PROPERTY(vertex, best_response);
 BOOST_INSTALL_PROPERTY(graph, generator);
 BOOST_INSTALL_PROPERTY(edge, q_val);
 BOOST_INSTALL_PROPERTY(edge, eindex);
+BOOST_INSTALL_PROPERTY(edge, total_reward);
 }
 
 
@@ -324,10 +360,30 @@ typedef boost::property <vertex_expert_positive_t, double, VertexExpertAbsoluteP
  */
 typedef boost::property <vertex_expert_negative_t, double, VertexExpertPositiveProperty> VertexExpertNegativeProperty;
 
+/** @typedef VertexRegretAbsoluteProperty
+ * Specifies the property for the absolute regret metric of a vertex
+ */
+typedef boost::property <vertex_regret_absolute_t, double, VertexExpertNegativeProperty> VertexRegretAbsoluteProperty;
+
+/** @typedef VertexIncentiveDeviateProperty
+ * Specifies the property for the incentive to deviate metric of a vertex
+ */
+typedef boost::property <vertex_incentive_deviate_t, double, VertexRegretAbsoluteProperty> VertexIncentiveDeviateProperty;
+
+/** @typedef VertexActualRewardProperty
+ * Specifies the property for the actual reward metric of a vertex
+ */
+typedef boost::property <vertex_actual_reward_t, double, VertexIncentiveDeviateProperty> VertexActualRewardProperty;
+
+/** @typedef VertexBestResponseProperty
+ * Specifies the property for the best response metric of a vertex
+ */
+typedef boost::property <vertex_best_response_t, double, VertexActualRewardProperty> VertexBestResponseProperty;
+
 /** @typedef VertexProperties
  * This type definition assembles all the properties for the vertices of the graph
  */
-typedef boost::property <boost::vertex_index_t, int, VertexExpertNegativeProperty> VertexProperties;
+typedef boost::property <boost::vertex_index_t, int, VertexBestResponseProperty> VertexProperties;
 
 /** @typedef EdgeWeightProperty
  * Specifies the property for the edge weight
@@ -339,10 +395,15 @@ typedef boost::property <boost::edge_weight_t, double> EdgeWeightProperty;
  */
 typedef boost::property <edge_q_val_t, double, EdgeWeightProperty> EdgeQValueProperty;
 
+/** @typedef EdgeTotalRewardProperty
+ * Specifies the property for the total reward
+ */
+typedef boost::property <edge_total_reward_t, double, EdgeQValueProperty> EdgeTotalRewardProperty;
+
 /** @typedef EdgeIndexProperty
  * Specifies the property for the edge index
  */
-typedef boost::property <edge_eindex_t, int, EdgeQValueProperty> EdgeIndexProperty;
+typedef boost::property <edge_eindex_t, int, EdgeTotalRewardProperty> EdgeIndexProperty;
 
 /** @typedef GraphGeneratorProperty
  * Specifies the property for the edge weight
@@ -484,6 +545,26 @@ typedef boost::property_map <Graph, vertex_expert_positive_t>::type VertexExpert
  */
 typedef boost::property_map <Graph, vertex_expert_negative_t>::type VertexExpertNegativeMap;
 
+/** @typedef VertexRegretAbsoluteMap
+ * Specifies the map that stores the vertex attribute regret_absolute
+ */
+typedef boost::property_map <Graph, vertex_regret_absolute_t>::type VertexRegretAbsoluteMap;
+
+/** @typedef VertexIncentiveDeviateMap
+ * Specifies the map that stores the vertex attribute incentive_deviate
+ */
+typedef boost::property_map <Graph, vertex_incentive_deviate_t>::type VertexIncentiveDeviateMap;
+
+/** @typedef VertexActualRewardMap
+ * Specifies the map that stores the vertex attribute actual_reward
+ */
+typedef boost::property_map <Graph, vertex_actual_reward_t>::type VertexActualRewardMap;
+
+/** @typedef VertexBestResponseMap
+ * Specifies the map that stores the vertex attribute best_response
+ */
+typedef boost::property_map <Graph, vertex_best_response_t>::type VertexBestResponseMap;
+
 /** @typedef EdgeQValueMap
  * Specifies the map that stores the edge q-value attribute
  */
@@ -493,6 +574,11 @@ typedef boost::property_map <Graph, edge_q_val_t>::type EdgeQValueMap;
  * Specifies the map that stores the edge index attribute
  */
 typedef boost::property_map <Graph, edge_eindex_t>::type EdgeIndexMap;
+
+/** @typedef EdgeTotalRewardMap
+ * Specifies the map that stores the total reward attribute
+ */
+typedef boost::property_map <Graph, edge_total_reward_t>::type EdgeTotalRewardMap;
 
 /** @typedef EdgeWeightMap
  * Specifies the edge weight property
@@ -622,6 +708,11 @@ const std::string EXPERT_NORMAL                     = "expert_normal";
 const std::string EXPERT_ABSOLUTE                   = "expert_absolute";
 const std::string EXPERT_POSITIVE                   = "expert_positive";
 const std::string EXPERT_NEGATIVE                   = "expert_negative";
+const std::string REGRET_ABSOLUTE                   = "regret_absolute";
+const std::string INCENTIVE_DEVIATE                 = "incentive_deviate";
+const std::string ACTUAL_REWARD                     = "actual_reward";
+const std::string BEST_RESPONSE                     = "best_response";
+const std::string EDGE_TOTAL_REWARD                 = "total_reward";
 
 
     }

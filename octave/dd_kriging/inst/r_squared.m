@@ -139,8 +139,7 @@ function r_pa = r_predadj(X, y, theta, beta, nugget=0, FUN = @(x) 1)
 endfunction
 
 
-function r_pa = r_predadjS(X, y, C, sigmaSqu, theta, beta, nugget=0, \
-                           FUN = @(x) 1, p=1)
+function r_pa = r_predadjS(X, y, C, sigmaSqu, theta, beta, nugget=0, FUN = @(x) 1, p=1)
   r_p = r_predS(X, y, C, sigmaSqu, theta, beta, nugget, FUN, p);
   r_pa = 1 - ((rows(y) - 1) / (rows(y) - columns(theta))) * (1 - r_p);
 endfunction

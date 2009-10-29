@@ -205,6 +205,8 @@ CL::CL()
         (CL_EXPERT_ABSOLUTE.c_str(), po::value <bool>()->default_value(false), "Set the absolute expert metric.")
         (CL_EXPERT_POSITIVE.c_str(), po::value <bool>()->default_value(false), "Set the positive expert metric.")
         (CL_EXPERT_NEGATIVE.c_str(), po::value <bool>()->default_value(false), "Set the negative expert metric.")
+        (CL_REGRET_ABSOLUTE.c_str(), po::value <bool>()->default_value(false), "Set the absolute regret metric.")
+        (CL_INCENTIVE_DEVIATE.c_str(), po::value <bool>()->default_value(false), "Set the incentive to deviate metric.")
         ;
 
     po::options_description opt_debug("Debug Configuration");
@@ -668,6 +670,16 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
         desArgs->expert_negative = vm[CL_EXPERT_NEGATIVE.c_str()].as <bool>();
     }
     std::cout << "Expert Negative enabled: " << desArgs->expert_negative << std::endl;
+
+    if (vm.count(CL_REGRET_ABSOLUTE.c_str())) {
+        desArgs->regret_absolute = vm[CL_REGRET_ABSOLUTE.c_str()].as <bool>();
+    }
+    std::cout << "Total Regret enabled: " << desArgs->regret_absolute << std::endl;
+
+    if (vm.count(CL_INCENTIVE_DEVIATE.c_str())) {
+        desArgs->incentive_deviate = vm[CL_INCENTIVE_DEVIATE.c_str()].as <bool>();
+    }
+    std::cout << "Incentive to Deviate enabled: " << desArgs->incentive_deviate << std::endl;
 
     std::cout << std::endl << "8) Output Files" << std::endl;
     desArgs->events_unprocessed = "events_unprocessed.dat";

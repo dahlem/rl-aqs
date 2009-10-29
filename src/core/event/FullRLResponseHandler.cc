@@ -25,6 +25,8 @@
 # include <iostream>
 #endif /* NDEBUG_EVENTS */
 
+#include <algorithm>
+
 #include <boost/foreach.hpp>
 
 #include <gsl/gsl_math.h>
@@ -56,17 +58,21 @@ FullRLResponseHandler::FullRLResponseHandler(dnet::Graph &p_graph, double p_q_al
                                              boost::uint16_t p_hidden_neurons, boost::int32_t p_uniform_rng_index,
                                              bool p_cg, boost::uint16_t p_loss_policy,
                                              boost::uint16_t p_window, boost::uint16_t p_brent_iter,
-                                             double p_momentum, bool p_outsource)
+                                             double p_momentum, bool p_outsource, bool p_regret_total, bool p_incentive_deviate)
     : m_graph(p_graph), m_q_alpha(p_q_alpha), m_q_lambda(p_q_lambda), m_policy(p_policy),
       m_state_representation(p_state_representation), m_hidden_neurons(p_hidden_neurons),
       m_uniform_rng_index(p_uniform_rng_index),
       qStatsSA(new dstats::OnlineStats[(p_outsource) ? (boost::num_vertices(m_graph)) : (boost::num_edges(m_graph))]),
-      m_outsource(p_outsource)
+      m_outsource(p_outsource), m_regret_total(p_regret_total), m_incentive_deviate(p_incentive_deviate)
 {
     vertex_next_action_map = get(vertex_next_action, m_graph);
     vertex_index_map = get(boost::vertex_index, m_graph);
+    vertex_actual_reward_map = get(vertex_actual_reward, m_graph);
+    vertex_regret_total_map = get(vertex_regret_absolute, m_graph);
+    vertex_incentive_deviate_map = get(vertex_incentive_deviate, m_graph);
     edge_q_val_map = get(edge_q_val, m_graph);
     edge_index_map = get(edge_eindex, m_graph);
+    edge_total_reward_map = get(edge_total_reward, m_graph);
 
     // init the neural network for each edge
     boost::uint16_t num_nets = (m_outsource) ? (boost::num_vertices(m_graph)) : (boost::num_edges(m_graph));
@@ -158,6 +164,41 @@ void FullRLResponseHandler::update(AckEvent *subject)
             values[count++] = value;
         }
 
+        // hook into total regret
+        if (m_regret_total) {
+            // update actual rewards
+            vertex_actual_reward_map[vertex] += reward;
+
+            // update rewards for all actions
+            BOOST_FOREACH(drl::tValues value, values) {
+                dnet::Edge e = boost::edge(vertex, boost::vertex(value.first, m_graph), m_graph).first;
+                // take actual reward instead of estimated for the current action
+                if (entry->getOrigin() == value.first) {
+                    edge_total_reward_map[e] += reward;
+                } else {
+                    edge_total_reward_map[e] += value.second;
+                }
+            }
+
+            // sort the values
+            std::sort(values.begin(), values.end(), drl::val_greater);
+
+            // calculate R_T
+            drl::tValues value = values.front();
+            dnet::Edge e = boost::edge(vertex, boost::vertex(value.first, m_graph), m_graph).first;
+            vertex_regret_total_map[vertex] = edge_total_reward_map[e] - vertex_actual_reward_map[vertex];
+        }
+
+        // hook into incentive deviate
+        if (m_incentive_deviate) {
+            std::sort(values.begin(), values.end(), drl::val_greater);
+
+            // calculate R_T
+            drl::tValues value = values.front();
+            vertex_incentive_deviate_map[vertex] = std::max(0.0, value.second - reward);
+        }
+
+        // retrieve new action
         drl::PAttr attr(0.0, drl::PolicyContext::learning());
         newAction = m_policy(entry->getDestination(), values, attr);
 

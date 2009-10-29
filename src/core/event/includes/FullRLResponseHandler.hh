@@ -97,7 +97,7 @@ public:
                           boost::uint16_t p_hidden_neurons, boost::int32_t p_uniform_rng_index,
                           bool p_cg, boost::uint16_t p_loss_policy,
                           boost::uint16_t p_window, boost::uint16_t p_brent_iter,
-                          double p_momentum, bool p_outsource);
+                          double p_momentum, bool p_outsource, bool p_regret_total, bool p_incentive_deviate);
 
     ~FullRLResponseHandler();
 
@@ -114,12 +114,18 @@ private:
 
     tQOnlineStatsSA qStatsSA;
     bool m_outsource;
+    bool m_regret_total;
+    bool m_incentive_deviate;
 
     // derived fields
     dnet::EdgeIndexMap edge_index_map;
     dnet::VertexNextActionMap vertex_next_action_map;
     dnet::VertexIndexMap vertex_index_map;
+    dnet::VertexActualRewardMap vertex_actual_reward_map;
+    dnet::VertexRegretAbsoluteMap vertex_regret_total_map;
+    dnet::VertexIncentiveDeviateMap vertex_incentive_deviate_map;
     dnet::EdgeQValueMap edge_q_val_map;
+    dnet::EdgeTotalRewardMap edge_total_reward_map;
 
     // neural networks
     std::vector<FFNetSP> m_nets;

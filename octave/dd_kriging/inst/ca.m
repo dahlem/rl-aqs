@@ -91,9 +91,11 @@ function w = ca_w(x, xS)
   w = w';
 endfunction
 
+
 function xs = ca_statX(B, b)
   xs = -0.5 * B^-1 * b
 endfunction
+
 
 function B = ca_coeffM(b, nvar)
   B = zeros(nvar, nvar);
@@ -204,18 +206,18 @@ function [X_r, y_r] = ca_reducedModel(X, yk, y_upper)
   endfor
 endfunction
 
+
 function [y] = ca_sndOrderModel(x, b0, b, B)
   y = b0 + x' * b + x' * B * x;
 endfunction
+
 
 function [y] = ca_sndOrderModel1(x, b, B)
   y = -(b(1) + x' * b(2:3) + x' * B * x);
 endfunction
 
 
-function [ym,z,w,b,B,D,M,lambda,thetam] = ca_analyse(boundaries, yS, xS, \
-                                                     S, R, C, sigma, theta, \
-                                                     y, F, FUN)
+function [ym,z,w,b,B,D,M,lambda,thetam] = ca_analyse(boundaries, yS, xS, S, R, C, sigma, theta, y, F, FUN)
   D = gen3fact(columns(boundaries));
 
   for i = 1:columns(boundaries)
@@ -250,8 +252,7 @@ function [ym,z,w,b,B,D,M,lambda,thetam] = ca_analyse(boundaries, yS, xS, \
 endfunction
 
 
-function ca_serialiseRidge(prefix, B, b0, b, f, lambdas, increment, \
-                           start=-1000000, dist, thresh=0.01)
+function ca_serialiseRidge(prefix, B, b0, b, f, lambdas, increment, start=-1000000, dist, thresh=0.01)
   outfile = [prefix "-ridge_path.dat"];
   fd = fopen(outfile, "wt");
   ## calculate the ridge path
@@ -259,7 +260,7 @@ function ca_serialiseRidge(prefix, B, b0, b, f, lambdas, increment, \
 
   ## serialise the ridge path
   for r = 1:rows(incr)
-    fprintf(fd, "%.10f,%.10f,%.10f,%.10f,%.10f,0\n", incr(r), RP(r), yP(r), xP(r,:));
+    fprintf(fd, "%.10f,%.10f,%.10f,%.10f,%.10f,%.10f,0\n", incr(r), RP(r), yP(r), xP(r,:));
   endfor
 
   for i = 1:(rows(lambdas) - 1)
@@ -268,26 +269,23 @@ function ca_serialiseRidge(prefix, B, b0, b, f, lambdas, increment, \
 
     ## serialise the ridge path
     for r = 1:rows(incr)
-      fprintf(fd, "%.10f,%.10f,%.10f,%.10f,%.10f,%d\n", incr(r), RP(r), yP(r), xP(r,:), i);
+      fprintf(fd, "%.10f,%.10f,%.10f,%.10f,%.10f,%.10f,%d\n", incr(r), RP(r), yP(r), xP(r,:), i);
     endfor
   endfor
 
   ## calculate the 2q ridge path
-  [xP, RP, yP, incr] = ca_analyseRidgeFocal(B, b0, b, f, \
-                                            lambdas(rows(lambdas)), \
-                                            increment, dist, thresh);
+  [xP, RP, yP, incr] = ca_analyseRidgeFocal(B, b0, b, f, lambdas(rows(lambdas)), increment, dist, thresh);
 
   ## serialise the 2q ridge path
   for r = 1:rows(incr)
-    fprintf(fd, "%.10f,%.10f,%.10f,%.10f,%.10f,%d\n", incr(r), RP(r), yP(r), xP(r,:), rows(lambdas));
+    fprintf(fd, "%.10f,%.10f,%.10f,%.10f,%.10f,%.10f,%d\n", incr(r), RP(r), yP(r), xP(r,:), rows(lambdas));
   endfor
   fclose(fd);
 endfunction
 
 
 ## path is specified by the eigenvalue and the increment
-function [xP, RP, yP, incr] = ca_analyseRidgeFocalIntermediate(B, b0, b, f, \
-                                                               increments, dist)
+function [xP, RP, yP, incr] = ca_analyseRidgeFocalIntermediate(B, b0, b, f, increments, dist)
   R = +Inf;
   xP = RP = yP = incr = [];
 
@@ -313,9 +311,7 @@ endfunction
 
 
 ## path is specified by the eigenvalue and the increment
-function [xP, RP, yP, incr] = ca_analyseRidgeFocal(B, b0, b, f, lambda, \
-                                                   increment, dist, \
-                                                   thresh=0.01)
+function [xP, RP, yP, incr] = ca_analyseRidgeFocal(B, b0, b, f, lambda, increment, dist, thresh=0.01)
   R = +Inf;
   mu = lambda;
   xP = RP = yP = incr = [];

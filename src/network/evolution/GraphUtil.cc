@@ -186,6 +186,11 @@ boost::dynamic_properties GraphUtil::getProperties(Graph &p_graph)
     dp.property(EXPERT_ABSOLUTE, get(vertex_expert_absolute, p_graph));
     dp.property(EXPERT_POSITIVE, get(vertex_expert_positive, p_graph));
     dp.property(EXPERT_NEGATIVE, get(vertex_expert_negative, p_graph));
+    dp.property(REGRET_ABSOLUTE, get(vertex_regret_absolute, p_graph));
+    dp.property(INCENTIVE_DEVIATE, get(vertex_incentive_deviate, p_graph));
+    dp.property(EDGE_TOTAL_REWARD, get(edge_total_reward, p_graph));
+    dp.property(ACTUAL_REWARD, get(vertex_actual_reward, p_graph));
+    dp.property(BEST_RESPONSE, get(vertex_best_response, p_graph));
 
     boost::ref_property_map<Graph*, boost::uint16_t>
         graphGenerator(get_property(p_graph, graph_generator));

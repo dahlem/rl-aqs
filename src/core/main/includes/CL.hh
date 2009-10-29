@@ -115,6 +115,8 @@ const std::string CL_EXPERT_NORMAL = "expert_normal";
 const std::string CL_EXPERT_ABSOLUTE = "expert_absolute";
 const std::string CL_EXPERT_POSITIVE = "expert_positive";
 const std::string CL_EXPERT_NEGATIVE = "expert_negative";
+const std::string CL_REGRET_ABSOLUTE = "regret_absolute";
+const std::string CL_INCENTIVE_DEVIATE = "incentive_deviate";
 
 const std::string CL_NN_HIDDENLAYER_NEURONS = "nn_hidden_neurons";
 const std::string CL_NN_LOSS_POLICY = "nn_loss_policy";
@@ -208,6 +210,8 @@ struct desArgs_t {
     bool expert_absolute;
     bool expert_positive;
     bool expert_negative;
+    bool regret_absolute;
+    bool incentive_deviate;
 
     std::vector<int> rl_state_representation;
     boost::uint16_t nn_hidden_neurons;
@@ -243,8 +247,8 @@ struct desArgs_t {
           rl_policy(args.rl_policy), rl_policy_epsilon(args.rl_policy_epsilon), min_rl_policy_epsilon(args.min_rl_policy_epsilon),
           max_rl_policy_epsilon(args.max_rl_policy_epsilon), rl_policy_boltzmann_t(args.rl_policy_boltzmann_t),
           lhs_optimal(args.lhs_optimal), lhs_r(args.lhs_r), expert_normal(args.expert_normal), expert_absolute(args.expert_absolute),
-          expert_positive(args.expert_positive), expert_negative(args.expert_negative), rl_state_representation(args.rl_state_representation),
-          nn_hidden_neurons(args.nn_hidden_neurons), nn_loss_policy(args.nn_loss_policy),
+          expert_positive(args.expert_positive), expert_negative(args.expert_negative), regret_absolute(args.regret_absolute), incentive_deviate(args.incentive_deviate),
+          rl_state_representation(args.rl_state_representation), nn_hidden_neurons(args.nn_hidden_neurons), nn_loss_policy(args.nn_loss_policy),
           nn_window(args.nn_window), nn_brent_iter(args.nn_brent_iter), nn_momentum(args.nn_momentum),
           nn_cg(args.nn_cg), nn_outsource(args.nn_outsource), min_nn_momentum(args.min_nn_momentum), max_nn_momentum(args.max_nn_momentum),
           rl_policy_wpl_eta(args.rl_policy_wpl_eta), min_rl_policy_wpl_eta(args.min_rl_policy_wpl_eta), max_rl_policy_wpl_eta(args.max_rl_policy_wpl_eta)
@@ -269,7 +273,7 @@ struct desArgs_t {
           rl_policy(0), rl_policy_epsilon(0.0), min_rl_policy_epsilon(0.0),
           max_rl_policy_epsilon(0.0), rl_policy_boltzmann_t(0.0),
           lhs_optimal(false), lhs_r(10), expert_normal(false), expert_absolute(false),
-          expert_positive(false), expert_negative(false), rl_state_representation(),
+          expert_positive(false), expert_negative(false), regret_absolute(false), incentive_deviate(false), rl_state_representation(),
           nn_hidden_neurons(5), nn_loss_policy(1),
           nn_window(100), nn_brent_iter(500), nn_momentum(1.0),
           nn_cg(true), nn_outsource(false), min_nn_momentum(0.0), max_nn_momentum(0.0), rl_policy_wpl_eta(0.0),

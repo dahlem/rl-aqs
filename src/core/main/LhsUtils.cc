@@ -73,6 +73,9 @@ int LhsUtils::dimensions(tDesArgsSP p_desArgs)
     if (p_desArgs->min_nn_momentum < std::numeric_limits<double>::max()) {
         dims++;
     }
+    if (p_desArgs->min_rl_policy_wpl_eta < std::numeric_limits<double>::max()) {
+        dims++;
+    }
 
     return dims;
 }

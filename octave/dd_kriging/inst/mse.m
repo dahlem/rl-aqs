@@ -183,3 +183,27 @@ function x = t_scale(y_p, var, X, x, F, R, y, beta, theta, lambda, FUN = @(x) 1)
   b = sqrt(var) / lambda;
   x = (y_p - mean) / b;
 endfunction
+
+
+## from Ankemann eq (27)
+function mse = mse_est(x, sigmaSq, theta, X, y, C, F, FUN, nugget, p)
+  Sigma = sigmaSq * scf_gaussianm(X, theta, nugget, p) + C;
+  SigmaInv = cholinv(Sigma);
+  r = scf_gaussianu(X, x, theta, p);
+  
+  delta = FUN(x) - F' * SigmaInv * r * sigmaSq;
+  temp = F' * SigmaInv * F;
+  tempInv = cholinv(temp);
+  
+  mse = sigmaSq - sigmaSq^2 * r' * SigmaInv * r + delta' * delta * tempInv;
+endfunction
+
+function mse_avg = mse_estChain(x, chain, X, y, C, F, FUN, nugget, p)
+  mses = zeros(1, rows(chain.theta));
+  
+  for i = 1:rows(chain.theta)
+    mses(i) = mse_est(x, chain.sigma(i), chain.theta(i,:), X, y, C, F, FUN, nugget, p);
+  endfor
+
+  mse_avg = mean(mses);
+endfunction

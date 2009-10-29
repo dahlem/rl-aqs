@@ -20,10 +20,6 @@
 ## two vectors and a correlation vector theta. The correlation vector
 ## theta correlates each dimension of the two vectors.
 function r = scf_gaussian(x, y, theta, p=2)
-  if (nargin < 4)
-    usage("scf_gaussianv(x, y, theta, nugget)");
-  endif
-
   if (theta <= 0)
     error("The parameter theta has to be positive");
   endif
@@ -32,16 +28,13 @@ function r = scf_gaussian(x, y, theta, p=2)
     error("The vectors x and y have to have the same dimension.");
   endif
 
-  temp = sum(-((abs(y - x).* theta).^p));
+  temp = sum(-((abs(y - x).^p) .* theta));
   r = e^temp;
+##  r = prod(e.^(-(abs(y-x).^p).*theta));
 endfunction
 
 
 function R = scf_gaussianm(X, theta, nugget = 0, p=2)
-  if (nargin != 4)
-    usage("scf_gaussianm(X, theta, nugget)");
-  endif
-
   if (theta <= 0)
     error("The parameter theta has to be positive");
   endif
@@ -50,41 +43,15 @@ function R = scf_gaussianm(X, theta, nugget = 0, p=2)
   r = r + nugget;
   R = diag(r);
 
-  for i = 1:rows(R)
-    for j = i+1:columns(R)
-      R(i, j) = scf_gaussian(X(i,:), X(j,:), theta, nugget, p);
+  for i = 1:(rows(X)-1)
+    for j = (i+1):rows(X)
+      R(i, j) = scf_gaussian(X(i,:), X(j,:), theta, p);
       R(j, i) = R(i, j);
     endfor
   endfor
 endfunction
 
-
-function Rd = scf_gaussianm_deriv(X, theta, deriv, nugget = 0, p=2)
-  if (nargin != 5)
-    usage("scf_gaussianm_deriv(X, theta, deriv, nugget)");
-  endif
-
-  if (theta <= 0)
-    error("The parameter theta has to be positive");
-  endif
-
-  Rd = zeros(rows(X));
-
-  for i = 1:rows(Rd)
-    for j = i+1:columns(Rd)
-      Rd(i, j) = - scf_gaussian(X(i,deriv), X(j,deriv), theta(deriv), nugget, p) * \
-          (X(i,deriv) - X(j,deriv))^2;
-      Rd(j, i) = Rd(i, j);
-    endfor
-  endfor
-endfunction
-
-
 function r = scf_gaussianu(X, x, theta, p=2)
-  if (nargin != 4)
-    usage("scf_gaussianu(X, x, theta)");
-  endif
-
   if (theta <= 0)
     error("The parameter theta has to be positive");
   endif
@@ -100,6 +67,26 @@ function r = scf_gaussianu(X, x, theta, p=2)
   endfor
 endfunction
 
+
+
+function Rd = scf_gaussianm_deriv(X, theta, deriv, nugget = 0, p=2)
+  if (nargin != 5)
+    usage("scf_gaussianm_deriv(X, theta, deriv, nugget)");
+  endif
+
+  if (theta <= 0)
+    error("The parameter theta has to be positive");
+  endif
+
+  Rd = zeros(rows(X));
+
+  for i = 1:rows(Rd)
+    for j = i+1:columns(Rd)
+      Rd(i, j) = - scf_gaussian(X(i,deriv), X(j,deriv), theta(deriv), nugget, p) * (X(i,deriv) - X(j,deriv))^2;
+      Rd(j, i) = Rd(i, j);
+    endfor
+  endfor
+endfunction
 
 
 ## -------------------------------------------------
@@ -152,8 +139,7 @@ function glk = density_knot(xl, xil, etal, k_up)
 
   isInRange = ((xl <= xil(k_up)) & (xl >= xil((k_up) - 1)));
 
-  alk = (xil(k_up) .* etal((k_up)-1) - xil((k_up)-1) .* etal(k_up)) .* \
-      (xil(k_up) - xil((k_up)-1)).^-1;
+  alk = (xil(k_up) .* etal((k_up)-1) - xil((k_up)-1) .* etal(k_up)) .* (xil(k_up) - xil((k_up)-1)).^-1;
   blk = (etal(k_up) - etal((k_up)-1)) .* (xil(k_up) - xil((k_up)-1)).^-1;;
   glk = (alk + blk .* xl) .* (isInRange);
 endfunction
@@ -162,8 +148,7 @@ endfunction
 function glk = density_knot_integr(xl, xm, xil, etal, k_up)
   glk = 0;
 
-  alk = (xil(k_up) .* etal((k_up)-1) - xil((k_up)-1) .* etal(k_up)) .\ \
-      (xil(k_up) - xil((k_up)-1));
+  alk = (xil(k_up) .* etal((k_up)-1) - xil((k_up)-1) .* etal(k_up)) .\ (xil(k_up) - xil((k_up)-1));
   blk = (etal(k_up) - etal((k_up)-1)) .\ (xil(k_up) - xil(k_up-1));
   glk = (alk .* xl + blk .* 1 / 2 .* xl.^2);
   glm = (alk .* xm + blk .* 1 / 2 .* xm.^2);
@@ -214,8 +199,7 @@ function fl = mapping_func_deriv(xl, xil, etal, curL, l, k)
     if (xl < xil(curK))
       break;
     else
-      fl += density_knot_integr2_deriv(xil(curK-1), xil(curK), etal, \
-                                       curL, curK, l, k);
+      fl += density_knot_integr2_deriv(xil(curK-1), xil(curK), etal, curL, curK, l, k);
     endif
   endfor
 
@@ -233,10 +217,8 @@ function R = scf_nonst_m_deriv(X, eta, xi, l, k, nugget)
   for i = 1:rows(R)
     for j = i+1:columns(R)
       for curL = 1:columns(X)
-        flm(curL) = mapping_func_deriv(X(i,curL), xi(:,curL), \
-                                       eta(:,curL), curL, l, k);
-        fln(curL) = mapping_func_deriv(X(j,curL), xi(:,curL), eta(:,curL), \
-                                       curL, l, k);
+        flm(curL) = mapping_func_deriv(X(i,curL), xi(:,curL), eta(:,curL), curL, l, k);
+        fln(curL) = mapping_func_deriv(X(j,curL), xi(:,curL), eta(:,curL), curL, l, k);
       endfor
       R(i, j) = scf_nonst_corr(flm, fln);
       R(j, i) = R(i, j);
