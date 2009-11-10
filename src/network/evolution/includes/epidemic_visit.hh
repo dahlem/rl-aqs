@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 
 #include <boost/config.hpp>
 #include <boost/pending/queue.hpp>
+#include <boost/version.hpp>
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/graph_concepts.hpp>
 #include <boost/graph/visitors.hpp>
@@ -77,12 +78,20 @@ namespace boost
         typedef typename Traits::vertex_descriptor vertex_descriptor;
         typedef boost::queue <vertex_descriptor> queue_t;
         queue_t Q;
+
+#if BOOST_VERSION < 104000
         detail::wrap_ref <queue_t> Qref(Q);
+#endif /* BOOST_VERSION */
 
         epidemic_visit
             (ng, s,
+#if BOOST_VERSION < 104000
              choose_param(get_param(params, buffer_param_t()),
                           Qref).ref,
+#else
+             choose_param(get_param(params, buffer_param_t()),
+                          boost::ref(Q)).get(),
+#endif /* BOOST_VERSION */
              choose_param(get_param(params, graph_visitor),
                           make_bfs_visitor(null_visitor())));
     }

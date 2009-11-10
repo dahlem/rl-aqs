@@ -26,6 +26,7 @@ libsamplingcrn_la_CPPFLAGS =                                          \
 
 libsamplingcrn_la_LIBADD =                                            \
 	$(OPENMP_CXXFLAGS)                                            \
+	$(MPILIBS)                                                    \
 	$(GSL_LIBS)                                                   \
 	$(top_srcdir)/src/sampling/common/libsamplingcommon.la
 

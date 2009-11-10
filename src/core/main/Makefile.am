@@ -43,6 +43,7 @@ des_main_LDADD =                                                         \
 	$(BOOST_PROGRAM_OPTIONS_LIB)                                     \
 	$(BOOST_SYSTEM_LIB)                                              \
 	$(GSL_LIBS)                                                      \
+	$(MPILIBS)                                                       \
 	$(top_srcdir)/src/io/libdesio.la                                 \
 	$(top_srcdir)/src/common/list/libcommonlist.la                   \
 	$(top_srcdir)/src/sampling/common/libsamplingcommon.la           \

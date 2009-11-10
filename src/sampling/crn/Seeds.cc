@@ -17,7 +17,9 @@
 
 #ifdef HAVE_MPI
 # include <mpi.h>
-# include <mpio.h>
+# ifndef HAVE_OPENMPI
+#  include <mpio.h>
+# endif
 #else
 # include <boost/lexical_cast.hpp>
 #endif /* HAVE_MPI */

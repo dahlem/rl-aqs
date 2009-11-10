@@ -22,6 +22,7 @@ crn_test_CPPFLAGS =                                                   \
 	-I$(top_srcdir)/src/sampling/common/includes
 
 crn_test_LDADD =                                                      \
+	$(MPILIBS)                                                    \
 	$(BOOST_PROGRAM_OPTIONS_LIB)                                  \
 	$(top_srcdir)/src/sampling/crn/libsamplingcrn.la              \
 	$(top_srcdir)/src/sampling/common/libsamplingcommon.la        \
@@ -39,6 +40,9 @@ seeds_read_CPPFLAGS =                                                 \
 seeds_read_LDFLAGS =                                                  \
 	$(BOOST_LDFLAGS)
 
+seeds_read_LDADD =                                                    \
+	$(MPILIBS)
+
 struct_test_SOURCES =                                                 \
 	struct_test.cc
 
@@ -47,6 +51,9 @@ struct_test_CPPFLAGS =                                                \
 
 struct_test_LDFLAGS =                                                 \
 	$(BOOST_LDFLAGS)
+
+struct_test_LDADD =                                                   \
+	$(MPILIBS)
 
 groups_test_SOURCES =                                                 \
 	groups.cc
@@ -57,6 +64,9 @@ groups_test_CPPFLAGS =                                                \
 groups_test_LDFLAGS =                                                 \
 	$(BOOST_LDFLAGS)
 
+groups_test_LDADD =                                                   \
+	$(MPILIBS)
+
 read_graphml_SOURCES =                                                \
 	read_graphml.cc
 
@@ -65,6 +75,7 @@ read_graphml_CPPFLAGS =                                               \
 	$(BOOST_CPPFLAGS)
 
 read_graphml_LDADD =                                                  \
+	$(MPILIBS)                                                    \
 	$(top_srcdir)/src/network/evolution/libnetevo.la
 
 read_graphml_LDFLAGS =                                                \
@@ -79,6 +90,7 @@ write_seeds_CPPFLAGS =                                                \
 	$(GSL_CFLAGS)
 
 write_seeds_LDADD =                                                   \
+	$(MPILIBS)                                                    \
 	$(BOOST_FILESYSTEM_LIB)                                       \
 	$(BOOST_SYSTEM_LIB)                                           \
 	$(GSL_LIBS)

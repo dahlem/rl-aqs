@@ -1,4 +1,4 @@
-// Copyright (C) 2007, 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2007, 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This file is free software; as a special exception the author gives
 // unlimited permission to copy and/or distribute it, with or without
@@ -19,7 +19,11 @@
 #endif /* __STDC_CONSTANT_MACROS */
 
 #ifdef HAVE_MPI
-# include <mpio.h>
+# ifndef HAVE_OPENMPI
+#  include <mpio.h>
+# else
+#  include <mpi.h>
+# endif
 #else
 # include <fstream>
 #endif /* HAVE_MPI */

@@ -11,7 +11,7 @@
 LT_PREREQ([1.5.26])
 AC_PREREQ(2.61)
 AC_INIT([Discrete Event Simulation for Service Interaction],
-        [3.6],
+        [3.7],
         [Dominik Dahlem Dominik.Dahlem@cs.tcd.ie], 
         [des])
 
@@ -92,6 +92,15 @@ else
    AC_SUBST(SNOW)
 fi
 AM_CONDITIONAL(COMPILE_PARALLEL, test "x$USE_MPI" = xyes)
+
+AC_ARG_ENABLE(openmpi, AS_HELP_STRING(
+		   [--enable-openmpi], 
+		   [enable Open MPI @<:@default=no@:>@]), 
+		   [USE_OPENMPI=$enableval], [USE_OPENMPI=no])
+if test "x$USE_OPENMPI" = xyes; then
+   AC_DEFINE(HAVE_OPENMPI,1,[Define if you have the MPI library.])
+fi
+
 
 
 # Check for OpenMP

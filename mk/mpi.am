@@ -1,2 +1,6 @@
+## maybe fore openmpi
+## wrapper scripts usually supply these
+#MPI_COMPILE_FLAGS = $(shell $(MPICXX) --showme:compile)
+#MPI_LINK_FLAGS = $(shell $(MPICXX) --showme:link)
+
 CXX = $(MPICXX)
-LIBS += $(MPILIBS)

@@ -34,7 +34,9 @@ namespace fs = boost::filesystem;
 
 #ifdef HAVE_MPI
 # include <mpi.h>
-# include <mpio.h>
+# ifndef HAVE_OPENMPI
+#  include <mpio.h>
+# endif
 #endif /* HAVE_MPI */
 
 
