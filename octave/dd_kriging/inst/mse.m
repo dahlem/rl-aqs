@@ -1,9 +1,9 @@
 ## Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
-##  
+##
 ## This file is free software; as a special exception the author gives
-## unlimited permission to copy and/or distribute it, with or without 
+## unlimited permission to copy and/or distribute it, with or without
 ## modifications, as long as this notice is preserved.
-## 
+##
 ## This program is distributed in the hope that it will be useful, but
 ## WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 ## implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
@@ -38,7 +38,7 @@ endfunction
 ## nugget: the nugget effect (smoothin)
 function rmse = rmse_avg(X, y, F, chain, n, xmax, xmin, nugget=0, FUN)
   mse_avg = zeros(1, n);
-  
+
   S = lhs(n, xmin, xmax);
   for i = 1:n
     mse_avg(i) = mse_average(X, S(i,:), y, f, chain, nugget, FUN);
@@ -58,7 +58,7 @@ endfunction
 ## nugget: the nugget effect (smoothin)
 function mse_avg = mse_average(X, x, y, F, chain, nugget=0, FUN)
   mses = zeros(1, rows(chain.theta));
-  
+
   for i = 1:rows(chain.theta)
     mses(i) = mse_pred(X, x, y, F, chain.beta(:,i), chain.theta(i,:), chain.sigma(i), nugget, FUN);
   endfor
@@ -68,7 +68,7 @@ endfunction
 
 function mse_avg = mse_averageS(X, x, y, F, C, chain, nugget=0, FUN, p=2)
   mses = zeros(1, rows(chain.theta));
-  
+
   for i = 1:rows(chain.theta)
     mses(i) = mse_predS(X, x, y, F, C, chain.beta(:,i), \
                         chain.theta(i,:), chain.sigma(i), nugget, FUN, p);
@@ -80,7 +80,7 @@ endfunction
 function mse_avg = mse_average_nonconst(X, x, y, F, chain, xi, nugget=0)
   [r,c1,c2] = size(chain.Eta);
   mses = zeros(1, c2);
-  
+
   for i = 1:c2
     mses(i) = mse_pred_nonconst(X, x, y, F, chain.Eta(:,:,i), xi, nugget);
   endfor
@@ -104,12 +104,14 @@ function mse_p = mse_pred(X, x, y, F, beta, theta, sigma, nugget=0, FUN = @(x) 1
   mse_p = sigma * (1 - r' * (R\r));
 endfunction
 
-function mse_p = mse_predS(X, x, y, F, C, beta, theta, sigma, \
-                           nugget=0, FUN = @(x) 1, p=2)
-  R = scf_gaussianm(X, theta, nugget, p);
-  r = scf_gaussianu(X, x, theta, p);
-  mse_p = sigma * (1 - r' * ((R + C)\r));
-endfunction
+
+##function mse_p = mse_predS(X, x, y, F, C, beta, theta, sigma, \
+##                           nugget=0, FUN = @(x) 1, p=2)
+##  R = scf_gaussianm(X, theta, nugget, p);
+##  r = scf_gaussianu(X, x, theta, p);
+##  mse_p = sigma * (1 - r' * ((R + C)\r));
+##endfunction
+
 
 function mse_p = mse_pred_nonconst(X, x, y, F, beta, eta, xi, nugget=0, FUN = @(x) 1)
   R = scf_nonst_m(X, xi, eta, nugget);
@@ -145,6 +147,20 @@ function y_prob = y_sim(chain, X, x, y, F, nugget=0, FUN = @(x) 1)
     var = mse_pred(X, x, y, F, beta, chain.theta(i,:), nugget, FUN);
     y = normrnd(mean, var);
     y_prob = [y_prob; y];
+  endfor
+endfunction
+
+
+function y_prob = y_simS(chain, X, x, y, F, C, nugget=0, FUN = @(x) 1, p, n=1000)
+  y_prob = [];
+
+  for i = 1:columns(chain.beta)
+    R = scf_gaussianm(X, chain.theta(i,:), nugget, p);
+            ### (x, X, R, C, sigmaSqu, theta, y, F, FUN = @(x) 1, p=2)
+    yhat = krigS(x, X, R, C, chain.sigma(i), chain.theta(i,:), y, F, FUN, p);
+    varhat = mse_est(x, chain.sigma(i), chain.theta(i,:), X, y, C, F, FUN, nugget, p);
+    yNorm = normrnd(yhat, sqrt(varhat), 1, n);
+    y_prob = [y_prob, yNorm];
   endfor
 endfunction
 
@@ -190,17 +206,19 @@ function mse = mse_est(x, sigmaSq, theta, X, y, C, F, FUN, nugget, p)
   Sigma = sigmaSq * scf_gaussianm(X, theta, nugget, p) + C;
   SigmaInv = cholinv(Sigma);
   r = scf_gaussianu(X, x, theta, p);
-  
+
   delta = FUN(x) - F' * SigmaInv * r * sigmaSq;
   temp = F' * SigmaInv * F;
   tempInv = cholinv(temp);
-  
+
   mse = sigmaSq - sigmaSq^2 * r' * SigmaInv * r + delta' * delta * tempInv;
 endfunction
 
+
+
 function mse_avg = mse_estChain(x, chain, X, y, C, F, FUN, nugget, p)
   mses = zeros(1, rows(chain.theta));
-  
+
   for i = 1:rows(chain.theta)
     mses(i) = mse_est(x, chain.sigma(i), chain.theta(i,:), X, y, C, F, FUN, nugget, p);
   endfor

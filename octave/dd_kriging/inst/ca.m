@@ -44,16 +44,16 @@ endfunction
 function D = ca_mesh(boundaries, meshsize)
   stepsize1 = (boundaries(2, 1) - boundaries(1, 1)) / meshsize;
   stepsize2 = (boundaries(2, 2) - boundaries(1, 2)) / meshsize;
-##  stepsize3 = (boundaries(2, 3) - boundaries(1, 3)) / meshsize;
+  stepsize3 = (boundaries(2, 3) - boundaries(1, 3)) / meshsize;
 
-##  [xx, yy, zz] = meshgrid(boundaries(1, 1):stepsize1:boundaries(2, 1),
-##                          boundaries(1, 2):stepsize2:boundaries(2, 2),
-##                          boundaries(1, 3):stepsize3:boundaries(2, 3));
-  [xx, yy] = meshgrid(boundaries(1, 1):stepsize1:boundaries(2, 1),
-                      boundaries(1, 2):stepsize2:boundaries(2, 2));
+  [xx, yy, zz] = meshgrid(boundaries(1, 1):stepsize1:boundaries(2, 1),
+                          boundaries(1, 2):stepsize2:boundaries(2, 2),
+                          boundaries(1, 3):stepsize3:boundaries(2, 3));
+##  [xx, yy] = meshgrid(boundaries(1, 1):stepsize1:boundaries(2, 1),
+##                      boundaries(1, 2):stepsize2:boundaries(2, 2));
 
-##  D = [vec(xx), vec(yy), vec(zz)];
-  D = [vec(xx), vec(yy)];
+  D = [vec(xx), vec(yy), vec(zz)];
+##  D = [vec(xx), vec(yy)];
 endfunction
 
 
@@ -252,7 +252,17 @@ function [ym,z,w,b,B,D,M,lambda,thetam] = ca_analyse(boundaries, yS, xS, S, R, C
 endfunction
 
 
-function ca_serialiseRidge(prefix, B, b0, b, f, lambdas, increment, start=-1000000, dist, thresh=0.01)
+function X = backscale_design(XScaled, lb, ub)
+  X = repmat(lb', rows(XScaled),1) + XScaled .* (repmat(ub', rows(XScaled),1) - repmat(lb', rows(XScaled),1));
+endfunction
+
+
+function XScaled = scale_design(X, lb, ub)
+  XScaled = (X - repmat(lb', rows(X),1)) ./ (repmat(ub', rows(X),1) - repmat(lb', rows(X),1));
+endfunction
+
+
+function ca_serialiseRidge(prefix, B, b0, b, f, lambdas, increment, start=-1000000, dist, thresh=0.01, caminx, camaxx, minX, maxX, scale=1)
   outfile = [prefix "-ridge_path.dat"];
   fd = fopen(outfile, "wt");
   ## calculate the ridge path
@@ -260,7 +270,13 @@ function ca_serialiseRidge(prefix, B, b0, b, f, lambdas, increment, start=-10000
 
   ## serialise the ridge path
   for r = 1:rows(incr)
-    fprintf(fd, "%.10f,%.10f,%.10f,%.10f,%.10f,%.10f,0\n", incr(r), RP(r), yP(r), xP(r,:));
+    if (scale == 1)
+      fprintf(fd, "%.10f,%.10f,%.10f,%.10f,%.10f,%.10f,0\n", incr(r), RP(r), yP(r), backscale_design(xP(r,:), caminx', camaxx'));
+    elseif (scale == 2)
+      fprintf(fd, "%.10f,%.10f,%.10f,%.10f,%.10f,%.10f,0\n", incr(r), RP(r), yP(r), scale_design(backscale_design(xP(r,:), caminx', camaxx'), minX', maxX'));
+    else
+      fprintf(fd, "%.10f,%.10f,%.10f,%.10f,%.10f,%.10f,0\n", incr(r), RP(r), yP(r), xP(r,:));
+    endif
   endfor
 
   for i = 1:(rows(lambdas) - 1)
@@ -269,7 +285,13 @@ function ca_serialiseRidge(prefix, B, b0, b, f, lambdas, increment, start=-10000
 
     ## serialise the ridge path
     for r = 1:rows(incr)
-      fprintf(fd, "%.10f,%.10f,%.10f,%.10f,%.10f,%.10f,%d\n", incr(r), RP(r), yP(r), xP(r,:), i);
+      if (scale == 1)
+	fprintf(fd, "%.10f,%.10f,%.10f,%.10f,%.10f,%.10f,%d\n", incr(r), RP(r), yP(r), backscale_design(xP(r,:), caminx', camaxx'), i);
+      elseif (scale == 2)
+	fprintf(fd, "%.10f,%.10f,%.10f,%.10f,%.10f,%.10f,%d\n", incr(r), RP(r), yP(r), scale_design(backscale_design(xP(r,:), caminx', camaxx'), minX', maxX'),i);
+      else
+	fprintf(fd, "%.10f,%.10f,%.10f,%.10f,%.10f,%.10f,%d\n", incr(r), RP(r), yP(r), xP(r,:), i);
+      endif
     endfor
   endfor
 
@@ -278,7 +300,13 @@ function ca_serialiseRidge(prefix, B, b0, b, f, lambdas, increment, start=-10000
 
   ## serialise the 2q ridge path
   for r = 1:rows(incr)
-    fprintf(fd, "%.10f,%.10f,%.10f,%.10f,%.10f,%.10f,%d\n", incr(r), RP(r), yP(r), xP(r,:), rows(lambdas));
+    if (scale == 1)
+      fprintf(fd, "%.10f,%.10f,%.10f,%.10f,%.10f,%.10f,%d\n", incr(r), RP(r), yP(r), backscale_design(xP(r,:), caminx', camaxx'), rows(lambdas));
+    elseif (scale == 2)
+      fprintf(fd, "%.10f,%.10f,%.10f,%.10f,%.10f,%.10f,%d\n", incr(r), RP(r), yP(r), scale_design(backscale_design(xP(r,:), caminx', camaxx'), minX', maxX'),rows(lambdas));
+    else
+      fprintf(fd, "%.10f,%.10f,%.10f,%.10f,%.10f,%.10f,%d\n", incr(r), RP(r), yP(r), xP(r,:), rows(lambdas));
+    endif
   endfor
   fclose(fd);
 endfunction

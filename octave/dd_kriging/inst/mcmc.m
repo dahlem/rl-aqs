@@ -617,7 +617,7 @@ function [chain, acceptanceRate] = mcmc_mhgibbsStochastic3(x0_theta, X, y, C, x0
       endfor
 
       sigmaj = x.sigma;
-      x.sigma = normrnd(x.sigma, exp(tuning(dims)));;
+      x.sigma = normrnd(x.sigma, exp(tuning(dims)));
 
       ## step 2: calcuate the probability of move
       [q_new, x.beta] = krig_likelihoodStochastic(logitinv(x.theta, aTheta, bTheta), C,X, y, F, logitinv(x.sigma, aSigma, bSigma),nugget,p);
@@ -677,7 +677,6 @@ function [chain, acceptanceRate] = mcmc_mhgibbsStochastic3(x0_theta, X, y, C, x0
       fprintf(stdout, "\n\n");
       fflush(stdout);
     endif
-    sigma_accept
   endfor
 endfunction
 

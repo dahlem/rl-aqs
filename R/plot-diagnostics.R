@@ -138,14 +138,14 @@ des.diagnostic.plots <- function(cl, simNum, replications, graphs, stopTime, ps=
 cl <- NULL
 
 # if it was configured using MPI, load the snow library
-if (TRUE) {
+if (FALSE) {
   library(snow)
 }
 
 message("Start with the diagnostics!")
 
 
-if (TRUE) {
+if (FALSE) {
   # read the NODEFILE to find out how many nodes are participating in the cluster
   nodes <- read.table("NODEFILE")
   
@@ -173,7 +173,7 @@ for (sim in simulations$sim_num) {
 # In case of unexpected program exceptions, clean up the cluster
 .Last <- function()
 {
-  if (TRUE) {
+  if (FALSE) {
     stopCluster(cl)
   }
 }

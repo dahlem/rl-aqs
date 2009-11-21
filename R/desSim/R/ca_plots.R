@@ -97,7 +97,7 @@ des.ca.ridge.x.plot.2 <- function(prefix, path, paths, end, ps=TRUE) {
 }
 
   
-des.ca.ridge.y.plot <- function(prefix, paths, path, end, ps=TRUE) {
+des.ca.ridge.y.plot <- function(prefix, path, paths, end, ps=TRUE) {
   if (ps) {
     des.postscript(paste(prefix, "-ca-ridge-y.eps", sep=""), width=2.8, height=2.8, pointsize=8)
   }

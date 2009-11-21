@@ -96,6 +96,7 @@ function r_p = r_pred(X, y, theta, beta, nugget=0, FUN = @(x) 1, p=2)
   r_p = 1 - press / ttss;
 endfunction
 
+
 function r_p = r_predS(X, y, C, sigmaSqu, theta, beta, nugget=0, FUN = @(x) 1, p=2)
   R = scf_gaussianm(X, theta, nugget, p);
   F = [];
@@ -113,6 +114,7 @@ function r_p = r_predS(X, y, C, sigmaSqu, theta, beta, nugget=0, FUN = @(x) 1, p
 
   r_p = 1 - press / ttss;
 endfunction
+
 
 function r_p = r_pred_nonst(X, y, xi, eta, beta, nugget=0, FUN = @(x) 1)
   R = scf_nonst_m(X, xi, eta, nugget);

@@ -1,3 +1,48 @@
+des.kriging.mcmc.y.plot <- function(prefix="2d-shdf", uniformPropFile=NULL, ps=TRUE, adj=1) {
+  if (ps) {
+    des.pdf(paste(prefix, "-y-density.pdf", sep=""))
+  }
+
+  yUniMin <- NULL
+
+  if (!is.null(uniformPropFile)) {
+    yUniMin <- read.csv(uniformPropFile, header=TRUE)
+  }
+
+  yMin <- read.csv(paste(prefix, "-y-min.dat", sep=""), header=TRUE)
+  yMax <- read.csv(paste(prefix, "-y-max.dat", sep=""), header=TRUE)
+  df <- data.frame(x=c(yMin$y, yMax$y),
+                   a=c(rep(1, length(c(yMin$y, yMax$y)))),
+                   t=c(rep(1, length(yMin$y)), rep(2, length(yMax$y))))
+
+  if (!is.null(uniformPropFile)) {
+    yUniMin <- read.csv(uniformPropFile, header=TRUE)
+    df <- rbind(df, data.frame(x=yUniMin$y,
+                               a=rep(2, length(yUniMin$y)),
+                               t=rep(1, length(yUniMin$y))))
+  }
+
+  ytitle <- bquote(paste("p(y)"))
+
+  if (!is.null(uniformPropFile)) {
+    p <- ggplot(df, aes(x=x, fill=factor(t), linetype=factor(a)))
+  } else {
+    p <- ggplot(df, aes(x=x, fill=factor(t)))
+  }
+  p <- p + geom_density(alpha=0.2, kernel="gaussian", adjust=adj)
+  p <- p + scale_y_continuous(ytitle)
+  p <- p + scale_x_continuous("y")
+  if (!is.null(uniformPropFile)) {
+    p <- p + scale_linetype("Agent", labels=c("Adaptive", "Uniform"))
+  }
+  p <- p + scale_fill_discrete("Density", labels=c(expression(y[min]), expression(y[max])))
+  p <- p + theme_bw(base_size=8)
+  print(p)
+
+  if (ps) {
+    dev.off()
+  }
+}
 
 
 des.kriging.mcmc.evo.plot <- function(prefix="2d-shdf", betas=1, thetas=2) {
@@ -38,7 +83,7 @@ des.kriging.mcmc.posterior.plot <- function(prefix="2d-shdf", ps=TRUE) {
   p <- p + scale_y_continuous(expression(paste("-log ", p(theta))))
   p <- p + scale_x_continuous("", breaks=as.integer(seq(min(df$x), max(df$x), length.out=3)))
 ##  p <- p + opts(title=expression(paste("Evolution of ", "-log ", p(theta))))
-  p <- p + theme_bw()
+  p <- p + theme_bw(base_size=8)
   print(p)
 
   if (ps) {
@@ -64,7 +109,7 @@ des.kriging.mcmc.beta.plot <- function(prefix="2d-shdf", nonst="", idx="1", ps=T
   p <- p + scale_y_continuous(ytitle)
   p <- p + scale_x_continuous("", breaks=as.integer(seq(min(df$x), max(df$x), length.out=3)))
 ##  p <- p + opts(title=title)
-  p <- p + theme_bw()
+  p <- p + theme_bw(base_size=8)
   print(p)
 
   if (ps) {
@@ -85,7 +130,7 @@ des.kriging.mcmc.sigma.plot <- function(prefix="2d-shdf", nonst="", ps=TRUE) {
   p <- p + scale_y_continuous(expression(sigma^2))
   p <- p + scale_x_continuous("", breaks=as.integer(seq(min(df$x), max(df$x), length.out=3)))
 ##  p <- p + opts(title=expression(paste("Evolution of ", sigma^2)))
-  p <- p + theme_bw()
+  p <- p + theme_bw(base_size=8)
   print(p)
 
   if (ps) {
@@ -112,7 +157,7 @@ des.kriging.mcmc.theta.plot <- function(prefix="2d-shdf", idx="1", ps=TRUE) {
   p <- p + scale_y_continuous(ytitle)
   p <- p + scale_x_continuous("", breaks=as.integer(seq(min(df$x), max(df$x), length.out=3)))
 ##  p <- p + opts(title=title)
-  p <- p + theme_bw()
+  p <- p + theme_bw(base_size=8)
   print(p)
 
   if (ps) {
@@ -149,7 +194,7 @@ des.kriging.mcmc.posterior.mean.plot <- function(prefix="2d-shdf", ps=TRUE) {
     p <- p + scale_y_continuous(expression(paste("-log", p(theta))))
     p <- p + scale_x_continuous("", breaks=as.integer(seq(min(df$x), max(df$x), length.out=3)))
 ##    p <- p + opts(title=expression(paste("Equilibration of ", "-log", p(theta))))
-    p <- p + theme_bw()
+    p <- p + theme_bw(base_size=8)
     print(p)
 
     if (ps) {
@@ -177,7 +222,7 @@ des.kriging.mcmc.beta.mean.plot <- function(prefix="2d-shdf", nonst="", idx="1",
   p <- p + scale_y_continuous(ytitle)
   p <- p + scale_x_continuous("", breaks=as.integer(seq(min(df$x), max(df$x), length.out=3)))
 ##  p <- p + opts(title=title)
-  p <- p + theme_bw()
+  p <- p + theme_bw(base_size=8)
   print(p)
 
   if (ps) {
@@ -198,7 +243,7 @@ des.kriging.mcmc.sigma.mean.plot <- function(prefix="2d-shdf", nonst="", ps=TRUE
   p <- p + scale_y_continuous(expression(bar(sigma)^2))
   p <- p + scale_x_continuous("", breaks=as.integer(seq(min(df$x), max(df$x), length.out=3)))
 ##  p <- p + opts(title=expression(paste("Equilibration of ", bar(sigma)^2)))
-  p <- p + theme_bw()
+  p <- p + theme_bw(base_size=8)
   print(p)
 
   if (ps) {
@@ -224,7 +269,7 @@ des.kriging.mcmc.theta.mean.plot <- function(prefix="2d-shdf", idx="1", ps=TRUE)
   p <- p + scale_y_continuous(ytitle)
   p <- p + scale_x_continuous("", breaks=as.integer(seq(min(df$x), max(df$x), length.out=3)))
 ##  p <- p + opts(title=title)
-  p <- p + theme_bw()
+  p <- p + theme_bw(base_size=8)
   print(p)
 
   if (ps) {
@@ -278,7 +323,7 @@ des.kriging.mcmc.autocorr.plot <- function(prefix="2d-shdf", var="beta", wopt, p
   p <- p + scale_y_continuous(expression(rho), breaks=c(-0.5, 0, 0.5, 1))
   p <- p + scale_x_continuous("W")
   p <- p + geom_vline(xintercept=wopt, colour="red")
-  p <- p + theme_bw()
+  p <- p + theme_bw(base_size=8)
 
   ## if (var == "beta") {
   ##   p <- p + opts(title=expression(paste("Normalised Autocorrelation of ", beta)))
@@ -335,7 +380,7 @@ des.kriging.mcmc.tauintvsw.plot <- function(prefix="2d-shdf", var="beta", wopt, 
   p <- p + scale_y_continuous(expression(tau[int]))
   p <- p + geom_hline(yintercept=taui, linetype=2, colour="blue")
   p <- p + geom_vline(xintercept=wopt, colour="red")
-  p <- p + theme_bw()
+  p <- p + theme_bw(base_size=8)
 
   ## if (var == "beta") {
   ##   p <- p + opts(title=expression(paste(tau[int], " with Statistical Errors of ", beta)))
@@ -400,7 +445,7 @@ des.kriging.mcmc.beta.likeli.plot <- function(prefix="2d-shdf", idx="1", ps=TRUE
   p <- p + scale_y_continuous(ytitle)
   p <- p + scale_x_continuous(expression(beta[.(i)]))
 ##  p <- p + opts(title=expression(paste("Likelihood over ", beta[.(i)])))
-  p <- p + theme_bw()
+  p <- p + theme_bw(base_size=8)
   print(p)
 
   if (ps) {
@@ -421,7 +466,7 @@ des.kriging.mcmc.sigma.likeli.plot <- function(prefix="2d-shdf", ps=TRUE) {
   p <- p + scale_y_continuous(expression(paste("L(", sigma^2, "|", y, ",", beta, ",", theta, ")")))
   p <- p + scale_x_continuous(expression(sigma^2))
 ##  p <- p + opts(title=expression(paste("Likelihood over ", sigma^2)))
-  p <- p + theme_bw()
+  p <- p + theme_bw(base_size=8)
   print(p)
 
   if (ps) {
@@ -443,7 +488,7 @@ des.kriging.mcmc.theta.likeli.plot <- function(prefix="2d-shdf", idx=1, ps=TRUE)
   p <- p + scale_y_continuous(substitute(paste("L(", theta[I], "|", y, ",", beta, ",", sigma^2, ")"), list(I = idx)))
   p <- p + scale_x_continuous(substitute(theta[I], list(I = idx)))
 ##  p <- p + opts(title=substitute(paste("Likelihood over ", theta[I]), list(I = idx)))
-  p <- p + theme_bw()
+  p <- p + theme_bw(base_size=8)
   print(p)
 
   if (ps) {
@@ -485,7 +530,7 @@ des.kriging.mcmc.beta.marginal.plot <- function(prefix="2d-shdf", idx="1", ps=TR
   p <- p + scale_y_continuous(ytitle)
   p <- p + scale_x_continuous(xtitle)
 ##  p <- p + opts(title=title)
-  p <- p + theme_bw()
+  p <- p + theme_bw(base_size=8)
   print(p)
 
   if (ps) {
@@ -511,7 +556,7 @@ des.kriging.mcmc.sigma.marginal.plot <- function(prefix="2d-shdf", ps=TRUE, adj=
   p <- p + scale_y_continuous(ytitle)
   p <- p + scale_x_continuous(expression(sigma^2))
 ##  p <- p + opts(title=title)
-  p <- p + theme_bw()
+  p <- p + theme_bw(base_size=8)
   print(p)
 
   if (ps) {
@@ -541,7 +586,7 @@ des.kriging.mcmc.theta.marginal.plot <- function(prefix="2d-shdf", ps=TRUE, idx=
   p <- p + scale_y_continuous(ytitle)
   p <- p + scale_x_continuous(xtitle)
 ##  p <- p + opts(title=title)
-  p <- p + theme_bw()
+  p <- p + theme_bw(base_size=8)
   print(p)
 
   if (ps) {
@@ -587,7 +632,7 @@ des.nonst.kriging.mcmc.mean.plot <- function(prefix="2d-shdf", betas=1, etasr=1,
 ##   p <- p + scale_y_continuous(ytitle)
 ##   p <- p + scale_x_continuous(xtitle)
 ##   p <- p + opts(title=title)
-##   p <- p + theme_bw()
+##   p <- p + theme_bw(base_size=8)
 ##   print(p)
 
 ##   if (ps) {
@@ -618,7 +663,7 @@ des.nonst.kriging.mcmc.mean.plot <- function(prefix="2d-shdf", betas=1, etasr=1,
 ##   p <- p + scale_y_continuous(expression(tau[int]))
 ##   p <- p + geom_hline(yintercept=taui, linetype=2, colour="blue")
 ##   p <- p + geom_vline(xintercept=wopt, colour="red")
-##   p <- p + theme_bw()
+##   p <- p + theme_bw(base_size=8)
 ##   p <- p + opts(title=title)
 
 ##   print(p)
@@ -652,7 +697,7 @@ des.nonst.kriging.mcmc.mean.plot <- function(prefix="2d-shdf", betas=1, etasr=1,
 ##   p <- p + scale_y_continuous(expression(rho), breaks=c(-0.5, 0, 0.5, 1))
 ##   p <- p + scale_x_continuous("W")
 ##   p <- p + geom_vline(xintercept=wopt, colour="red")
-##   p <- p + theme_bw()
+##   p <- p + theme_bw(base_size=8)
 ##   p <- p + opts(title=title)
 
 ##   print(p)
@@ -680,7 +725,7 @@ des.nonst.kriging.mcmc.mean.plot <- function(prefix="2d-shdf", betas=1, etasr=1,
 ##   p <- p + scale_y_continuous(ytitle)
 ##   p <- p + scale_x_continuous("")
 ##   p <- p + opts(title=title)
-##   p <- p + theme_bw()
+##   p <- p + theme_bw(base_size=8)
 ##   print(p)
 
 ##   if (ps) {
@@ -708,7 +753,7 @@ des.nonst.kriging.mcmc.mean.plot <- function(prefix="2d-shdf", betas=1, etasr=1,
 ##   p <- p + scale_x_continuous("")
 ##   p <- p + opts(title=title)
 
-##   p <- p + theme_bw()
+##   p <- p + theme_bw(base_size=8)
 ##   print(p)
 
 ##   if (ps) {
