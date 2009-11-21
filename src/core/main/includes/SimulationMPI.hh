@@ -356,6 +356,15 @@ public:
                         &&
                         (avgDelays[output->simulation_id - 1].getNumValues() >= p_desArgs->replications);
 
+#ifndef NDEBUG
+                    std::cout << "****** Performance Update ******" << std::endl
+                              << "Simulation ID: " << output->simulation_id << ", replication number: " << output->replications << std::endl
+                              << "Delay (mu/sigma):                     " << avgDelays[output->simulation_id - 1].mean() << "/" << avgDelays[output->simulation_id - 1].variance() << std::endl
+                              << "Avg. Num. Events (mu/sigma):          " << avgNumEvents[output->simulation_id - 1].mean() << "/" << avgNumEvents[output->simulation_id - 1].variance() << std::endl
+                              << "Avg. Event in System Time (mu/sigma): " << totalQs[output->simulation_id - 1].mean() << "/" << totalQs[output->simulation_id - 1].variance() << std::endl
+                              << std::endl << std::flush;
+#endif /* NDEBUG */
+
                     // if not send another replica
                     if (!isConfident) {
                         // do progressive parallel job execution
