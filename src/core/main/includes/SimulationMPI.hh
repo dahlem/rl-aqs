@@ -129,6 +129,18 @@ public:
             dsample::tGslRngSP rng = dsample::CRN::getInstance().get(rng_index);
             int dimensions = LhsUtils::dimensions(p_desArgs);
 
+            std::stringstream outDir, simDir, csv_line;
+            std::vector <dio::Results*> replica_results;
+
+            simDir << p_desArgs->results_dir << "/";
+
+            std::stringstream *sim_results_lines = new std::stringstream[runs];
+
+            std::string dir = simDir.str();
+            std::string file = "simulations.dat";
+
+            dio::Results sim_results(file, dir);
+
 #ifndef NDEBUG
             std::cout << "The number of LHS dimensions is " << dimensions << std::endl;
             std::cout << "Network Size Index: " << LhsUtils::getNetSizeIndex(p_desArgs) << std::endl;
@@ -198,19 +210,11 @@ public:
 #endif /* NDEBUG */
                     dsample::LHS::sample(rng.get(), min, max, p_desArgs->simulations, &sample);
                 }
+
+                // serialise design matrix
+                std::string designFile = "design.dat";
+                LhsUtils::serialiseDesign(p_desArgs, sample, designFile, dir);
             }
-
-            std::stringstream outDir, simDir, csv_line;
-            std::vector <dio::Results*> replica_results;
-
-            simDir << p_desArgs->results_dir << "/";
-
-            std::stringstream *sim_results_lines = new std::stringstream[runs];
-
-            std::string dir = simDir.str();
-            std::string file = "simulations.dat";
-
-            dio::Results sim_results(file, dir);
 
             // adjust the simulation number by already_run
             if (!p_desArgs->add_sim.empty()) {

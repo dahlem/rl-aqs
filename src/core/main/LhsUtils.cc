@@ -29,8 +29,12 @@
 #endif /* __STDC_CONSTANT_MACROS */
 
 #include <limits>
+#include <sstream>
 
 #include <boost/cstdint.hpp>
+
+#include "Results.hh"
+namespace dio = des::io;
 
 #include "LhsUtils.hh"
 
@@ -40,6 +44,109 @@ namespace des
 {
 namespace core
 {
+
+void LhsUtils::serialiseDesign(tDesArgsSP p_desArgs, const gsl_matrix *p_design, std::string &p_filename, std::string &p_dir)
+{
+    std::stringstream line;
+    dio::Results design(p_filename, p_dir);
+    int dims = 0;
+
+    if (p_desArgs->min_size < std::numeric_limits<boost::uint16_t>::max()) {
+        dims++;
+        line << SIZE;
+    }
+    if (p_desArgs->min_max_edges < std::numeric_limits<boost::uint16_t>::max()) {
+        dims++;
+        if (dims > 1) {
+            line << "," << MAX_EDGES;
+        } else {
+            line << MAX_EDGES;
+        }
+    }
+    if (p_desArgs->min_edge_prob < std::numeric_limits<double>::max()) {
+        dims++;
+        if (dims > 1) {
+            line << "," << EDGE_PROB;
+        } else {
+            line << EDGE_PROB;
+        }
+    }
+    if (p_desArgs->min_boost_arrival < std::numeric_limits<double>::max()) {
+        dims++;
+        if (dims > 1) {
+            line << "," << BOOST_ARRIVAL;
+        } else {
+            line << BOOST_ARRIVAL;
+        }
+    }
+    if (p_desArgs->min_boost_edge < std::numeric_limits<double>::max()) {
+        dims++;
+        if (dims > 1) {
+            line << "," << BOOST_EDGE;
+        } else {
+            line << BOOST_EDGE;
+        }
+    }
+    if (p_desArgs->min_rl_q_alpha < std::numeric_limits<double>::max()) {
+        dims++;
+        if (dims > 1) {
+            line << "," << RL_Q_ALPHA;
+        } else {
+            line << RL_Q_ALPHA;
+        }
+    }
+    if (p_desArgs->min_rl_q_lambda < std::numeric_limits<double>::max()) {
+        dims++;
+        if (dims > 1) {
+            line << "," << RL_Q_LAMBDA;
+        } else {
+            line << RL_Q_LAMBDA;
+        }
+    }
+    if (p_desArgs->min_rl_policy_epsilon < std::numeric_limits<double>::max()) {
+        dims++;
+        if (dims > 1) {
+            line << "," << RL_POLICY_EPSILON;
+        } else {
+            line << RL_POLICY_EPSILON;
+        }
+    }
+    if (p_desArgs->min_nn_momentum < std::numeric_limits<double>::max()) {
+        dims++;
+        if (dims > 1) {
+            line << "," << CL_NN_MOMENTUM;
+        } else {
+            line << CL_NN_MOMENTUM;
+        }
+    }
+    if (p_desArgs->min_rl_policy_wpl_eta < std::numeric_limits<double>::max()) {
+        dims++;
+        if (dims > 1) {
+            line << "," << RL_POLICY_WPL_ETA;
+        } else {
+            line << RL_POLICY_WPL_ETA;
+        }
+    }
+
+    // print header
+    design.print(line);
+    line.str("");
+
+    for (boost::uint32_t i = 0; i < p_design->size1; ++i) {
+        for (boost::uint32_t j = 0; j < dims; ++j) {
+            if (j > 0) {
+                line << "," << gsl_matrix_get(p_design, i, j);
+            } else {
+                line << gsl_matrix_get(p_design, i, j);
+            }
+        }
+
+        // print design location
+        design.print(line);
+        line.str("");
+    }
+}
+
 
 
 int LhsUtils::dimensions(tDesArgsSP p_desArgs)

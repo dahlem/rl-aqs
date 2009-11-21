@@ -27,6 +27,10 @@
 # include <config.h>
 #endif
 
+#include <string>
+
+#include <gsl/gsl_matrix.h>
+
 #include "CL.hh"
 
 
@@ -54,6 +58,7 @@ public:
     static int getRLEpsilonIndex(tDesArgsSP p_desArgs);
     static int getNNMomentumIndex(tDesArgsSP p_desArgs);
     static int getRlWplEtaIndex(tDesArgsSP p_desArgs);
+    static void serialiseDesign(tDesArgsSP p_desArgs, const gsl_matrix *p_design, std::string &p_filename, std::string &p_dir);
 
 private:
 
