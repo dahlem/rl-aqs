@@ -104,7 +104,7 @@ void Simplex::projectionDuchi(int p_n, DoubleSA p_vec, double p_z)
             temp2 += mu[i] - p_z;
         }
 
-        temp1 = mu[j] - 1.0 / static_cast<double>(j) * temp2;
+        temp1 = mu[j] - 1.0 / (static_cast<double>(j) + 1.0) * temp2;
 
         if (temp1 > 0.0) {
             if (rho < temp1) {
@@ -118,7 +118,7 @@ void Simplex::projectionDuchi(int p_n, DoubleSA p_vec, double p_z)
         temp2 += mu[i] - p_z;
     }
 
-    theta = 1.0 / static_cast<double>(rho) * temp2;
+    theta = 1.0 / (static_cast<double>(rho) + 1.0) * temp2;
 
     for (boost::uint16_t i = 0; i < p_n; ++i) {
         p_vec[i] = std::max(p_vec[i] - theta, 0.0);

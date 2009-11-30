@@ -32,6 +32,8 @@
 #include <boost/foreach.hpp>
 #include <boost/shared_array.hpp>
 
+#include <gsl/gsl_math.h>
+
 #include "Simplex.hh"
 #include "Vector.hh"
 namespace dutils = des::utils;
@@ -107,7 +109,6 @@ boost::uint16_t WeightedPolicyLearner::operator() (
 //            sum += fabs(gradient[i]);
         }
 
-        double factor = 1.0/sum;
 //        dutils::Vector::mult(p_values.size(), gradient, factor);
 //        dutils::Vector::normalise(p_values.size(), gradient, true);
 
@@ -121,8 +122,10 @@ boost::uint16_t WeightedPolicyLearner::operator() (
         dutils::Simplex::projectionDuchi(p_values.size(), gradient, 1.0);
 
         sum = std::accumulate(gradient.get(), gradient.get() + p_values.size(), 0.0);
-        factor = 1.0/sum;
-        dutils::Vector::mult(p_values.size(), gradient, factor);
+        if (gsl_fcmp(sum, 1.0, 1e-6) != 0) {
+            double factor = 1.0/sum;
+            dutils::Vector::mult(p_values.size(), gradient, factor);
+        }
 
         double nMinusOne = static_cast<double>(p_values.size()) - 1.0;
         double maxEpsilon = 1.0 - nMinusOne * m_epsilon;
