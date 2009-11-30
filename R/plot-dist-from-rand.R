@@ -15,7 +15,9 @@
 
 
 
+library(desStats)
 library(desGraph)
+
 
 message("Start with the analysis of dynamic behaviour!")
 
@@ -27,7 +29,7 @@ for (sim in simulations$sim_num) {
   graphs <- simulations[simulations$sim_num == sim,]$graphs
   stopTime <- simulations[simulations$sim_num == sim,]$stop_time
 
-  des.plot.info(paste(sim, "/1", sep=""), graphs-1, 2, stopTime, T)
+  des.plot.dist.from.rand(paste(sim, "/1/graphs", sep=""), graphs-1, 2, stopTime, T)
 }
 
 

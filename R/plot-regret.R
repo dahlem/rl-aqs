@@ -13,7 +13,9 @@
 ## Keywords: plotting
 ## Created: 15.07.2008
 
-
+library(igraph)
+library(ggplot2)
+library(desStats)
 
 message("Start with the analysis of regret!")
 
@@ -45,7 +47,7 @@ des.plot.incentive.deviate <- function(dir, numGraphs, stopTime, ps=TRUE) {
   df$incentives = incentives
 
   if (ps) {
-    des.postscript(paste(dir, "./regret-incentive-deviate.eps", sep=""))
+    des.postscript(paste(dir, "/../../../regret-incentive-deviate.eps", sep=""))
   }
 
   p <- ggplot(df, aes(x=time, y=incentives))
@@ -70,7 +72,7 @@ des.plot.regret.absolute <- function(dir, numGraphs, stopTime, ps=TRUE) {
   df$regrets = regrets
 
   if (ps) {
-    des.postscript(paste(dir, "./regret-average.eps", sep=""))
+    des.postscript(paste(dir, "/../../../regret-average.eps", sep=""))
   }
 
   p <- ggplot(df, aes(x=time, y=regrets))
@@ -92,8 +94,9 @@ for (sim in simulations$sim_num) {
   stopTime <- simulations[simulations$sim_num == sim,]$stop_time
   numGraphs <- (graphs - 1);
 
-  dir <- paste(sim, "1/graphs", sep="")
+  dir <- paste(sim, "/1/graphs", sep="")
   des.plot.incentive.deviate(dir, numGraphs, stopTime, TRUE)
+  des.plot.regret.absolute(dir, numGraphs, stopTime, TRUE)
 }
 
 

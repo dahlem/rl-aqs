@@ -1,6 +1,6 @@
 des.kriging.mcmc.y.plot <- function(prefix="2d-shdf", uniformPropFile=NULL, ps=TRUE, adj=1) {
   if (ps) {
-    des.pdf(paste(prefix, "-y-density.pdf", sep=""))
+    des.pdf(filename=paste(prefix, "-y-density.pdf", sep=""), width=3.2, height=2.8, pointsize=8)
   }
 
   yUniMin <- NULL
@@ -29,13 +29,14 @@ des.kriging.mcmc.y.plot <- function(prefix="2d-shdf", uniformPropFile=NULL, ps=T
   } else {
     p <- ggplot(df, aes(x=x, fill=factor(t)))
   }
-  p <- p + geom_density(alpha=0.2, kernel="gaussian", adjust=adj)
+  p <- p + geom_density(alpha=0.75, kernel="gaussian", adjust=adj)
   p <- p + scale_y_continuous(ytitle)
   p <- p + scale_x_continuous("y")
   if (!is.null(uniformPropFile)) {
     p <- p + scale_linetype("Agent", labels=c("Adaptive", "Uniform"))
   }
-  p <- p + scale_fill_discrete("Density", labels=c(expression(y[min]), expression(y[max])))
+##  p <- p + scale_fill_discrete("Density", labels=c(expression(y[min]), expression(y[max])))
+  p <- p + scale_fill_brewer("Density", palette="Paired", labels=c(expression(y[min]), expression(y[max])))
   p <- p + theme_bw(base_size=8)
   print(p)
 

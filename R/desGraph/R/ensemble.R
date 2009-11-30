@@ -51,7 +51,7 @@ des.ensemble.average.degree.neighbours <- function(P) {
 
 des.ensemble.cluster.i <- function(i, P, graph) {
   edges <- length(which(P[i,] > 0, arr.ind=T))
-##  edges <- degree(graph, v=(i-1), mode="total")
+  ##  edges <- degree(graph, v=(i-1), mode="total")
   cj <- 0
 
   if (edges > 1) {
@@ -73,5 +73,4 @@ des.ensemble.cluster.i <- function(i, P, graph) {
 des.ensemble.cluster <- function(P, graph) {
   c <- sapply(1:nrow(P), des.ensemble.cluster.i, P, graph)
   return(c)
-}
 }

@@ -201,7 +201,7 @@ des.steady.state.num.stable <- function(graph, threshold=1.0, policy=c("wpl", "e
   numUnstable <- length(which(rho > threshold))
 }
 
-des.control.plot <- function(prefix="", df, ps=TRUE, width=7, height=7, pts=12) {
+des.control.plot <- function(prefix="", df, ps=TRUE, width=2.8, height=2.8, pts=8) {
   if (ps) {
     filename <- paste(prefix, "control-dist.eps", sep="")
     des.postscript(filename, width, height, pointsize=pts)
@@ -221,7 +221,7 @@ des.control.plot <- function(prefix="", df, ps=TRUE, width=7, height=7, pts=12) 
 }
 
 ## same as above
-des.ownership.plot <- function(prefix="", df, ps=TRUE, width=7, height=7, pts=12) {
+des.ownership.plot <- function(prefix="", df, ps=TRUE, width=2.8, height=2.8, pts=8) {
   if (ps) {
     filename <- paste(prefix, "control-dist.eps", sep="")
     des.postscript(filename, width, height, pointsize=pts)
@@ -240,7 +240,7 @@ des.ownership.plot <- function(prefix="", df, ps=TRUE, width=7, height=7, pts=12
   }
 }
 
-des.concentration.pdf <- function(prefix="", concentration, ps=TRUE, width=7, height=7, pts=12) {
+des.concentration.pdf <- function(prefix="", concentration, ps=TRUE, width=2.8, height=2.8, pts=8) {
   if (ps) {
     filename <- paste(prefix, "concentration-power-law.eps", sep="")
     des.postscript(filename, width, height, pointsize=pts)
@@ -265,7 +265,7 @@ des.concentration.pdf <- function(prefix="", concentration, ps=TRUE, width=7, he
 }
 
 
-des.concentration.cdf <- function(prefix="", concentration, ps=TRUE, width=7, height=7, pts=12) {
+des.concentration.cdf <- function(prefix="", concentration, ps=TRUE, width=2.8, height=2.8, pts=8) {
   if (ps) {
     filename <- paste(prefix, "concentration-index-power-law.eps", sep="")
     des.postscript(filename, width, height, pointsize=pts)
@@ -289,7 +289,7 @@ des.concentration.cdf <- function(prefix="", concentration, ps=TRUE, width=7, he
 }
 
 
-des.control.cdf <- function(prefix="", controls, ps=TRUE, width=7, height=7, pts=12) {
+des.control.cdf <- function(prefix="", controls, ps=TRUE, width=2.8, height=2.8, pts=8) {
   if (ps) {
     filename <- paste(prefix, "control-index-power-law.eps", sep="")
     des.postscript(filename, width, height, pointsize=pts)

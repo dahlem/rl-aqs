@@ -18,10 +18,12 @@
 library(desGraph)
 library(desInfluence)
 
+
 message("Start with the analysis of dynamic behaviour!")
 
 simulations <- read.csv("simulations.dat", header=TRUE)
 print(simulations)
+
 
 ## (1) for all simulations
 for (sim in simulations$sim_num) {

@@ -289,7 +289,7 @@ des.topo.weight.plot <- function(prefix, weight, ps=T) {
 }
 
 
-ap <- des.topo.avg.path(graphFiles)
-c <- des.topo.cluster(graphFiles)
-apR <- des.topo.avg.path(graphFilesR)
-cR <- des.topo.cluster(graphFilesR)
+## ap <- des.topo.avg.path(graphFiles)
+## c <- des.topo.cluster(graphFiles)
+## apR <- des.topo.avg.path(graphFilesR)
+## cR <- des.topo.cluster(graphFilesR)

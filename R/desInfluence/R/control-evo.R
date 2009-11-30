@@ -22,7 +22,7 @@ des.control.evo.corr.i <- function(i, M, method="kendall") {
 }
 
 des.control.evo.corr <- function(M, method="kendall") {
-  return(sapply(1:(ncol(M)-1), des.control.evo.tau.corr.i, M, method))
+  return(sapply(1:(ncol(M)-1), des.control.evo.corr.i, M, method))
 }
 
 des.control.evo.interval.averages <- function(M, N) {
@@ -87,11 +87,11 @@ des.control.evo.percent.log.return <- function(data, start, end=(ncol(data)-1)) 
 
 
 ## 3. calculate the correlation
-des.control.evo.corr <- function(data) {
-  R <- cor(data, method="pearson")
-  R[is.na(R)] <- 0
-  return(R)
-}
+## des.control.evo.corr <- function(data) {
+##   R <- cor(data, method="pearson")
+##   R[is.na(R)] <- 0
+##   return(R)
+## }
 
 ## 4. calculate the distance matrix
 des.control.evo.dist <- function(R) {
@@ -186,7 +186,7 @@ des.control.evo.plot.graph <- function(mst, layout, M,
 }
 
 
-des.evo.plot <- function(prefix="", df, k=3, ps=TRUE, ylab=expression(e^P), width=7, height=7, pts=12) {
+des.evo.plot <- function(prefix="", df, k=3, ps=TRUE, ylab=expression(e^P), width=2.8, height=2.8, pts=8) {
   if (ps) {
     filename <- paste(prefix, "-evo-plot.eps", sep="")
     des.postscript(filename, width, height, pointsize=pts)

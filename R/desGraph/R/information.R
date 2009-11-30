@@ -270,7 +270,7 @@ des.read.graph.info <- function(graphName, mode) {
   return(mean(info$distance))
 }
 
-des.plot.info <- function(dir, numGraphs, mode, stopTime, ps=TRUE) {
+des.plot.dist.from.rand <- function(dir, numGraphs, mode, stopTime, ps=TRUE) {
   graphs <- paste(dir, "/graph", seq(0,numGraphs), ".gml", sep="")
   dists <- sapply(graphs, des.read.graph.info, mode)
 
@@ -279,11 +279,15 @@ des.plot.info <- function(dir, numGraphs, mode, stopTime, ps=TRUE) {
   df$time = seq(0, numGraphs) * interval
   df$dist = dists
 
+  graph <- read.graph(graphs[1], format="graphml")
+  maxDist <- des.graph.max.info(graph)
+  
   if (ps) {
-    postscript("./graph-info-evo-plot.eps", onefile=FALSE)
+    des.postscript("./graph-info-distance-from-rand-evo-plot.eps")
   }
 
   p <- ggplot(df, aes(x=time, y=dist))
+  p <- p + geom_hline(yintercept=maxDist, colour="red")
   p <- p + layer(geom = "line")
   p <- p + scale_y_continuous("")
   p <- p + scale_x_continuous("Time")
@@ -295,5 +299,3 @@ des.plot.info <- function(dir, numGraphs, mode, stopTime, ps=TRUE) {
   }
 }
 
-
-des.plot.info(".", 100, 2, 100000, T)

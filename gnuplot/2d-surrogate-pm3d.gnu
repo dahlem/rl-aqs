@@ -43,7 +43,7 @@ fi
 
 gnuplot << EOF
 
-set terminal pdf colour solid rounded
+set terminal postscript eps enhanced colour solid rounded size 2.8,2.8 10
 set output "$DATAFILE.eps"
 
 set datafile separator ","
