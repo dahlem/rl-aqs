@@ -23,7 +23,7 @@ namespace utils
 
 double Vector::dotproduct(int p_n, DoubleSA p_vec1, DoubleSA p_vec2)
 {
-    int k, m, i = 0;
+    int k = 0, m = 0, i = 0;
     double sum = 0.0;
 
     k = p_n / 4;

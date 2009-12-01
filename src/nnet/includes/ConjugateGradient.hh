@@ -231,7 +231,7 @@ private:
     double getOptimalTrainingRate(DoubleSA p_targets, double p_trainingRate, double p_error,
                                   DoubleSA p_weights, DoubleSA p_trainingDirection)
         {
-            double ax, bx, cx, fa, fb, fc, fu;
+            double ax = 0.0, bx = 0.0, cx = 0.0, fa = 0.0, fb = 0.0, fc = 0.0, fu = 0.0;
 
             ax = 0.0;
             bx = p_trainingRate;
@@ -328,8 +328,8 @@ private:
 
             const double ZEPS = std::numeric_limits<double>::epsilon() * 1.0e-3;
             const double tol = 3.0e-8;
-            double a, b, d = 0.0, etemp, fv, fw, fx;
-            double p, q, r, tol1, tol2, u, v, w, x, xm;
+            double a = 0.0, b = 0.0, d = 0.0, etemp = 0.0, fv = 0.0, fw = 0.0, fx = 0.0;
+            double p = 0.0, q = 0.0, r = 0.0, tol1 = 0.0, tol2 = 0.0, u = 0.0, v = 0.0, w = 0.0, x = 0.0, xm = 0.0;
             double e = 0.0;
 
             a = (ax < cx ? ax : cx);

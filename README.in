@@ -3,3 +3,6 @@ Welcome to des.
 des is free software. Please see the file COPYING for details.
 For documentation, please see the files in the doc subdirectory.
 For building and installation instructions please see the INSTALL file.
+
+** Valgrind
+valgrind --time-stamp=yes --log-file=memcheck-test-%p-`date +%Y%m%d.%H%M%S`-valgrind.log --tool=memcheck -v --leak-check=yes --track-origins=yes --show-reachable=yes --freelist-vol=100000000 --partial-loads-ok=yes ./src/core/main/des_main --seeds seeds.dat --confidence 0 --lhs 0 --graph_generator 1 --graph_generation 10 --log_events 0 --stop_time 200 --generations 100 --size 100  --boost_arrival 1.2 --boost_edge 1.2 --max_edges 3 --rl 1 --rl_q_alpha 0.1 --rl_q_lambda 0.75 --rl_policy_epsilon 0.05 --rl_policy 3 --rl_state_representation 5 --sim_dir soc-wpl-dv12-de12-valgrind --nn_hidden_neurons 8 --nn_cg 0 --nn_momentum 0.5 --nn_loss_policy 2 --nn_window 100

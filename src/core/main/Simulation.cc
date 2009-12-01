@@ -215,7 +215,7 @@ dnet::tGraphSP Simulation::createGraph(tDesArgsSP desArgs,
 {
     std::cout << "Generate the graph." << std::endl;
     dsample::tGslRngSP r1, r2, r3;
-    boost::int32_t num_edges_rng_index;
+    boost::int32_t num_edges_rng_index = 0;
     boost::uint32_t seed = 0;
     dnet::tGraphSP graph;
 
@@ -233,8 +233,8 @@ dnet::tGraphSP Simulation::createGraph(tDesArgsSP desArgs,
                   << "boost edge: " << boost_edge << std::endl
                   << "Fix edge weight: " << desArgs->edge_fixed << std::endl;
 
-        boost::int32_t arrival_rng_index;
-        boost::int32_t uniform_rng_index;
+        boost::int32_t arrival_rng_index = 0;
+        boost::int32_t uniform_rng_index = 0;
 
         seed = dsample::Seeds::getInstance().getSeed();
         arrival_rng_index = dsample::CRN::getInstance().init(seed);
@@ -274,18 +274,18 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
     sim_output Simulation::operator()(tDesArgsSP desArgs)
 #endif /* HAVE_MPI */
 {
-    boost::uint16_t sim_num, rep_num, num_vertices;
-    boost::uint16_t net_size, max_edges;
-    double edge_prob,
-        rl_q_alpha, rl_q_lambda, rl_policy_epsilon, rl_policy_boltz_t,
-        nn_momentum, boost_arrival, boost_edge, rl_policy_wpl_eta;
+    boost::uint16_t sim_num = 0, rep_num = 0, num_vertices = 0;
+    boost::uint16_t net_size = 0, max_edges = 0;
+    double edge_prob = 0.0,
+        rl_q_alpha = 0.0, rl_q_lambda = 0.0, rl_policy_epsilon = 0.0, rl_policy_boltz_t = 0.0,
+        nn_momentum = 0.0, boost_arrival = 0.0, boost_edge = 0.0, rl_policy_wpl_eta = 0.0;
 
     // receive the input arguments via mpi
 #ifdef HAVE_MPI
     tSimArgsMPI simArgs;
     MPI_Status status;
-    int rc;
-    int rank;
+    int rc = 0;
+    int rank = 0;
     int *minRank;
 
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -434,7 +434,7 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
             get(vertex_arrival_rate, *graph);
 
         // generate events for each vertex in the graph
-        double stopTimeAdj;
+        double stopTimeAdj = 0.0;
 
         // find out whether we only generate the events in phases
         if (desArgs->generations < 0) {
@@ -444,8 +444,8 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
             stopTimeAdj = desArgs->stop_time / desArgs->generations;
         }
 
-        boost::int32_t destination;
-        double arrival_rate;
+        boost::int32_t destination = 0;
+        double arrival_rate = 0.0;
 
         // generate events over this graph
         if (desArgs->trace_event) {

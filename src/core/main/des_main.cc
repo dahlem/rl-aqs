@@ -129,10 +129,10 @@ int main(int argc, char *argv[])
 #endif /* HAVE_LIBGSL */
 
     dcore::tDesArgsSP desArgs(new dcore::desArgs_t);
-    char dateCStr[128];
+    char *dateCStr = new char[128];
 
 #ifdef HAVE_MPI
-    int rank, num_tasks, colour, rc;
+    int rank = 0, num_tasks = 0, colour = 0, rc = 0;
     MPI_Datatype MPI_Simargs, MPI_Desout;
     MPI_Comm group_comm;
     dcore::sim_output outVal;
@@ -163,7 +163,7 @@ int main(int argc, char *argv[])
     std::stringstream baseDir;
 
     // if we start a new experiment we'll create a new date string
-    std::string dateStr;
+    std::string dateStr("");
 
     // otherwise use the one supplied on the command-line
     if (desArgs->add_sim.empty()) {
@@ -319,5 +319,6 @@ int main(int argc, char *argv[])
     MPI_Finalize();
 #endif /* HAVE_MPI */
 
+    delete [] dateCStr;
     return EXIT_SUCCESS;
 }

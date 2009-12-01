@@ -192,9 +192,10 @@ bool EventProcessor::process()
                 std::cout << "** EventProcessor : post any event finished" << std::endl;
 #endif /* NDEBUG_EVENTS */
 
-                if (entry != NULL) {
-                    delete entry;
-                }
+            }
+
+            if (entry != NULL) {
+                delete entry;
             }
         }
 

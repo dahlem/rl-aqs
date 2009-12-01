@@ -58,8 +58,8 @@ void dcore::LeaveHandler::update(dcore::LeaveEvent *subject)
 
     dnet::Vertex vertex = boost::vertex(origin, m_graph);
 
-    double inSystem = 0.0;
-    inSystem = (gsl_fcmp(entry->getArrival(), entry->getExternalArrival(), 1e-9) <= 0)
+    double inSystem =
+        (gsl_fcmp(entry->getArrival(), entry->getExternalArrival(), 1e-9) <= 0)
         ? (0.0)
         : (entry->getArrival() - entry->getExternalArrival());
 

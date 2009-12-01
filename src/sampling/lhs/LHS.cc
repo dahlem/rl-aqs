@@ -47,7 +47,7 @@ void LHS::sample(const gsl_rng *p_rng, const gsl_vector *p_min,
     int nvar;
     gsl_matrix *u;
     gsl_permutation *p;
-    double temp;
+    double temp = 0.0;
 
     if (p_min->size != p_max->size) {
         throw SamplingException(SamplingException::DIM_DONT_MATCH);
@@ -65,10 +65,10 @@ void LHS::sample(const gsl_rng *p_rng, const gsl_vector *p_min,
 
     p = gsl_permutation_calloc(p_size);
 
-    for (int j = 0; j < nvar; ++j) {
+    for (boost::uint16_t j = 0; j < nvar; ++j) {
         gsl_ran_shuffle(p_rng, p->data, p_size, sizeof(size_t));
 
-        for (int i = 0; i < p_size; ++i) {
+        for (boost::uint16_t i = 0; i < p_size; ++i) {
             temp = (p->data[i] + 1 - gsl_matrix_get(u, i, j)) / p_size;
             gsl_matrix_set(*p_mat, i, j,
                            gsl_vector_get(p_min, j) + temp *
@@ -91,8 +91,8 @@ void LHS::sample(const gsl_rng *p_rng, const gsl_vector *p_min,
     gsl_permutation *p;
     gsl_matrix *M, *Mt, *S;
     gsl_vector *e, *e1, *dist;
-    double minDist;
-    boost::uint32_t r1, r2;
+    double minDist = 0.0;
+    boost::uint32_t r1 = 0, r2 = 0;
 
     if (p_min->size != p_max->size) {
         throw SamplingException(SamplingException::DIM_DONT_MATCH);
@@ -411,7 +411,7 @@ void LHS::matrixS(int p_m, gsl_matrix **p_S)
 void LHS::kronecker(const gsl_matrix &p_a, const gsl_matrix &p_b,
                     gsl_matrix **p_mat)
 {
-    boost::uint32_t rowA, rowB, colA, colB;
+    boost::uint32_t rowA = 0, rowB = 0, colA = 0, colB = 0;
     rowA = p_a.size1;
     colA = p_a.size2;
     rowB = p_b.size1;

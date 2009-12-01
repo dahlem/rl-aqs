@@ -91,8 +91,8 @@ public:
         {
             MPI_Status status;
             int jobs = 1;
-            int rc;
-            int runs, already_run;
+            int rc = 0;
+            int runs = 0, already_run = 0;
 
             // 1. perform lhs
             // calculate the number of simulations

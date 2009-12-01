@@ -231,8 +231,8 @@ void WEvonet::advance(boost::uint32_t p_steps, tGraphSP g,
     VertexBestResponseMap vertex_best_response_map
         = get(vertex_best_response, *g);
 
-    double accum_service_rate;
-    size_t vertices;
+    double accum_service_rate = 0.0;
+    size_t vertices = 0;
     boost::uint16_t num_edges = 0;
 
 

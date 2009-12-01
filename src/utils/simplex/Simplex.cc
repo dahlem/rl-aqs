@@ -37,7 +37,7 @@ void Simplex::projectionDuchi(
 {
     double s = 0.0;
     double rho = 0.0;
-    double delta_s, delta_rho, theta;
+    double delta_s = 0.0, delta_rho = 0.0, theta = 0.0;
     std::vector<boost::uint16_t> U, G, L;
 
     // add the set of all indeces to p_vec to the U vector
@@ -86,7 +86,7 @@ void Simplex::projectionDuchi(
 void Simplex::projectionDuchi(int p_n, DoubleSA p_vec, double p_z)
 {
     boost::uint16_t rho = 0;
-    double temp1, temp2, theta;
+    double temp1 = 0.0, temp2 = 0.0, theta = 0.0;
     double *mu = new double[p_n];
 
     // copy p_vec
@@ -123,6 +123,8 @@ void Simplex::projectionDuchi(int p_n, DoubleSA p_vec, double p_z)
     for (boost::uint16_t i = 0; i < p_n; ++i) {
         p_vec[i] = std::max(p_vec[i] - theta, 0.0);
     }
+
+    delete[] mu;
 }
 
 }

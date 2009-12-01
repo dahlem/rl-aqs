@@ -41,7 +41,7 @@ namespace core
 /** @struct sim_output
  * Specifies the output variables of the simulation
  */
-typedef struct
+typedef struct SimOutput
 {
     // single simulation output
     double system_average_delay;
@@ -59,13 +59,22 @@ typedef struct
     // number of replications
     unsigned int replications;
     unsigned int simulation_id;
+
+    SimOutput()
+        : system_average_delay(0.0), system_expected_average_num_in_queue(0.0),
+          system_total_q(0.0), mean_system_average_delay(0.0),
+          mean_system_expected_average_num_in_queue(0.0), mean_system_total_q(0.0),
+          sd_system_average_delay(0.0), sd_system_expected_average_num_in_queue(0.0),
+          sd_system_total_q(0.0), replications(0), simulation_id(0)
+        {}
+
 } sim_output;
 
 
 
 #ifdef HAVE_MPI
 
-typedef struct {
+typedef struct SimArgsMPI {
     unsigned int sim_num;       /* simulation number */
     unsigned int rep_num;       /* replication number */
     unsigned int net_size;      /* network size */
@@ -79,6 +88,14 @@ typedef struct {
     double rl_policy_boltzmann_t;   /* rl policy boltzmann temperature */
     double nn_momentum;             /* NN Backpropagation momentum */
     double rl_policy_wpl_eta;             /* NN Backpropagation momentum */
+
+    SimArgsMPI()
+        : sim_num(0), rep_num(0), net_size(0), max_edges(0), edge_prob(0.0),
+          boost_arrival(0.0), boost_edge(0.0), rl_q_alpha(0.0), rl_q_lambda(0.0),
+          rl_policy_epsilon(0.0), rl_policy_boltzmann_t(0.0), nn_momentum(0.0),
+          rl_policy_wpl_eta(0.0)
+        {}
+
 } tSimArgsMPI;
 
 

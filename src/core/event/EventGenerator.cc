@@ -64,7 +64,7 @@ void dcore::EventGenerator::generate(
     double start_time,
     double stop_time)
 {
-    double cur_arrival, new_arrival;
+    double cur_arrival = 0.0, new_arrival = 0.0;
 
     // if start time is larger than 0, then we assume this
     // time is unprocessed (last event that wasn't put into the queue in
@@ -160,9 +160,7 @@ void dcore::EventGenerator::generate(
     boost::int32_t destination,
     double arrival_rate)
 {
-    double cur_arrival;
-
-    cur_arrival = -dsample::Rng::poiss(
+    double cur_arrival = -dsample::Rng::poiss(
         arrival_rate, gsl_rng_uniform(arrival_rng.get()));
 
     // enqueue the last arrival event

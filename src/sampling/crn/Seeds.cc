@@ -55,8 +55,7 @@ Seeds::~Seeds()
 #ifdef HAVE_MPI
 void Seeds::close()
 {
-    int rc;
-    rc = MPI_File_close(&fh);
+    int rc = MPI_File_close(&fh);
     if (rc != MPI_SUCCESS) {
         std::cerr << "Error closing seed file." << std::endl;
         std::cerr.flush();
@@ -66,7 +65,7 @@ void Seeds::close()
 
 void Seeds::init(const char *p_file) throw (SamplingException)
 {
-    int rc;
+    int rc = 0;
 
     if (!isInitialised) {
         rc = MPI_File_open(
@@ -118,7 +117,7 @@ const boost::uint32_t Seeds::getSeed() throw (SamplingException)
 
 #ifdef HAVE_MPI
     MPI_Status status;
-    int rc;
+    int rc = 0;
     int *buf = new int[1];
 
     rc = MPI_File_read_shared(fh, buf, 1, MPI_INT, &status);

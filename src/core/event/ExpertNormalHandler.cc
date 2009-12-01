@@ -66,8 +66,8 @@ void ExpertNormalHandler::update(AckEvent *subject)
 
     dnet::Vertex vertex = boost::vertex(entry->getDestination(), m_graph);
     // observe reward (the longer it takes the smaller the reward)
-    double reward = 0.0;
-    reward = (gsl_fcmp(entry->topArrival(), entry->getArrival(), 1e-9) == 0)
+    double reward =
+        (gsl_fcmp(entry->topArrival(), entry->getArrival(), 1e-9) == 0)
         ? (0.0)
         : (entry->topArrival() - entry->getArrival());
 
