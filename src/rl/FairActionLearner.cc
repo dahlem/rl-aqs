@@ -21,7 +21,7 @@
 # include <config.h>
 #endif
 
-#if !defined(NDEBUG_WPL) || !defined(NDEBUG_EVENTS)
+#if !defined(NDEBUG_FAL) || !defined(NDEBUG_EVENTS)
 # include <iostream>
 #endif /* NDEBUG_EVENTS */
 
@@ -66,7 +66,7 @@ boost::uint16_t FairActionLearner::operator() (
 {
     int action = -1;
 
-#if !defined(NDEBUG_WPL) || !defined(NDEBUG_EVENTS)
+#if !defined(NDEBUG_FAL) || !defined(NDEBUG_EVENTS)
     std::cout << "Consider Action-Value Pairs... " << std::endl;
     BOOST_FOREACH(tValues v, p_values) {
         std::cout << "Action-Value: " << v.first << ", " << v.second << std::endl;
@@ -76,6 +76,7 @@ boost::uint16_t FairActionLearner::operator() (
 
     if (p_values.size() > 1) {
         boost::shared_array<double> gradient = boost::shared_array<double>(new double[p_values.size()]);
+        boost::shared_array<double> orig = boost::shared_array<double>(new double[p_values.size()]);
         double sum = 0.0;
 
         // 1. calc the mean of the q-values
@@ -85,13 +86,14 @@ boost::uint16_t FairActionLearner::operator() (
                 boost::vertex(p_source, m_graph),
                 boost::vertex(p_values[i].first, m_graph),
                 m_graph).first;
+            orig[i] = edge_weight_map[edge];
             q_mean += p_values[i].second * orig[i];
         }
 
         // 2. for each action
         for (boost::uint16_t i = 0; i < p_values.size(); ++i) {
             // 2.1. calc the difference between current Q and average Q
-            gradient[i] = p_values[i].second + m_eta * (p_values[i].second - q_mean);
+            gradient[i] = orig[i] + m_eta * (p_values[i].second - q_mean);
         }
 
         dutils::Simplex::projectionDuchi(p_values.size(), gradient, 1.0, 0.0, m_simplex_rng);
