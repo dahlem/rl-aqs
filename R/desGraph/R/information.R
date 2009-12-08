@@ -278,6 +278,7 @@ des.plot.dist.from.rand <- function(dir, numGraphs, mode, stopTime, ps=TRUE) {
   df <- data.frame(time=rep(0, numGraphs+1), dist=rep(0, numGraphs+1))
   df$time = seq(0, numGraphs) * interval
   df$dist = dists
+  write.csv(df, "graph-info-distance-from-rand-evo-plot.dat")
 
   graph <- read.graph(graphs[1], format="graphml")
   maxDist <- des.graph.max.info(graph)

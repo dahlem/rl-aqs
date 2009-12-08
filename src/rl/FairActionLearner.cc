@@ -14,7 +14,7 @@
 // along with this program	  ; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-/** @file WeightedPolicyLearner.cc
+/** @file FairActionLearner.cc
  * Implementation of the epsilon greedy function object
  */
 #if HAVE_CONFIG_H
@@ -39,7 +39,7 @@
 namespace dutils = des::utils;
 
 #include "Policy.hh"
-#include "WeightedPolicyLearner.hh"
+#include "FairActionLearner.hh"
 
 
 namespace des
@@ -48,7 +48,7 @@ namespace rl
 {
 
 
-WeightedPolicyLearner::WeightedPolicyLearner(
+FairActionLearner::FairActionLearner(
     double p_epsilon,
     double p_eta,
     dnet::Graph &p_graph,
@@ -61,7 +61,7 @@ WeightedPolicyLearner::WeightedPolicyLearner(
 }
 
 
-boost::uint16_t WeightedPolicyLearner::operator() (
+boost::uint16_t FairActionLearner::operator() (
     boost::uint16_t p_source, tValuesVec &p_values, PAttr p_attr)
 {
     int action = -1;
@@ -75,9 +75,7 @@ boost::uint16_t WeightedPolicyLearner::operator() (
 #endif /* !defined(NDEBUG_WPL) || !defined(NDEBUG_EVENTS) */
 
     if (p_values.size() > 1) {
-        boost::shared_array<double> diff = boost::shared_array<double>(new double[p_values.size()]);
         boost::shared_array<double> gradient = boost::shared_array<double>(new double[p_values.size()]);
-        boost::shared_array<double> orig = boost::shared_array<double>(new double[p_values.size()]);
         double sum = 0.0;
 
         // 1. calc the mean of the q-values
@@ -87,47 +85,23 @@ boost::uint16_t WeightedPolicyLearner::operator() (
                 boost::vertex(p_source, m_graph),
                 boost::vertex(p_values[i].first, m_graph),
                 m_graph).first;
-            orig[i] = edge_weight_map[edge];
             q_mean += p_values[i].second * orig[i];
         }
 
         // 2. for each action
         for (boost::uint16_t i = 0; i < p_values.size(); ++i) {
             // 2.1. calc the difference between current Q and average Q
-            diff[i] = p_values[i].second - q_mean;
-
-            if (diff[i] > 0) {
-                // 2.2.1 if diff > 0 then update diff <- diff * (1 - probability_of_action)
-                diff[i] = diff[i] * m_eta * (1 - orig[i]);
-            } else {
-                // 2.2.2 else diff <- diff * (probability_of_action)
-                diff[i] = diff[i] * m_eta * orig[i];
-            }
-
-            // 2.3. calculate new policy
-            gradient[i] = orig[i] + diff[i];
-//            sum += fabs(gradient[i]);
+            gradient[i] = p_values[i].second + m_eta * (p_values[i].second - q_mean);
         }
 
-//        dutils::Vector::mult(p_values.size(), gradient, factor);
-//        dutils::Vector::normalise(p_values.size(), gradient, true);
-
-#if !defined(NDEBUG_WPL) || !defined(NDEBUG_EVENTS)
-        for (boost::uint16_t i = 0; i < p_values.size(); ++i) {
-            std::cout << "diff: " << diff[i] << ", gradient: " << gradient[i] << std::endl;
-        }
-        std::cout << std::endl;
-#endif /* !defined(NDEBUG_WPL) || !defined(NDEBUG_EVENTS) */
-
-//        dutils::Simplex::projectionDuchi(p_values.size(), gradient, 1.0);
         dutils::Simplex::projectionDuchi(p_values.size(), gradient, 1.0, 0.0, m_simplex_rng);
 
-#if !defined(NDEBUG_WPL) || !defined(NDEBUG_EVENTS)
+#if !defined(NDEBUG_FAL) || !defined(NDEBUG_EVENTS)
         double tempSum = 0.0;
         std::cout << "after projection...." << std::endl;
         for (boost::uint16_t i = 0; i < p_values.size(); ++i) {
             tempSum += gradient[i];
-            std::cout << "gradient: " << gradient[i] << std::endl;
+            std::cout << "probability: " << gradient[i] << std::endl;
         }
         std::cout << "sum: " << tempSum << std::endl;
 #endif /* !defined(NDEBUG_WPL) || !defined(NDEBUG_EVENTS) */
@@ -142,7 +116,7 @@ boost::uint16_t WeightedPolicyLearner::operator() (
         double maxEpsilon = 1.0 - nMinusOne * m_epsilon;
         dutils::Vector::scale(p_values.size(), gradient, m_epsilon, maxEpsilon);
 
-#if !defined(NDEBUG_WPL) || !defined(NDEBUG_EVENTS)
+#if !defined(NDEBUG_FAL) || !defined(NDEBUG_EVENTS)
         for (boost::uint16_t i = 0; i < p_values.size(); ++i) {
             std::cout << "projected gradient: " << gradient[i] << std::endl;
         }

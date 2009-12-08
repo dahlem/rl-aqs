@@ -65,6 +65,7 @@ namespace fs = boost::filesystem;
 #include "ExpertAbsoluteHandler.hh"
 #include "ExpertPositiveHandler.hh"
 #include "ExpertNegativeHandler.hh"
+#include "FairActionLearner.hh"
 #include "FullRLResponseHandler.hh"
 #include "GenerateEventHandler.hh"
 #include "HybridFullRLResponseHandler.hh"
@@ -645,6 +646,24 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
 
                 pol = tPolicySP(
                     new drl::WeightedPolicyLearner(
+                        desArgs->rl_policy_epsilon, desArgs->rl_policy_wpl_eta, *graph, r2, r3));
+            } else if (desArgs->rl_policy == 4) {
+                boost::uint32_t seed = dsample::Seeds::getInstance().getSeed();
+                boost::uint32_t pol_uniform_rng_index
+                    = dsample::CRN::getInstance().init(seed);
+                dsample::CRN::getInstance().log(seed, "epsilon uniform");
+                dsample::tGslRngSP r2
+                    = dsample::CRN::getInstance().get(pol_uniform_rng_index);
+
+                seed = dsample::Seeds::getInstance().getSeed();
+                boost::uint32_t simplex_rng_index
+                    = dsample::CRN::getInstance().init(seed);
+                dsample::CRN::getInstance().log(seed, "simplex uniform");
+                dsample::tGslRngSP r3
+                    = dsample::CRN::getInstance().get(simplex_rng_index);
+
+                pol = tPolicySP(
+                    new drl::FairActionLearner(
                         desArgs->rl_policy_epsilon, desArgs->rl_policy_wpl_eta, *graph, r2, r3));
             }
 

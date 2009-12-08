@@ -171,7 +171,7 @@ CL::CL()
         (RL_RESPONSE_REWARD.c_str(), po::value <std::string>(), "Reward Scalars above respective levels.")
         (RL_Q_ALPHA.c_str(), po::value <double>()->default_value(0.1), "Learning Rate.")
         (RL_Q_LAMBDA.c_str(), po::value <double>()->default_value(0.1), "Action-value Rate.")
-        (RL_POLICY.c_str(), po::value <boost::uint16_t>()->default_value(1), "Policy (1=Epsilon-Greedy, 2=Boltzmann, 3=WPL).")
+        (RL_POLICY.c_str(), po::value <boost::uint16_t>()->default_value(1), "Policy (1=Epsilon-Greedy, 2=Boltzmann, 3=WPL, 4=FAL).")
         (CL_RL_STATE_IDS.c_str(), po::value <std::string>()->default_value(""), "State representation.")
         (CL_NN_HIDDENLAYER_NEURONS.c_str(), po::value <boost::uint16_t>()->default_value(5), "Hidden number of Neurons.")
         (CL_NN_LOSS_POLICY.c_str(), po::value <boost::uint16_t>()->default_value(1), "Loss Policy (1=default, 2=sliding window).")
@@ -194,7 +194,7 @@ CL::CL()
             100.0), "Temperator for Boltzmann policy.")
         ;
 
-    po::options_description opt_rl_policy_wpl("RL WPL Policy Configuration");
+    po::options_description opt_rl_policy_wpl("RL WPL/FAL Policy Configuration");
     opt_rl_policy_wpl.add_options()
         (RL_POLICY_WPL_ETA.c_str(), po::value <double>()->default_value(0.001), "Learning rate for WPL.")
         ;

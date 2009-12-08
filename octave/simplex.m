@@ -45,3 +45,21 @@ function w = projSimplex1(v, z)
   theta = 1/rho * sum(mu(1:rho) - z);
   w = max(v - theta, 0);
 endfunction
+
+function w = projSimplex3(v, z)
+  n = columns(v);
+  mu = sort(v, 'descend');
+  rho = 0;
+  
+  for j = 1:n
+    temp = mu(j) - 1/j * (sum(mu(1:j)) - z);
+    if (temp > 0)
+      if (rho < temp)
+	rho = j;
+      endif
+    endif
+  endfor
+
+  theta = 1/rho * (sum(mu(1:rho)) - z);
+  w = max(v - theta, 0);
+endfunction

@@ -16,6 +16,7 @@
 
 library(igraph)
 library(ggplot2)
+library(desStats)
 
 
 des.diagnostic.sum <- function(g, simNum, replications) {
@@ -83,7 +84,7 @@ des.diagnostic.plots <- function(cl, simNum, replications, graphs, stopTime, ps=
   df$lclUtil = df$meanUtilisation - 1.96 * sortedResult[,7]
 
   if (ps) {
-    pdf(paste(simNum, "/graph-response-diagnostic-evo-plot.pdf", sep=""), onefile=FALSE, version=1.4)
+    des.pdf(paste(simNum, "/graph-response-diagnostic-evo-plot.pdf", sep=""))
   }
 
 
@@ -101,7 +102,7 @@ des.diagnostic.plots <- function(cl, simNum, replications, graphs, stopTime, ps=
   }
 
   if (ps) {
-    pdf(paste(simNum, "/graph-delay-diagnostic-evo-plot.pdf", sep=""), onefile=FALSE, version=1.4)
+    des.pdf(paste(simNum, "/graph-delay-diagnostic-evo-plot.pdf", sep=""))
   }
 
   p <- ggplot(df, aes(x=time, y=meanDelay))
@@ -118,7 +119,7 @@ des.diagnostic.plots <- function(cl, simNum, replications, graphs, stopTime, ps=
   }
 
   if (ps) {
-    pdf(paste(simNum, "/graph-util-diagnostic-evo-plot.pdf", sep=""), onefile=FALSE, version=1.4)
+    des.pdf(paste(simNum, "/graph-util-diagnostic-evo-plot.pdf", sep=""))
   }
 
   p <- ggplot(df, aes(x=time, y=meanUtilisation))
@@ -146,14 +147,12 @@ message("Start with the diagnostics!")
 
 
 if (@HAVE_MPI@) {
-  # read the NODEFILE to find out how many nodes are participating in the cluster
-  nodes <- read.table("NODEFILE")
-  
   # make the cluster
-  cl <- makeCluster(length(nodes$V1), type="MPI")
+  cl <- makeCluster(8, type="MPI")
 
   clusterEvalQ(cl, library(igraph))
   clusterEvalQ(cl, library(ggplot2))
+  clusterEvalQ(cl, library(desStats))
 }
 
 simulations <- read.csv("simulations.dat", header=TRUE)

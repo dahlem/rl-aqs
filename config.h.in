@@ -123,6 +123,9 @@
 /* define event debugging, if disabled */
 #undef NDEBUG_EVENTS
 
+/* define fal debugging, if disabled */
+#undef NDEBUG_FAL
+
 /* define network debugging, if disabled */
 #undef NDEBUG_NETWORK
 

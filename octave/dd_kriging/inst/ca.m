@@ -57,6 +57,19 @@ function D = ca_mesh(boundaries, meshsize)
 endfunction
 
 
+function D = ca_mesh2D(boundaries, meshsize)
+  stepsize1 = (boundaries(2, 1) - boundaries(1, 1)) / meshsize;
+  stepsize2 = (boundaries(2, 2) - boundaries(1, 2)) / meshsize;
+
+  x = boundaries(1, 1):stepsize1:boundaries(2, 1);
+  y = boundaries(1, 2):stepsize2:boundaries(2, 2);
+
+  [xx, yy] = meshgrid(x, y);
+
+  D = [vec(xx), vec(yy)];
+endfunction
+
+
 function X = ca_modelM(D)
   n = rows(D);
   nvar = columns(D);
@@ -263,50 +276,76 @@ endfunction
 
 
 function ca_serialiseRidge(prefix, B, b0, b, f, lambdas, increment, start=-1000000, dist, thresh=0.01, caminx, camaxx, minX, maxX, scale=1)
-  outfile = [prefix "-ridge_path.dat"];
+  outfile = [prefix "-ridge_path-" int2str(scale) ".dat"];
   fd = fopen(outfile, "wt");
   ## calculate the ridge path
+  fprintf(stdout, "analyse minimum path\n");
+  fflush(stdout);
   [xP, RP, yP, incr] = ca_analyseRidgeFocalIntermediate(B, b0, b, f, start:increment:floor(lambdas(1) - increment), dist);
 
   ## serialise the ridge path
   for r = 1:rows(incr)
     if (scale == 1)
-      fprintf(fd, "%.10f,%.10f,%.10f,%.10f,%.10f,%.10f,0\n", incr(r), RP(r), yP(r), backscale_design(xP(r,:), caminx', camaxx'));
+      des = backscale_design(xP(r,:), caminx', camaxx');
     elseif (scale == 2)
-      fprintf(fd, "%.10f,%.10f,%.10f,%.10f,%.10f,%.10f,0\n", incr(r), RP(r), yP(r), scale_design(backscale_design(xP(r,:), caminx', camaxx'), minX', maxX'));
+      des = scale_design(backscale_design(xP(r,:), caminx', camaxx'), minX', maxX');
     else
-      fprintf(fd, "%.10f,%.10f,%.10f,%.10f,%.10f,%.10f,0\n", incr(r), RP(r), yP(r), xP(r,:));
+      des = xP(r,:);
     endif
+
+
+    fprintf(fd, "%.10f,%.10f,%.10f,", incr(r), RP(r), yP(r));
+    for j = 1:(rows(caminx')-1)
+      fprintf(fd, "%.10f,", des(j));
+    endfor
+    fprintf(fd, "%.10f,0\n", des(rows(caminx')));
   endfor
 
   for i = 1:(rows(lambdas) - 1)
     ## calculate the ridge path
+    fprintf(stdout, "analyse %d centre paths\n", i);
+    fflush(stdout);
     [xP, RP, yP, incr] = ca_analyseRidgeFocalIntermediate(B, b0, b, f, floor(lambdas(i) + increment):increment:floor(lambdas(i+1) - increment), dist);
 
     ## serialise the ridge path
     for r = 1:rows(incr)
       if (scale == 1)
-	fprintf(fd, "%.10f,%.10f,%.10f,%.10f,%.10f,%.10f,%d\n", incr(r), RP(r), yP(r), backscale_design(xP(r,:), caminx', camaxx'), i);
+        des = backscale_design(xP(r,:), caminx', camaxx');
       elseif (scale == 2)
-	fprintf(fd, "%.10f,%.10f,%.10f,%.10f,%.10f,%.10f,%d\n", incr(r), RP(r), yP(r), scale_design(backscale_design(xP(r,:), caminx', camaxx'), minX', maxX'),i);
+        des = scale_design(backscale_design(xP(r,:), caminx', camaxx'), minX', maxX');
       else
-	fprintf(fd, "%.10f,%.10f,%.10f,%.10f,%.10f,%.10f,%d\n", incr(r), RP(r), yP(r), xP(r,:), i);
+        des = xP(r,:);
       endif
+
+      fprintf(fd, "%.10f,%.10f,%.10f,", incr(r), RP(r), yP(r));
+      for j = 1:(rows(caminx')-1)
+        fprintf(fd, "%.10f,", des(j));
+      endfor
+      fprintf(fd, "%.10f,%d\n", des(rows(caminx')), i);
     endfor
   endfor
 
   ## calculate the 2q ridge path
+  fprintf(stdout, "analyse maximum paths\n");
+  fflush(stdout);
   [xP, RP, yP, incr] = ca_analyseRidgeFocal(B, b0, b, f, lambdas(rows(lambdas)), increment, dist, thresh);
 
   ## serialise the 2q ridge path
   for r = 1:rows(incr)
     if (scale == 1)
-      fprintf(fd, "%.10f,%.10f,%.10f,%.10f,%.10f,%.10f,%d\n", incr(r), RP(r), yP(r), backscale_design(xP(r,:), caminx', camaxx'), rows(lambdas));
+      des = backscale_design(xP(r,:), caminx', camaxx');
     elseif (scale == 2)
-      fprintf(fd, "%.10f,%.10f,%.10f,%.10f,%.10f,%.10f,%d\n", incr(r), RP(r), yP(r), scale_design(backscale_design(xP(r,:), caminx', camaxx'), minX', maxX'),rows(lambdas));
+      des = scale_design(backscale_design(xP(r,:), caminx', camaxx'), minX', maxX');
     else
-      fprintf(fd, "%.10f,%.10f,%.10f,%.10f,%.10f,%.10f,%d\n", incr(r), RP(r), yP(r), xP(r,:), rows(lambdas));
+      des = xP(r,:);
     endif
+
+
+    fprintf(fd, "%.10f,%.10f,%.10f,", incr(r), RP(r), yP(r));
+    for j = 1:(rows(caminx')-1)
+      fprintf(fd, "%.10f,", des(j));
+    endfor
+    fprintf(fd, "%.10f,%d\n", des(rows(caminx')), rows(lambdas));
   endfor
   fclose(fd);
 endfunction
