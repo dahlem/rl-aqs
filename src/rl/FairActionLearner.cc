@@ -93,7 +93,8 @@ boost::uint16_t FairActionLearner::operator() (
         // 2. for each action
         for (boost::uint16_t i = 0; i < p_values.size(); ++i) {
             // 2.1. calc the difference between current Q and average Q
-            gradient[i] = orig[i] + m_eta * (p_values[i].second - q_mean);
+            double diff = (p_values[i].second - q_mean);
+            gradient[i] = orig[i] + m_eta * diff;
         }
 
         dutils::Simplex::projectionDuchi(p_values.size(), gradient, 1.0, 0.0, m_simplex_rng);

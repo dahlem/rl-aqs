@@ -418,7 +418,7 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
                 desArgs->rl_policy_boltzmann_t = vm[RL_POLICY_BOLTZMANN_T.c_str()].as <double>();
             }
             std::cout << "RL Boltzmann T: " << desArgs->rl_policy_boltzmann_t << "." << std::endl;
-        } else if (desArgs->rl_policy == 3) {
+        } else if ((desArgs->rl_policy == 3) || (desArgs->rl_policy == 4)) {
             if (vm.count(RL_POLICY_EPSILON.c_str())) {
                 desArgs->rl_policy_epsilon = vm[RL_POLICY_EPSILON.c_str()].as <double>();
             }
