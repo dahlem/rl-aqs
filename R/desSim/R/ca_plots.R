@@ -189,6 +189,27 @@ des.ca.ridge.y.plot <- function(prefix, path, paths, end, ps=TRUE) {
 }
 
   
+des.ca.ridge.y.group.plot <- function(prefix, paths, ps=TRUE) {
+  if (ps) {
+    des.postscript(paste(prefix, "-ca-ridge-y.eps", sep=""), width=2.8, height=2.8, pointsize=8)
+  }
+
+  data <- read.csv(paste(prefix, "-ridge_path-1.dat", sep=""), header=FALSE, col.names=c("incr", "R", "y", paste("x", 1:(paths - 1), sep=""), "path"))
+  data$path <- data$path + 1
+  p <- ggplot(data, aes(x=R, y=y, linetype=factor(path)))
+  p <- p + geom_line()
+  p <- p + scale_linetype("Path")
+  p <- p + scale_y_continuous(expression(hat(y)))
+  p <- p + theme_bw(base_size=8)
+
+  print(p)
+  
+  if (ps) {
+    dev.off()
+  }
+}
+
+  
 des.ca.plot <- function(prefix="2d-shdf", ps=TRUE) {
   if (ps) {
     des.postscript(paste(prefix, "-ca-model.eps", sep=""), width=3.0, height=2.8, pointsize=8)

@@ -133,7 +133,7 @@ des.control.ownership <- function(graph, policy=c("wpl", "epsilon", "boltzman"),
   WIntegrated <- des.matrix.integrated.ownership(W, nonTopProp)
   vertices <- 0:(vcount(graph)-1)
 
-  df <- data.frame(id=vertex, cint=HIntegrated, phiint=WIntegrated)
+  df <- data.frame(id=vertices, cint=HIntegrated, phiint=WIntegrated)
   df <- df[order(df$cint, decreasing=TRUE),]
   df$cintCumsum <- cumsum(df$cint)
   df$cintCumsumNorm <- df$cintCumsum/sum(df$cint)
@@ -146,6 +146,38 @@ des.control.ownership <- function(graph, policy=c("wpl", "epsilon", "boltzman"),
 
   return(df)
 }
+
+
+des.backbone.control <- function(data, vartheta) {
+  backbone <- data[data$phiintCumsumNorm < vartheta,]
+  return(backbone)
+}
+
+
+des.backbone.control.eta.100 <- function(data) {
+  backbone <- data[data$phiintCumsumNorm < 1.0,]
+  etaHat <- length(backbone$phiintCumsumNorm)
+  return(etaHat)
+}
+
+
+des.backbone.control.eta.prime <- function(data, vartheta) {
+  backbone <- des.backbone.control(data, vartheta)
+  etahat <- length(backbone$phiintCumsumNorm)
+  eta100 <- des.backbone.control.eta.100(data)
+
+  etaPrime <- etahat/eta100
+}
+
+
+des.backbone.control.local <- function(graph, backbone, inout=1) {
+  W <- des.topo.weighted.Weight(graph, mode=1) ## actual weights
+  strengths <- des.topo.weighted.strength(W, graph, inout, T)
+  sizeBackbone <- length(backbone$id)
+
+  localControl <- sum(strengths[backbone$id+1])/sizeBackbone
+}
+
 
 
 des.qval.average.props.i <- function(i, graph) {
@@ -212,7 +244,43 @@ des.control.plot <- function(prefix="", df, ps=TRUE, width=2.8, height=2.8, pts=
   p <- p + coord_trans(x = "log")
   p <- p + scale_y_continuous(expression(vartheta))
   p <- p + scale_x_continuous(expression(eta))
-  p <- p + theme_bw()
+  p <- p + theme_bw(base_size=8)
+  print(p)
+
+  if (ps) {
+    dev.off()
+  }
+}
+
+des.local.control.plot <- function(prefix="", df, ps=TRUE, width=2.8, height=2.8, pts=8) {
+  if (ps) {
+    filename <- paste(prefix, "-local-control.eps", sep="")
+    des.postscript(filename, width, height, pointsize=pts)
+  }
+
+  p <- ggplot(df, aes(x=time, y=localControl))
+  p <- p + geom_line()
+  p <- p + scale_y_continuous(expression(bar(s)))
+  p <- p + scale_x_continuous("Time")
+  p <- p + theme_bw(base_size=8)
+  print(p)
+
+  if (ps) {
+    dev.off()
+  }
+}
+
+des.eta.prime.plot <- function(prefix="", df, ps=TRUE, width=2.8, height=2.8, pts=8) {
+  if (ps) {
+    filename <- paste(prefix, "-eta-prime.eps", sep="")
+    des.postscript(filename, width, height, pointsize=pts)
+  }
+
+  p <- ggplot(df, aes(x=time, y=etaPrime))
+  p <- p + geom_line()
+  p <- p + scale_y_continuous(expression(paste(eta, "'", sep="")))
+  p <- p + scale_x_continuous("Time")
+  p <- p + theme_bw(base_size=8)
   print(p)
 
   if (ps) {
@@ -232,7 +300,7 @@ des.ownership.plot <- function(prefix="", df, ps=TRUE, width=2.8, height=2.8, pt
   p <- p + coord_trans(x = "log")
   p <- p + scale_y_continuous(expression(phi))
   p <- p + scale_x_continuous(expression(eta))
-  p <- p + theme_bw()
+  p <- p + theme_bw(base_size=8)
   print(p)
 
   if (ps) {
