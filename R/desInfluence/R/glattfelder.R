@@ -243,7 +243,7 @@ des.control.plot <- function(prefix="", df, ps=TRUE, width=2.8, height=2.8, pts=
   p <- p + geom_point()
   p <- p + coord_trans(x = "log")
   p <- p + scale_y_continuous(expression(vartheta))
-  p <- p + scale_x_continuous(expression(eta))
+  p <- p + scale_x_continuous(expression(eta), breaks=c(0.2, 0.4, 1.0))
   p <- p + theme_bw(base_size=8)
   print(p)
 
@@ -299,7 +299,7 @@ des.ownership.plot <- function(prefix="", df, ps=TRUE, width=2.8, height=2.8, pt
   p <- p + geom_point()
   p <- p + coord_trans(x = "log")
   p <- p + scale_y_continuous(expression(phi))
-  p <- p + scale_x_continuous(expression(eta))
+  p <- p + scale_x_continuous(expression(eta), breaks=c(0.2, 0.4, 1.0))
   p <- p + theme_bw(base_size=8)
   print(p)
 

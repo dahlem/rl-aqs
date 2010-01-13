@@ -1,4 +1,4 @@
-# Copyright (C) 2007-2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+# Copyright (C) 2007-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 #  
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without 
@@ -259,6 +259,8 @@ AC_CONFIG_FILES([
    R/desStats/DESCRIPTION
    R/desSim/Makefile
    R/desSim/DESCRIPTION
+   R/graphProps/Makefile
+   R/graphProps/DESCRIPTION
    src/Makefile
    src/common/Makefile
    src/common/list/Makefile

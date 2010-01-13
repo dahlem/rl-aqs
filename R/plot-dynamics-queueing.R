@@ -24,12 +24,12 @@ vplayout <- function(Layout) {
 subplot <- function(x, y) viewport(layout.pos.row = x, layout.pos.col = y)
 
 
-des.dynamics.queueing.utilisation.plot.group <- function(prefix,
-                                                         group=c("soc-epsilon-dv12-de12-diagnostics.dat", "soc-epsilon-outsource-dv12-de12-diagnostics.dat"),
-                                                         labels=c(expression(paste(epsilon, "-greedy")), expression(paste(epsilon, "-greedy CFA"))),
-                                                         stopTime=200000, ps=TRUE) {
+des.dynamics.queueing.plot.group <- function(prefix,
+                                             group=c("soc-epsilon-dv12-de12-diagnostics.dat", "soc-epsilon-outsource-dv12-de12-diagnostics.dat"),
+                                             labels=c(expression(paste(epsilon, "-greedy")), expression(paste(epsilon, "-greedy CFA"))),
+                                             stopTime=200000, ps=TRUE) {
   if (ps) {
-    des.pdf(paste(prefix, "-dynamics-queueing-diagnostic-evo-plot.pdf", sep=""), width=9.52, height=2.8)
+    des.pdf(paste(prefix, "-dynamics-queueing-diagnostic-evo-plot.pdf", sep=""), width=6.264, height=1.74)
   }
 
   data <- read.csv(group[1])
@@ -47,6 +47,8 @@ des.dynamics.queueing.utilisation.plot.group <- function(prefix,
   if (length(group) > 1) {
     for (i in 2:length(group)) {
       data <- read.csv(group[i])
+      n <- length(data$g)
+      interval <- stopTime / n;
       sortedDat <- data[order(unlist(data[,1])), ]
 
       df <- rbind(df, data.frame(time = seq(1, n) * interval,
@@ -69,6 +71,8 @@ des.dynamics.queueing.utilisation.plot.group <- function(prefix,
   p1 <- p1 + opts(legend.position = "none")
 
   data <- read.csv(group[1])
+  n <- length(data$g)
+  interval <- stopTime / n;
   sortedDat <- data[order(unlist(data[,1])), ]
   df1 <- data.frame(time = seq(1, n) * interval,
                     meanResponse = sortedDat$meanResponse,
@@ -80,6 +84,8 @@ des.dynamics.queueing.utilisation.plot.group <- function(prefix,
   if (length(group) > 1) {
     for (i in 2:length(group)) {
       data <- read.csv(group[i])
+      n <- length(data$g)
+      interval <- stopTime / n;
       sortedDat <- data[order(unlist(data[,1])), ]
 
       df1 <- rbind(df1, data.frame(time = seq(1, n) * interval,
@@ -101,6 +107,8 @@ des.dynamics.queueing.utilisation.plot.group <- function(prefix,
 
   
   data <- read.csv(group[1])
+  n <- length(data$g)
+  interval <- stopTime / n;
   sortedDat <- data[order(unlist(data[,1])), ]
   df2 <- data.frame(time = seq(1, n) * interval,
                     meanDelay = sortedDat$meanDelay,
@@ -112,6 +120,8 @@ des.dynamics.queueing.utilisation.plot.group <- function(prefix,
   if (length(group) > 1) {
     for (i in 2:length(group)) {
       data <- read.csv(group[i])
+      n <- length(data$g)
+      interval <- stopTime / n;
       sortedDat <- data[order(unlist(data[,1])), ]
 
       df2 <- rbind(df2, data.frame(time = seq(1, n) * interval,
@@ -132,8 +142,8 @@ des.dynamics.queueing.utilisation.plot.group <- function(prefix,
   p3 <- p3 + opts(legend.position = "none")
 
   Layout <- grid.layout(nrow = 1, ncol = 4,
-                        widths = unit(c(1, 1, 1, .4), c("null", "null", "null", "null")),
-                        heights = unit(c(3.4), c("null")))
+                        widths = unit(c(1, 1, 1, .6), c("null", "null", "null", "null")),
+                        heights = unit(c(3.6), c("null")))
   
   vplayout(Layout)
   print(p1, vp = subplot(1, 1))

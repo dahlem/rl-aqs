@@ -14,7 +14,7 @@
 ## Created: 10.11.2008
 ## Version: 0.1
 
-function D = gen3fact(n)
+function D = gen3fact(n, boundaries)
   dim = 3^n;
   D = zeros(dim, n);
   for i = 1:dim
@@ -24,6 +24,11 @@ function D = gen3fact(n)
       j = floor(j / 3);
     endfor
   endfor
+
+  ## scale to be between [0;1]
+  D = D - 1;
+  D = D./2;
+  D = repmat(boundaries(1,:), rows(D), 1) .+ D .* repmat(boundaries(2,:) - boundaries(1,:), rows(D), 1);
 endfunction
 
 ## boundaries: the boundaries of the input variables. The first row
