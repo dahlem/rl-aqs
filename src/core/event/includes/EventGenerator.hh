@@ -1,4 +1,4 @@
-// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -50,34 +50,21 @@ private:
     ~EventGenerator();
 
 public:
-    static void generate(
-        dnet::Graph &p_graph,
+    static void generateLogGraphEvent(
         dcommon::Queue &p_queue,
-        dsample::tGslRngSP arrival_rng,
-        boost::int32_t destination,
-        double arrival_rate,
-        double stop_time);
+        double p_scheduledTime);
 
-    static void generate(
-        dnet::Graph &p_graph,
+    static void generateArrivalAdmin(
+        dcommon::Queue &p_queue,
+        boost::int32_t p_destination,
+        double p_time);
+
+    static void generateArrival(
         dcommon::Queue &p_queue,
         dsample::tGslRngSP arrival_rng,
         boost::int32_t destination,
-        double arrival_rate,
         double start_time,
-        double stop_time);
-
-    static void generate(
-        dcommon::Queue &p_queue,
-        dsample::tGslRngSP arrival_rng,
-        boost::int32_t destination,
         double arrival_rate);
-
-    static void generateLogGraph(
-        dcommon::Queue &p_queue,
-        double rate,
-        double stop_time);
-
 };
 
     }

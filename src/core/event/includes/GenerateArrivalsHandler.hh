@@ -1,4 +1,4 @@
-// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -18,8 +18,8 @@
  * This header file specifies the unprocessedEvent handler subject.
  */
 
-#ifndef __GENERATEEVENTHANDLER_HH__
-#define __GENERATEEVENTHANDLER_HH__
+#ifndef __GENERATEARRIVALSHANDLER_HH__
+#define __GENERATEARRIVALSHANDLER_HH__
 
 #if HAVE_CONFIG_H
 # include <config.h>
@@ -56,29 +56,24 @@ namespace core
 {
 
 
-typedef boost::shared_array <int> tIntSA;
 typedef boost::shared_array <boost::int32_t> Int32SA;
 
 
-/** @class GenerateEventHandler
- * The class @code{GenerateEventHandler} generates events in the DES.
+/** @class GenerateArrivalsHandler
+ * The class @code{GenerateArrivalsHandler} generates events in the DES.
  */
-class GenerateEventHandler : public design::Observer<dcore::LastArrivalEvent>
+class GenerateArrivalsHandler : public design::Observer<dcore::LastArrivalEvent>
 {
 public:
-    GenerateEventHandler(dnet::Graph&, Int32SA, int, dcommon::Queue&, double);
-    ~GenerateEventHandler();
+    GenerateArrivalsHandler(dnet::Graph&, Int32SA, dcommon::Queue&);
+    ~GenerateArrivalsHandler();
 
     void update(dcore::LastArrivalEvent *subject);
 
 private:
     dnet::Graph &m_graph;
     Int32SA m_arrivalRngs;
-    int m_generations;
     dcommon::Queue &m_queue;
-    double m_stopTime;
-    tIntSA m_currentGeneration;
-    double m_interval;
 
 };
 
@@ -88,4 +83,4 @@ private:
 }
 
 
-#endif /* __GENERATEEVENTHANDLER_HH__ */
+#endif /* __GENERATEARRIVALSHANDLER_HH__ */

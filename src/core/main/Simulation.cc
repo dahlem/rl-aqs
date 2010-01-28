@@ -1,4 +1,4 @@
-// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -67,7 +67,8 @@ namespace fs = boost::filesystem;
 #include "ExpertNegativeHandler.hh"
 #include "FairActionLearner.hh"
 #include "FullRLResponseHandler.hh"
-#include "GenerateEventHandler.hh"
+#include "GenerateArrivalsHandler.hh"
+#include "GenerateArrivalsAdminHandler.hh"
 #include "HybridFullRLResponseHandler.hh"
 #include "LastArrivalEvent.hh"
 #include "LastEventHandler.hh"
@@ -434,16 +435,16 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
         dnet::VertexArrivalRateMap vertex_arrival_props_map =
             get(vertex_arrival_rate, *graph);
 
-        // generate events for each vertex in the graph
-        double stopTimeAdj = 0.0;
+        // // generate events for each vertex in the graph
+        // double stopTimeAdj = 0.0;
 
-        // find out whether we only generate the events in phases
-        if (desArgs->generations < 0) {
-            stopTimeAdj = desArgs->stop_time;
-        } else {
-            // calculate the phases
-            stopTimeAdj = desArgs->stop_time / desArgs->generations;
-        }
+        // // find out whether we only generate the events in phases
+        // if (desArgs->generations < 0) {
+        //     stopTimeAdj = desArgs->stop_time;
+        // } else {
+        //     // calculate the phases
+        //     stopTimeAdj = desArgs->stop_time / desArgs->generations;
+        // }
 
         boost::int32_t destination = 0;
         double arrival_rate = 0.0;
@@ -472,8 +473,7 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
 
                     dsample::tGslRngSP arrival_rng = dsample::CRN::getInstance().get(
                         arrivalCRNs[destination]);
-                    EventGenerator::generate(
-                        queue, arrival_rng, destination, arrival_rate);
+                    EventGenerator::generateArrivalAdmin(queue, destination, 0.0);
                 } else {
                     std::cout << "Error: Expected a single vertex to be traced!" << std::endl;
                     break;
@@ -482,8 +482,6 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
                 count++;
             }
         } else {
-            double graphGenRate = desArgs->stop_time;
-
             std::pair <dnet::VertexIterator, dnet::VertexIterator> p;
             dsample::tGslRngSP arrival_rng;
 
@@ -499,20 +497,19 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
                 std::cout << "... for vertex " << destination << std::endl;
 #endif /* NDEBUG */
 
-                arrival_rng = dsample::CRN::getInstance().get(
-                    arrivalCRNs[destination]);
-                EventGenerator::generate(
-                    *graph, queue, arrival_rng, destination, arrival_rate, stopTimeAdj);
+                arrival_rng = dsample::CRN::getInstance().get(arrivalCRNs[destination]);
+                EventGenerator::generateArrivalAdmin(queue, destination, 0.0);
+            }
+        }
+
+        double graphGenRate = desArgs->stop_time;
+
+        if (desArgs->log_graphs) {
+            if (desArgs->graph_rate > 1) {
+                graphGenRate = desArgs->stop_time / desArgs->graph_rate;
             }
 
-            if (desArgs->log_graphs) {
-                if (desArgs->graph_rate > 1) {
-                    graphGenRate = desArgs->stop_time / desArgs->graph_rate;
-                }
-
-                EventGenerator::generateLogGraph(
-                    queue, graphGenRate, desArgs->stop_time);
-            }
+            EventGenerator::generateLogGraphEvent(queue, 0.0);
         }
 
         // configure the results directory
@@ -531,7 +528,8 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
         AckEvent ackEvent;
         LeaveEvent leaveEvent;
 
-        LogGraphHandler logGraphHandler(resultsBaseDir, *graph);
+        GenerateArrivalsAdminHandler generateArrivalsAdminHandler(*graph, arrivalCRNs, queue);
+        LogGraphHandler logGraphHandler(resultsBaseDir, *graph, queue, graphGenRate, desArgs->stop_time);
 
         ArrivalHandler arrivalHandler(queue, *graph, serviceCRNs);
         NumEventsHandler numEventsHandler(*graph);
@@ -543,15 +541,12 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
 
         leaveEvent.attach(leaveHandler);
 
-        // we only need to register an event generation handler, if there are > 1 phases
-        GenerateEventHandler generateEventHandler(
-                *graph, arrivalCRNs, desArgs->generations, queue, desArgs->stop_time);
-        if (desArgs->generations > 1) {
-            lastArrivalEvent.attach(generateEventHandler);
-        }
+        GenerateArrivalsHandler generateArrivalsHandler(*graph, arrivalCRNs, queue);
+        lastArrivalEvent.attach(generateArrivalsHandler);
 
         // attach the handlers to the events
         // the order of the handlers is important
+        adminEvent.attach(generateArrivalsAdminHandler);
         adminEvent.attach(logGraphHandler);
 
         // only register the logging handlers, if they are configured.
@@ -695,7 +690,7 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
                                                   nn_uniform_rng_index, desArgs->nn_cg,
                                                   desArgs->nn_loss_policy, desArgs->nn_window,
                                                   desArgs->nn_brent_iter, nn_momentum, desArgs->nn_outsource,
-                                                  desArgs->regret_absolute, desArgs->incentive_deviate));
+                                                  desArgs->regret_absolute, desArgs->incentive_deviate, desArgs->nn_loss_serialise));
                     ackEvent.attach(*fullRlResponseHandler);
                 }
             } else {

@@ -1,4 +1,4 @@
-// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009, 2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -45,7 +45,6 @@ namespace des { namespace core {
  * const variables specifying the allowed options.
  */
 const std::string STOPTIME = "stop_time";
-const std::string GENERATIONS = "generations";
 const std::string MAX_ARRIVAL = "max_arrival_rate";
 
 const std::string GRAPH = "graph";
@@ -128,6 +127,7 @@ const std::string CL_NN_OUTSOURCE = "nn_outsource";
 const std::string CL_RL_STATE_IDS = "rl_state_representation";
 const std::string MIN_NN_MOMENTUM = "min_nn_momentum";
 const std::string MAX_NN_MOMENTUM = "max_nn_momentum";
+const std::string CL_NN_LOSS_SERIALISE = "nn_loss_serialise";
 
 
 /** @typedef tOptDescSP
@@ -135,7 +135,7 @@ const std::string MAX_NN_MOMENTUM = "max_nn_momentum";
  */
 typedef boost::shared_ptr <po::options_description> tOptDescSP;
 
-static const std::string ARGS_HEADER = "stop_time,generations,graphs,max_arrival,boost_arrival,boost_edge,confidence,alpha,error,initial_reps,network_type,network_size,max_edges,edgeProb,edgeDiffusion,rl,rlq_alpha,rlq_lambda,rl_policy,rl_policy_epsilon,rl_policy_boltzmann_t,rl_hybrid,rl_hybrid_warmup,nn_momentum,rl_policy_wpl_eta";
+static const std::string ARGS_HEADER = "stop_time,graphs,max_arrival,boost_arrival,boost_edge,confidence,alpha,error,initial_reps,network_type,network_size,max_edges,edgeProb,edgeDiffusion,rl,rlq_alpha,rlq_lambda,rl_policy,rl_policy_epsilon,rl_policy_boltzmann_t,rl_hybrid,rl_hybrid_warmup,nn_momentum,rl_policy_wpl_eta";
 
 /** @struct
  * structure specifying the command line variables.
@@ -158,7 +158,6 @@ struct desArgs_t {
     double max_arrival;             /* the max. arrival rate */
 
     double stop_time;               /* stopping time of the DES */
-    boost::int32_t generations;     /* number of generations for the event simulation */
     bool confidence;                /* run experiments within a confidence band */
     bool lhs;                       /* run experiments with lhs sampling */
     double alpha;                   /* 100(1 - alpha) confidence interval for the experiments */
@@ -221,6 +220,7 @@ struct desArgs_t {
     double nn_momentum;
     bool nn_cg;
     bool nn_outsource;
+    bool nn_loss_serialise;
     double min_nn_momentum;          /* min momentum */
     double max_nn_momentum;          /* max momentum */
     double rl_policy_wpl_eta;          /* wpl learning rate */
@@ -233,7 +233,7 @@ struct desArgs_t {
           events_unprocessed(args.events_unprocessed), events_processed(args.events_processed), add_sim(args.add_sim),
           sim_dir(args.sim_dir), graph_single(args.graph_single), trace_event(args.trace_event), log_events(args.log_events), log_graphs(args.log_graphs),
           vertex(args.vertex), graph_rate(args.graph_rate), max_arrival(args.max_arrival),
-          stop_time(args.stop_time), generations(args.generations), confidence(args.confidence),
+          stop_time(args.stop_time), confidence(args.confidence),
           lhs(args.lhs), alpha(args.alpha), error(args.error),
           replications(args.replications), init_replications(args.init_replications), simulations(args.simulations), sim_num(args.sim_num),
           rep_num(args.rep_num), net_size(args.net_size), max_size(args.max_size),
@@ -250,7 +250,7 @@ struct desArgs_t {
           expert_positive(args.expert_positive), expert_negative(args.expert_negative), regret_absolute(args.regret_absolute), incentive_deviate(args.incentive_deviate),
           rl_state_representation(args.rl_state_representation), nn_hidden_neurons(args.nn_hidden_neurons), nn_loss_policy(args.nn_loss_policy),
           nn_window(args.nn_window), nn_brent_iter(args.nn_brent_iter), nn_momentum(args.nn_momentum),
-          nn_cg(args.nn_cg), nn_outsource(args.nn_outsource), min_nn_momentum(args.min_nn_momentum), max_nn_momentum(args.max_nn_momentum),
+          nn_cg(args.nn_cg), nn_outsource(args.nn_outsource), nn_loss_serialise(args.nn_loss_serialise), min_nn_momentum(args.min_nn_momentum), max_nn_momentum(args.max_nn_momentum),
           rl_policy_wpl_eta(args.rl_policy_wpl_eta), min_rl_policy_wpl_eta(args.min_rl_policy_wpl_eta), max_rl_policy_wpl_eta(args.max_rl_policy_wpl_eta)
         {}
 
@@ -259,7 +259,7 @@ struct desArgs_t {
           events_unprocessed(""), events_processed(""), add_sim(""), sim_dir(""), graph_single(false),
           trace_event(0), log_events(0), log_graphs(0),
           vertex(0), graph_rate(0), max_arrival(0.0),
-          stop_time(0.0), generations(0), confidence(0),
+          stop_time(0.0), confidence(0),
           lhs(0), alpha(0.0), error(0.0),
           replications(0), init_replications(0), simulations(0), sim_num(0),
           rep_num(0), net_size(0), max_size(0),
@@ -276,14 +276,13 @@ struct desArgs_t {
           expert_positive(false), expert_negative(false), regret_absolute(false), incentive_deviate(false), rl_state_representation(),
           nn_hidden_neurons(5), nn_loss_policy(1),
           nn_window(100), nn_brent_iter(500), nn_momentum(1.0),
-          nn_cg(true), nn_outsource(false), min_nn_momentum(0.0), max_nn_momentum(0.0), rl_policy_wpl_eta(0.0),
+          nn_cg(true), nn_outsource(false), nn_loss_serialise(false), min_nn_momentum(0.0), max_nn_momentum(0.0), rl_policy_wpl_eta(0.0),
           min_rl_policy_wpl_eta(0.0), max_rl_policy_wpl_eta(0.0)
         {}
 
     friend std::ostream& operator <<(std::ostream &p_os, const desArgs_t &desArgs)
         {
             p_os << desArgs.stop_time << ","
-                 << desArgs.generations << ","
                  << (desArgs.graph_rate + 1) << ","
                  << desArgs.max_arrival << ","
                  << desArgs.boost_arrival << ","

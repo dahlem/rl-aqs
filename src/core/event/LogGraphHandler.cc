@@ -1,4 +1,4 @@
-// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,16 +23,25 @@ namespace fs = boost::filesystem;
 #include "Entry.hh"
 namespace dcommon = des::common;
 
-#include "LogGraphHandler.hh"
-namespace dcore = des::core;
-
 #include "GraphUtil.hh"
 namespace dnet = des::network;
 
+#include "events.hh"
+#include "LogGraphHandler.hh"
+#include "EventGenerator.hh"
 
 
-dcore::LogGraphHandler::LogGraphHandler(std::string p_baseResultDir, dnet::Graph &p_graph)
-    : m_baseResultDir(p_baseResultDir), m_graph(p_graph)
+namespace des
+{
+namespace core
+{
+
+
+
+LogGraphHandler::LogGraphHandler(std::string p_baseResultDir, dnet::Graph &p_graph,
+                                 dcommon::Queue& p_queue, double p_interval, double p_stopTime)
+    : m_baseResultDir(p_baseResultDir), m_graph(p_graph), m_queue(p_queue), m_interval(p_interval),
+      m_stopTime(p_stopTime), m_counter(0)
 {
     std::stringstream path_str;
 
@@ -45,21 +54,41 @@ dcore::LogGraphHandler::LogGraphHandler(std::string p_baseResultDir, dnet::Graph
     if (!fs::exists(graphs_path)) {
         fs::create_directories(graphs_path);
     }
-
-    counter = 0;
 }
 
 
-dcore::LogGraphHandler::~LogGraphHandler()
+LogGraphHandler::~LogGraphHandler()
 {}
 
 
-void dcore::LogGraphHandler::update(dcore::AdminEvent *subject)
+void LogGraphHandler::update(AdminEvent *subject)
 {
-    std::stringstream file_str;
+    dcommon::Entry *entry = subject->getEvent();
 
-    file_str << m_resultDir << "/" << "graph" << counter << ".gml";
-    dnet::GraphUtil::print(m_graph, file_str.str(), dnet::GraphUtil::GRAPHML);
+    // update the last event time
+    if (entry->getType() == LOG_GRAPH_EVENT) {
+#ifndef NDEBUG_EVENTS
+        std::cout << "LogGraphHandler -- graph : " << m_counter << std::endl;
+#endif /* NDEBUG_EVENTS */
+        std::stringstream file_str;
 
-    counter++;
+        file_str << m_resultDir << "/" << "graph" << m_counter << ".gml";
+        dnet::GraphUtil::print(m_graph, file_str.str(), dnet::GraphUtil::GRAPHML);
+
+        m_counter++;
+
+#ifndef NDEBUG_EVENTS
+        std::cout << "LogGraphHandler -- next time : " << (static_cast<double> (m_counter) * m_interval) << std::endl;
+#endif /* NDEBUG_EVENTS */
+
+        if ((static_cast<double> (m_counter) * m_interval) <= m_stopTime) {
+#ifndef NDEBUG_EVENTS
+            std::cout << "schedule..." << std::endl;
+#endif /* NDEBUG_EVENTS */
+            EventGenerator::generateLogGraphEvent(m_queue, (static_cast<double> (m_counter) * m_interval));
+        }
+    }
+}
+
+}
 }

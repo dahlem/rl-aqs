@@ -11,7 +11,7 @@
 LT_PREREQ([1.5.26])
 AC_PREREQ(2.61)
 AC_INIT([Discrete Event Simulation for Service Interaction],
-        [3.9],
+        [4.0],
         [Dominik Dahlem Dominik.Dahlem@cs.tcd.ie], 
         [des])
 
@@ -61,7 +61,7 @@ AC_CHECK_FUNCS([floor memset sqrt pow])
 AX_PATH_GSL([1.9])
 
 # Boost library check
-AX_BOOST_BASE([1.35])
+AX_BOOST_BASE([1.39])
 AX_BOOST_GRAPH
 AX_BOOST_DATE_TIME
 AX_BOOST_PROGRAM_OPTIONS
@@ -268,6 +268,7 @@ AC_CONFIG_FILES([
    src/core/Makefile
    src/core/event/Makefile
    src/core/main/Makefile
+   src/core/mgmt/Makefile
    src/date/Makefile
    src/design/Makefile
    src/design/pattern/Makefile

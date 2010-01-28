@@ -1,4 +1,4 @@
-// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009, 2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -216,6 +216,18 @@ enum vertex_actual_reward_t { vertex_actual_reward = 1138 };
 enum vertex_best_response_t { vertex_best_response = 1139 };
 
 
+/** @enum vertex_v_nn_loss_t
+ * This enum extends the vertex properties by an best response argument
+ */
+enum vertex_v_nn_loss_t { vertex_v_nn_loss = 1140 };
+
+
+/** @enum edge_e_nn_loss_t
+ * This enum extends the edge properties by a total reward attribute
+ */
+enum edge_e_nn_loss_t { edge_e_nn_loss = 1141 };
+
+
 
 // install the vertex service rate property
 namespace boost
@@ -245,10 +257,12 @@ BOOST_INSTALL_PROPERTY(vertex, regret_absolute);
 BOOST_INSTALL_PROPERTY(vertex, incentive_deviate);
 BOOST_INSTALL_PROPERTY(vertex, actual_reward);
 BOOST_INSTALL_PROPERTY(vertex, best_response);
+BOOST_INSTALL_PROPERTY(vertex, v_nn_loss);
 BOOST_INSTALL_PROPERTY(graph, generator);
 BOOST_INSTALL_PROPERTY(edge, q_val);
 BOOST_INSTALL_PROPERTY(edge, eindex);
 BOOST_INSTALL_PROPERTY(edge, total_reward);
+BOOST_INSTALL_PROPERTY(edge, e_nn_loss);
 }
 
 
@@ -380,10 +394,15 @@ typedef boost::property <vertex_actual_reward_t, double, VertexIncentiveDeviateP
  */
 typedef boost::property <vertex_best_response_t, double, VertexActualRewardProperty> VertexBestResponseProperty;
 
+/** @typedef VertexNNLossProperty
+ * Specifies the property for the loss value of the NN of a vertex
+ */
+typedef boost::property <vertex_v_nn_loss_t, double, VertexBestResponseProperty> VertexNNLossProperty;
+
 /** @typedef VertexProperties
  * This type definition assembles all the properties for the vertices of the graph
  */
-typedef boost::property <boost::vertex_index_t, int, VertexBestResponseProperty> VertexProperties;
+typedef boost::property <boost::vertex_index_t, int, VertexNNLossProperty> VertexProperties;
 
 /** @typedef EdgeWeightProperty
  * Specifies the property for the edge weight
@@ -400,10 +419,15 @@ typedef boost::property <edge_q_val_t, double, EdgeWeightProperty> EdgeQValuePro
  */
 typedef boost::property <edge_total_reward_t, double, EdgeQValueProperty> EdgeTotalRewardProperty;
 
+/** @typedef EdgeNNLossProperty
+ * Specifies the property for the loss value of the NN
+ */
+typedef boost::property <edge_e_nn_loss_t, double, EdgeTotalRewardProperty> EdgeNNLossProperty;
+
 /** @typedef EdgeIndexProperty
  * Specifies the property for the edge index
  */
-typedef boost::property <edge_eindex_t, int, EdgeTotalRewardProperty> EdgeIndexProperty;
+typedef boost::property <edge_eindex_t, int, EdgeNNLossProperty> EdgeIndexProperty;
 
 /** @typedef GraphGeneratorProperty
  * Specifies the property for the edge weight
@@ -565,6 +589,11 @@ typedef boost::property_map <Graph, vertex_actual_reward_t>::type VertexActualRe
  */
 typedef boost::property_map <Graph, vertex_best_response_t>::type VertexBestResponseMap;
 
+/** @typedef VertexNNLossMap
+ * Specifies the map that stores the vertex attribute nn_loss
+ */
+typedef boost::property_map <Graph, vertex_v_nn_loss_t>::type VertexNNLossMap;
+
 /** @typedef EdgeQValueMap
  * Specifies the map that stores the edge q-value attribute
  */
@@ -579,6 +608,11 @@ typedef boost::property_map <Graph, edge_eindex_t>::type EdgeIndexMap;
  * Specifies the map that stores the total reward attribute
  */
 typedef boost::property_map <Graph, edge_total_reward_t>::type EdgeTotalRewardMap;
+
+/** @typedef EdgeNNLossMap
+ * Specifies the map that stores the nn_loss attribute
+ */
+typedef boost::property_map <Graph, edge_e_nn_loss_t>::type EdgeNNLossMap;
 
 /** @typedef EdgeWeightMap
  * Specifies the edge weight property
@@ -702,7 +736,6 @@ const std::string Q_VALUE                           = "q_value";
 const std::string EDGE_INDEX                        = "eindex";
 const std::string NEXT_ACTION                       = "next_action";
 const std::string GRAPH_GENERATOR                   = "graph_generator";
-const std::string NEXT_EVENT_TIME                   = "next_event_time";
 const std::string AVG_EVENT_IN_SYSTEM_TIME          = "avg_event_in_system_time";
 const std::string EXPERT_NORMAL                     = "expert_normal";
 const std::string EXPERT_ABSOLUTE                   = "expert_absolute";
@@ -712,7 +745,9 @@ const std::string REGRET_ABSOLUTE                   = "regret_absolute";
 const std::string INCENTIVE_DEVIATE                 = "incentive_deviate";
 const std::string ACTUAL_REWARD                     = "actual_reward";
 const std::string BEST_RESPONSE                     = "best_response";
+const std::string VERTEX_NN_LOSS                    = "vertex_nn_loss";
 const std::string EDGE_TOTAL_REWARD                 = "total_reward";
+const std::string EDGE_NN_LOSS                      = "edge_nn_loss";
 
 
     }

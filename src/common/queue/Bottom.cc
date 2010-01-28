@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2007-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -41,11 +41,15 @@ namespace bio = boost::iostreams;
 
 #include "Bottom.hh"
 #include "Entry.hh"
-namespace dcommon = des::common;
+
+namespace des
+{
+namespace common
+{
 
 
-dcommon::Bottom::Bottom()
-    : m_lastEvent(0.0), m_list(new dcommon::EntryList())
+Bottom::Bottom()
+    : m_lastEvent(0.0), m_list(new EntryList())
 {
 #ifdef HAVE_LADDERSTATS
     events_in = 0;
@@ -63,10 +67,10 @@ dcommon::Bottom::Bottom()
 }
 
 
-dcommon::Bottom::~Bottom()
+Bottom::~Bottom()
 {
     m_list->erase_and_dispose(m_list->begin(), m_list->end(),
-                              dcommon::delete_disposer());
+                              delete_disposer());
 
     if (m_list != NULL) {
         delete m_list;
@@ -75,7 +79,7 @@ dcommon::Bottom::~Bottom()
 
 
 #ifdef HAVE_LADDERSTATS
-void dcommon::Bottom::record()
+void Bottom::record()
 {
     (*os.get()) << events_in << "," << events_out << "," << size() << std::endl;
 
@@ -86,7 +90,7 @@ void dcommon::Bottom::record()
 #endif /* HAVE_LADDERSTATS */
 
 
-boost::uint32_t dcommon::Bottom::size()
+boost::uint32_t Bottom::size()
 {
     return static_cast<boost::uint32_t> (m_list->size());
 }
@@ -98,12 +102,12 @@ boost::uint32_t dcommon::Bottom::size()
  * starting from the back of the queue in order to maintain stability. Otherwise,
  * the bottom structure would not offer stability characteristics.
  *
- * @see Queue#push(dcommon::Entry) throw (QueueException)
+ * @see Queue#push(Entry) throw (QueueException)
  */
-bool dcommon::Bottom::push(dcommon::Entry *p_entry) throw (dcommon::QueueException)
+bool Bottom::push(Entry *p_entry) throw (QueueException)
 {
 #ifndef NDEBUG_QUEUE
-    std::cout << std::setprecision(14) << "Bottom -- Push event: " << const_cast <const dcommon::Entry&> (*p_entry)
+    std::cout << std::setprecision(14) << "Bottom -- Push event: " << const_cast <const Entry&> (*p_entry)
               << std::endl;
 #endif /* NDEBUG_EVENTS */
     bool inserted = false;
@@ -113,8 +117,8 @@ bool dcommon::Bottom::push(dcommon::Entry *p_entry) throw (dcommon::QueueExcepti
         std::cout << std::setprecision(14) << "Bottom -- PAST event! Last dequeued event: "
                   << m_lastEvent << std::endl;
 #endif /* NDEBUG_QUEUE */
-        throw dcommon::QueueException(
-            dcommon::QueueException::PAST_EVENT_NOT_ALLOWED);
+        throw QueueException(
+            QueueException::PAST_EVENT_NOT_ALLOWED);
     }
 
     if (m_list->empty()) {
@@ -135,14 +139,14 @@ bool dcommon::Bottom::push(dcommon::Entry *p_entry) throw (dcommon::QueueExcepti
         } else {
             // insertion sort from the back
             // maintain stability
-            dcommon::EntryList::reverse_iterator it(m_list->rbegin()), itend(m_list->rend());
+            EntryList::reverse_iterator it(m_list->rbegin()), itend(m_list->rend());
 
             for(; it != itend; ++it) {
                 if (it->getArrival() <= p_entry->getArrival()) {
-                    dcommon::EntryList::iterator pos = m_list->s_iterator_to(*it);
+                    EntryList::iterator pos = m_list->s_iterator_to(*it);
                     pos++;
 #ifndef NDEBUG_QUEUE
-                    dcommon::EntryList::iterator pos_start = m_list->s_iterator_to(*it);
+                    EntryList::iterator pos_start = m_list->s_iterator_to(*it);
                     std::cout << "Bottom -- Inserted between " << pos_start->getArrival()
                               << " and " << pos->getArrival() << std::endl;
 #endif /* NDEBUG_EVENTS */
@@ -177,15 +181,15 @@ bool dcommon::Bottom::push(dcommon::Entry *p_entry) throw (dcommon::QueueExcepti
  *
  * @see List#enlist(node_double_t*, long)
  */
-void dcommon::Bottom::push(dcommon::EntryList* p_list)
+void Bottom::push(EntryList* p_list)
 {
     // this sort does NOT seem to be stable at all
     p_list->sort();
 
 #ifndef NDEBUG_QUEUE
     std::cout << "Bottom -- Push list. Size: " << p_list->size() << std::endl;
-    dcommon::Entry *ef = reinterpret_cast<dcommon::Entry*>(&p_list->front());
-    dcommon::Entry *eb = reinterpret_cast<dcommon::Entry*>(&p_list->back());
+    Entry *ef = reinterpret_cast<Entry*>(&p_list->front());
+    Entry *eb = reinterpret_cast<Entry*>(&p_list->back());
     std::cout << "from: " << ef->getArrival() << " to: " << eb->getArrival() << std::endl;
 #endif /* NDEBUG_EVENTS */
 
@@ -193,8 +197,8 @@ void dcommon::Bottom::push(dcommon::EntryList* p_list)
 
 #ifndef NDEBUG_QUEUE
     std::cout << "Bottom -- Merged lists. Size: " << m_list->size() << std::endl;
-    ef = reinterpret_cast<dcommon::Entry*>(&m_list->front());
-    eb = reinterpret_cast<dcommon::Entry*>(&m_list->back());
+    ef = reinterpret_cast<Entry*>(&m_list->front());
+    eb = reinterpret_cast<Entry*>(&m_list->back());
     std::cout << "from: " << ef->getArrival() << " to: " << eb->getArrival() << std::endl;
 #endif /* NDEBUG_EVENTS */
 
@@ -204,26 +208,26 @@ void dcommon::Bottom::push(dcommon::EntryList* p_list)
 }
 
 
-dcommon::EntryList* dcommon::Bottom::list()
+EntryList* Bottom::list()
 {
     return m_list;
 }
 
-dcommon::Entry* dcommon::Bottom::front() throw (dcommon::QueueException)
+Entry* Bottom::front() throw (QueueException)
 {
     if (m_list->size() == 0) {
-        throw dcommon::QueueException(
-            dcommon::QueueException::QUEUE_EMPTY);
+        throw QueueException(
+            QueueException::QUEUE_EMPTY);
     }
 
-    return reinterpret_cast<dcommon::Entry*>(&m_list->front());
+    return reinterpret_cast<Entry*>(&m_list->front());
 }
 
-void dcommon::Bottom::pop_front() throw (dcommon::QueueException)
+void Bottom::pop_front() throw (QueueException)
 {
     if (m_list->size() == 0) {
-        throw dcommon::QueueException(
-            dcommon::QueueException::QUEUE_EMPTY);
+        throw QueueException(
+            QueueException::QUEUE_EMPTY);
     }
 
 #ifdef HAVE_LADDERSTATS
@@ -236,7 +240,7 @@ void dcommon::Bottom::pop_front() throw (dcommon::QueueException)
     m_list->pop_front();
 }
 
-double dcommon::Bottom::getMaxTS()
+double Bottom::getMaxTS()
 {
     if (!m_list->empty()) {
         return m_list->back().getArrival();
@@ -245,11 +249,15 @@ double dcommon::Bottom::getMaxTS()
     return m_lastEvent;
 }
 
-double dcommon::Bottom::getMinTS()
+
+double Bottom::getMinTS()
 {
     if (!m_list->empty()) {
         return m_list->front().getArrival();
     }
 
     return m_lastEvent;
+}
+
+}
 }

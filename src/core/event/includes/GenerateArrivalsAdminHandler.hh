@@ -1,4 +1,4 @@
-// Copyright (C) 2008-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,18 +14,24 @@
 // along with this program	  ; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-/** @file LogGraphHandler.hh
- * This header file specifies the logGraph handler subject.
+/** @file GenerateArrivalsHandler.hh
+ * This header file specifies the generate arrivals handler subject.
  */
 
-#ifndef __LOGGRAPHHANDLER_HH__
-#define __LOGGRAPHHANDLER_HH__
+#ifndef __GENERATEARRIVALSADMINHANDLER_HH__
+#define __GENERATEARRIVALSADMINHANDLER_HH__
 
-#include <string>
+#if HAVE_CONFIG_H
+# include <config.h>
+#endif
 
+#ifndef __STDC_CONSTANT_MACROS
+# define __STDC_CONSTANT_MACROS
+#endif /* __STDC_CONSTANT_MACROS */
 
-#include "Entry.hh"
-namespace dcommon = des::common;
+#include <boost/cstdint.hpp>
+#include <boost/shared_array.hpp>
+
 
 #include "LadderQueue.hh"
 namespace dcommon = des::common;
@@ -36,45 +42,44 @@ namespace dcore = des::core;
 #include "Observer.hh"
 namespace design = des::design;
 
+#include "CRN.hh"
+namespace dsample = des::sampling;
+
 #include "DirectedGraph.hh"
 namespace dnet = des::network;
 
 
+
 namespace des
 {
-    namespace core
-    {
+namespace core
+{
+
+typedef boost::shared_array <boost::int32_t> Int32SA;
 
 
-/** @class LogGraphHandler
- * The class @code{LogGraphHandler} handles log-graph events in the DES.
+/** @class GenerateArrivalsAdminHandler
+ * The class @code{GenerateArrivalsAdminHandler} generates arrival events in the DES.
  */
-class LogGraphHandler : public design::Observer<dcore::AdminEvent>
+class GenerateArrivalsAdminHandler : public design::Observer<dcore::AdminEvent>
 {
 public:
-    LogGraphHandler(std::string, dnet::Graph&,
-                    dcommon::Queue&, double, double);
-    ~LogGraphHandler();
+    GenerateArrivalsAdminHandler(dnet::Graph&, Int32SA, dcommon::Queue&);
+    ~GenerateArrivalsAdminHandler();
 
     void update(dcore::AdminEvent *subject);
 
 private:
-    std::string m_baseResultDir;
     dnet::Graph &m_graph;
+    Int32SA m_arrivalRngs;
     dcommon::Queue &m_queue;
-    double m_interval;
-    double m_stopTime;
-    int m_counter;
-
-    // derived fields
-    std::string m_resultDir;
 
 };
 
 
 
-    }
+}
 }
 
 
-#endif /* __PROCESSEDEVENTHANDLER_HH__ */
+#endif /* __GENERATEARRIVALSADMINHANDLER_HH__ */

@@ -1,4 +1,4 @@
-// Copyright (C) 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2009, 2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -58,21 +58,25 @@ FullRLResponseHandler::FullRLResponseHandler(dnet::Graph &p_graph, double p_q_al
                                              boost::uint16_t p_hidden_neurons, boost::int32_t p_uniform_rng_index,
                                              bool p_cg, boost::uint16_t p_loss_policy,
                                              boost::uint16_t p_window, boost::uint16_t p_brent_iter,
-                                             double p_momentum, bool p_outsource, bool p_regret_total, bool p_incentive_deviate)
+                                             double p_momentum, bool p_outsource, bool p_regret_total, bool p_incentive_deviate,
+                                             bool p_nn_loss_serialise)
     : m_graph(p_graph), m_q_alpha(p_q_alpha), m_q_lambda(p_q_lambda), m_policy(p_policy),
       m_state_representation(p_state_representation), m_hidden_neurons(p_hidden_neurons),
       m_uniform_rng_index(p_uniform_rng_index),
       qStatsSA(new dstats::OnlineStats[(p_outsource) ? (boost::num_vertices(m_graph)) : (boost::num_edges(m_graph))]),
-      m_outsource(p_outsource), m_regret_total(p_regret_total), m_incentive_deviate(p_incentive_deviate)
+      m_outsource(p_outsource), m_regret_total(p_regret_total), m_incentive_deviate(p_incentive_deviate),
+      m_nn_loss_serialise(p_nn_loss_serialise)
 {
     vertex_next_action_map = get(vertex_next_action, m_graph);
     vertex_index_map = get(boost::vertex_index, m_graph);
     vertex_actual_reward_map = get(vertex_actual_reward, m_graph);
     vertex_regret_total_map = get(vertex_regret_absolute, m_graph);
     vertex_incentive_deviate_map = get(vertex_incentive_deviate, m_graph);
+    vertex_nn_loss_map = get(vertex_v_nn_loss, m_graph);
     edge_q_val_map = get(edge_q_val, m_graph);
     edge_index_map = get(edge_eindex, m_graph);
     edge_total_reward_map = get(edge_total_reward, m_graph);
+    edge_nn_loss_map = get(edge_e_nn_loss, m_graph);
 
     // init the neural network for each edge
     boost::uint16_t num_nets = (m_outsource) ? (boost::num_vertices(m_graph)) : (boost::num_edges(m_graph));
@@ -236,6 +240,14 @@ void FullRLResponseHandler::update(AckEvent *subject)
 
         // update the q_value
         edge_q_val_map[oldE] = m_nets[index]->present(m_inputs)[0];
+
+        if (m_nn_loss_serialise) {
+            if (m_outsource) {
+                edge_nn_loss_map[oldE] = m_objectives[edge_index_map[oldE]]->error();
+            } else {
+                vertex_nn_loss_map[boost::vertex(entry->getOrigin(), m_graph)] = m_objectives[entry->getOrigin()]->error();
+            }
+        }
     } else if (degree == 1) {
         dnet::Edge e = *(boost::out_edges(vertex, m_graph).first);
         newAction = vertex_index_map[boost::target(e, m_graph)];
@@ -251,6 +263,14 @@ void FullRLResponseHandler::update(AckEvent *subject)
 #endif /* NDEBUG_EVENTS */
 
         edge_q_val_map[e] = qStatsSA[index].mean();
+
+        if (m_nn_loss_serialise) {
+            if (m_outsource) {
+                edge_nn_loss_map[e] = m_objectives[edge_index_map[e]]->error();
+            } else {
+                vertex_nn_loss_map[boost::vertex(newAction, m_graph)] = m_objectives[newAction]->error();
+            }
+        }
     }
 
     // set new action

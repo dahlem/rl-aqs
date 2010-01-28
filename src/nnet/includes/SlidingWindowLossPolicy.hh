@@ -1,4 +1,4 @@
-// Copyright (C) 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2009, 2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This file is free software; as a spevectoral exception the author gives
 // unlimited permission to copy and/or distribute it, with or without
@@ -58,8 +58,12 @@ public:
     inline
     double error()
         {
-            return std::accumulate(m_circBuffer.begin(), m_circBuffer.end(), 0.0)
-                / static_cast<double> (m_circBuffer.size());
+            if (m_circBuffer.size() == 0) {
+                return 0.0;
+            } else {
+                return std::accumulate(m_circBuffer.begin(), m_circBuffer.end(), 0.0)
+                    / static_cast<double> (m_circBuffer.size());
+            }
         }
 
     double addError(DoubleSA p_targets, DoubleSA p_outputs, boost::uint16_t p_size)

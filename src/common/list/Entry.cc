@@ -1,4 +1,4 @@
-// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ boost::uintmax_t Entry::uid = 0;
 
 Entry::Entry()
     : delay(0.0), arrival(0.0), externalArrival(0), destination(0), origin(0), type(0),
-      event_path(50), event_arrivals(50)
+      event_path(), event_arrivals()
 {
     uid++;
     id = uid;
@@ -42,7 +42,7 @@ Entry::Entry()
 
 Entry::Entry(double del, double a, int d, int o, int t)
     : delay(del), arrival(a), externalArrival(a), destination(d), origin(o), type(t),
-      event_path(50), event_arrivals(50)
+      event_path(), event_arrivals()
 {
     uid++;
     id = uid;

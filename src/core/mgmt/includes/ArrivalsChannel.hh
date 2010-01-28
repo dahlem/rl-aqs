@@ -1,4 +1,4 @@
-// Copyright (C) 2008-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,11 +14,15 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-/** @file events.hh
- * Specification of the event types.
+/** @file ArrivalsChannel.hh
+ * Specification of the ArrivalsChannel interface.
  */
-#ifndef __EVENTS_HH__
-#define __EVENTS_HH__
+#ifndef __DES_CORE_MGMT_ARRIVALSCHANNEL_HH__
+#define __DES_CORE_MGMT_ARRIVALSCHANNEL_HH__
+
+#if HAVE_CONFIG_H
+# include <config.h>
+#endif
 
 #ifndef __STDC_CONSTANT_MACROS
 # define __STDC_CONSTANT_MACROS
@@ -27,32 +31,24 @@
 #include <boost/cstdint.hpp>
 
 
-namespace des {namespace core {
-
-/**
- * Declaration of the event types
- */
-const boost::int32_t LAST_ARRIVAL_EVENT         = 0;
-const boost::int32_t ARRIVAL_EVENT              = 1;
-const boost::int32_t RESCHEDULED_EVENT          = 2;
-const boost::int32_t DEPARTURE_EVENT            = 3;
-const boost::int32_t ACK_EVENT                  = 4;
-const boost::int32_t LEAVE_EVENT                = 5;
-
-/**
- * Declaration of admin events
- */
-const boost::int32_t LOG_GRAPH_EVENT            = 6;
-const boost::int32_t GENERATE_ARRIVAL_EVENT     = 7;
-
-/**
- * Declaration of the event source
- */
-const boost::int32_t EXTERNAL_EVENT             = -1;
-const boost::int32_t ADMIN_EVENT                = -2;
+namespace des {
+namespace core {
 
 
-    }
+class ArrivalsChannel
+{
+public:
+    ArrivalsChannel() {};
+    virtual ~ArrivalsChannel() {};
+
+    virtual boost::uint16_t getId() 
+        { return id::ARRIVAL_CHANNEL; }
+
+};
+
+
+
+}
 }
 
 

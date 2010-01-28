@@ -1,4 +1,4 @@
-// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -125,12 +125,15 @@ void ArrivalHandler::update(ArrivalEvent *subject)
     // otherwise schedule the departure
     if (vertex_busy_map[vertex]) {
         // the new arrival time is that of the time-service-ends
-        delay = (gsl_fcmp(vertex_time_service_ends_map[vertex], entry->getArrival(), 1e-5) <= 0)
-            ? (0.0)
-            : (vertex_time_service_ends_map[vertex] - entry->getArrival());
+        if ((vertex_time_service_ends_map[vertex] - entry->getArrival()) < 0.0) {
+            delay = 0.0;
+        } else {
+            delay = vertex_time_service_ends_map[vertex] - entry->getArrival();
+        }
 
         departure = vertex_time_service_ends_map[vertex] + service_time;
         vertex_number_in_queue_map[vertex]++;
+        vertex_time_service_ends_map[vertex] = departure;
 
 #ifndef NDEBUG_EVENTS
         std::cout << "Busy -- service time: " << service_time
@@ -152,6 +155,7 @@ void ArrivalHandler::update(ArrivalEvent *subject)
 
         // set the busy flag to true
         vertex_busy_map[vertex] = true;
+        vertex_time_service_ends_map[vertex] = departure;
 
         // service the event
         new_entry->service(departure, DEPARTURE_EVENT);
@@ -169,7 +173,7 @@ void ArrivalHandler::update(ArrivalEvent *subject)
                             delay);
 
     // set the time the service ends to the arrival time of the scheduled departure event
-    vertex_time_service_ends_map[vertex] = new_entry->getArrival();
+    //vertex_time_service_ends_map[vertex] = new_entry->getArrival();
 
 #ifndef NDEBUG_EVENTS
     std::cout << "Set the time the service ends to: " << vertex_time_service_ends_map[vertex]

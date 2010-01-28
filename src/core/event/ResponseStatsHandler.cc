@@ -1,4 +1,4 @@
-// Copyright (C) 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2009, 2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -71,9 +71,10 @@ void ResponseStatsHandler::update(AckEvent *subject)
     dnet::Vertex vertex = boost::vertex(entry->getDestination(), m_graph);
     double size = vertex_num_events_processed_map[vertex];
     double xbar = vertex_mean_reward_map[vertex];
-    double x = (gsl_fcmp(entry->topArrival(), entry->getArrival(), 1e-9) == 0)
-        ? (0.0)
-        : (entry->topArrival() - entry->getArrival());
+    double x = 0.0;
+    if ((entry->topArrival() - entry->getArrival()) > 0.0) {
+        x = (entry->topArrival() - entry->getArrival());
+    }
 
 #ifndef NDEBUG_EVENTS
     std::cout << "old stats -- size: " << size << ", xbar: " << xbar

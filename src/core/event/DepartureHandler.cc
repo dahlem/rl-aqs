@@ -76,12 +76,12 @@ void dcore::DepartureHandler::update(dcore::DepartureEvent *subject)
 
     // if the server is busy then re-schedule
     // otherwise schedule the departure
-    if (vertex_number_in_queue_map[vertex] > 0) {
-        vertex_number_in_queue_map[vertex]--;
-    }
-
     if (vertex_number_in_queue_map[vertex] == 0) {
         vertex_busy_map[vertex] = false;
+    }
+
+    if (vertex_number_in_queue_map[vertex] > 0) {
+        vertex_number_in_queue_map[vertex]--;
     }
 
     dnet::Graph::degree_size_type degree =
@@ -115,56 +115,30 @@ void dcore::DepartureHandler::update(dcore::DepartureEvent *subject)
             throw;
         }
     } else {
-        if (entry->isEventQueueEmpty()) {
-            assert(false);
-            // schedule leave event
-            dcommon::Entry *new_entry = new dcommon::Entry(*entry);
+        // schedule ack event to self
+        boost::int32_t origin = entry->getDestination();
+        boost::int32_t destination = origin;
+        dcommon::Entry *new_entry = new dcommon::Entry(
+            const_cast <const dcommon::Entry&> (*entry));
 
-            new_entry->leave(dcore::EXTERNAL_EVENT, dcore::LEAVE_EVENT);
+        new_entry->acknowledge(origin, destination, dcore::ACK_EVENT);
 
 #ifndef NDEBUG_EVENTS
-            std::cout << "Schedule new leave event: " << const_cast <const dcommon::Entry&> (*new_entry)
-                      << std::endl;
+        std::cout << "Schedule new acknowledge event: " << const_cast <const dcommon::Entry&> (*new_entry)
+                  << std::endl;
 #endif /* NDEBUG_EVENTS */
 
-            try {
-                m_queue.push(new_entry);
+        try {
+            m_queue.push(new_entry);
 #ifndef NDEBUG_EVENTS
-                std::cout << "Leave event scheduled." << std::endl;
+            std::cout << "Acknowledge event scheduled." << std::endl;
 #endif /* NDEBUG_EVENTS */
-            } catch (dcommon::QueueException &qe) {
-                std::cout << "Error scheduling leave event: " << new_entry->getArrival() << " " << qe.what() << std::endl;
-                if (new_entry != NULL) {
-                    delete new_entry;
-                }
-                throw;
+        } catch (dcommon::QueueException &qe) {
+            std::cout << "Error scheduling acknowledge event: " << new_entry->getArrival() << " " << qe.what() << std::endl;
+            if (new_entry != NULL) {
+                delete new_entry;
             }
-        } else {
-            // schedule ack event to self
-            boost::int32_t origin = entry->getDestination();
-            boost::int32_t destination = origin;
-            dcommon::Entry *new_entry = new dcommon::Entry(
-                const_cast <const dcommon::Entry&> (*entry));
-
-            new_entry->acknowledge(origin, destination, dcore::ACK_EVENT);
-
-#ifndef NDEBUG_EVENTS
-            std::cout << "Schedule new acknowledge event: " << const_cast <const dcommon::Entry&> (*new_entry)
-                      << std::endl;
-#endif /* NDEBUG_EVENTS */
-
-            try {
-                m_queue.push(new_entry);
-#ifndef NDEBUG_EVENTS
-                std::cout << "Acknowledge event scheduled." << std::endl;
-#endif /* NDEBUG_EVENTS */
-            } catch (dcommon::QueueException &qe) {
-                std::cout << "Error scheduling acknowledge event: " << new_entry->getArrival() << " " << qe.what() << std::endl;
-                if (new_entry != NULL) {
-                    delete new_entry;
-                }
-                throw;
-            }
+            throw;
         }
     }
 }

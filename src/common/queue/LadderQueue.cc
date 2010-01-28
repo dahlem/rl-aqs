@@ -1,4 +1,4 @@
-// Copyright (C) 2007,2008,2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2007-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -117,10 +117,6 @@ bool LadderQueue::push(Entry *p_entry) throw (QueueException)
         std::cout << "LQ -- Inserted at top." << std::endl;
 #endif /* NDEBUG_EVENTS */
     } else {
-#ifndef NDEBUG
-//            assert(p_entry->getArrival() > m_bottom->getMaxTS());
-#endif /* NDEBUG */
-
         if (p_entry->getArrival() <= m_bottom->getMaxTS()) {
             m_bottom->push(p_entry);
 
@@ -145,6 +141,7 @@ bool LadderQueue::push(Entry *p_entry) throw (QueueException)
 #endif /* NDEBUG_EVENTS */
                 } else {
                     EntryList *list = m_bottom->list();
+
                     try {
                         m_ladder->pushBack(list);
 #ifndef NDEBUG_QUEUE
@@ -168,11 +165,19 @@ bool LadderQueue::push(Entry *p_entry) throw (QueueException)
                 m_bottom->push(p_entry);
 #ifndef NDEBUG_QUEUE
                 std::cout << "LQ -- Inserted at bottom." << std::endl;
+                std::cout << "LQ -- bottom size: " << m_bottom->size()
+                          << ", ladder threshold: " << m_ladder->getThres() << std::endl;
 #endif /* NDEBUG_EVENTS */
                 if (m_bottom->size() > m_ladder->getThres()) {
+#ifndef NDEBUG_QUEUE
+                    std::cout << "LQ -- bottom size exceeds threshold" << std::endl;
+#endif /* NDEBUG_EVENTS */
                     // check whether ladder is empty
                     // if yes, get max and min TS values from bottom and enlist
                     if (m_ladder->getNBC() == 0) {
+#ifndef NDEBUG_QUEUE
+                        std::cout << "LQ -- ladder number of events: " << m_ladder->getNBC() << std::endl;
+#endif /* NDEBUG_EVENTS */
                         double max = m_bottom->getMaxTS();
                         double min = m_bottom->getMinTS();
 
@@ -183,7 +188,15 @@ bool LadderQueue::push(Entry *p_entry) throw (QueueException)
 #endif /* NDEBUG_EVENTS */
                     } else {
                         EntryList *list = m_bottom->list();
-                        m_ladder->pushBack(list);
+
+                        try {
+                            m_ladder->pushBack(list);
+                        } catch (QueueException qe2) {
+#ifndef NDEBUG_QUEUE
+                            std::cout << "LQ -- exception: " << qe2.what() << std::endl;
+                            std::cout << "LQ -- leave the events in the bottom." << std::endl;
+#endif /* NDEBUG_EVENTS */
+                        }
 #ifndef NDEBUG_QUEUE
                         std::cout << "LQ -- Push back bottom to ladder." << std::endl;
 #endif /* NDEBUG_EVENTS */

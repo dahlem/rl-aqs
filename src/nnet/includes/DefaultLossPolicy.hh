@@ -1,4 +1,4 @@
-// Copyright (C) 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2009, 2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This file is free software; as a spevectoral exception the author gives
 // unlimited permission to copy and/or distribute it, with or without
@@ -49,7 +49,11 @@ public:
     inline
     double error()
         {
-            return m_sse / static_cast<double> (m_size);
+            if (m_size == 0) {
+                return 0.0;
+            } else {
+                return m_sse / static_cast<double> (m_size);
+            }
         }
 
     double addError(DoubleSA p_targets, DoubleSA p_outputs, boost::uint16_t p_size)

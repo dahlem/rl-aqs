@@ -1,4 +1,4 @@
-// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009, 2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -97,8 +97,6 @@ tGraphSP WEvonet::createBBVGraph(boost::uint32_t p_size, boost::uint32_t max_edg
         = get(vertex_mean_reward, *g);
     VertexNextActionMap vertex_next_action_map
         = get(vertex_next_action, *g);
-    VertexNextEventTimeMap vertex_next_event_time_map
-        = get(vertex_next_event_time, *g);
     VertexAvgEventInSystemTimeMap vertex_avg_event_in_system_time_map
         = get(vertex_avg_event_in_system_time, *g);
     VertexExpertNormalMap vertex_expert_normal_map
@@ -121,6 +119,10 @@ tGraphSP WEvonet::createBBVGraph(boost::uint32_t p_size, boost::uint32_t max_edg
         = get(vertex_actual_reward, *g);
     VertexBestResponseMap vertex_best_response_map
         = get(vertex_best_response, *g);
+    VertexNNLossMap vertex_nn_loss_map
+        = get(vertex_v_nn_loss, *g);
+    EdgeNNLossMap edge_nn_loss_map
+        = get(edge_e_nn_loss, *g);
 
     // set the graph properties
     boost::set_property(*g, graph_generator, 1);
@@ -143,7 +145,6 @@ tGraphSP WEvonet::createBBVGraph(boost::uint32_t p_size, boost::uint32_t max_edg
     vertex_num_events_processed_map[v1] = 0;
     vertex_mean_reward_map[v1] = 0.0;
     vertex_next_action_map[v1] = -1;
-    vertex_next_event_time_map[v1] = 0.0;
     vertex_avg_event_in_system_time_map[v1] = 0.0;
     vertex_expert_normal_map[v1] = 0.0;
     vertex_expert_absolute_map[v1] = 0.0;
@@ -153,6 +154,7 @@ tGraphSP WEvonet::createBBVGraph(boost::uint32_t p_size, boost::uint32_t max_edg
     vertex_incentive_deviate_map[v1] = 0.0;
     vertex_actual_reward_map[v1] = 0.0;
     vertex_best_response_map[v1] = 0.0;
+    vertex_nn_loss_map[v1] = 0.0;
 
     advance(p_size - 1, g, num_edges_rng, uniform_rng, vertex_arrival_rng,
             fixed_edge_weight, max_arrival_rate, boost_arrival, boost_edge, max_edges);
@@ -162,6 +164,7 @@ tGraphSP WEvonet::createBBVGraph(boost::uint32_t p_size, boost::uint32_t max_edg
     BOOST_FOREACH(Edge e, (boost::edges(*g))) {
         edge_index_map[e] = num_edges++;
         edge_total_reward_map[e] = 0.0;
+        edge_nn_loss_map[e] = 0.0;
     }
 
     return g;
@@ -208,8 +211,6 @@ void WEvonet::advance(boost::uint32_t p_steps, tGraphSP g,
         = get(vertex_next_action, *g);
     EdgeQValueMap edge_q_val_map
         = get(edge_q_val, *g);
-    VertexNextEventTimeMap vertex_next_event_time_map
-        = get(vertex_next_event_time, *g);
     VertexAvgEventInSystemTimeMap vertex_avg_event_in_system_time_map
         = get(vertex_avg_event_in_system_time, *g);
     VertexExpertNormalMap vertex_expert_normal_map
@@ -230,6 +231,10 @@ void WEvonet::advance(boost::uint32_t p_steps, tGraphSP g,
         = get(vertex_actual_reward, *g);
     VertexBestResponseMap vertex_best_response_map
         = get(vertex_best_response, *g);
+    VertexNNLossMap vertex_nn_loss_map
+        = get(vertex_v_nn_loss, *g);
+    EdgeNNLossMap edge_nn_loss_map
+        = get(edge_e_nn_loss, *g);
 
     double accum_service_rate = 0.0;
     size_t vertices = 0;
@@ -285,7 +290,6 @@ void WEvonet::advance(boost::uint32_t p_steps, tGraphSP g,
         vertex_num_events_processed_map[v] = 0;
         vertex_mean_reward_map[v] = 0.0;
         vertex_next_action_map[v] = -1;
-        vertex_next_event_time_map[v] = 0.0;
         vertex_avg_event_in_system_time_map[v] = 0.0;
         vertex_expert_normal_map[v] = 0.0;
         vertex_expert_absolute_map[v] = 0.0;
@@ -295,6 +299,7 @@ void WEvonet::advance(boost::uint32_t p_steps, tGraphSP g,
         vertex_incentive_deviate_map[v] = 0.0;
         vertex_actual_reward_map[v] = 0.0;
         vertex_best_response_map[v] = 0.0;
+        vertex_nn_loss_map[v] = 0.0;
 
         // select vertices to connect to
         boost::uint32_t edges = 0;
@@ -324,6 +329,7 @@ void WEvonet::advance(boost::uint32_t p_steps, tGraphSP g,
                         std::pair<Edge, bool> e = add_edge(v, z, *g);
                         edge_q_val_map[e.first] = 0.0;
                         edge_total_reward_map[e.first] = 0.0;
+                        edge_nn_loss_map[e.first] = 0.0;
                         break;
                     }
                 }
@@ -472,8 +478,6 @@ tGraphSP WEvonet::createERGraph(boost::uint32_t p_size, double fixed_edge_weight
         = get(edge_q_val, *g);
     EdgeIndexMap edge_index_map
         = get(edge_eindex, *g);
-    VertexNextEventTimeMap vertex_next_event_time_map
-        = get(vertex_next_event_time, *g);
     VertexAvgEventInSystemTimeMap vertex_avg_event_in_system_time_map
         = get(vertex_avg_event_in_system_time, *g);
     VertexExpertNormalMap vertex_expert_normal_map
@@ -494,6 +498,10 @@ tGraphSP WEvonet::createERGraph(boost::uint32_t p_size, double fixed_edge_weight
         = get(vertex_actual_reward, *g);
     VertexBestResponseMap vertex_best_response_map
         = get(vertex_best_response, *g);
+    VertexNNLossMap vertex_nn_loss_map
+        = get(vertex_v_nn_loss, *g);
+    EdgeNNLossMap edge_nn_loss_map
+        = get(edge_e_nn_loss, *g);
 
     // assign ids, arrival and service rates
 #ifndef NDEBUG_NETWORK
@@ -520,7 +528,6 @@ tGraphSP WEvonet::createERGraph(boost::uint32_t p_size, double fixed_edge_weight
         vertex_num_events_processed_map[*p_v.first] = 0;
         vertex_mean_reward_map[*p_v.first] = 0.0;
         vertex_next_action_map[*p_v.first] = -1;
-        vertex_next_event_time_map[*p_v.first] = 0.0;
         vertex_avg_event_in_system_time_map[*p_v.first] = 0.0;
         vertex_expert_normal_map[*p_v.first] = 0.0;
         vertex_expert_absolute_map[*p_v.first] = 0.0;
@@ -530,6 +537,7 @@ tGraphSP WEvonet::createERGraph(boost::uint32_t p_size, double fixed_edge_weight
         vertex_incentive_deviate_map[*p_v.first] = 0.0;
         vertex_actual_reward_map[*p_v.first] = 0.0;
         vertex_best_response_map[*p_v.first] = 0.0;
+        vertex_nn_loss_map[*p_v.first] = 0.0;
     }
 
     // assign edge indeces
@@ -538,6 +546,7 @@ tGraphSP WEvonet::createERGraph(boost::uint32_t p_size, double fixed_edge_weight
         edge_q_val_map[e] = 0.0;
         edge_total_reward_map[e] = 0.0;
         edge_index_map[e] = num_edges++;
+        edge_nn_loss_map[e] = 0.0;
     }
 
     // remove cycles
@@ -587,7 +596,6 @@ tGraphSP WEvonet::createERGraph(boost::uint32_t p_size, double fixed_edge_weight
         vertex_num_events_processed_map[*p_v.first] = 0;
         vertex_mean_reward_map[*p_v.first] = 0.0;
         vertex_next_action_map[*p_v.first] = -1;
-        vertex_next_event_time_map[*p_v.first] = 0.0;
         vertex_avg_event_in_system_time_map[*p_v.first] = 0.0;
         vertex_expert_normal_map[*p_v.first] = 0.0;
         vertex_expert_absolute_map[*p_v.first] = 0.0;
@@ -597,6 +605,7 @@ tGraphSP WEvonet::createERGraph(boost::uint32_t p_size, double fixed_edge_weight
         vertex_incentive_deviate_map[*p_v.first] = 0.0;
         vertex_actual_reward_map[*p_v.first] = 0.0;
         vertex_best_response_map[*p_v.first] = 0.0;
+        vertex_nn_loss_map[*p_v.first] = 0.0;
     }
 
     // re-assign edge indeces
@@ -605,6 +614,7 @@ tGraphSP WEvonet::createERGraph(boost::uint32_t p_size, double fixed_edge_weight
         edge_q_val_map[e] = 0.0;
         edge_total_reward_map[e] = 0.0;
         edge_index_map[e] = num_edges++;
+        edge_nn_loss_map[e] = 0.0;
     }
 
     // balance the service rates

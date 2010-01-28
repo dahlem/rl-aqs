@@ -1,4 +1,4 @@
-// Copyright (C) 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2009, 2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -97,7 +97,8 @@ public:
                           boost::uint16_t p_hidden_neurons, boost::int32_t p_uniform_rng_index,
                           bool p_cg, boost::uint16_t p_loss_policy,
                           boost::uint16_t p_window, boost::uint16_t p_brent_iter,
-                          double p_momentum, bool p_outsource, bool p_regret_total, bool p_incentive_deviate);
+                          double p_momentum, bool p_outsource, bool p_regret_total, bool p_incentive_deviate,
+                          bool p_nn_loss_serialise);
 
     ~FullRLResponseHandler();
 
@@ -116,6 +117,7 @@ private:
     bool m_outsource;
     bool m_regret_total;
     bool m_incentive_deviate;
+    bool m_nn_loss_serialise;
 
     // derived fields
     dnet::EdgeIndexMap edge_index_map;
@@ -124,8 +126,10 @@ private:
     dnet::VertexActualRewardMap vertex_actual_reward_map;
     dnet::VertexRegretAbsoluteMap vertex_regret_total_map;
     dnet::VertexIncentiveDeviateMap vertex_incentive_deviate_map;
+    dnet::VertexNNLossMap vertex_nn_loss_map;
     dnet::EdgeQValueMap edge_q_val_map;
     dnet::EdgeTotalRewardMap edge_total_reward_map;
+    dnet::EdgeNNLossMap edge_nn_loss_map;
 
     // neural networks
     std::vector<FFNetSP> m_nets;

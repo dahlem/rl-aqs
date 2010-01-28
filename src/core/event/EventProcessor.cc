@@ -1,4 +1,4 @@
-// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -89,7 +89,15 @@ bool EventProcessor::process()
                 break;
             }
 
+#ifndef NDEBUG_EVENTS
+            std::cout << "** EventProcessor : Handle event: " << const_cast <const dcommon::Entry&> (*entry) << std::endl;
+#endif /* NDEBUG_EVENTS */
+
             double newTime = entry->getArrival();
+
+#ifndef NDEBUG
+            assert(newTime >= m_oldTime);
+#endif /* NDEBUG */
 
             // correct a possible floating point error
             if (newTime < m_oldTime) {
@@ -105,21 +113,22 @@ bool EventProcessor::process()
             }
 
             m_oldTime = newTime;
-
-#ifndef NDEBUG_EVENTS
-            std::cout << "** EventProcessor : Handle event: " << const_cast <const dcommon::Entry&> (*entry) << std::endl;
-#endif /* NDEBUG_EVENTS */
             // if it is a admin event, then handle it
-            if (entry->getType() == LOG_GRAPH_EVENT) {
+            if (entry->getOrigin() == ADMIN_EVENT) {
+                if ((entry->getType() == LOG_GRAPH_EVENT) || (entry->getType() == GENERATE_ARRIVAL_EVENT)) {
 #ifndef NDEBUG_EVENTS
-                std::cout << "** EventProcessor : admin event start" << std::endl;
+                    std::cout << "** EventProcessor : admin event start" << std::endl;
 #endif /* NDEBUG_EVENTS */
-                m_adminEvent.admin(entry);
+                    m_adminEvent.admin(entry);
 #ifndef NDEBUG_EVENTS
-                std::cout << "** EventProcessor : admin event finished" << std::endl;
+                    std::cout << "** EventProcessor : admin event finished" << std::endl;
 #endif /* NDEBUG_EVENTS */
+                } else {
+#ifndef NDEBUG_EVENTS
+                    std::cout << "** EventProcessor : unsupported admin event" << std::endl;
+#endif /* NDEBUG_EVENTS */
+                }
             } else {
-
                 // if stop time has been reached break out and handle the event below
                 if (entry->getArrival() > m_stopTime) {
                     break;

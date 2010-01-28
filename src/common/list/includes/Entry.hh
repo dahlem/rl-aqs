@@ -1,4 +1,4 @@
-// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -34,13 +34,14 @@
 #endif
 
 #include <iostream>
+#include <stack>
 #include <string>
 
 #include <boost/cstdint.hpp>
 #include <boost/shared_array.hpp>
 #include <boost/intrusive/list.hpp>
 
-#include "Stack.hh"
+//#include "Stack.hh"
 
 
 namespace des
@@ -48,8 +49,10 @@ namespace des
 namespace common
 {
 
-typedef Stack <int> StackInt;
-typedef Stack <double> StackDouble;
+// typedef Stack <int> StackInt;
+// typedef Stack <double> StackDouble;
+typedef std::stack <int> StackInt;
+typedef std::stack <double> StackDouble;
 
 
 static const std::string HEADER = "uid,id,arrivalTime,delay,origin,destination,type,eventPathSize";

@@ -1,4 +1,4 @@
-// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -24,8 +24,6 @@
 #ifndef NDEBUG_EVENTS
 # include <iostream>
 #endif /* NDEBUG_EVENTS */
-
-#include <gsl/gsl_math.h>
 
 #include "events.hh"
 #include "UtilisationHandler.hh"
@@ -69,9 +67,11 @@ void dcore::UtilisationHandler::update(dcore::PostAnyEvent *subject)
 #endif /* NDEBUG_EVENTS */
 
         if (vertex_busy_map[vertex]) {
-            double diff = (gsl_fcmp(entry->getArrival(), vertex_last_event_time_map[vertex], 1e-9) == 0)
-                ? (0.0)
-                : (entry->getArrival() - vertex_last_event_time_map[vertex]);
+            double diff = 0.0;
+
+            if ((entry->getArrival() - vertex_last_event_time_map[vertex]) >= 0.0) {
+                diff = (entry->getArrival() - vertex_last_event_time_map[vertex]);
+            }
             b_i = diff;
         }
 

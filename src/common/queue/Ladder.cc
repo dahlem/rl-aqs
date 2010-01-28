@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2007-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -178,10 +178,22 @@ double Ladder::bucketwidth(double p_max, double p_min, boost::uint32_t p_n)
 
 boost::uint32_t Ladder::bucket(double p_TS, boost::uint32_t p_rung)
 {
+#ifndef NDEBUG_QUEUE
+    std::cout << "Ladder -- bucket on rung " << p_rung << std::endl
+              << " -- max: " << m_buckets[p_rung] << std::endl
+              << " -- time: " << p_TS << std::endl
+              << " -- RStart: " << m_RStart[p_rung] << std::endl
+              << " -- bucketwidth: " << m_bucketwidth[p_rung] << std::endl;
+#endif /* NDEBUG */
+
     double diff = 0.0;
 
     // if the difference is too small we set it to zero
-    diff = (gsl_fcmp(p_TS, m_RStart[p_rung], 1e-9) <= 0) ? (0.0) : (p_TS - m_RStart[p_rung]);
+    if ((p_TS - m_RStart[p_rung]) <=0) {
+        diff = 0.0;
+    } else {
+        diff = (p_TS - m_RStart[p_rung]);
+    }
 
     double result = diff / m_bucketwidth[p_rung];
     boost::uint32_t retVal = (boost::uint32_t) floor(result);
@@ -194,18 +206,30 @@ boost::uint32_t Ladder::bucket(double p_TS, boost::uint32_t p_rung)
 
 #ifndef NDEBUG
     assert(retVal >= m_currentBucket[p_rung]);
-    assert(retVal <= m_buckets[p_rung]);
+    assert(retVal < m_buckets[p_rung]);
 #endif /* NDEBUG */
 
-    // use interval iteration to find the correct bucket
-//     if (retVal > m_buckets[p_rung]) {
-//     }
+#ifndef NDEBUG_QUEUE
+    std::cout << " -- bucket: " << retVal << std::endl;
+#endif /* NDEBUG */
 
     return retVal;
 }
 
 void Ladder::updateNEvents(boost::uint32_t p_rung, boost::int32_t size)
 {
+#ifndef NDEBUG_QUEUE
+    std::cout << "Ladder -- total size: " << m_NBC << ", current rung: " << m_events[p_rung]
+              << ", update: " << size << std::endl;
+#endif /* NDEBUG */
+
+#ifndef NDEBUG
+    if (size < 0) {
+        assert(m_events[p_rung] >= std::abs(size));
+        assert(m_NBC >= std::abs(size));
+    }
+#endif /* NDEBUG */
+
     m_events[p_rung] += size;
     m_NBC += size;
 
@@ -253,38 +277,24 @@ bool Ladder::push(Entry *p_entry) throw (QueueException)
         }
     }
 
-//     if (nRungs <= m_lowestRung) {
-//         if ((m_RStart[nRungs] + m_bucketwidth[nRungs] * l_bucket) > ts_arrival) {
-//             if (nRungs == 0) {
-//                 throw QueueException(QueueException::RUNG_NOT_FOUND);
-//             } else {
-//                 nRungs--;
-//             }
-//         }
-//     }
-
     // found
     if (nRungs <= m_lowestRung) {
+#ifndef NDEBUG_QUEUE
+        std::cout << "Ladder -- found rung: " << nRungs << std::endl;
+#endif /* NDEBUG_QUEUE */
         // insert into tail of rung x, bucket k
         boost::uint32_t l_bucket = bucket(ts_arrival, nRungs);
 
-        // work with inaccuracies
-        // ddahlem: could still cause problems if the inaccuracies occur on lower rungs as well
-        if (gsl_fcmp(ts_arrival, m_RStart[nRungs] + m_bucketwidth[nRungs] * l_bucket, 1e-9) == -1) {
-            throw QueueException(QueueException::RUNG_NOT_FOUND);
-        }
-
 #ifndef NDEBUG_QUEUE
-        printState(nRungs);
         std::cout << std::setprecision(14) << "Ladder -- Enter event: " << ts_arrival
                   << " between " << (m_RStart[nRungs] + m_bucketwidth[nRungs] * (l_bucket))
                   << " and " << (m_RStart[nRungs] + m_bucketwidth[nRungs] * (l_bucket + 1)) << std::endl;
 #endif /* NDEBUG_QUEUE */
 
 #ifndef NDEBUG
-//         assert(m_RStart[nRungs] <= ts_arrival);
-//         assert(m_RStart[nRungs] + m_bucketwidth[nRungs] * l_bucket <= ts_arrival);
-//         assert(ts_arrival <= (m_RStart[nRungs] + m_bucketwidth[nRungs] * (l_bucket + 1)));
+        // assert(m_RStart[nRungs] <= ts_arrival);
+        // assert(m_RStart[nRungs] + m_bucketwidth[nRungs] * l_bucket <= ts_arrival);
+        // assert(ts_arrival <= (m_RStart[nRungs] + m_bucketwidth[nRungs] * (l_bucket + 1)));
 #endif /* NDEBUG */
 
         m_rungs[nRungs][l_bucket].push_back(*p_entry);
@@ -297,6 +307,20 @@ bool Ladder::push(Entry *p_entry) throw (QueueException)
     } else {
         throw QueueException(QueueException::RUNG_NOT_FOUND);
     }
+
+#ifndef NDEBUG_QUEUE
+    boost::uint32_t t = 0;
+    for (boost::uint16_t i = 0; i < m_NRung; ++i) {
+        t += m_events[i];
+    }
+    std::cout << "Ladder -- total size after update: " << m_NBC << ", should be: " << t << std::endl;
+
+    assert(t == m_NBC);
+
+    for (boost::uint16_t i = 0; i <= m_lowestRung; ++i) {
+        printState(i);
+    }
+#endif /* NDEBUG_QUEUE */
 
     return true;
 }
@@ -313,6 +337,16 @@ void Ladder::pop_front() throw (QueueException)
 
 void Ladder::push(boost::uint32_t p_rung, EntryList *p_list)
 {
+#ifndef NDEBUG_QUEUE
+    std::cout << "Ladder -- push list on rung: " << p_rung << std::endl;
+#endif /* NDEBUG_QUEUE */
+
+#ifndef NDEBUG_QUEUE
+    for (boost::uint16_t i = 0; i <= m_lowestRung; ++i) {
+        printState(i);
+    }
+#endif /* NDEBUG_QUEUE */
+
     Entry *entry = NULL;
 
     // transfer one event at a time
@@ -321,47 +355,85 @@ void Ladder::push(boost::uint32_t p_rung, EntryList *p_list)
         boost::uint32_t l_bucket = bucket(entry->getArrival(), p_rung);
         p_list->pop_front();
 
-#ifndef NDEBUG
-//         assert(l_bucket < m_buckets[p_rung]);
-//         assert(l_bucket >= m_currentBucket[p_rung]);
-#endif /* NDEBUG */
-
 #ifndef NDEBUG_QUEUE
         std::cout << std::setprecision(25) << "Ladder -- Enter event: " << entry->getArrival()
                   << " between " << (m_RStart[p_rung] + m_bucketwidth[p_rung] * (l_bucket))
                   << " and " << (m_RStart[p_rung] + m_bucketwidth[p_rung] * (l_bucket + 1))
-                  << ", current bucket: " << l_bucket << std::endl;
-
-        if (p_rung > 0) {
-            printState(p_rung);
-            printState(p_rung - 1);
-        }
+                  << ", current bucket (max: " << m_buckets[p_rung] << "): " << l_bucket << std::endl;
 #endif /* NDEBUG_QUEUE */
+
+#ifndef NDEBUG
+         assert(l_bucket < m_buckets[p_rung]);
+         assert(l_bucket >= m_currentBucket[p_rung]);
+#endif /* NDEBUG */
 
         m_rungs[p_rung][l_bucket].push_back(*entry);
 
         updateNEvents(p_rung, 1);
     }
+
+#ifndef NDEBUG_QUEUE
+    boost::uint32_t t = 0;
+    for (boost::uint16_t i = 0; i < m_NRung; ++i) {
+        t += m_events[i];
+    }
+    std::cout << "Ladder -- total size after update: " << m_NBC << ", should be: " << t << std::endl;
+
+    assert(t == m_NBC);
+
+    for (boost::uint16_t i = 0; i <= m_lowestRung; ++i) {
+        printState(i);
+    }
+#endif /* NDEBUG_QUEUE */
 }
 
 
 void Ladder::pushBack(EntryList *p_list)
     throw (QueueException)
 {
+#ifndef NDEBUG_QUEUE
+    std::cout << "Ladder -- pushback(list)" << std::endl;
+#endif /* NDEBUG_QUEUE */
+
+#ifndef NDEBUG_QUEUE
+    for (boost::uint16_t i = 0; i <= m_lowestRung; ++i) {
+        printState(i);
+    }
+#endif /* NDEBUG_QUEUE */
+
     bool spawned = false;
 
     spawned = spawn(false);
     if (!spawned) {
+#ifndef NDEBUG_QUEUE
+        std::cout << "Ladder -- spawn not successful" << std::endl;
+#endif /* NDEBUG_QUEUE */
         throw QueueException(QueueException::RUNG_OUT_OF_BOUNDS);
     }
 
     push(m_lowestRung, p_list);
+
+#ifndef NDEBUG_QUEUE
+    for (boost::uint16_t i = 0; i <= m_lowestRung; ++i) {
+        printState(i);
+    }
+#endif /* NDEBUG_QUEUE */
 }
 
 
 void Ladder::push(EntryList *p_list, double p_maxTS, double p_minTS)
     throw (QueueException)
 {
+#ifndef NDEBUG_QUEUE
+    std::cout << "Ladder -- push list within (min, max)" << std::endl;
+#endif /* NDEBUG_QUEUE */
+
+#ifndef NDEBUG_QUEUE
+    for (boost::uint16_t i = 0; i <= m_lowestRung; ++i) {
+        printState(i);
+    }
+#endif /* NDEBUG_QUEUE */
+
     if (getNBC() != 0) {
         throw QueueException(QueueException::EPOCH_EXISTS);
     }
@@ -383,9 +455,17 @@ void Ladder::push(EntryList *p_list, double p_maxTS, double p_minTS)
     }
 
     double diff = 0.0;
-    diff = (gsl_fcmp(p_maxTS, p_minTS, 1e-9) <= 0) ? (0.0) : (p_maxTS - p_minTS);
+    diff = (gsl_fcmp(p_maxTS, p_minTS, 1e-12) <= 0) ? (0.0) : (p_maxTS - p_minTS);
+
+#ifndef NDEBUG_QUEUE
+    std::cout << "Ladder -- max - min: " << diff << std::endl;
+#endif /* NDEBUG_QUEUE */
 
     boost::uint32_t buckets = static_cast<boost::uint32_t>(diff / m_bucketwidth[0]);
+
+#ifndef NDEBUG_QUEUE
+    std::cout << "Ladder -- buckets: " << buckets << std::endl;
+#endif /* NDEBUG_QUEUE */
 
     if (buckets >= m_BucketsFirstRung) {
         resizeFirstRung(buckets);
@@ -393,12 +473,21 @@ void Ladder::push(EntryList *p_list, double p_maxTS, double p_minTS)
 
     // transfer events
     push(m_lowestRung, p_list);
+
+#ifndef NDEBUG_QUEUE
+    for (boost::uint16_t i = 0; i <= m_lowestRung; ++i) {
+        printState(i);
+    }
+#endif /* NDEBUG_QUEUE */
 }
 
 EntryList* Ladder::delist() throw (QueueException)
 {
 #ifndef NDEBUG_QUEUE
     std::cout << "Ladder -- Delist" << std::endl;
+    for (boost::uint16_t i = 0; i <= m_lowestRung; ++i) {
+        printState(i);
+    }
 #endif /* NDEBUG_QUEUE */
 
     // advance the dequeue bucket
@@ -408,9 +497,13 @@ EntryList* Ladder::delist() throw (QueueException)
     EntryList *temp =
         reinterpret_cast<EntryList*>(
             &(m_rungs[m_lowestRung][m_currentBucket[m_lowestRung]]));
-    boost::uint32_t size = temp->size();
+    boost::int32_t size = temp->size();
 
     updateNEvents(m_lowestRung, -size);
+
+    // once delisted we increment rcur to invalidate the previous bucket
+    m_RCur[m_lowestRung] += m_bucketwidth[m_lowestRung];
+    m_currentBucket[m_lowestRung]++;
 
 #ifndef NDEBUG_QUEUE
     std::cout << "Ladder -- Delist: " << m_lowestRung << ", bucket: "
@@ -418,26 +511,35 @@ EntryList* Ladder::delist() throw (QueueException)
               << std::endl;
 #endif /* NDEBUG_QUEUE */
 
-    // once delisted we increment rcur to invalidate the previous bucket
     if ((m_lowestRung > 0) && (m_events[m_lowestRung] == 0)) {
         m_RCur[m_lowestRung] = std::numeric_limits<double>::max();
         m_RStart[m_lowestRung] = std::numeric_limits<double>::max();
         m_currentBucket[m_lowestRung] = 0;
         m_lowestRung--;
-    } else {
-#ifndef NDEBUG
-        assert(m_RCur[m_lowestRung] < m_RCur[m_lowestRung] + m_bucketwidth[m_lowestRung]);
-#endif /* NDEBUG */
-
-        m_RCur[m_lowestRung] += m_bucketwidth[m_lowestRung];
-        m_currentBucket[m_lowestRung]++;
     }
+
+#ifndef NDEBUG_QUEUE
+    boost::uint32_t t = 0;
+    for (boost::uint16_t i = 0; i < m_NRung; ++i) {
+        t += m_events[i];
+    }
+    std::cout << "Ladder -- total size after update: " << m_NBC << ", should be: " << t << std::endl;
+
+    assert(t == m_NBC);
+
+    for (boost::uint16_t i = 0; i <= m_lowestRung; ++i) {
+        printState(i);
+    }
+#endif /* NDEBUG_QUEUE */
 
     return temp;
 }
 
 void Ladder::resizeFirstRung(boost::uint32_t p_base)
 {
+#ifndef NDEBUG_QUEUE
+    std::cout << "Ladder -- resize first rung. Was : " << p_base << std::endl;
+#endif /* NDEBUG_QUEUE */
     // resize the rung size
     m_BucketsFirstRung = 2 * p_base;
     m_buckets[0] = m_BucketsFirstRung;
@@ -474,32 +576,13 @@ void Ladder::advanceDequeueBucket(bool p_spawn) throw (QueueException)
     while (true) {
 #ifndef NDEBUG_QUEUE
         std::cout << "Ladder -- advance on rung " << m_lowestRung
-                  << " from bucket " << m_currentBucket[m_lowestRung]
-                  << ", num events: " << m_events[m_lowestRung] << std::endl;
+                  << " from bucket (" << m_buckets[m_lowestRung] << "): "
+                  << m_currentBucket[m_lowestRung] << ", num events: "
+                  << m_events[m_lowestRung] << std::endl;
 #endif /* NDEBUG_QUEUE */
 
 #ifndef NDEBUG
-        if (m_lowestRung == 0) {
-            if ((m_currentBucket[m_lowestRung] >= m_BucketsFirstRung)
-                && (m_NBC > 0)) {
-                std::cout << "current bucket: " << m_currentBucket[m_lowestRung] << std::endl;
-
-                for (boost::uint16_t i = 0; i < m_NRung; ++i) {
-                    boost::uint16_t buckets = m_buckets[i];
-
-                    if (m_events[i] > 0) {
-                        std::cout << i << ", elements " << m_events[i] << std::endl;
-                    }
-                    for (boost::uint16_t j = 0; j < buckets; ++j) {
-                        if (m_rungs[i][j].size() > 0) {
-                            std::cout << i << ", " << j << std::endl;
-                        }
-                    }
-                }
-            }
-        }
         assert(m_currentBucket[m_lowestRung] <= m_buckets[m_lowestRung]);
-
 #endif /* NDEBUG */
 
         // how many elements are in this bucket?
@@ -520,17 +603,20 @@ void Ladder::advanceDequeueBucket(bool p_spawn) throw (QueueException)
             m_currentBucket[m_lowestRung]++;
             m_RCur[m_lowestRung] += m_bucketwidth[m_lowestRung];
         } else {
+            //m_RCur[m_lowestRung] += m_bucketwidth[m_lowestRung];
             break;
         }
     }
 
     if (p_spawn && (elements > m_Thres)) {
-        bool spawned = spawn(true);
-        advanceDequeueBucket(spawned);
+        m_RCur[m_lowestRung] += m_bucketwidth[m_lowestRung];
+        spawn(true);
+        advanceDequeueBucket(false); // ddahlem: check here
     }
 
 #ifndef NDEBUG_QUEUE
-    std::cout << "Ladder -- advance dequeue bucket finished" << std::endl;
+    std::cout << "Ladder -- advance dequeue bucket finished. Lowest Rung: " << m_lowestRung
+              << ", current bucket: " << m_currentBucket[m_lowestRung] << std::endl;
 #endif /* NDEBUG_QUEUE */
 }
 
@@ -556,6 +642,16 @@ bool Ladder::canAdvance()
 bool Ladder::spawn(bool p_doEnlist)
 {
     bool result = false;
+#ifndef NDEBUG_QUEUE
+    std::cout << "Ladder -- spawn. lowest rung: " << m_lowestRung
+              << ", max rungs: " << MAX_RUNGS << std::endl;
+#endif /* NDEBUG_QUEUE */
+
+#ifndef NDEBUG_QUEUE
+    for (boost::uint16_t i = 0; i <= m_lowestRung; ++i) {
+        printState(i);
+    }
+#endif /* NDEBUG_QUEUE */
 
     // spawn, iff
     // (1) lowest rung < MAX_RUNGS - 1
@@ -569,17 +665,16 @@ bool Ladder::spawn(bool p_doEnlist)
             createRung();
         }
 
-        // journal on the Ladder Queue by Tang, et. al.
+        // different equations than in journal on the Ladder Queue by Tang, et. al.
         m_bucketwidth[m_lowestRung] =
             m_bucketwidth[m_lowestRung - 1] / (m_Thres  - 1);
         m_RStart[m_lowestRung] =
-            m_RCur[m_lowestRung - 1];
+            m_RCur[m_lowestRung - 1] - m_bucketwidth[m_lowestRung - 1];
         m_RCur[m_lowestRung] =
-            m_RStart[m_lowestRung];
+            m_RStart[m_lowestRung];// - m_bucketwidth[m_lowestRung - 1];
 
         // we need to set the current dequeue bucket of the spawned rung to zero
         m_currentBucket[m_lowestRung] = 0;
-
 
         if (p_doEnlist) {
 #ifndef NDEBUG
@@ -595,25 +690,30 @@ bool Ladder::spawn(bool p_doEnlist)
                 reinterpret_cast<EntryList*>(
                     &(m_rungs[m_lowestRung - 1][m_currentBucket[m_lowestRung - 1]]));
 
+            // m_RCur[m_lowestRung - 1] += m_bucketwidth[m_lowestRung - 1];
+            m_currentBucket[m_lowestRung - 1]++;
             updateNEvents(m_lowestRung - 1, -list->size());
             push(m_lowestRung, list);
         }
 
-#ifndef NDEBUG
-        assert(m_RCur[m_lowestRung - 1] < m_RCur[m_lowestRung - 1] + m_bucketwidth[m_lowestRung - 1]);
-#endif /* NDEBUG */
-
-        m_currentBucket[m_lowestRung - 1]++;
-        m_RCur[m_lowestRung - 1] += m_bucketwidth[m_lowestRung - 1];
-
         result = true;
     }
+
+#ifndef NDEBUG_QUEUE
+    for (boost::uint16_t i = 0; i <= m_lowestRung; ++i) {
+        printState(i);
+    }
+#endif /* NDEBUG_QUEUE */
 
     return result;
 }
 
 void Ladder::createRung()
 {
+#ifndef NDEBUG_QUEUE
+    std::cout << "Ladder -- create rung. Current rung: " << m_NRung << std::endl;
+#endif /* NDEBUG_QUEUE */
+
     m_NRung++;
 
     // create a new rung
@@ -621,16 +721,22 @@ void Ladder::createRung()
 
     // copy the old rungs over
     for (boost::uint32_t i = 0; i < (m_NRung - 1); ++i) {
+#ifndef NDEBUG_QUEUE
+        std::cout << "Ladder -- update rung: " << i << std::endl;
+#endif /* NDEBUG_QUEUE */
         rungs[i] = m_rungs[i];
     }
     rungs[m_NRung - 1] = EntryListSA(new EntryList[m_Thres]);
 
-    m_rungs = rungs;
+    m_rungs = EntryListSM(rungs);
 
     // resize the events data structure
     boost::uint32_t *events = new boost::uint32_t[m_NRung];
     memset(events, 0, sizeof(boost::uint32_t) * m_NRung);
-    for (boost::uint32_t i = 0; i < m_NRung; ++i) {
+    for (boost::uint32_t i = 0; i < (m_NRung - 1); ++i) {
+#ifndef NDEBUG_QUEUE
+        std::cout << "Ladder -- update events: " << i << ", total: " << m_events[i] << std::endl;
+#endif /* NDEBUG_QUEUE */
         events[i] = m_events[i];
     }
 
@@ -639,7 +745,10 @@ void Ladder::createRung()
     // resize the currentBucket data structure
     boost::uint32_t *currentBucket = new boost::uint32_t[m_NRung];
     memset(currentBucket, 0, sizeof(boost::uint32_t) * m_NRung);
-    for (boost::uint32_t i = 0; i < m_NRung; ++i) {
+    for (boost::uint32_t i = 0; i < (m_NRung - 1); ++i) {
+#ifndef NDEBUG_QUEUE
+        std::cout << "Ladder -- update current bucket: " << i << ", current bucket: " << m_currentBucket[i] << std::endl;
+#endif /* NDEBUG_QUEUE */
         currentBucket[i] = m_currentBucket[i];
     }
 
@@ -648,7 +757,10 @@ void Ladder::createRung()
     // resize the buckets data structure
     boost::uint32_t *buckets = new boost::uint32_t[m_NRung];
     memset(buckets, 0, sizeof(boost::uint32_t) * m_NRung);
-    for (boost::uint32_t i = 0; i < m_NRung; ++i) {
+    for (boost::uint32_t i = 0; i < (m_NRung - 1); ++i) {
+#ifndef NDEBUG_QUEUE
+        std::cout << "Ladder -- update number of buckets: " << i << ", number of buckets: " << m_buckets[i] << std::endl;
+#endif /* NDEBUG_QUEUE */
         buckets[i] = m_buckets[i];
     }
 
@@ -657,7 +769,10 @@ void Ladder::createRung()
     // resize the bucketwidth data structure
     double *bucketwidth = new double[m_NRung];
     memset(bucketwidth, 0, sizeof(double) * m_NRung);
-    for (boost::uint32_t i = 0; i < m_NRung; ++i) {
+    for (boost::uint32_t i = 0; i < (m_NRung - 1); ++i) {
+#ifndef NDEBUG_QUEUE
+        std::cout << "Ladder -- update bucket width: " << i << ", bucket width: " << m_bucketwidth[i] << std::endl;
+#endif /* NDEBUG_QUEUE */
         bucketwidth[i] = m_bucketwidth[i];
     }
 
@@ -666,7 +781,10 @@ void Ladder::createRung()
     // resize the rcur data structure
     double *rcur = new double[m_NRung];
     memset(rcur, 0, sizeof(double) * m_NRung);
-    for (boost::uint32_t i = 0; i < m_NRung; ++i) {
+    for (boost::uint32_t i = 0; i < (m_NRung - 1); ++i) {
+#ifndef NDEBUG_QUEUE
+        std::cout << "Ladder -- current timestamp: " << i << ", time stamp: " << m_RCur[i] << std::endl;
+#endif /* NDEBUG_QUEUE */
         rcur[i] = m_RCur[i];
     }
 
@@ -675,22 +793,50 @@ void Ladder::createRung()
     // resize the rstart data structure
     double *rstart = new double[m_NRung];
     memset(rstart, 0, sizeof(double) * m_NRung);
-    for (boost::uint32_t i = 0; i < m_NRung; ++i) {
+    for (boost::uint32_t i = 0; i < (m_NRung - 1); ++i) {
+#ifndef NDEBUG_QUEUE
+        std::cout << "Ladder -- update start: " << i << ", start: " << m_RStart[i] << std::endl;
+#endif /* NDEBUG_QUEUE */
         rstart[i] = m_RStart[i];
     }
 
     m_RStart = tDoubleSA(rstart);
+
+    m_RCur[m_NRung - 1] = std::numeric_limits<double>::max();
+    m_RStart[m_NRung - 1] = std::numeric_limits<double>::max();
+    m_buckets[m_NRung - 1] = m_Thres;
+
+#ifndef NDEBUG_QUEUE
+    std::cout << "Ladder -- created " << m_NRung << " rung." << std::endl;
+#endif /* NDEBUG_QUEUE */
 }
 
 #if !defined(NDEBUG) || !defined(NDEBUG_QUEUE)
 void Ladder::printState(boost::uint32_t p_rung)
 {
-    std::cout << std::setprecision(21) << "Ladder State -- Rung: " << p_rung
-              << ", current bucket: " << m_currentBucket[p_rung]
-              << ", start: " << m_RStart[p_rung]
-              << ", rcur: " << m_RCur[p_rung]
-              << ", bucketwidth: " << m_bucketwidth[p_rung]
-              << std::endl;
+    std::cout << "Ladder State -- Rung: " << p_rung << std::endl;
+    std::cout << " -- RStart: " << m_RStart[p_rung] << std::endl;
+    std::cout << " -- RCur: " << m_RCur[p_rung] << std::endl;
+    std::cout << " -- bucketwidth: " << m_bucketwidth[p_rung] << std::endl;
+
+    for (boost::uint16_t i = 0; i < m_buckets[p_rung]; ++i) {
+        if (m_currentBucket[p_rung] > i) { // invalidated
+            std::cout << " ";
+        } else if (m_currentBucket[p_rung] < i) {
+            if (m_rungs[p_rung][i].size() > 0) {// valid full
+                std::cout << "*";
+            } else { // valid empty
+                std::cout << "-";
+            }
+        } else if (m_currentBucket[p_rung] == i) { // current dequeue
+            if (p_rung < m_lowestRung) {
+                std::cout << "x";
+            } else {
+                std::cout << "c";
+            }
+        }
+    }
+    std::cout << std::endl;
 }
 #endif /* NDEBUG || NDEBUG_QUEUE */
 

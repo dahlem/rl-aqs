@@ -1,4 +1,4 @@
-// Copyright (C) 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2009, 2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -81,9 +81,9 @@ void RLResponseHandler::update(AckEvent *subject)
 
     // observe reward (the longer it takes the smaller the reward)
     double reward = 0.0;
-    reward = (gsl_fcmp(entry->topArrival(), entry->getArrival(), 1e-9) == 0)
-        ? (0.0)
-        : (entry->topArrival() - entry->getArrival());
+    if ((entry->topArrival() - entry->getArrival()) > 0.0) {
+        reward = (entry->topArrival() - entry->getArrival());
+    }
 
     if (degree > 1) {
 #ifndef NDEBUG_EVENTS

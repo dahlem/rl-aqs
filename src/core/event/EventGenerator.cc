@@ -1,4 +1,4 @@
-// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -35,149 +35,34 @@ namespace dcommon = des::common;
 
 #include "events.hh"
 #include "EventGenerator.hh"
-namespace dcore = des::core;
 
 #include "DirectedGraph.hh"
 namespace dnet = des::network;
 
 
-
-void dcore::EventGenerator::generate(
-    dnet::Graph &p_graph,
-    dcommon::Queue &p_queue,
-    dsample::tGslRngSP arrival_rng,
-    boost::int32_t destination,
-    double arrival_rate,
-    double stop_time)
+namespace des
 {
-    generate(p_graph, p_queue, arrival_rng, destination,
-             arrival_rate, 0.0, stop_time);
-}
-
-
-void dcore::EventGenerator::generate(
-    dnet::Graph &p_graph,
-    dcommon::Queue &p_queue,
-    dsample::tGslRngSP arrival_rng,
-    boost::int32_t destination,
-    double arrival_rate,
-    double start_time,
-    double stop_time)
+namespace core
 {
-    double cur_arrival = 0.0, new_arrival = 0.0;
-
-    // if start time is larger than 0, then we assume this
-    // time is unprocessed (last event that wasn't put into the queue in
-    // a previous event generation iteration).
-    if (start_time > 0.0) {
-        if (start_time <= stop_time) {
-            dcommon::Entry *entry = new dcommon::Entry(
-                0.0,
-                start_time,
-                destination,
-                dcore::EXTERNAL_EVENT,
-                dcore::ARRIVAL_EVENT);
-
-            p_queue.push(entry);
-        }
-    }
-
-    cur_arrival = -dsample::Rng::poiss(
-        arrival_rate, gsl_rng_uniform(arrival_rng.get()));
-
-    cur_arrival += start_time;
-
-    // for as long as there is no stopping event
-    while (cur_arrival < stop_time) {
-        // generate arrival events
-        new_arrival = dsample::Rng::poiss(
-            arrival_rate, gsl_rng_uniform(arrival_rng.get()));
-
-        if ((cur_arrival - new_arrival) <= stop_time) {
-            // enqueue the last arrival event
-            dcommon::Entry *entry = new dcommon::Entry(
-                0.0,
-                cur_arrival,
-                destination,
-                dcore::EXTERNAL_EVENT,
-                dcore::ARRIVAL_EVENT);
-
-            try {
-                p_queue.push(entry);
-#ifndef NDEBUG_EVENTS
-                std::cout << "External arrival event scheduled for vertex "
-                          << destination << std::endl;
-#endif /* NDEBUG_EVENTS */
-            } catch (dcommon::QueueException &qe) {
-                std::cout << "Error scheduling external arrival event: " << entry->getArrival() << " " << qe.what() << std::endl;
-                if (entry != NULL) {
-                    delete entry;
-                }
-                throw;
-            }
-            cur_arrival -= new_arrival;
-        } else {
-            dnet::VertexNextEventTimeMap vertex_next_event_time_map =
-                get(vertex_next_event_time, p_graph);
-            dnet::Vertex vertex = boost::vertex(destination, p_graph);
-
-            // enqueue the last arrival event
-            dcommon::Entry *entry = new dcommon::Entry(
-                0.0,
-                cur_arrival,
-                destination,
-                dcore::EXTERNAL_EVENT,
-                dcore::LAST_ARRIVAL_EVENT);
-
-            try {
-                p_queue.push(entry);
-#ifndef NDEBUG_EVENTS
-                std::cout << "External last arrival event scheduled for vertex "
-                          << destination << std::endl;
-#endif /* NDEBUG_EVENTS */
-            } catch (dcommon::QueueException &qe) {
-                std::cout << "Error scheduling external last arrival event: " << entry->getArrival() << " " << qe.what() << std::endl;
-                if (entry != NULL) {
-                    delete entry;
-                }
-                throw;
-            }
-
-            // store the event that could not be pushed into the queue
-            // if event phases are enabled this value will be picked up.
-            // (see first if statement)
-            vertex_next_event_time_map[vertex] = (cur_arrival - new_arrival);
-
-            break;
-        }
-    }
-}
 
 
-void dcore::EventGenerator::generate(
-    dcommon::Queue &p_queue,
-    dsample::tGslRngSP arrival_rng,
-    boost::int32_t destination,
-    double arrival_rate)
+void EventGenerator::generateLogGraphEvent(dcommon::Queue &p_queue, double p_scheduledTime)
 {
-    double cur_arrival = -dsample::Rng::poiss(
-        arrival_rate, gsl_rng_uniform(arrival_rng.get()));
-
-    // enqueue the last arrival event
     dcommon::Entry *entry = new dcommon::Entry(
         0.0,
-        cur_arrival,
-        destination,
-        dcore::EXTERNAL_EVENT,
-        dcore::ARRIVAL_EVENT);
+        p_scheduledTime,
+        -99,
+        ADMIN_EVENT,
+        LOG_GRAPH_EVENT);
+
+#ifndef NDEBUG_EVENTS
+    std::cout << "Admin log graph event for time " << time << " scheduled." << std::endl;
+#endif /* NDEBUG_EVENTS */
 
     try {
         p_queue.push(entry);
-#ifndef NDEBUG_EVENTS
-        std::cout << "External arrival event scheduled for vertex " << destination << std::endl;
-#endif /* NDEBUG_EVENTS */
     } catch (dcommon::QueueException &qe) {
-        std::cout << "Error scheduling external arrival event: " << entry->getArrival() << " " << qe.what() << std::endl;
+        std::cout << "Error scheduling admin log graph event: " << entry->getArrival() << " " << qe.what() << std::endl;
         if (entry != NULL) {
             delete entry;
         }
@@ -186,32 +71,71 @@ void dcore::EventGenerator::generate(
 }
 
 
-void dcore::EventGenerator::generateLogGraph(
+void EventGenerator::generateArrivalAdmin(
     dcommon::Queue &p_queue,
-    double rate,
-    double stop_time)
+    boost::int32_t p_destination,
+    double p_time)
 {
-    double time = 0.0;
 
-    for (; time <= stop_time; time += rate) {
-        dcommon::Entry *entry = new dcommon::Entry(
-            0.0,
-            time,
-            -99,
-            dcore::ADMIN_EVENT,
-            dcore::LOG_GRAPH_EVENT);
+    // enqueue the last arrival event
+    dcommon::Entry *entry = new dcommon::Entry(
+        0.0, // delay
+        p_time, // arrival
+        p_destination, // destination
+        ADMIN_EVENT, // origin
+        GENERATE_ARRIVAL_EVENT); // type
 
-        try {
-            p_queue.push(entry);
 #ifndef NDEBUG_EVENTS
-            std::cout << "Admin log graph event scheduled." << std::endl;
+    std::cout << "Admin event for external arrival at time " << p_time
+              << " scheduled for vertex " << p_destination << std::endl;
 #endif /* NDEBUG_EVENTS */
-        } catch (dcommon::QueueException &qe) {
-            std::cout << "Error scheduling admin log graph event: " << entry->getArrival() << " " << qe.what() << std::endl;
-            if (entry != NULL) {
-                delete entry;
-            }
-            throw;
+
+    try {
+        p_queue.push(entry);
+    } catch (dcommon::QueueException &qe) {
+        std::cout << "Error scheduling admin event for external arrival: " << entry->getArrival() << " " << qe.what() << std::endl;
+        if (entry != NULL) {
+            delete entry;
         }
+        throw;
     }
+}
+
+
+void EventGenerator::generateArrival(
+    dcommon::Queue &p_queue,
+    dsample::tGslRngSP arrival_rng,
+    boost::int32_t destination,
+    double start_time,
+    double arrival_rate)
+{
+    double cur_arrival = -dsample::Rng::poiss(
+        arrival_rate, gsl_rng_uniform(arrival_rng.get()));
+
+    cur_arrival += start_time;
+
+    // enqueue the last arrival event
+    dcommon::Entry *entry = new dcommon::Entry(
+        0.0,
+        cur_arrival,
+        destination,
+        EXTERNAL_EVENT,
+        LAST_ARRIVAL_EVENT);
+
+    try {
+        p_queue.push(entry);
+#ifndef NDEBUG_EVENTS
+        std::cout << "External last arrival event scheduled for vertex " << destination << std::endl;
+#endif /* NDEBUG_EVENTS */
+    } catch (dcommon::QueueException &qe) {
+        std::cout << "Error scheduling external last arrival event: " << entry->getArrival() << " " << qe.what() << std::endl;
+        if (entry != NULL) {
+            delete entry;
+        }
+        throw;
+    }
+}
+
+
+}
 }

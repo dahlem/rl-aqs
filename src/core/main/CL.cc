@@ -1,4 +1,4 @@
-// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009, 2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -85,7 +85,6 @@ CL::CL()
     po::options_description opt_des("Simulation Configuration");
     opt_des.add_options()
         (STOPTIME.c_str(), po::value <double>()->default_value(100.0), "set the stop time of the event simulator.")
-        (GENERATIONS.c_str(), po::value <boost::int32_t>()->default_value(-1), "set the number of generations for the event simulator.")
         (SIZE.c_str(), po::value<int>()->default_value(10), "set the size of the network")
         (GENERATOR.c_str(), po::value <int>()->default_value(1), "Network generator (1=BBV, 2=Erdoes-Renyi).")
         (MAX_ARRIVAL.c_str(), po::value <double>()->default_value(1.0), "Max. arrival rate.")
@@ -180,6 +179,7 @@ CL::CL()
         (CL_NN_MOMENTUM.c_str(), po::value <double>()->default_value(1.0), "Momentum for the Backpropagation Training.")
         (CL_NN_CG.c_str(), po::value <bool>()->default_value(true), "Training method (1=CG, 2=BP).")
         (CL_NN_OUTSOURCE.c_str(), po::value <bool>()->default_value(false), "Outsource the NN (only valid for state representations that cover the neighbours).")
+        (CL_NN_LOSS_SERIALISE.c_str(), po::value <bool>()->default_value(false), "Serialise the loss-value of the NN.")
        ;
 
     po::options_description opt_rl_policy_epsilon("RL Epsilon Policy Configuration");
@@ -353,13 +353,6 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
     }
     std::cout << "Boost the edge weight " << desArgs->boost_edge << "." << std::endl;
 
-    if (vm.count(GENERATIONS.c_str())) {
-        desArgs->generations = vm[GENERATIONS.c_str()].as <boost::int32_t>();
-        std::cout << "Number of generations set to " << desArgs->generations << "." << std::endl;
-    } else {
-        std::cout << "No generations." << std::endl;
-    }
-
     if (vm.count(SIZE.c_str())) {
         desArgs->net_size = vm[SIZE.c_str()].as<int>();
     }
@@ -459,6 +452,11 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
             desArgs->nn_outsource = vm[CL_NN_OUTSOURCE.c_str()].as <bool>();
         }
         std::cout << "NN Outsourcing: " << desArgs->nn_outsource << "." << std::endl;
+
+        if (vm.count(CL_NN_LOSS_SERIALISE.c_str())) {
+            desArgs->nn_loss_serialise = vm[CL_NN_LOSS_SERIALISE.c_str()].as <bool>();
+        }
+        std::cout << "NN serialise loss: " << desArgs->nn_loss_serialise << "." << std::endl;
 
         // parse the command-line
         std::string ids;

@@ -1,4 +1,4 @@
-// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009, 2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -143,7 +143,7 @@ void GraphUtil::read_dot(Graph &p_graph, const std::string& p_filename)
         boost::dynamic_properties dp = getProperties(p_graph);
 
         try {
-            boost::read_graphviz(in, p_graph, dp);
+//            boost::read_graphviz(in, p_graph, dp);
 #ifndef NDEBUG
             std::cout << "Successfully read graph." << std::endl;
 #endif /* NDEBUG */
@@ -180,7 +180,6 @@ boost::dynamic_properties GraphUtil::getProperties(Graph &p_graph)
     dp.property(Q_VALUE, get(edge_q_val, p_graph));
     dp.property(EDGE_INDEX, get(edge_eindex, p_graph));
     dp.property(NEXT_ACTION, get(vertex_next_action, p_graph));
-    dp.property(NEXT_EVENT_TIME, get(vertex_next_event_time, p_graph));
     dp.property(AVG_EVENT_IN_SYSTEM_TIME, get(vertex_avg_event_in_system_time, p_graph));
     dp.property(EXPERT_NORMAL, get(vertex_expert_normal, p_graph));
     dp.property(EXPERT_ABSOLUTE, get(vertex_expert_absolute, p_graph));
@@ -191,6 +190,8 @@ boost::dynamic_properties GraphUtil::getProperties(Graph &p_graph)
     dp.property(EDGE_TOTAL_REWARD, get(edge_total_reward, p_graph));
     dp.property(ACTUAL_REWARD, get(vertex_actual_reward, p_graph));
     dp.property(BEST_RESPONSE, get(vertex_best_response, p_graph));
+    dp.property(VERTEX_NN_LOSS, get(vertex_v_nn_loss, p_graph));
+    dp.property(EDGE_NN_LOSS, get(edge_e_nn_loss, p_graph));
 
     boost::ref_property_map<Graph*, boost::uint16_t>
         graphGenerator(get_property(p_graph, graph_generator));
