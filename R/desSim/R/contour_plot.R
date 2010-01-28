@@ -1,4 +1,4 @@
-## Copyright (C) 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+## Copyright (C) 2009, 2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 ##
 ## This file is free software; as a special exception the author gives
 ## unlimited permission to copy and/or distribute it, with or without
@@ -113,10 +113,12 @@ des.contour.grid6.plot <- function(prefix="2d-shdf",
   surrogate <- read.csv(paste(prefix, "-surrogate.dat", sep=""))
 
   data <- surrogate[,c("x1", "x2", "y")]
-  names(data) <- c("x", "y", "z")
-  
-  p <- ggplot(data, aes(x, y, z = z))
-  p1 <- p + geom_tile(aes(fill = z)) + stat_contour(bins = 10)
+  names(data) <- c('x', 'y', 'z')
+
+
+  p <- ggplot(data, aes(x=x, y=y))
+  p1 <- p + geom_tile(aes(fill = z))
+  p1 <- p1 + stat_contour(aes(z=z), bins=10)
   p1 <- p1 + scale_fill_gradientn("S", colours=c("blue", "cyan", "yellow", "red"))
   p1 <- p1 + scale_x_continuous(titles[1])
   p1 <- p1 + scale_y_continuous(titles[2])

@@ -5,11 +5,11 @@ des.ca.ridge.spectrum.plot <- function(prefix, paths, start, end, ps=TRUE) {
 
   lambdas <- read.csv(paste(prefix, "-ca-eigen.dat", sep=""), header=TRUE)
   data <- read.csv(paste(prefix, "-ridge_path-1.dat", sep=""), header=FALSE, col.names=c("incr", "R", "y", paste("x", 1:(paths - 1), sep=""), "path"))
-  p <- ggplot()
 
   data <- data[data$incr < end,]
   data <- data[data$incr > start,]
   
+  p <- ggplot()
   for (i in 0:(paths - 1)) {
     df <- data[data$path == i,];
     if (length(df$incr) > 0) {
@@ -126,7 +126,7 @@ des.ca.ridge.x.plot.3 <- function(prefix, path, paths, end, inlay=TRUE, mainScal
   mp <- p + geom_line(data=dfPrep, aes(x=R, y=y, linetype=factor(x)))
   mp <- mp + scale_y_continuous("")
   mp <- mp + scale_x_continuous("R", breaks=breaks)
-  mp <- mp + scale_linetype("Variable", labels=labels)
+  mp <- mp + scale_linetype("Variable", breaks=unique(dfPrep$x), labels=labels)
   mp <- mp + opts(base_size=8)
 
   if (inlay) {
@@ -144,9 +144,9 @@ des.ca.ridge.x.plot.3 <- function(prefix, path, paths, end, inlay=TRUE, mainScal
 
     sp <- p + geom_line(data=sdfPrep, aes(x=R, y=y, linetype=factor(x)))
     sp <- sp + scale_y_continuous("")
-    sp <- sp + scale_x_continuous("", breaks = NA)
-    sp <- sp + opts(panel.border = theme_blank(),
-                    legend.position = "none")
+    sp <- sp + scale_x_continuous("", breaks=NA)
+    sp <- sp + scale_linetype("Variable", breaks=unique(sdfPrep$x), labels=labels)
+    sp <- sp + opts(panel.border = theme_blank(), legend.position = "none")
 
     vp <- viewport(x=unit(ncps[1], "npc"), y=unit(ncps[2], "npc"), width = 0.4, height = 0.4, just = c("left", "bottom"))
 
@@ -171,12 +171,11 @@ des.ca.ridge.y.plot <- function(prefix, path, paths, end, ps=TRUE) {
     des.postscript(paste(prefix, "-ca-ridge-y.eps", sep=""), width=2.8, height=2.8, pointsize=8)
   }
 
-  p <- ggplot()
-
   data <- read.csv(paste(prefix, "-ridge_path-1.dat", sep=""), header=FALSE, col.names=c("incr", "R", "y", paste("x", 1:(paths - 1), sep=""), "path"))
   data <- data[data$incr < end,]
   df <- data[data$path == path,]
-  p <- p + geom_line(data=df, aes(x=R, y=y))
+  p <- ggplot(df)
+  p <- p + geom_line(aes(x=R, y=y))
 
   p <- p + scale_y_continuous(expression(hat(y)))
   p <- p + theme_bw(base_size=8)

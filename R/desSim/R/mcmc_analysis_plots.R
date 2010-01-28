@@ -33,10 +33,11 @@ des.kriging.mcmc.y.plot <- function(prefix="2d-shdf", uniformPropFile=NULL, ps=T
   p <- p + scale_y_continuous(ytitle)
   p <- p + scale_x_continuous("y")
   if (!is.null(uniformPropFile)) {
-    p <- p + scale_linetype("Agent", labels=c("Adaptive", "Uniform"))
+    p <- p + scale_linetype("Agent", breaks=c(1, 2), labels=c("Adaptive", "Uniform"))
   }
 ##  p <- p + scale_fill_discrete("Density", labels=c(expression(y[min]), expression(y[max])))
-  p <- p + scale_fill_brewer("Density", palette="Paired", labels=c(expression(y[min]), expression(y[max])))
+  p <- p + scale_fill_brewer("Density", palette="Paired", breaks=c(1, 2),
+                             labels=c(expression(y[min]), expression(y[max])))
   p <- p + theme_bw(base_size=8)
   print(p)
 
