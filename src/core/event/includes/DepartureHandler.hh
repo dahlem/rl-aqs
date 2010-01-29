@@ -1,4 +1,4 @@
-// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -28,9 +28,6 @@
 #include <boost/cstdint.hpp>
 
 
-#include "DepartureEvent.hh"
-namespace dcore = des::core;
-
 #include "LadderQueue.hh"
 namespace dcommon = des::common;
 
@@ -42,6 +39,10 @@ namespace dnet = des::network;
 
 #include "Selection.hh"
 namespace drl = des::rl;
+
+#include "DepartureEvent.hh"
+#include "DesBus.hh"
+
 
 
 namespace des
@@ -56,14 +57,14 @@ namespace core
 class DepartureHandler : public design::Observer<dcore::DepartureEvent>
 {
 public:
-    DepartureHandler(dcommon::Queue &p_queue, dnet::Graph &p_graph, drl::Selection &p_selection);
+    DepartureHandler(DesBus&, drl::Selection&);
     ~DepartureHandler();
 
     void update(dcore::DepartureEvent *subject);
 
 private:
-    dcommon::Queue &m_queue;
     dnet::Graph &m_graph;
+    dcommon::Queue &m_queue;
     drl::Selection &m_selection;
 
     dnet::VertexBusyMap vertex_busy_map;

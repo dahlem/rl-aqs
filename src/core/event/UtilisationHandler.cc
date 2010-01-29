@@ -25,19 +25,25 @@
 # include <iostream>
 #endif /* NDEBUG_EVENTS */
 
-#include "events.hh"
-#include "UtilisationHandler.hh"
-namespace dcore = des::core;
-
 #include "Entry.hh"
 namespace dcommon = des::common;
 
 #include "WEvonet.hh"
 namespace dnet = des::network;
 
+#include "events.hh"
+#include "UtilisationHandler.hh"
+#include "GraphChannel.hh"
 
-dcore::UtilisationHandler::UtilisationHandler(dnet::Graph &p_graph)
-    : m_graph(p_graph)
+
+namespace des
+{
+namespace core
+{
+
+
+UtilisationHandler::UtilisationHandler(DesBus &p_bus)
+    : m_graph((dynamic_cast<GraphChannel&> (p_bus.getChannel(id::GRAPH_CHANNEL))).getGraph())
 {
     vertex_Bdt_map = get(vertex_Bdt, m_graph);
     vertex_busy_map = get(vertex_busy, m_graph);
@@ -46,11 +52,11 @@ dcore::UtilisationHandler::UtilisationHandler(dnet::Graph &p_graph)
 }
 
 
-dcore::UtilisationHandler::~UtilisationHandler()
+UtilisationHandler::~UtilisationHandler()
 {}
 
 
-void dcore::UtilisationHandler::update(dcore::PostAnyEvent *subject)
+void UtilisationHandler::update(PostAnyEvent *subject)
 {
     dcommon::Entry *entry = subject->getEvent();
 
@@ -84,4 +90,8 @@ void dcore::UtilisationHandler::update(dcore::PostAnyEvent *subject)
         vertex_Bdt_map[vertex] += b_i;
         vertex_utilisation_map[vertex] = vertex_Bdt_map[vertex] / entry->getArrival();
     }
+}
+
+
+}
 }

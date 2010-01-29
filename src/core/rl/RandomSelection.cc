@@ -1,4 +1,4 @@
-// Copyright (C) 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2009-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -35,6 +35,9 @@
 
 #include <gsl/gsl_randist.h>
 
+#include "GraphChannel.hh"
+namespace dcore = des::core;
+
 #include "RandomSelection.hh"
 
 
@@ -44,8 +47,9 @@ namespace rl
 {
 
 RandomSelection::RandomSelection(
-    Policy &p_policy, dnet::Graph &p_graph, Int32SA p_depart_uniform_ids)
-    : Selection(p_policy), m_graph(p_graph), m_depart_uniform_ids(p_depart_uniform_ids)
+    dcore::DesBus &p_bus, Policy &p_policy, Int32SA p_depart_uniform_ids)
+    : m_graph((dynamic_cast<dcore::GraphChannel&> (p_bus.getChannel(dcore::id::GRAPH_CHANNEL))).getGraph()),
+      Selection(p_policy), m_depart_uniform_ids(p_depart_uniform_ids)
 {
     edge_weight_map = get(boost::edge_weight, m_graph);
     vertex_index_map = get(boost::vertex_index, m_graph);

@@ -1,4 +1,4 @@
-// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -29,12 +29,13 @@ namespace design = des::design;
 namespace dnet = des::network;
 
 #include "ArrivalEvent.hh"
+#include "DesBus.hh"
 
 
 namespace des
 {
-    namespace core
-    {
+namespace core
+{
 
 
 /** @class NumEventsHandler
@@ -43,7 +44,7 @@ namespace des
 class NumEventsHandler : public design::Observer<dcore::ArrivalEvent>
 {
 public:
-    NumEventsHandler(dnet::Graph &p_graph);
+    NumEventsHandler(DesBus&);
     ~NumEventsHandler();
 
     void update(ArrivalEvent *subject);
@@ -57,7 +58,7 @@ private:
 };
 
 
-    }
+}
 }
 
 

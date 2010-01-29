@@ -1,4 +1,4 @@
-// Copyright (C) 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2009-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -60,6 +60,7 @@ namespace dstats = des::statistics;
 namespace dnnet = des::nnet;
 
 #include "AckEvent.hh"
+#include "DesBus.hh"
 
 
 namespace des
@@ -88,12 +89,7 @@ typedef boost::shared_ptr <ConjGrad> ConjGradSP;
 class HybridFullRLResponseHandler : public design::Observer<AckEvent>
 {
 public:
-    HybridFullRLResponseHandler(dnet::Graph &p_graph, double p_q_alpha, double p_q_lambda,
-                                drl::Policy &p_policy, std::vector<int> &p_state_representation,
-                                boost::uint16_t p_hidden_neurons, boost::int32_t p_uniform_rng_index,
-                                bool p_cg, boost::uint16_t p_loss_policy,
-                                boost::uint16_t p_window, boost::uint16_t p_brent_iter,
-                                double p_momentum, boost::uint16_t p_randomIter);
+    HybridFullRLResponseHandler(DesBus&, drl::Policy &p_policy, double, double, double);
     ~HybridFullRLResponseHandler();
 
     void update(AckEvent *subject);
@@ -104,11 +100,8 @@ private:
     double m_q_lambda;
     drl::Policy &m_policy;
     std::vector<int> &m_state_representation;
-    boost::uint16_t m_hidden_neurons;
-    boost::int32_t m_uniform_rng_index;
-    boost::uint16_t m_randomIter;
-
     tQOnlineStatsSA qStatsSA;
+    boost::uint16_t m_randomIter;
 
     // derived fields
     dnet::EdgeIndexMap edge_index_map;

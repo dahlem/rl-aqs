@@ -1,4 +1,4 @@
-// Copyright (C) 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2009-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -38,6 +38,7 @@ namespace dstats = des::statistics;
 
 
 #include "AckEvent.hh"
+#include "DesBus.hh"
 
 
 namespace des
@@ -53,7 +54,7 @@ typedef boost::scoped_array<dstats::OnlineStats> tQOnlineStatsSA;
 class DefaultResponseHandler : public design::Observer<AckEvent>
 {
 public:
-    DefaultResponseHandler(dnet::Graph &p_graph);
+    DefaultResponseHandler(DesBus&);
     ~DefaultResponseHandler();
 
     void update(AckEvent *subject);

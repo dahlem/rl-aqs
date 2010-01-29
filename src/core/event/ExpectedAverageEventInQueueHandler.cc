@@ -1,4 +1,4 @@
-// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -31,19 +31,25 @@
 
 #include <gsl/gsl_math.h>
 
-#include "events.hh"
-#include "ExpectedAverageEventInQueueHandler.hh"
-namespace dcore = des::core;
-
 #include "Entry.hh"
 namespace dcommon = des::common;
 
 #include "WEvonet.hh"
 namespace dnet = des::network;
 
+#include "events.hh"
+#include "ExpectedAverageEventInQueueHandler.hh"
+#include "GraphChannel.hh"
 
-dcore::ExpectedAverageEventInQueueHandler::ExpectedAverageEventInQueueHandler(dnet::Graph &p_graph)
-    : m_graph(p_graph)
+
+namespace des
+{
+namespace core
+{
+
+
+ExpectedAverageEventInQueueHandler::ExpectedAverageEventInQueueHandler(DesBus &p_bus)
+    : m_graph((dynamic_cast<GraphChannel&> (p_bus.getChannel(id::GRAPH_CHANNEL))).getGraph())
 {
     vertex_Qdt_map = get(vertex_Qdt, m_graph);
     vertex_number_in_queue_map = get(vertex_number_in_queue, m_graph);
@@ -52,11 +58,11 @@ dcore::ExpectedAverageEventInQueueHandler::ExpectedAverageEventInQueueHandler(dn
 }
 
 
-dcore::ExpectedAverageEventInQueueHandler::~ExpectedAverageEventInQueueHandler()
+ExpectedAverageEventInQueueHandler::~ExpectedAverageEventInQueueHandler()
 {}
 
 
-void dcore::ExpectedAverageEventInQueueHandler::update(dcore::PostAnyEvent *subject)
+void ExpectedAverageEventInQueueHandler::update(PostAnyEvent *subject)
 {
     dcommon::Entry *entry = subject->getEvent();
 
@@ -93,4 +99,8 @@ void dcore::ExpectedAverageEventInQueueHandler::update(dcore::PostAnyEvent *subj
 #ifndef NDEBUG_EVENTS
     std::cout << "Avg. Event in queue updated." << std::endl;
 #endif /* NDEBUG_EVENTS */
+}
+
+
+}
 }

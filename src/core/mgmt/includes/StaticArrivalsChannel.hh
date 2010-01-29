@@ -24,18 +24,15 @@
 # include <config.h>
 #endif
 
-#ifndef __STDC_CONSTANT_MACROS
-# define __STDC_CONSTANT_MACROS
-#endif /* __STDC_CONSTANT_MACROS */
 
-#include <boost/cstdint.hpp>
+#include "ArrivalsChannel.hh"
 
 
 namespace des {
 namespace core {
 
 
-class StaticArrivalsChannel
+class StaticArrivalsChannel : public ArrivalsChannel
 {
 public:
     StaticArrivalsChannel() {};

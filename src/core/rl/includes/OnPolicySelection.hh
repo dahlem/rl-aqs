@@ -1,4 +1,4 @@
-// Copyright (C) 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2009-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,30 +14,27 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-/** @file FairActionLearner.hh
- * Declaration of the methods for the weighted policy learner. The implementation follows
- * Abdallah and Lesser "Multiagent Reinforcement Learning and
- * Self-organization in a Network of Agents"
+/** @file OnPolicySelection.hh
+ * Declaration of the on-policy selection class
  *
  * @author Dominik Dahlem
  */
-#ifndef __DES_RL_FAIRACTIONLEARNER_HH__
-#define __DES_RL_FAIRACTIONLEARNER_HH__
+#ifndef __DES_RL_ONPOLICYSELECTION_HH__
+#define __DES_RL_ONPOLICYSELECTION_HH__
 
 #ifndef __STDC_CONSTANT_MACROS
 # define __STDC_CONSTANT_MACROS
 #endif /* __STDC_CONSTANT_MACROS */
 
-
-#include <gsl/gsl_randist.h>
-
-#include "CRN.hh"
-namespace dsample = des::sampling;
+#include <boost/cstdint.hpp>
 
 #include "DirectedGraph.hh"
 namespace dnet = des::network;
 
-#include "Policy.hh"
+#include "DesBus.hh"
+namespace dcore = des::core;
+
+#include "Selection.hh"
 
 
 namespace des
@@ -45,30 +42,25 @@ namespace des
 namespace rl
 {
 
-class FairActionLearner : public Policy
+/** @class OnPolicySelection
+ * This class selects on-policy actions. This implies that this selection does
+ * not need to know which policy is been used, because the action is chosen whenever
+ * the new value-function is calculated.
+ */
+class OnPolicySelection : public Selection
 {
 public:
-    FairActionLearner(
-        double,
-        double,
-        dnet::Graph &,
-        dsample::tGslRngSP,
-        dsample::tGslRngSP);
+    OnPolicySelection(Policy &p_policy, dcore::DesBus&);
 
-    ~FairActionLearner()
+    virtual ~OnPolicySelection()
         {}
 
-    virtual boost::uint16_t operator() (
-        boost::uint16_t p_source, tValuesVec &p_values, PAttr p_attr);
+    boost::int32_t operator() (boost::int32_t p_source);
 
 private:
-    double m_epsilon;
-    double m_eta;
     dnet::Graph &m_graph;
-    dsample::tGslRngSP m_uniform_rng;
-    dsample::tGslRngSP m_simplex_rng;
+    dnet::VertexNextActionMap vertex_next_action_map;
 
-    dnet::EdgeWeightMap edge_weight_map;
 };
 
 
@@ -77,4 +69,4 @@ private:
 
 
 
-#endif /* __DES_RL_FAIRACTIONLEARNER_HH__ */
+#endif /* __DES_RL_ONPOLICYSELECTION_HH__ */

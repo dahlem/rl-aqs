@@ -269,6 +269,7 @@ AC_CONFIG_FILES([
    src/core/event/Makefile
    src/core/main/Makefile
    src/core/mgmt/Makefile
+   src/core/rl/Makefile
    src/date/Makefile
    src/design/Makefile
    src/design/pattern/Makefile
@@ -279,7 +280,6 @@ AC_CONFIG_FILES([
    src/network/evolution/Makefile
    src/network/main/Makefile
    src/nnet/Makefile
-   src/rl/Makefile
    src/sampling/Makefile
    src/sampling/common/Makefile
    src/sampling/crn/Makefile

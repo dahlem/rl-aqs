@@ -1,4 +1,4 @@
-// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009, 2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,30 +23,38 @@
 
 #include <gsl/gsl_math.h>
 
-#include "events.hh"
-#include "LeaveEvent.hh"
-#include "LeaveHandler.hh"
-namespace dcore = des::core;
-
 #include "Entry.hh"
 #include "LadderQueue.hh"
 namespace dcommon = des::common;
 
+#include "events.hh"
+#include "LeaveEvent.hh"
+#include "LeaveHandler.hh"
+#include "GraphChannel.hh"
+#include "QueueChannel.hh"
 
-dcore::LeaveHandler::LeaveHandler(dcommon::Queue &p_queue, dnet::Graph &p_graph)
-    : m_queue(p_queue), m_graph(p_graph),
-      m_EventInSystem(new dstats::OnlineStats[boost::num_vertices(p_graph)])
+
+namespace des
+{
+namespace core
+{
+
+
+LeaveHandler::LeaveHandler(DesBus &p_bus)
+    : m_graph((dynamic_cast<GraphChannel&> (p_bus.getChannel(id::GRAPH_CHANNEL))).getGraph()),
+      m_queue((dynamic_cast<QueueChannel&> (p_bus.getChannel(id::QUEUE_CHANNEL))).getQueue()),
+      m_EventInSystem(new dstats::OnlineStats[boost::num_vertices(m_graph)])
 {
     m_vertexAvgEventInSystemTimeMap = get(vertex_avg_event_in_system_time, m_graph);
 }
 
 
-dcore::LeaveHandler::~LeaveHandler()
+LeaveHandler::~LeaveHandler()
 {
 }
 
 
-void dcore::LeaveHandler::update(dcore::LeaveEvent *subject)
+void LeaveHandler::update(LeaveEvent *subject)
 {
     dcommon::Entry *entry = subject->getEvent();
     int origin = entry->getOrigin();
@@ -65,4 +73,8 @@ void dcore::LeaveHandler::update(dcore::LeaveEvent *subject)
 
     m_EventInSystem[origin].push(inSystem);
     m_vertexAvgEventInSystemTimeMap[vertex] = m_EventInSystem[origin].mean();
+}
+
+
+}
 }

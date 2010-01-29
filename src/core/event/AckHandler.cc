@@ -1,4 +1,4 @@
-// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -21,30 +21,36 @@
 # include <config.h>
 #endif
 
-#include "events.hh"
-#include "AckEvent.hh"
-#include "AckHandler.hh"
-namespace dcore = des::core;
-
 #include "Entry.hh"
 #include "LadderQueue.hh"
 namespace dcommon = des::common;
 
 #include "events.hh"
+#include "AckEvent.hh"
+#include "AckHandler.hh"
+#include "GraphChannel.hh"
+#include "QueueChannel.hh"
 
 
-dcore::AckHandler::AckHandler(dcommon::Queue &p_queue, dnet::Graph &p_graph)
-    : m_queue(p_queue), m_graph(p_graph)
+namespace des
+{
+namespace core
+{
+
+
+AckHandler::AckHandler(DesBus &p_bus)
+    : m_graph((dynamic_cast<GraphChannel&> (p_bus.getChannel(id::GRAPH_CHANNEL))).getGraph()),
+      m_queue((dynamic_cast<QueueChannel&> (p_bus.getChannel(id::QUEUE_CHANNEL))).getQueue())
 {
     vertex_num_events_processed_map = get(vertex_num_events_processed, m_graph);
 }
 
 
-dcore::AckHandler::~AckHandler()
+AckHandler::~AckHandler()
 {}
 
 
-void dcore::AckHandler::update(dcore::AckEvent *subject)
+void AckHandler::update(AckEvent *subject)
 {
     dcommon::Entry *entry = subject->getEvent();
     dnet::Vertex vertex = boost::vertex(entry->getDestination(), m_graph);
@@ -60,13 +66,13 @@ void dcore::AckHandler::update(dcore::AckEvent *subject)
     dcommon::Entry *new_entry = new dcommon::Entry(*entry);
 
     if (destination == EXTERNAL_EVENT) {
-        new_entry->leave(dcore::EXTERNAL_EVENT, dcore::LEAVE_EVENT);
+        new_entry->leave(EXTERNAL_EVENT, LEAVE_EVENT);
     } else {
 #ifndef NDEBUG_EVENTS
         std::cout << "Schedule acknowledge event." << std::endl;
 #endif /* NDEBUG_EVENTS */
 
-        new_entry->acknowledge(origin, destination, dcore::ACK_EVENT);
+        new_entry->acknowledge(origin, destination, ACK_EVENT);
     }
 
     m_queue.push(new_entry);
@@ -80,4 +86,8 @@ void dcore::AckHandler::update(dcore::AckEvent *subject)
 #ifndef NDEBUG_EVENTS
     std::cout << "** Acknowledge handler done." << std::endl;
 #endif /* NDEBUG_EVENTS */
+}
+
+
+}
 }

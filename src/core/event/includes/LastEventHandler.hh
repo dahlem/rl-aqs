@@ -1,4 +1,4 @@
-// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -21,20 +21,21 @@
 #ifndef __LASTEVENTHANDLER_HH__
 #define __LASTEVENTHANDLER_HH__
 
-#include "PostAnyEvent.hh"
-namespace dcore = des::core;
-
 #include "Observer.hh"
 namespace design = des::design;
 
 #include "WEvonet.hh"
 namespace dnet = des::network;
 
+#include "PostAnyEvent.hh"
+#include "DesBus.hh"
+
+
 
 namespace des
 {
-    namespace core
-    {
+namespace core
+{
 
 
 /** @class LastEventHandler
@@ -43,7 +44,7 @@ namespace des
 class LastEventHandler : public design::Observer<dcore::PostAnyEvent>
 {
 public:
-    LastEventHandler(dnet::Graph &p_graph);
+    LastEventHandler(DesBus&);
     ~LastEventHandler();
 
     void update(dcore::PostAnyEvent *subject);
@@ -57,7 +58,7 @@ private:
 };
 
 
-    }
+}
 }
 
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2009-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -42,6 +42,7 @@ namespace dnet = des::network;
 namespace drl = des::rl;
 
 #include "AckEvent.hh"
+#include "DesBus.hh"
 
 
 namespace des
@@ -55,7 +56,7 @@ namespace core
 class ExpertNormalHandler : public design::Observer<AckEvent>
 {
 public:
-    ExpertNormalHandler(dnet::Graph &p_graph);
+    ExpertNormalHandler(DesBus&);
     ~ExpertNormalHandler();
 
     void update(AckEvent *subject);

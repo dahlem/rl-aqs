@@ -1,4 +1,4 @@
-// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -31,11 +31,6 @@
 
 #include <boost/graph/adjacency_list.hpp>
 
-#include "events.hh"
-#include "DepartureEvent.hh"
-#include "DepartureHandler.hh"
-namespace dcore = des::core;
-
 #include "Entry.hh"
 #include "LadderQueue.hh"
 namespace dcommon = des::common;
@@ -46,22 +41,34 @@ namespace dnet = des::network;
 #include "Selection.hh"
 namespace drl = des::rl;
 
+#include "events.hh"
+#include "DepartureEvent.hh"
+#include "DepartureHandler.hh"
+#include "GraphChannel.hh"
+#include "QueueChannel.hh"
 
-dcore::DepartureHandler::DepartureHandler(dcommon::Queue &p_queue,
-                                          dnet::Graph &p_graph,
-                                          drl::Selection &p_selection)
-    : m_queue(p_queue), m_graph(p_graph), m_selection(p_selection)
+
+namespace des
+{
+namespace core
+{
+
+
+DepartureHandler::DepartureHandler(DesBus &p_bus, drl::Selection &p_selection)
+    : m_graph((dynamic_cast<GraphChannel&> (p_bus.getChannel(id::GRAPH_CHANNEL))).getGraph()),
+      m_queue((dynamic_cast<QueueChannel&> (p_bus.getChannel(id::QUEUE_CHANNEL))).getQueue()),
+      m_selection(p_selection)
 {
     vertex_busy_map = get(vertex_busy, m_graph);
     vertex_number_in_queue_map = get(vertex_number_in_queue, m_graph);
 }
 
 
-dcore::DepartureHandler::~DepartureHandler()
+DepartureHandler::~DepartureHandler()
 {}
 
 
-void dcore::DepartureHandler::update(dcore::DepartureEvent *subject)
+void DepartureHandler::update(DepartureEvent *subject)
 {
     dcommon::Entry *entry = subject->getEvent();
     dnet::Vertex vertex = boost::vertex(entry->getDestination(), m_graph);
@@ -95,7 +102,7 @@ void dcore::DepartureHandler::update(dcore::DepartureEvent *subject)
         assert(destination >= 0);
 #endif /* NDEBUG_EVENTS */
 
-        new_entry->depart(destination, dcore::ARRIVAL_EVENT);
+        new_entry->depart(destination, ARRIVAL_EVENT);
 
 #ifndef NDEBUG_EVENTS
         std::cout << "Schedule new arrival event: " << const_cast <const dcommon::Entry&> (*new_entry)
@@ -121,7 +128,7 @@ void dcore::DepartureHandler::update(dcore::DepartureEvent *subject)
         dcommon::Entry *new_entry = new dcommon::Entry(
             const_cast <const dcommon::Entry&> (*entry));
 
-        new_entry->acknowledge(origin, destination, dcore::ACK_EVENT);
+        new_entry->acknowledge(origin, destination, ACK_EVENT);
 
 #ifndef NDEBUG_EVENTS
         std::cout << "Schedule new acknowledge event: " << const_cast <const dcommon::Entry&> (*new_entry)
@@ -141,4 +148,8 @@ void dcore::DepartureHandler::update(dcore::DepartureEvent *subject)
             throw;
         }
     }
+}
+
+
+}
 }

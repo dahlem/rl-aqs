@@ -1,4 +1,4 @@
-// Copyright (C) 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2009-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,15 +14,14 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-/** @file WeightedPolicyLearner.hh
- * Declaration of the methods for the weighted policy learner. The implementation follows
- * Abdallah and Lesser "Multiagent Reinforcement Learning and
- * Self-organization in a Network of Agents"
+/** @file CL.hh
+ * Declaration of the methods for the command-line parsing of the main
+ * routine for DES.
  *
  * @author Dominik Dahlem
  */
-#ifndef __DES_RL_WEIGHTEDPOLICYLEARNER_HH__
-#define __DES_RL_WEIGHTEDPOLICYLEARNER_HH__
+#ifndef __DES_RL_BOLTZMANN_HH__
+#define __DES_RL_BOLTZMANN_HH__
 
 #ifndef __STDC_CONSTANT_MACROS
 # define __STDC_CONSTANT_MACROS
@@ -34,8 +33,8 @@
 #include "CRN.hh"
 namespace dsample = des::sampling;
 
-#include "DirectedGraph.hh"
-namespace dnet = des::network;
+#include "DesBus.hh"
+namespace dcore = des::core;
 
 #include "Policy.hh"
 
@@ -45,30 +44,21 @@ namespace des
 namespace rl
 {
 
-class WeightedPolicyLearner : public Policy
+
+class BoltzmannPolicy : public Policy
 {
 public:
-    WeightedPolicyLearner(
-        double,
-        double,
-        dnet::Graph &,
-        dsample::tGslRngSP,
-        dsample::tGslRngSP);
-
-    ~WeightedPolicyLearner()
+    BoltzmannPolicy(dcore::DesBus&);
+    ~BoltzmannPolicy()
         {}
 
     virtual boost::uint16_t operator() (
         boost::uint16_t p_source, tValuesVec &p_values, PAttr p_attr);
 
 private:
-    double m_epsilon;
-    double m_eta;
-    dnet::Graph &m_graph;
+    double m_tau;
     dsample::tGslRngSP m_uniform_rng;
-    dsample::tGslRngSP m_simplex_rng;
 
-    dnet::EdgeWeightMap edge_weight_map;
 };
 
 
@@ -77,4 +67,4 @@ private:
 
 
 
-#endif /* __DES_RL_WEIGHTEDPOLICYLEARNER_HH__ */
+#endif /* __DES_RL_BOLTZMANN_HH__ */

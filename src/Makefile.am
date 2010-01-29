@@ -8,7 +8,7 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-SUBDIRS = design sampling common utils statistics date io network nnet rl core
+SUBDIRS = design sampling common utils statistics date io network nnet core
 
 if COMPILE_PARALLEL
   SUBDIRS += mpi

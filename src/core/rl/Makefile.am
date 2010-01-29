@@ -1,4 +1,4 @@
-# Copyright (C) 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+# Copyright (C) 2009-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 #  
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without 
@@ -30,6 +30,7 @@ librl_la_CPPFLAGS =                                                     \
 	-I$(top_srcdir)/src/network/evolution/includes                  \
 	-I$(top_srcdir)/src/utils/vector/includes                       \
 	-I$(top_srcdir)/src/utils/simplex/includes                      \
+	-I$(top_srcdir)/src/core/mgmt/includes                          \
 	-I./includes
 
 librl_la_LIBADD =                                                       \
@@ -38,6 +39,7 @@ librl_la_LIBADD =                                                       \
 	$(GSL_LIBS)                                                     \
 	$(top_srcdir)/src/utils/vector/libutils_vector.la               \
 	$(top_srcdir)/src/utils/simplex/libutils_simplex.la             \
+	$(top_srcdir)/src/core/mgmt/libcoremgmt.la                      \
 	$(top_srcdir)/src/sampling/common/libsamplingcommon.la
 
 librl_la_LDFLAGS =                                                      \

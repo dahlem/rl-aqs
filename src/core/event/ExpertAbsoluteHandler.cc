@@ -37,6 +37,7 @@ namespace dnet = des::network;
 #include "events.hh"
 #include "AckEvent.hh"
 #include "ExpertAbsoluteHandler.hh"
+#include "GraphChannel.hh"
 
 
 namespace des
@@ -45,8 +46,8 @@ namespace core
 {
 
 
-ExpertAbsoluteHandler::ExpertAbsoluteHandler(dnet::Graph &p_graph)
-    : m_graph(p_graph)
+ExpertAbsoluteHandler::ExpertAbsoluteHandler(DesBus& p_bus)
+    : m_graph((dynamic_cast<GraphChannel&> (p_bus.getChannel(id::GRAPH_CHANNEL))).getGraph())
 {
     vertex_expert_absolute_map = get(vertex_expert_absolute, m_graph);
 }

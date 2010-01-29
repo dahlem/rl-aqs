@@ -28,6 +28,8 @@ namespace dnet = des::network;
 
 #include "GenerateArrivalsHandler.hh"
 #include "EventGenerator.hh"
+#include "GraphChannel.hh"
+#include "QueueChannel.hh"
 
 
 
@@ -38,10 +40,10 @@ namespace core
 
 
 GenerateArrivalsHandler::GenerateArrivalsHandler(
-    dnet::Graph &p_graph,
-    Int32SA p_arrivalRngs,
-    dcommon::Queue &p_queue)
-    : m_graph(p_graph), m_arrivalRngs(p_arrivalRngs), m_queue(p_queue)
+    DesBus &p_bus, Int32SA p_arrivalRngs)
+    : m_graph((dynamic_cast<GraphChannel&> (p_bus.getChannel(id::GRAPH_CHANNEL))).getGraph()),
+      m_queue((dynamic_cast<QueueChannel&> (p_bus.getChannel(id::QUEUE_CHANNEL))).getQueue()),
+      m_arrivalRngs(p_arrivalRngs)
 {
 #ifndef NDEBUG_SAMPLING
     int vertices = 0;

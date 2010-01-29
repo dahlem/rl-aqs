@@ -1,4 +1,4 @@
-// Copyright (C) 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2009-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -36,6 +36,7 @@ namespace dnet = des::network;
 #include "events.hh"
 #include "AckEvent.hh"
 #include "DefaultResponseHandler.hh"
+#include "GraphChannel.hh"
 
 
 namespace des
@@ -44,8 +45,8 @@ namespace core
 {
 
 
-DefaultResponseHandler::DefaultResponseHandler(dnet::Graph &p_graph)
-    : m_graph(p_graph),
+DefaultResponseHandler::DefaultResponseHandler(DesBus &p_bus)
+    : m_graph((dynamic_cast<GraphChannel&> (p_bus.getChannel(id::GRAPH_CHANNEL))).getGraph()),
       qStatsSA(new dstats::OnlineStats[boost::num_edges(m_graph)])
 {
     edge_index_map = get(edge_eindex, m_graph);

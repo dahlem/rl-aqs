@@ -36,9 +36,6 @@
 #include "LadderQueue.hh"
 namespace dcommon = des::common;
 
-#include "LastArrivalEvent.hh"
-namespace dcore = des::core;
-
 #include "Observer.hh"
 namespace design = des::design;
 
@@ -47,6 +44,9 @@ namespace dsample = des::sampling;
 
 #include "WEvonet.hh"
 namespace dnet = des::network;
+
+#include "LastArrivalEvent.hh"
+#include "DesBus.hh"
 
 
 
@@ -65,15 +65,15 @@ typedef boost::shared_array <boost::int32_t> Int32SA;
 class GenerateArrivalsHandler : public design::Observer<dcore::LastArrivalEvent>
 {
 public:
-    GenerateArrivalsHandler(dnet::Graph&, Int32SA, dcommon::Queue&);
+    GenerateArrivalsHandler(DesBus&, Int32SA);
     ~GenerateArrivalsHandler();
 
     void update(dcore::LastArrivalEvent *subject);
 
 private:
     dnet::Graph &m_graph;
-    Int32SA m_arrivalRngs;
     dcommon::Queue &m_queue;
+    Int32SA m_arrivalRngs;
 
 };
 

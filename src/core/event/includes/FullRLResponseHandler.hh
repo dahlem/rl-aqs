@@ -64,6 +64,7 @@ namespace dstats = des::statistics;
 namespace dnnet = des::nnet;
 
 #include "AckEvent.hh"
+#include "DesBus.hh"
 
 
 namespace des
@@ -92,32 +93,22 @@ typedef boost::shared_ptr <ConjGrad> ConjGradSP;
 class FullRLResponseHandler : public design::Observer<AckEvent>
 {
 public:
-    FullRLResponseHandler(dnet::Graph &p_graph, double p_q_alpha, double p_q_lambda,
-                          drl::Policy &p_policy, std::vector<int> &p_state_representation,
-                          boost::uint16_t p_hidden_neurons, boost::int32_t p_uniform_rng_index,
-                          bool p_cg, boost::uint16_t p_loss_policy,
-                          boost::uint16_t p_window, boost::uint16_t p_brent_iter,
-                          double p_momentum, bool p_outsource, bool p_regret_total, bool p_incentive_deviate,
-                          bool p_nn_loss_serialise);
-
+    FullRLResponseHandler(DesBus&, drl::Policy&, double, double, double);
     ~FullRLResponseHandler();
 
     void update(AckEvent *subject);
 
 private:
     dnet::Graph &m_graph;
-    double m_q_alpha;
     double m_q_lambda;
     drl::Policy &m_policy;
     std::vector<int> &m_state_representation;
-    boost::uint16_t m_hidden_neurons;
-    boost::int32_t m_uniform_rng_index;
-
-    tQOnlineStatsSA qStatsSA;
     bool m_outsource;
     bool m_regret_total;
     bool m_incentive_deviate;
     bool m_nn_loss_serialise;
+
+    tQOnlineStatsSA qStatsSA;
 
     // derived fields
     dnet::EdgeIndexMap edge_index_map;

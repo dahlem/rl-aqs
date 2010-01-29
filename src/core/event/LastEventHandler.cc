@@ -1,4 +1,4 @@
-// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -25,29 +25,35 @@
 # include <iostream>
 #endif /* NDEBUG_EVENTS */
 
-#include "events.hh"
-#include "LastEventHandler.hh"
-namespace dcore = des::core;
-
 #include "Entry.hh"
 namespace dcommon = des::common;
 
 #include "WEvonet.hh"
 namespace dnet = des::network;
 
+#include "events.hh"
+#include "LastEventHandler.hh"
+#include "GraphChannel.hh"
 
-dcore::LastEventHandler::LastEventHandler(dnet::Graph &p_graph)
-    : m_graph(p_graph)
+
+namespace des
+{
+namespace core
+{
+
+
+LastEventHandler::LastEventHandler(DesBus &p_bus)
+    : m_graph((dynamic_cast<GraphChannel&> (p_bus.getChannel(id::GRAPH_CHANNEL))).getGraph())
 {
     vertex_last_event_time_map = get(vertex_last_event_time, m_graph);
 }
 
 
-dcore::LastEventHandler::~LastEventHandler()
+LastEventHandler::~LastEventHandler()
 {}
 
 
-void dcore::LastEventHandler::update(dcore::PostAnyEvent *subject)
+void LastEventHandler::update(PostAnyEvent *subject)
 {
     dcommon::Entry *entry = subject->getEvent();
 
@@ -72,3 +78,8 @@ void dcore::LastEventHandler::update(dcore::PostAnyEvent *subject)
     std::cout << "Last event updated." << std::endl;
 #endif /* NDEBUG_EVENTS */
 }
+
+
+}
+}
+

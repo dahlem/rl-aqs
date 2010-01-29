@@ -1,4 +1,4 @@
-// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -45,6 +45,7 @@ namespace dnet = des::network;
 namespace dsample = des::sampling;
 
 #include "ArrivalEvent.hh"
+#include "DesBus.hh"
 
 
 
@@ -61,7 +62,7 @@ typedef boost::shared_array <boost::int32_t> Int32SA;
 class ArrivalHandler : public design::Observer<ArrivalEvent>
 {
 public:
-    ArrivalHandler(dcommon::Queue &p_queue, dnet::Graph &p_graph,  Int32SA p_service_ids);
+    ArrivalHandler(DesBus&,  Int32SA p_service_ids);
     ~ArrivalHandler();
 
     void update(ArrivalEvent *subject);

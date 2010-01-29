@@ -1,4 +1,4 @@
-// Copyright (C) 2009, 2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2009-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -36,6 +36,7 @@ namespace dnet = des::network;
 #include "events.hh"
 #include "AckEvent.hh"
 #include "ExpertNormalHandler.hh"
+#include "GraphChannel.hh"
 
 
 namespace des
@@ -44,8 +45,8 @@ namespace core
 {
 
 
-ExpertNormalHandler::ExpertNormalHandler(dnet::Graph &p_graph)
-    : m_graph(p_graph)
+ExpertNormalHandler::ExpertNormalHandler(DesBus &p_bus)
+    : m_graph((dynamic_cast<GraphChannel&> (p_bus.getChannel(id::GRAPH_CHANNEL))).getGraph())
 {
     vertex_expert_normal_map = get(vertex_expert_normal, m_graph);
 }

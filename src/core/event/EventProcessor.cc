@@ -36,6 +36,8 @@ namespace dcommon = des::common;
 
 #include "events.hh"
 #include "EventProcessor.hh"
+#include "ConfigChannel.hh"
+#include "QueueChannel.hh"
 
 
 
@@ -46,7 +48,7 @@ namespace core
 
 
 
-EventProcessor::EventProcessor(dcommon::LadderQueue &p_queue,
+EventProcessor::EventProcessor(DesBus &p_bus,
                                AdminEvent &p_adminEvent,
                                PreAnyEvent &p_preAnyEvent,
                                PostAnyEvent &p_postAnyEvent,
@@ -55,14 +57,16 @@ EventProcessor::EventProcessor(dcommon::LadderQueue &p_queue,
                                PostEvent &p_postEvent,
                                LastArrivalEvent &p_lastArrivalEvent,
                                AckEvent &p_ackEvent,
-                               LeaveEvent &p_leaveEvent,
-                               double p_stopTime)
-    : m_queue(p_queue), m_adminEvent(p_adminEvent), m_preAnyEvent(p_preAnyEvent),
+                               LeaveEvent &p_leaveEvent)
+    : m_queue(dynamic_cast<dcommon::LadderQueue&> ((dynamic_cast<QueueChannel&> (p_bus.getChannel(id::QUEUE_CHANNEL))).getQueue())),
+      m_adminEvent(p_adminEvent), m_preAnyEvent(p_preAnyEvent),
       m_postAnyEvent(p_postAnyEvent), m_arrivalEvent(p_arrivalEvent),
       m_departureEvent(p_departureEvent), m_postEvent(p_postEvent),
       m_lastArrivalEvent(p_lastArrivalEvent), m_ackEvent(p_ackEvent),
-      m_leaveEvent(p_leaveEvent), m_stopTime(p_stopTime)
+      m_leaveEvent(p_leaveEvent)
 {
+    dcore::desArgs_t config = (dynamic_cast<ConfigChannel&> (p_bus.getChannel(id::CONFIG_CHANNEL))).getConfig();
+    m_stopTime = config.stop_time;
     m_oldTime = 0.0;
 }
 

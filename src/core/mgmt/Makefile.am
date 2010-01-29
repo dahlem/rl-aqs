@@ -16,6 +16,8 @@ libcoremgmt_la_SOURCES =                                                  \
 
 libcoremgmt_la_CPPFLAGS =                                                 \
 	$(BOOST_CPPFLAGS)                                                 \
+	-I$(top_srcdir)/src/network/evolution/includes                    \
+	-I$(top_srcdir)/src/common/queue/includes                         \
 	-I./includes
 
 libcoremgmt_la_LDFLAGS =                                                  \

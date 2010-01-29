@@ -29,6 +29,9 @@ namespace dnet = des::network;
 #include "events.hh"
 #include "LogGraphHandler.hh"
 #include "EventGenerator.hh"
+#include "ConfigChannel.hh"
+#include "GraphChannel.hh"
+#include "QueueChannel.hh"
 
 
 namespace des
@@ -38,11 +41,23 @@ namespace core
 
 
 
-LogGraphHandler::LogGraphHandler(std::string p_baseResultDir, dnet::Graph &p_graph,
-                                 dcommon::Queue& p_queue, double p_interval, double p_stopTime)
-    : m_baseResultDir(p_baseResultDir), m_graph(p_graph), m_queue(p_queue), m_interval(p_interval),
-      m_stopTime(p_stopTime), m_counter(0)
+LogGraphHandler::LogGraphHandler(DesBus& p_bus, std::string p_baseResultDir)
+    : m_graph((dynamic_cast<GraphChannel&> (p_bus.getChannel(id::GRAPH_CHANNEL))).getGraph()),
+      m_queue((dynamic_cast<QueueChannel&> (p_bus.getChannel(id::QUEUE_CHANNEL))).getQueue()),
+      m_config((dynamic_cast<ConfigChannel&> (p_bus.getChannel(id::CONFIG_CHANNEL))).getConfig()),
+      m_baseResultDir(p_baseResultDir)
 {
+    m_interval = m_config.stop_time;
+
+    if (m_config.log_graphs) {
+        if (m_config.graph_rate > 1) {
+            m_interval = m_config.stop_time / m_config.graph_rate;
+        }
+    }
+
+    m_stopTime = m_config.stop_time;
+    m_counter = 0;
+
     std::stringstream path_str;
 
     path_str << m_baseResultDir << "/" << "graphs";

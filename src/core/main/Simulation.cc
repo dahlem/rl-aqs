@@ -54,9 +54,11 @@ namespace fs = boost::filesystem;
 #include "ArrivalHandler.hh"
 #include "BoltzmannPolicy.hh"
 #include "CL.hh"
+#include "ConfigChannel.hh"
 #include "DefaultResponseHandler.hh"
 #include "DepartureEvent.hh"
 #include "DepartureHandler.hh"
+#include "DesBus.hh"
 #include "events.hh"
 #include "EventGenerator.hh"
 #include "EventProcessor.hh"
@@ -69,6 +71,7 @@ namespace fs = boost::filesystem;
 #include "FullRLResponseHandler.hh"
 #include "GenerateArrivalsHandler.hh"
 #include "GenerateArrivalsAdminHandler.hh"
+#include "GraphChannel.hh"
 #include "HybridFullRLResponseHandler.hh"
 #include "LastArrivalEvent.hh"
 #include "LastEventHandler.hh"
@@ -79,10 +82,12 @@ namespace fs = boost::filesystem;
 #include "PostEvent.hh"
 #include "PreAnyEvent.hh"
 #include "ProcessedEventsHandler.hh"
+#include "QueueChannel.hh"
 #include "Report.hh"
 #include "ResponseStatsHandler.hh"
 #include "RLResponseHandler.hh"
 #include "Simulation.hh"
+#include "StaticArrivalsChannel.hh"
 #include "UnprocessedEventsHandler.hh"
 #include "UtilisationHandler.hh"
 #include "WeightedPolicyLearner.hh"
@@ -355,6 +360,7 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
         std::cout.flush();
 # endif /* NDEBUG */
 
+        DesBus dbus;
         dnet::tGraphSP graph(new dnet::Graph);
         dcommon::LadderQueue queue;
 
@@ -421,6 +427,19 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
 
         num_vertices = boost::num_vertices(*graph);
 
+        // instantiate the channels (order of addition is important)
+        // instantiate the arrival channel
+        StaticArrivalsChannel arrivalChannel;
+        QueueChannel queueChannel(queue);
+        GraphChannel graphChannel(*graph);
+        ConfigChannel configChannel(*desArgs);
+
+        dbus.addChannel(arrivalChannel);
+        dbus.addChannel(queueChannel);
+        dbus.addChannel(graphChannel);
+        dbus.addChannel(configChannel);
+
+
         // init the crn for the arrival events
         Int32SA arrivalCRNs = arrivalCRN(num_vertices);
 
@@ -434,17 +453,6 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
             get(boost::vertex_index, *graph);
         dnet::VertexArrivalRateMap vertex_arrival_props_map =
             get(vertex_arrival_rate, *graph);
-
-        // // generate events for each vertex in the graph
-        // double stopTimeAdj = 0.0;
-
-        // // find out whether we only generate the events in phases
-        // if (desArgs->generations < 0) {
-        //     stopTimeAdj = desArgs->stop_time;
-        // } else {
-        //     // calculate the phases
-        //     stopTimeAdj = desArgs->stop_time / desArgs->generations;
-        // }
 
         boost::int32_t destination = 0;
         double arrival_rate = 0.0;
@@ -502,13 +510,7 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
             }
         }
 
-        double graphGenRate = desArgs->stop_time;
-
         if (desArgs->log_graphs) {
-            if (desArgs->graph_rate > 1) {
-                graphGenRate = desArgs->stop_time / desArgs->graph_rate;
-            }
-
             EventGenerator::generateLogGraphEvent(queue, 0.0);
         }
 
@@ -528,20 +530,20 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
         AckEvent ackEvent;
         LeaveEvent leaveEvent;
 
-        GenerateArrivalsAdminHandler generateArrivalsAdminHandler(*graph, arrivalCRNs, queue);
-        LogGraphHandler logGraphHandler(resultsBaseDir, *graph, queue, graphGenRate, desArgs->stop_time);
+        GenerateArrivalsAdminHandler generateArrivalsAdminHandler(dbus, arrivalCRNs);
+        LogGraphHandler logGraphHandler(dbus, resultsBaseDir);
 
-        ArrivalHandler arrivalHandler(queue, *graph, serviceCRNs);
-        NumEventsHandler numEventsHandler(*graph);
-        LastEventHandler lastEventHandler(*graph);
-        UtilisationHandler utilisationHandler(*graph);
-        ExpectedAverageEventInQueueHandler expectedAverageEventInQueueHandler(*graph);
-        AckHandler ackHandler(queue, *graph);
-        LeaveHandler leaveHandler(queue, *graph);
+        ArrivalHandler arrivalHandler(dbus, serviceCRNs);
+        NumEventsHandler numEventsHandler(dbus);
+        LastEventHandler lastEventHandler(dbus);
+        UtilisationHandler utilisationHandler(dbus);
+        ExpectedAverageEventInQueueHandler expectedAverageEventInQueueHandler(dbus);
+        AckHandler ackHandler(dbus);
+        LeaveHandler leaveHandler(dbus);
 
         leaveEvent.attach(leaveHandler);
 
-        GenerateArrivalsHandler generateArrivalsHandler(*graph, arrivalCRNs, queue);
+        GenerateArrivalsHandler generateArrivalsHandler(dbus, arrivalCRNs);
         lastArrivalEvent.attach(generateArrivalsHandler);
 
         // attach the handlers to the events
@@ -554,8 +556,8 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
         dio::Results unprocessed_events(desArgs->events_unprocessed, resultsBaseDir);
 
         ProcessedEventsHandler processedEventsHandler(processed_events);
-        UnprocessedEventsHandler unprocessedEventsHandler(unprocessed_events, queue);
-        NullUnprocessedEventsHandler nullUnprocessedEventsHandler(queue);
+        UnprocessedEventsHandler unprocessedEventsHandler(dbus, unprocessed_events);
+        NullUnprocessedEventsHandler nullUnprocessedEventsHandler(dbus);
 
         if (desArgs->log_events) {
             preAnyEvent.attach(processedEventsHandler);
@@ -577,15 +579,15 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
 
         if (desArgs->expert_normal || desArgs->expert_absolute
             || desArgs->expert_positive || desArgs->expert_negative) {
-            expertNormalHandler = tExpertNormalHandlerSP(new ExpertNormalHandler(*graph));
+            expertNormalHandler = tExpertNormalHandlerSP(new ExpertNormalHandler(dbus));
             ackEvent.attach(*expertNormalHandler);
-            expertAbsoluteHandler = tExpertAbsoluteHandlerSP(new ExpertAbsoluteHandler(*graph));
+            expertAbsoluteHandler = tExpertAbsoluteHandlerSP(new ExpertAbsoluteHandler(dbus));
             ackEvent.attach(*expertAbsoluteHandler);
-            expertPositiveHandler = tExpertPositiveHandlerSP(new ExpertPositiveHandler(*graph));
+            expertPositiveHandler = tExpertPositiveHandlerSP(new ExpertPositiveHandler(dbus));
             ackEvent.attach(*expertPositiveHandler);
-            expertNegativeHandler = tExpertNegativeHandlerSP(new ExpertNegativeHandler(*graph));
+            expertNegativeHandler = tExpertNegativeHandlerSP(new ExpertNegativeHandler(dbus));
             ackEvent.attach(*expertNegativeHandler);
-            responseStatsHandler = tResponseStatsHandlerSP(new ResponseStatsHandler(*graph));
+            responseStatsHandler = tResponseStatsHandlerSP(new ResponseStatsHandler(dbus));
             ackEvent.attach(*responseStatsHandler);
         }
 
@@ -600,116 +602,46 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
 
         if (desArgs->rl) {
             if (desArgs->rl_policy == 1) {
-                boost::uint32_t seed = dsample::Seeds::getInstance().getSeed();
-                boost::uint32_t pol_epsilon_rng_index
-                    = dsample::CRN::getInstance().init(seed);
-                dsample::CRN::getInstance().log(seed, "epsilon policy");
-                dsample::tGslRngSP r1
-                    = dsample::CRN::getInstance().get(pol_epsilon_rng_index);
-
-                seed = dsample::Seeds::getInstance().getSeed();
-                boost::uint32_t pol_uniform_rng_index
-                    = dsample::CRN::getInstance().init(seed);
-                dsample::CRN::getInstance().log(seed, "epsilon uniform");
-                dsample::tGslRngSP r2
-                    = dsample::CRN::getInstance().get(pol_uniform_rng_index);
-
-                pol = tPolicySP(new drl::EpsilonGreedy(*graph, desArgs->rl_policy_epsilon, r1, r2));
+                pol = tPolicySP(new drl::EpsilonGreedy(dbus));
             } else if (desArgs->rl_policy == 2) {
-                boost::uint32_t seed = dsample::Seeds::getInstance().getSeed();
-                boost::uint32_t pol_uniform_rng_index
-                    = dsample::CRN::getInstance().init(seed);
-                dsample::CRN::getInstance().log(seed, "boltzmann uniform");
-                dsample::tGslRngSP r1
-                    = dsample::CRN::getInstance().get(pol_uniform_rng_index);
-
-                pol = tPolicySP(new drl::BoltzmannPolicy(desArgs->rl_policy_boltzmann_t, r1));
+                pol = tPolicySP(new drl::BoltzmannPolicy(dbus));
             } else if (desArgs->rl_policy == 3) {
-                boost::uint32_t seed = dsample::Seeds::getInstance().getSeed();
-                boost::uint32_t pol_uniform_rng_index
-                    = dsample::CRN::getInstance().init(seed);
-                dsample::CRN::getInstance().log(seed, "epsilon uniform");
-                dsample::tGslRngSP r2
-                    = dsample::CRN::getInstance().get(pol_uniform_rng_index);
-
-                seed = dsample::Seeds::getInstance().getSeed();
-                boost::uint32_t simplex_rng_index
-                    = dsample::CRN::getInstance().init(seed);
-                dsample::CRN::getInstance().log(seed, "simplex uniform");
-                dsample::tGslRngSP r3
-                    = dsample::CRN::getInstance().get(simplex_rng_index);
-
-                pol = tPolicySP(
-                    new drl::WeightedPolicyLearner(
-                        desArgs->rl_policy_epsilon, desArgs->rl_policy_wpl_eta, *graph, r2, r3));
+                pol = tPolicySP(new drl::WeightedPolicyLearner(dbus));
             } else if (desArgs->rl_policy == 4) {
-                boost::uint32_t seed = dsample::Seeds::getInstance().getSeed();
-                boost::uint32_t pol_uniform_rng_index
-                    = dsample::CRN::getInstance().init(seed);
-                dsample::CRN::getInstance().log(seed, "epsilon uniform");
-                dsample::tGslRngSP r2
-                    = dsample::CRN::getInstance().get(pol_uniform_rng_index);
-
-                seed = dsample::Seeds::getInstance().getSeed();
-                boost::uint32_t simplex_rng_index
-                    = dsample::CRN::getInstance().init(seed);
-                dsample::CRN::getInstance().log(seed, "simplex uniform");
-                dsample::tGslRngSP r3
-                    = dsample::CRN::getInstance().get(simplex_rng_index);
-
-                pol = tPolicySP(
-                    new drl::FairActionLearner(
-                        desArgs->rl_policy_epsilon, desArgs->rl_policy_wpl_eta, *graph, r2, r3));
+                pol = tPolicySP(new drl::FairActionLearner(dbus));
             }
 
             // configure the on-policy selection
-            selection = tSelectionSP(new drl::OnPolicySelection(*pol, *graph));
-            departureHandler = tDepartureHandlerSP(new DepartureHandler(queue, *graph, *selection));
+            selection = tSelectionSP(new drl::OnPolicySelection(*pol, dbus));
+            departureHandler = tDepartureHandlerSP(new DepartureHandler(dbus, *selection));
             departureEvent.attach(*departureHandler);
 
             if (desArgs->rl_state_representation.size() > 0) {
-                boost::uint32_t seed = dsample::Seeds::getInstance().getSeed();
-                boost::uint32_t nn_uniform_rng_index
-                    = dsample::CRN::getInstance().init(seed);
-                dsample::CRN::getInstance().log(seed, "Neural Network uniform");
-
                 // configure the full reinforcement handler with function approximation
                 if (desArgs->rl_hybrid) {
                     hybridFullRlResponseHandler = tHybridFullRLResponseHandlerSP(
-                        new HybridFullRLResponseHandler(*graph, rl_q_alpha, rl_q_lambda, *pol,
-                                                        desArgs->rl_state_representation, desArgs->nn_hidden_neurons,
-                                                        nn_uniform_rng_index, desArgs->nn_cg,
-                                                        desArgs->nn_loss_policy, desArgs->nn_window,
-                                                        desArgs->nn_brent_iter, nn_momentum,
-                                                        desArgs->rl_hybrid_warmup));
+                        new HybridFullRLResponseHandler(dbus, *pol, rl_q_alpha, rl_q_lambda, nn_momentum));
                     ackEvent.attach(*hybridFullRlResponseHandler);
                 } else {
                     fullRlResponseHandler = tFullRLResponseHandlerSP(
-                        new FullRLResponseHandler(*graph, rl_q_alpha, rl_q_lambda, *pol,
-                                                  desArgs->rl_state_representation, desArgs->nn_hidden_neurons,
-                                                  nn_uniform_rng_index, desArgs->nn_cg,
-                                                  desArgs->nn_loss_policy, desArgs->nn_window,
-                                                  desArgs->nn_brent_iter, nn_momentum, desArgs->nn_outsource,
-                                                  desArgs->regret_absolute, desArgs->incentive_deviate, desArgs->nn_loss_serialise));
+                        new FullRLResponseHandler(dbus, *pol, rl_q_alpha, rl_q_lambda, nn_momentum));
                     ackEvent.attach(*fullRlResponseHandler);
                 }
             } else {
                 // configure the simple on-policy SARSA control RL handler
                 rlResponseHandler = tRLResponseHandlerSP(
-                    new RLResponseHandler(*graph, rl_q_alpha, rl_q_lambda, *pol));
+                    new RLResponseHandler(dbus, rl_q_alpha, rl_q_lambda, *pol));
                 ackEvent.attach(*rlResponseHandler);
             }
         } else {
             pol = tPolicySP(new drl::DummyPolicy());
             selection = tSelectionSP(
-                new drl::RandomSelection(*pol, *graph, departureCRNs));
-            departureHandler = tDepartureHandlerSP(
-                new DepartureHandler(queue, *graph, *selection));
+                new drl::RandomSelection(dbus, *pol, departureCRNs));
+            departureHandler = tDepartureHandlerSP(new DepartureHandler(dbus, *selection));
             departureEvent.attach(*departureHandler);
 
             // configure default response handler
-            defaultResponseHandler = tDefaultResponseHandlerSP(
-                new DefaultResponseHandler(*graph));
+            defaultResponseHandler = tDefaultResponseHandlerSP(new DefaultResponseHandler(dbus));
             ackEvent.attach(*defaultResponseHandler);
         }
 
@@ -720,9 +652,8 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
         postAnyEvent.attach(lastEventHandler);
 
         // instantiate the event processor and set the events
-        EventProcessor processor(queue, adminEvent, preAnyEvent, postAnyEvent, arrivalEvent,
-                                 departureEvent, postEvent, lastArrivalEvent, ackEvent,
-                                 leaveEvent, desArgs->stop_time);
+        EventProcessor processor(dbus, adminEvent, preAnyEvent, postAnyEvent, arrivalEvent,
+                                 departureEvent, postEvent, lastArrivalEvent, ackEvent, leaveEvent);
 
         // process the events
 #ifndef NDEBUG

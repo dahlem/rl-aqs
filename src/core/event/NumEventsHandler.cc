@@ -1,4 +1,4 @@
-// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@ namespace dnet = des::network;
 
 #include "events.hh"
 #include "NumEventsHandler.hh"
+#include "GraphChannel.hh"
 
 
 namespace des
@@ -33,8 +34,8 @@ namespace core
 {
 
 
-NumEventsHandler::NumEventsHandler(dnet::Graph &p_graph)
-    : m_graph(p_graph)
+NumEventsHandler::NumEventsHandler(DesBus &p_bus)
+    : m_graph((dynamic_cast<GraphChannel&> (p_bus.getChannel(id::GRAPH_CHANNEL))).getGraph())
 {
     vertex_num_events_map = get(vertex_num_events, m_graph);
 }

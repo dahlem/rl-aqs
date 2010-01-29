@@ -1,4 +1,4 @@
-// Copyright (C) 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2009-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -39,6 +39,7 @@ namespace design = des::design;
 namespace dnet = des::network;
 
 #include "AckEvent.hh"
+#include "DesBus.hh"
 
 
 namespace des
@@ -52,7 +53,7 @@ namespace core
 class ExpertPositiveHandler : public design::Observer<AckEvent>
 {
 public:
-    ExpertPositiveHandler(dnet::Graph &p_graph);
+    ExpertPositiveHandler(DesBus&);
 
     ~ExpertPositiveHandler();
 

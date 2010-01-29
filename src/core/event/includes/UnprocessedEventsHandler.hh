@@ -1,4 +1,4 @@
-// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -25,36 +25,36 @@
 #include "LadderQueue.hh"
 namespace dcommon = des::common;
 
-#include "PostEvent.hh"
-namespace dcore = des::core;
-
 #include "Observer.hh"
 namespace design = des::design;
 
 #include "Results.hh"
 namespace dio = des::io;
 
+#include "PostEvent.hh"
+#include "DesBus.hh"
+
 
 namespace des
 {
-    namespace core
-    {
+namespace core
+{
 
 
 /** @class UnprocessedEventHandler
  * The class @code{UnprocessedEventHandler} handles unprocessedEvent events in the DES.
  */
-class UnprocessedEventsHandler : public design::Observer<dcore::PostEvent>
+class UnprocessedEventsHandler : public design::Observer<PostEvent>
 {
 public:
-    UnprocessedEventsHandler(dio::Results&, dcommon::LadderQueue&);
+    UnprocessedEventsHandler(DesBus&, dio::Results&);
     ~UnprocessedEventsHandler();
 
-    void update(dcore::PostEvent *subject);
+    void update(PostEvent *subject);
 
 private:
-    dio::Results &m_unprocessedEvents;
     dcommon::LadderQueue &m_queue;
+    dio::Results &m_unprocessedEvents;
 
 };
 

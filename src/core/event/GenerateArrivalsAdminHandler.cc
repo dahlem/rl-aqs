@@ -26,8 +26,10 @@ namespace dcommon = des::common;
 namespace dnet = des::network;
 
 #include "events.hh"
-#include "GenerateArrivalsAdminHandler.hh"
 #include "EventGenerator.hh"
+#include "GenerateArrivalsAdminHandler.hh"
+#include "GraphChannel.hh"
+#include "QueueChannel.hh"
 
 
 
@@ -38,11 +40,12 @@ namespace core
 
 
 GenerateArrivalsAdminHandler::GenerateArrivalsAdminHandler(
-    dnet::Graph &p_graph,
-    Int32SA p_arrivalRngs,
-    dcommon::Queue &p_queue)
-    : m_graph(p_graph), m_arrivalRngs(p_arrivalRngs), m_queue(p_queue)
+    DesBus& p_bus, Int32SA p_arrivalRngs)
+    : m_arrivalRngs(p_arrivalRngs),
+      m_graph((dynamic_cast<GraphChannel&> (p_bus.getChannel(id::GRAPH_CHANNEL))).getGraph()),
+      m_queue((dynamic_cast<QueueChannel&> (p_bus.getChannel(id::QUEUE_CHANNEL))).getQueue())
 {
+
 #ifndef NDEBUG_SAMPLING
     int vertices = 0;
 
@@ -71,7 +74,7 @@ void GenerateArrivalsAdminHandler::update(AdminEvent *subject)
         dnet::Vertex vertex = boost::vertex(dest, m_graph);
         dnet::VertexArrivalRateMap vertex_arrival_props_map =
             get(vertex_arrival_rate, m_graph);
-    
+
         // generate a single event
         double arrival_rate = vertex_arrival_props_map[vertex];
         double startTime = entry->getArrival();

@@ -35,6 +35,10 @@ namespace dcommon = des::common;
 #include "DirectedGraph.hh"
 namespace dnet = des::network;
 
+#include "Seeds.hh"
+#include "CRN.hh"
+namespace dsample = des::sampling;
+
 #include "Policy.hh"
 #include "EpsilonGreedy.hh"
 #include "RLStateHelper.hh"
@@ -43,6 +47,8 @@ namespace drl = des::rl;
 #include "events.hh"
 #include "AckEvent.hh"
 #include "HybridFullRLResponseHandler.hh"
+#include "GraphChannel.hh"
+#include "ConfigChannel.hh"
 
 
 namespace des
@@ -51,24 +57,20 @@ namespace core
 {
 
 
-HybridFullRLResponseHandler::HybridFullRLResponseHandler(dnet::Graph &p_graph,
-                                                         double p_q_alpha,
-                                                         double p_q_lambda,
-                                                         drl::Policy &p_policy,
-                                                         std::vector<int> &p_state_representation,
-                                                         boost::uint16_t p_hidden_neurons,
-                                                         boost::int32_t p_uniform_rng_index,
-                                                         bool p_cg,
-                                                         boost::uint16_t p_loss_policy,
-                                                         boost::uint16_t p_window,
-                                                         boost::uint16_t p_brent_iter,
-                                                         double p_momentum,
-                                                         boost::uint16_t p_randomIter)
-    : m_graph(p_graph), m_q_alpha(p_q_alpha), m_q_lambda(p_q_lambda), m_policy(p_policy),
-      m_state_representation(p_state_representation), m_hidden_neurons(p_hidden_neurons),
-      m_uniform_rng_index(p_uniform_rng_index), m_randomIter(p_randomIter),
+HybridFullRLResponseHandler::HybridFullRLResponseHandler(
+    DesBus &p_bus, drl::Policy &p_policy, double p_q_alpha, double p_q_lambda, double p_momentum)
+    : m_graph((dynamic_cast<GraphChannel&> (p_bus.getChannel(id::GRAPH_CHANNEL))).getGraph()),
+      m_q_lambda(p_q_lambda), m_policy(p_policy),
+      m_state_representation(((dynamic_cast<dcore::ConfigChannel&> (p_bus.getChannel(dcore::id::CONFIG_CHANNEL))).getConfig()).rl_state_representation),
       qStatsSA(new dstats::OnlineStats[boost::num_edges(m_graph)])
 {
+    dcore::desArgs_t config = (dynamic_cast<dcore::ConfigChannel&> (p_bus.getChannel(dcore::id::CONFIG_CHANNEL))).getConfig();
+    boost::uint16_t hidden_neurons = config.nn_hidden_neurons;
+
+    boost::uint32_t seed = dsample::Seeds::getInstance().getSeed();
+    boost::int32_t uniform_rng_index = dsample::CRN::getInstance().init(seed);
+    dsample::CRN::getInstance().log(seed, "Neural Network uniform");
+
     vertex_next_action_map = get(vertex_next_action, m_graph);
     vertex_index_map = get(boost::vertex_index, m_graph);
     edge_q_val_map = get(edge_q_val, m_graph);
@@ -78,22 +80,22 @@ HybridFullRLResponseHandler::HybridFullRLResponseHandler(dnet::Graph &p_graph,
     for (boost::uint16_t i = 0; i < boost::num_edges(m_graph); ++i) {
         // create the neural network for edge i
         FFNetSP net = dnnet::NNetFactory::createNNet<dnnet::HTangent, dnnet::Identity>
-            (p_state_representation.size(), p_hidden_neurons, 1, m_uniform_rng_index);
+            (m_state_representation.size(), hidden_neurons, 1, uniform_rng_index);
 
         ObjMseSP mse;
-        if (p_loss_policy == 1) {
+        if (config.nn_loss_policy == 1) {
             mse = dnnet::NNetFactory::createDefaultMSEObjective<dnnet::HTangent, dnnet::Identity>(net);
-        } else if (p_loss_policy == 2) {
-            mse = dnnet::NNetFactory::createSlidingWindowMSEObjective<dnnet::HTangent, dnnet::Identity>(net, p_window);
+        } else if (config.nn_loss_policy == 2) {
+            mse = dnnet::NNetFactory::createSlidingWindowMSEObjective<dnnet::HTangent, dnnet::Identity>(net, config.nn_window);
         }
 
         dnnet::TrainingSP training;
-        if (p_cg) {
+        if (config.nn_cg) {
             training = dnnet::NNetFactory::createConjugateGradientTraining<dnnet::HTangent, dnnet::Identity>(
-                net, mse, m_q_alpha, 1e-6, p_brent_iter);
+                net, mse, p_q_alpha, 1e-6, config.nn_brent_iter);
         } else {
             training = dnnet::NNetFactory::createBackpropagationTraining<dnnet::HTangent, dnnet::Identity>(
-                net, mse, m_q_alpha, p_momentum, 1e-6);
+                net, mse, p_q_alpha, p_momentum, 1e-6);
         }
 
         // store the neural network, objective function, and training method into vectors
@@ -103,7 +105,7 @@ HybridFullRLResponseHandler::HybridFullRLResponseHandler(dnet::Graph &p_graph,
     }
 
     // allocate memory here for the input vector and the target
-    m_inputs = DoubleSA(new double[p_state_representation.size()]);
+    m_inputs = DoubleSA(new double[m_state_representation.size()]);
     m_target = DoubleSA(new double[1]);
 }
 

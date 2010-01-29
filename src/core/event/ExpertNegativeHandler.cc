@@ -1,4 +1,4 @@
-// Copyright (C) 2009, 2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2009-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -42,6 +42,7 @@ namespace drl = des::rl;
 #include "events.hh"
 #include "AckEvent.hh"
 #include "ExpertNegativeHandler.hh"
+#include "GraphChannel.hh"
 
 
 namespace des
@@ -50,8 +51,8 @@ namespace core
 {
 
 
-ExpertNegativeHandler::ExpertNegativeHandler(dnet::Graph &p_graph)
-    : m_graph(p_graph)
+ExpertNegativeHandler::ExpertNegativeHandler(DesBus &p_bus)
+    : m_graph((dynamic_cast<GraphChannel&> (p_bus.getChannel(id::GRAPH_CHANNEL))).getGraph())
 {
     vertex_expert_negative_map = get(vertex_expert_negative, m_graph);
     vertex_mean_response_map = get(vertex_mean_reward, m_graph);

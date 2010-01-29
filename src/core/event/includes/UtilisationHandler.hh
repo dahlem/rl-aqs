@@ -1,4 +1,4 @@
-// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -22,32 +22,32 @@
 #define __UTILISATIONHANDLER_HH__
 
 
-#include "PostAnyEvent.hh"
-namespace dcore = des::core;
-
 #include "Observer.hh"
 namespace design = des::design;
 
 #include "WEvonet.hh"
 namespace dnet = des::network;
 
+#include "PostAnyEvent.hh"
+#include "DesBus.hh"
+
 
 namespace des
 {
-    namespace core
-    {
+namespace core
+{
 
 
 /** @class UtilisationHandler
  * The class @code{UtilisationHandler} handles utilisation events in the DES.
  */
-class UtilisationHandler : public design::Observer<dcore::PostAnyEvent>
+class UtilisationHandler : public design::Observer<PostAnyEvent>
 {
 public:
-    UtilisationHandler(dnet::Graph &p_graph);
+    UtilisationHandler(DesBus&);
     ~UtilisationHandler();
 
-    void update(dcore::PostAnyEvent *subject);
+    void update(PostAnyEvent *subject);
 
 private:
     dnet::Graph &m_graph;
@@ -59,12 +59,6 @@ private:
     dnet::VertexLastEventTimeMap vertex_last_event_time_map;
 
 };
-
-
-/** @typedef tUtilisationHandlerSP
- * a type definition of the shared pointer of the utilisation handler
- */
-typedef boost::shared_ptr <UtilisationHandler> tUtilisationHandlerSP;
 
 
     }

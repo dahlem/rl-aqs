@@ -1,4 +1,4 @@
-// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,9 +23,6 @@
 
 #include <boost/scoped_array.hpp>
 
-#include "LeaveEvent.hh"
-namespace dcore = des::core;
-
 #include "LadderQueue.hh"
 namespace dcommon = des::common;
 
@@ -38,14 +35,17 @@ namespace dstats = des::statistics;
 #include "DirectedGraph.hh"
 namespace dnet = des::network;
 
+#include "LeaveEvent.hh"
+#include "DesBus.hh"
+
 
 namespace des
 {
-    namespace core
-    {
+namespace core
+{
 
 
-    typedef boost::scoped_array<dstats::OnlineStats> tOnlineStatsSA;
+typedef boost::scoped_array<dstats::OnlineStats> tOnlineStatsSA;
 
 /** @class LeaveHandler
  * The class @code{LeaveHandler} handles leave events in the DES.
@@ -53,14 +53,14 @@ namespace des
 class LeaveHandler : public design::Observer<dcore::LeaveEvent>
 {
 public:
-    explicit LeaveHandler(dcommon::Queue &p_queue, dnet::Graph &p_graph);
+    explicit LeaveHandler(DesBus&);
     ~LeaveHandler();
 
     void update(dcore::LeaveEvent *subject);
 
 private:
-    dcommon::Queue &m_queue;
     dnet::Graph &m_graph;
+    dcommon::Queue &m_queue;
     tOnlineStatsSA m_EventInSystem;
 
     dnet::VertexAvgEventInSystemTimeMap m_vertexAvgEventInSystemTimeMap;
@@ -68,7 +68,7 @@ private:
 
 
 
-    }
+}
 }
 
 

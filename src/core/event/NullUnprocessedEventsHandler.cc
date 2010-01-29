@@ -1,4 +1,4 @@
-// Copyright (C) 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2009-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -25,24 +25,30 @@
 # include <iostream>
 #endif /* NDEBUG_EVENTS */
 
-#include "NullUnprocessedEventsHandler.hh"
-namespace dcore = des::core;
-
 #include "Entry.hh"
 namespace dcommon = des::common;
 
+#include "NullUnprocessedEventsHandler.hh"
+#include "QueueChannel.hh"
 
 
-dcore::NullUnprocessedEventsHandler::NullUnprocessedEventsHandler(dcommon::LadderQueue &p_queue)
-    : m_queue(p_queue)
+
+namespace des
+{
+namespace core
+{
+
+
+NullUnprocessedEventsHandler::NullUnprocessedEventsHandler(DesBus &p_bus)
+    : m_queue(dynamic_cast<dcommon::LadderQueue&> ((dynamic_cast<QueueChannel&> (p_bus.getChannel(id::QUEUE_CHANNEL))).getQueue()))
 {}
 
 
-dcore::NullUnprocessedEventsHandler::~NullUnprocessedEventsHandler()
+NullUnprocessedEventsHandler::~NullUnprocessedEventsHandler()
 {}
 
 
-void dcore::NullUnprocessedEventsHandler::update(dcore::PostEvent *subject)
+void NullUnprocessedEventsHandler::update(PostEvent *subject)
 {
 #ifndef NDEBUG_EVENTS
     std::cout << "** Drop unprocessed events" << std::endl;
@@ -73,4 +79,8 @@ void dcore::NullUnprocessedEventsHandler::update(dcore::PostEvent *subject)
 #ifndef NDEBUG
     std::cout << "NullUnprocessed events: " << num << std::endl;
 #endif /* NDEBUG */
+}
+
+
+}
 }

@@ -1,4 +1,4 @@
-// Copyright (C) 2009, 2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2009-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -42,6 +42,7 @@ namespace drl = des::rl;
 #include "events.hh"
 #include "AckEvent.hh"
 #include "RLResponseHandler.hh"
+#include "GraphChannel.hh"
 
 
 namespace des
@@ -50,9 +51,10 @@ namespace core
 {
 
 
-RLResponseHandler::RLResponseHandler(dnet::Graph &p_graph, double p_q_alpha, double p_q_lambda,
+RLResponseHandler::RLResponseHandler(DesBus &p_bus, double p_q_alpha, double p_q_lambda,
                                      drl::Policy &p_policy)
-    : m_graph(p_graph), m_q_alpha(p_q_alpha), m_q_lambda(p_q_lambda), m_policy(p_policy),
+    : m_graph((dynamic_cast<GraphChannel&> (p_bus.getChannel(id::GRAPH_CHANNEL))).getGraph()),
+      m_q_alpha(p_q_alpha), m_q_lambda(p_q_lambda), m_policy(p_policy),
       qStatsSA(new dstats::OnlineStats[boost::num_edges(m_graph)])
 {
     vertex_next_action_map = get(vertex_next_action, m_graph);

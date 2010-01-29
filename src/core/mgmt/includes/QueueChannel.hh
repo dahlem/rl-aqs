@@ -1,4 +1,4 @@
-// Copyright (C) 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,56 +14,56 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-/** @file CL.hh
- * Declaration of the methods for the command-line parsing of the main
- * routine for DES.
- *
- * @author Dominik Dahlem
+/** @file QueueChannel.hh
+ * Specification of the QueueChannel interface.
  */
-#ifndef __DES_RL_BOLTZMANN_HH__
-#define __DES_RL_BOLTZMANN_HH__
+#ifndef __DES_CORE_MGMT_QUEUECHANNEL_HH__
+#define __DES_CORE_MGMT_QUEUECHANNEL_HH__
+
+#if HAVE_CONFIG_H
+# include <config.h>
+#endif
 
 #ifndef __STDC_CONSTANT_MACROS
 # define __STDC_CONSTANT_MACROS
 #endif /* __STDC_CONSTANT_MACROS */
 
+#include <boost/cstdint.hpp>
 
-#include <gsl/gsl_randist.h>
+#include "LadderQueue.hh"
+namespace dcommon = des::common;
 
-#include "CRN.hh"
-namespace dsample = des::sampling;
-
-#include "Policy.hh"
-
-
-namespace des
-{
-namespace rl
-{
+#include "Channel.hh"
 
 
-class BoltzmannPolicy : public Policy
+namespace des {
+namespace core {
+
+
+class QueueChannel : public Channel
 {
 public:
-    BoltzmannPolicy(
-        double p_tau,
-        dsample::tGslRngSP p_uniform_rng);
-    ~BoltzmannPolicy()
-        {}
+    QueueChannel(dcommon::Queue &p_queue) : m_queue(p_queue) {};
+    virtual ~QueueChannel() {};
 
-    virtual boost::uint16_t operator() (
-        boost::uint16_t p_source, tValuesVec &p_values, PAttr p_attr);
+    virtual boost::uint16_t getId()
+        { return id::QUEUE_CHANNEL; }
 
+    dcommon::Queue& getQueue() 
+        {
+            return m_queue;
+        }
+    
+    
 private:
-    double m_tau;
-    dsample::tGslRngSP m_uniform_rng;
-
+    dcommon::Queue &m_queue;
+    
 };
 
 
+
 }
 }
 
 
-
-#endif /* __DES_RL_BOLTZMANN_HH__ */
+#endif

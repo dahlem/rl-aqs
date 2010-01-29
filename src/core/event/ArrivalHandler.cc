@@ -51,6 +51,8 @@ namespace dstats = des::statistics;
 #include "events.hh"
 #include "ArrivalEvent.hh"
 #include "ArrivalHandler.hh"
+#include "GraphChannel.hh"
+#include "QueueChannel.hh"
 
 
 namespace des
@@ -59,9 +61,10 @@ namespace core
 {
 
 
-ArrivalHandler::ArrivalHandler(dcommon::Queue &p_queue,
-                               dnet::Graph &p_graph, Int32SA p_service_ids)
-    : m_queue(p_queue), m_graph(p_graph), m_service_ids(p_service_ids)
+ArrivalHandler::ArrivalHandler(DesBus &p_bus, Int32SA p_service_ids)
+    : m_graph((dynamic_cast<GraphChannel&> (p_bus.getChannel(id::GRAPH_CHANNEL))).getGraph()),
+      m_queue((dynamic_cast<QueueChannel&> (p_bus.getChannel(id::QUEUE_CHANNEL))).getQueue()),
+      m_service_ids(p_service_ids)
 {
     vertex_busy_map = get(vertex_busy, m_graph);
     vertex_service_map = get(vertex_service_rate, m_graph);

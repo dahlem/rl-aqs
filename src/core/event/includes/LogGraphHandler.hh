@@ -30,14 +30,15 @@ namespace dcommon = des::common;
 #include "LadderQueue.hh"
 namespace dcommon = des::common;
 
-#include "AdminEvent.hh"
-namespace dcore = des::core;
-
 #include "Observer.hh"
 namespace design = des::design;
 
 #include "DirectedGraph.hh"
 namespace dnet = des::network;
+
+#include "AdminEvent.hh"
+#include "DesBus.hh"
+#include "clconfig.hh"
 
 
 namespace des
@@ -52,16 +53,16 @@ namespace des
 class LogGraphHandler : public design::Observer<dcore::AdminEvent>
 {
 public:
-    LogGraphHandler(std::string, dnet::Graph&,
-                    dcommon::Queue&, double, double);
+    LogGraphHandler(DesBus&, std::string);
     ~LogGraphHandler();
 
     void update(dcore::AdminEvent *subject);
 
 private:
-    std::string m_baseResultDir;
     dnet::Graph &m_graph;
     dcommon::Queue &m_queue;
+    desArgs_t &m_config;
+    std::string m_baseResultDir;
     double m_interval;
     double m_stopTime;
     int m_counter;

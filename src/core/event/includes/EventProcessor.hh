@@ -1,4 +1,4 @@
-// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -24,6 +24,9 @@
 # include <config.h>
 #endif
 
+#include "LadderQueue.hh"
+namespace dcommon = des::common;
+
 #include "AckEvent.hh"
 #include "AdminEvent.hh"
 #include "ArrivalEvent.hh"
@@ -33,10 +36,7 @@
 #include "PostAnyEvent.hh"
 #include "PostEvent.hh"
 #include "PreAnyEvent.hh"
-namespace dcore = des::core;
-
-#include "LadderQueue.hh"
-namespace dcommon = des::common;
+#include "DesBus.hh"
 
 
 namespace des
@@ -50,17 +50,16 @@ namespace des
 class EventProcessor
 {
 public:
-    EventProcessor(dcommon::LadderQueue&,
-                   dcore::AdminEvent&,
-                   dcore::PreAnyEvent&,
-                   dcore::PostAnyEvent&,
-                   dcore::ArrivalEvent&,
-                   dcore::DepartureEvent&,
-                   dcore::PostEvent&,
-                   dcore::LastArrivalEvent&,
-                   dcore::AckEvent&,
-                   dcore::LeaveEvent&,
-                   double);
+    EventProcessor(DesBus&,
+                   AdminEvent&,
+                   PreAnyEvent&,
+                   PostAnyEvent&,
+                   ArrivalEvent&,
+                   DepartureEvent&,
+                   PostEvent&,
+                   LastArrivalEvent&,
+                   AckEvent&,
+                   LeaveEvent&);
     ~EventProcessor();
 
     bool process();
@@ -68,15 +67,15 @@ public:
 
 private:
     dcommon::LadderQueue &m_queue;
-    dcore::AdminEvent &m_adminEvent;
-    dcore::PreAnyEvent &m_preAnyEvent;
-    dcore::PostAnyEvent &m_postAnyEvent;
-    dcore::ArrivalEvent &m_arrivalEvent;
-    dcore::DepartureEvent &m_departureEvent;
-    dcore::PostEvent &m_postEvent;
-    dcore::LastArrivalEvent &m_lastArrivalEvent;
-    dcore::AckEvent &m_ackEvent;
-    dcore::LeaveEvent &m_leaveEvent;
+    AdminEvent &m_adminEvent;
+    PreAnyEvent &m_preAnyEvent;
+    PostAnyEvent &m_postAnyEvent;
+    ArrivalEvent &m_arrivalEvent;
+    DepartureEvent &m_departureEvent;
+    PostEvent &m_postEvent;
+    LastArrivalEvent &m_lastArrivalEvent;
+    AckEvent &m_ackEvent;
+    LeaveEvent &m_leaveEvent;
 
     double m_stopTime;
     double m_oldTime;

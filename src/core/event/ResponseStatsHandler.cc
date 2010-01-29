@@ -1,4 +1,4 @@
-// Copyright (C) 2009, 2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2009-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -39,6 +39,7 @@ namespace dstats = des::statistics;
 #include "events.hh"
 #include "AckEvent.hh"
 #include "ResponseStatsHandler.hh"
+#include "GraphChannel.hh"
 
 
 namespace des
@@ -47,8 +48,8 @@ namespace core
 {
 
 
-ResponseStatsHandler::ResponseStatsHandler(dnet::Graph &p_graph)
-    : m_graph(p_graph)
+ResponseStatsHandler::ResponseStatsHandler(DesBus &p_bus)
+    : m_graph((dynamic_cast<GraphChannel&> (p_bus.getChannel(id::GRAPH_CHANNEL))).getGraph())
 {
     vertex_mean_reward_map = get(vertex_mean_reward, m_graph);
     vertex_num_events_processed_map = get(vertex_num_events_processed, m_graph);

@@ -1,4 +1,4 @@
-// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -22,9 +22,6 @@
 #define __ACKHANDLER_HH__
 
 
-#include "AckEvent.hh"
-namespace dcore = des::core;
-
 #include "LadderQueue.hh"
 namespace dcommon = des::common;
 
@@ -34,11 +31,15 @@ namespace dnet = des::network;
 #include "Observer.hh"
 namespace design = des::design;
 
+#include "AckEvent.hh"
+#include "DesBus.hh"
+
+
 
 namespace des
 {
-    namespace core
-    {
+namespace core
+{
 
 /** @class AckHandler
  * The class @code{AckHandler} handles ack events in the DES.
@@ -46,7 +47,7 @@ namespace des
 class AckHandler : public design::Observer<dcore::AckEvent>
 {
 public:
-    AckHandler(dcommon::Queue &p_queue, dnet::Graph &p_graph);
+    AckHandler(DesBus&);
     ~AckHandler();
 
     void update(dcore::AckEvent *subject);

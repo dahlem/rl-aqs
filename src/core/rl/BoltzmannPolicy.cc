@@ -1,4 +1,4 @@
-// Copyright (C) 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2009-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -33,6 +33,13 @@
 #include <boost/foreach.hpp>
 
 #include <gsl/gsl_math.h>
+
+#include "ConfigChannel.hh"
+namespace dcore = des::core;
+
+#include "Seeds.hh"
+#include "CRN.hh"
+namespace dsample = des::sampling;
 
 #include "BoltzmannPolicy.hh"
 
@@ -71,11 +78,17 @@ public:
 
 
 
-BoltzmannPolicy::BoltzmannPolicy(
-    double p_tau,
-    dsample::tGslRngSP p_uniform_rng)
-    : m_tau(p_tau), m_uniform_rng(p_uniform_rng)
-{}
+BoltzmannPolicy::BoltzmannPolicy(dcore::DesBus &p_bus)
+{
+    dcore::desArgs_t config = (dynamic_cast<dcore::ConfigChannel&> (p_bus.getChannel(dcore::id::CONFIG_CHANNEL))).getConfig();
+    m_tau = config.rl_policy_boltzmann_t;
+
+    boost::uint32_t seed = dsample::Seeds::getInstance().getSeed();
+    boost::uint32_t pol_uniform_rng_index
+        = dsample::CRN::getInstance().init(seed);
+    dsample::CRN::getInstance().log(seed, "boltzmann uniform");
+    m_uniform_rng = dsample::CRN::getInstance().get(pol_uniform_rng_index);
+}
 
 
 boost::uint16_t BoltzmannPolicy::operator() (

@@ -1,4 +1,4 @@
-// Copyright (C) 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2009-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -28,6 +28,14 @@
 
 #include <algorithm>
 
+#include "GraphChannel.hh"
+#include "ConfigChannel.hh"
+namespace dcore = des::core;
+
+#include "Seeds.hh"
+#include "CRN.hh"
+namespace dsample = des::sampling;
+
 #include "Policy.hh"
 #include "EpsilonGreedy.hh"
 
@@ -39,14 +47,24 @@ namespace rl
 
 
 
-EpsilonGreedy::EpsilonGreedy(
-    dnet::Graph &p_graph,
-    double p_epsilon,
-    dsample::tGslRngSP p_epsilon_rng,
-    dsample::tGslRngSP p_uniform_rng)
-    : m_graph(p_graph), m_epsilon(p_epsilon), m_epsilon_rng(p_epsilon_rng),
-      m_uniform_rng(p_uniform_rng)
+EpsilonGreedy::EpsilonGreedy(dcore::DesBus &p_bus)
+    : m_graph((dynamic_cast<dcore::GraphChannel&> (p_bus.getChannel(dcore::id::GRAPH_CHANNEL))).getGraph())
 {
+    dcore::desArgs_t config = (dynamic_cast<dcore::ConfigChannel&> (p_bus.getChannel(dcore::id::CONFIG_CHANNEL))).getConfig();
+    m_epsilon = config.rl_policy_epsilon;
+
+    boost::uint32_t seed = dsample::Seeds::getInstance().getSeed();
+    boost::uint32_t pol_epsilon_rng_index
+        = dsample::CRN::getInstance().init(seed);
+    dsample::CRN::getInstance().log(seed, "epsilon policy");
+    m_epsilon_rng = dsample::CRN::getInstance().get(pol_epsilon_rng_index);
+
+    seed = dsample::Seeds::getInstance().getSeed();
+    boost::uint32_t pol_uniform_rng_index
+        = dsample::CRN::getInstance().init(seed);
+    dsample::CRN::getInstance().log(seed, "epsilon uniform");
+    m_uniform_rng = dsample::CRN::getInstance().get(pol_uniform_rng_index);
+
     edge_weight_map = get(boost::edge_weight, m_graph);
 }
 

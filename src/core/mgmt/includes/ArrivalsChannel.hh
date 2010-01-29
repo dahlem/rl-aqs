@@ -30,18 +30,20 @@
 
 #include <boost/cstdint.hpp>
 
+#include "Channel.hh"
+
 
 namespace des {
 namespace core {
 
 
-class ArrivalsChannel
+class ArrivalsChannel : public Channel
 {
 public:
     ArrivalsChannel() {};
     virtual ~ArrivalsChannel() {};
 
-    virtual boost::uint16_t getId() 
+    virtual boost::uint16_t getId()
         { return id::ARRIVAL_CHANNEL; }
 
 };

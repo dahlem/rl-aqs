@@ -36,9 +36,6 @@
 #include "LadderQueue.hh"
 namespace dcommon = des::common;
 
-#include "AdminEvent.hh"
-namespace dcore = des::core;
-
 #include "Observer.hh"
 namespace design = des::design;
 
@@ -47,6 +44,9 @@ namespace dsample = des::sampling;
 
 #include "DirectedGraph.hh"
 namespace dnet = des::network;
+
+#include "AdminEvent.hh"
+#include "DesBus.hh"
 
 
 
@@ -64,14 +64,14 @@ typedef boost::shared_array <boost::int32_t> Int32SA;
 class GenerateArrivalsAdminHandler : public design::Observer<dcore::AdminEvent>
 {
 public:
-    GenerateArrivalsAdminHandler(dnet::Graph&, Int32SA, dcommon::Queue&);
+    GenerateArrivalsAdminHandler(DesBus&, Int32SA);
     ~GenerateArrivalsAdminHandler();
 
     void update(dcore::AdminEvent *subject);
 
 private:
-    dnet::Graph &m_graph;
     Int32SA m_arrivalRngs;
+    dnet::Graph &m_graph;
     dcommon::Queue &m_queue;
 
 };

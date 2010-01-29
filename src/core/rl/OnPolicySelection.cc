@@ -1,4 +1,4 @@
-// Copyright (C) 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2009-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software ; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -28,6 +28,9 @@
 #include <boost/foreach.hpp>
 #include <boost/graph/adjacency_list.hpp>
 
+#include "GraphChannel.hh"
+namespace dcore = des::core;
+
 #include "OnPolicySelection.hh"
 
 
@@ -37,8 +40,10 @@ namespace rl
 {
 
 OnPolicySelection::OnPolicySelection(
-    Policy &p_policy, dnet::Graph &p_graph)
-    : Selection(p_policy), m_graph(p_graph)
+    Policy &p_policy, dcore::DesBus &p_bus)
+    : Selection(p_policy),
+      m_graph((dynamic_cast<dcore::GraphChannel&> (p_bus.getChannel(dcore::id::GRAPH_CHANNEL))).getGraph())
+
 {
     vertex_next_action_map = get(vertex_next_action, m_graph);
 }

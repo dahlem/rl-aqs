@@ -14,11 +14,11 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-/** @file Channel.hh
- * Specification of the Channel interface.
+/** @file GraphChannel.hh
+ * Specification of the GraphChannel interface.
  */
-#ifndef __DES_CORE_MGMT_CHANNEL_HH__
-#define __DES_CORE_MGMT_CHANNEL_HH__
+#ifndef __DES_CORE_MGMT_GRAPHCHANNEL_HH__
+#define __DES_CORE_MGMT_GRAPHCHANNEL_HH__
 
 #if HAVE_CONFIG_H
 # include <config.h>
@@ -30,28 +30,35 @@
 
 #include <boost/cstdint.hpp>
 
-
-namespace des
-{
-namespace core
-{
-namespace id
-{
-static const boost::uint16_t ARRIVAL_CHANNEL = 0;
-static const boost::uint16_t QUEUE_CHANNEL   = 1;
-static const boost::uint16_t GRAPH_CHANNEL   = 2;
-static const boost::uint16_t CONFIG_CHANNEL  = 3;
-}
+#include "DirectedGraph.hh"
+namespace dnet = des::network;
 
 
-class Channel
+#include "Channel.hh"
+
+
+namespace des {
+namespace core {
+
+
+class GraphChannel : public Channel
 {
 public:
-    Channel() {};
-    virtual ~Channel() {};
+    GraphChannel(dnet::Graph &p_graph) : m_graph(p_graph) {};
+    virtual ~GraphChannel() {};
 
-    virtual boost::uint16_t getId() = 0;
+    virtual boost::uint16_t getId()
+        { return id::GRAPH_CHANNEL; }
 
+    dnet::Graph& getGraph() 
+        {
+            return m_graph;
+        }
+    
+    
+private:
+    dnet::Graph &m_graph;
+    
 };
 
 

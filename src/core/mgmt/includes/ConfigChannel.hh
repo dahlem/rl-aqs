@@ -14,11 +14,11 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-/** @file Channel.hh
- * Specification of the Channel interface.
+/** @file ConfigChannel.hh
+ * Specification of the ConfigChannel interface.
  */
-#ifndef __DES_CORE_MGMT_CHANNEL_HH__
-#define __DES_CORE_MGMT_CHANNEL_HH__
+#ifndef __DES_CORE_MGMT_CONFIGCHANNEL_HH__
+#define __DES_CORE_MGMT_CONFIGCHANNEL_HH__
 
 #if HAVE_CONFIG_H
 # include <config.h>
@@ -30,28 +30,32 @@
 
 #include <boost/cstdint.hpp>
 
-
-namespace des
-{
-namespace core
-{
-namespace id
-{
-static const boost::uint16_t ARRIVAL_CHANNEL = 0;
-static const boost::uint16_t QUEUE_CHANNEL   = 1;
-static const boost::uint16_t GRAPH_CHANNEL   = 2;
-static const boost::uint16_t CONFIG_CHANNEL  = 3;
-}
+#include "Channel.hh"
+#include "clconfig.hh"
 
 
-class Channel
+namespace des {
+namespace core {
+
+
+class ConfigChannel : public Channel
 {
 public:
-    Channel() {};
-    virtual ~Channel() {};
+    ConfigChannel(desArgs_t &p_config) : m_config(p_config) {};
+    virtual ~ConfigChannel() {};
 
-    virtual boost::uint16_t getId() = 0;
+    virtual boost::uint16_t getId()
+        { return id::CONFIG_CHANNEL; }
 
+    desArgs_t& getConfig() 
+        {
+            return m_config;
+        }
+    
+    
+private:
+    desArgs_t &m_config;
+    
 };
 
 
