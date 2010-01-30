@@ -1,0 +1,11 @@
+Package: graphProps
+Version: @VERSION@
+Date: 2010-01-08
+Title: Retrieve properties of graphs
+Author: Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+Maintainer: Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+Depends: R (>= 2.6), igraph, desStats, @SNOW@
+Description: Read vertex/edge properties of graphs and summarise the data.
+License: GPL-2
+URL: http://www.r-project.org
+     
