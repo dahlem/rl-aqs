@@ -93,6 +93,7 @@ public:
             int jobs = 1;
             int rc = 0;
             int runs = 0, already_run = 0;
+            int nodes = 0;
 
             // 1. perform lhs
             // calculate the number of simulations
@@ -105,6 +106,7 @@ public:
             gsl_vector *min, *max;
             gsl_matrix *sample;
             int *simReplications = new int[runs];
+            int *simInitReplications = new int[runs];
             int *simActiveReplications = new int[runs];
 
             // keep track of the significance of the experiments and their replication count
@@ -112,7 +114,25 @@ public:
             for (boost::uint16_t i = 0; i < runs; ++i) {
                 areExpsSignificant[i] = false;
                 simReplications[i] = p_desArgs->init_replications;
+                simInitReplications[i] = p_desArgs->init_replications;
                 simActiveReplications[i] = p_desArgs->init_replications;
+            }
+
+            // if more nodes are available allocate those to the replications
+            MPI_Comm_size(MPI_COMM_WORLD, &nodes);
+            boost::uint16_t freeNodes = nodes - (runs * p_desArgs->init_replications + 1);
+#ifndef NDEBUG
+            std::cout << "Number of additional nodes: " << freeNodes  << std::endl;
+#endif /* NDEBUG */
+
+            for (boost::uint16_t i = 0; i < freeNodes; ++i) {
+#ifndef NDEBUG
+                std::cout << "Increment number of replicas for sim: " << (i+1) << std::endl;
+#endif /* NDEBUG */
+
+                simReplications[i%runs]++;
+                simInitReplications[i%runs]++;
+                simActiveReplications[i%runs]++;
             }
 
             // online statistics for the experiments
@@ -236,8 +256,7 @@ public:
                 desArgsMPI.sim_num = i + 1 + already_run;
                 assignParams(p_desArgs, desArgsMPI, sample);
 
-                for (desArgsMPI.rep_num = 1; desArgsMPI.rep_num <= p_desArgs->init_replications;
-                     ++desArgsMPI.rep_num) {
+                for (desArgsMPI.rep_num = 1; desArgsMPI.rep_num <= simInitReplications[i]; ++desArgsMPI.rep_num) {
                     // send the desargs to the slave nodes
 #ifndef NDEBUG
                     std::cout << "Sending job: " << jobs << ". Simulation " << desArgsMPI.sim_num
@@ -367,7 +386,7 @@ public:
                     // if not send another replica
                     if (!isConfident) {
                         // do progressive parallel job execution
-                        int moreJobs = (p_desArgs->init_replications > idleNodes.size()) ? idleNodes.size() : (simActiveReplications[output->simulation_id - 1] + lazyNodes.size());
+                        int moreJobs = (simInitReplications[output->simulation_id - 1] > idleNodes.size()) ? idleNodes.size() : (simActiveReplications[output->simulation_id - 1] + lazyNodes.size());
                         simActiveReplications[output->simulation_id - 1] = moreJobs;
 
 #ifndef NDEBUG
@@ -492,6 +511,8 @@ public:
 
             delete[] sim_results_lines;
             delete[] simReplications;
+            delete[] simInitReplications;
+            delete[] simActiveReplications;
 
             // 5. free gsl stuff
             if (dimensions > 0) {
