@@ -1,4 +1,4 @@
-// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -275,7 +275,6 @@ public:
                 // prepare the overall results
                 sim_results_lines[i] << desArgsMPI.sim_num << ","
                                      << p_desArgs->stop_time << ","
-                                     << p_desArgs->generations << ","
                                      << (p_desArgs->graph_rate + 1) << ","
                                      << p_desArgs->max_arrival << ","
                                      << desArgsMPI.boost_arrival << ","
