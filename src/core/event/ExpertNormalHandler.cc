@@ -25,8 +25,6 @@
 # include <iostream>
 #endif /* NDEBUG_EVENTS */
 
-#include <gsl/gsl_math.h>
-
 #include "Entry.hh"
 namespace dcommon = des::common;
 
@@ -67,10 +65,7 @@ void ExpertNormalHandler::update(AckEvent *subject)
 
     dnet::Vertex vertex = boost::vertex(entry->getDestination(), m_graph);
     // observe reward (the longer it takes the smaller the reward)
-    double reward = 0.0;
-    if ((entry->topArrival() - entry->getArrival()) > 0.0) {
-        reward = (entry->topArrival() - entry->getArrival());
-    }
+    double reward = entry->getReward();
 
     vertex_expert_normal_map[vertex] += reward;
 

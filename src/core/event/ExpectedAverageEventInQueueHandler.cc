@@ -27,9 +27,8 @@
 
 #ifndef NDEBUG
 # include <cassert>
+# include <gsl/gsl_math.h>
 #endif /* NDEBUG */
-
-#include <gsl/gsl_math.h>
 
 #include "Entry.hh"
 namespace dcommon = des::common;
@@ -72,9 +71,11 @@ void ExpectedAverageEventInQueueHandler::update(PostAnyEvent *subject)
         (entry->getType() == DEPARTURE_EVENT)) {
 
         dnet::Vertex vertex = boost::vertex(entry->getDestination(), m_graph);
-        double q_i = (gsl_fcmp(entry->getArrival(), vertex_last_event_time_map[vertex], 1e-9) == 0)
-            ? (0.0)
-            : (entry->getArrival() - vertex_last_event_time_map[vertex]);
+        double q_i = 0.0;
+
+        if ((entry->getArrival() - vertex_last_event_time_map[vertex]) > 0.0) {
+            q_i = entry->getArrival() - vertex_last_event_time_map[vertex];
+        }
 
 #ifndef NDEBUG
         assert(gsl_fcmp(entry->getArrival(), vertex_last_event_time_map[vertex], 1e-9) >= 0);

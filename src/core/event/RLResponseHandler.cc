@@ -27,8 +27,6 @@
 
 #include <boost/foreach.hpp>
 
-#include <gsl/gsl_math.h>
-
 #include "Entry.hh"
 namespace dcommon = des::common;
 
@@ -82,10 +80,7 @@ void RLResponseHandler::update(AckEvent *subject)
     boost::uint16_t newAction = 0;
 
     // observe reward (the longer it takes the smaller the reward)
-    double reward = 0.0;
-    if ((entry->topArrival() - entry->getArrival()) > 0.0) {
-        reward = (entry->topArrival() - entry->getArrival());
-    }
+    double reward = entry->getReward();
 
     if (degree > 1) {
 #ifndef NDEBUG_EVENTS
@@ -126,7 +121,7 @@ void RLResponseHandler::update(AckEvent *subject)
         double alphaOldQ = m_q_alpha * oldQ;
         double newQ = oldQ + m_q_alpha * reward;
 
-        newQ += (gsl_fcmp(alphaLambdaQ, alphaOldQ, 1e-9) == 0) ? (0.0) : (alphaLambdaQ - alphaOldQ);
+        newQ += (alphaLambdaQ - alphaOldQ);
 
         edge_q_val_map[oldE] = newQ;
 

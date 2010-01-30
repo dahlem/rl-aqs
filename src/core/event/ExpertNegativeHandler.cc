@@ -27,8 +27,6 @@
 
 #include <boost/foreach.hpp>
 
-#include <gsl/gsl_math.h>
-
 #include "Entry.hh"
 namespace dcommon = des::common;
 
@@ -78,11 +76,7 @@ void ExpertNegativeHandler::update(AckEvent *subject)
         boost::out_degree(vertex, m_graph);
 
     // observe reward (the longer it takes the smaller the reward)
-    double reward = 0.0;
-    if ((entry->topArrival() - entry->getArrival()) > 0.0) {
-        reward = (entry->topArrival() - entry->getArrival());
-    }
-
+    double reward = entry->getReward();
     double qval = 0.0;
 
     if (degree > 0) {

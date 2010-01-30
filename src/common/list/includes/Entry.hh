@@ -108,6 +108,7 @@ public:
 
     double topArrival();
     double getExternalArrival();
+    double getReward();
 
     void pushEventHistory(boost::int32_t, double);
     int getEventHistoryLength();

@@ -21,6 +21,10 @@
 
 #include <iostream>
 
+#ifndef NDEBUG
+# include <gsl/gsl_math.h>
+#endif /* NDEBUG */
+
 
 namespace des
 {
@@ -66,7 +70,6 @@ Entry::~Entry()
 {
 }
 
-
 bool Entry::operator< (const Entry& rhs) const
 {
     if (arrival == rhs.arrival) {
@@ -76,7 +79,6 @@ bool Entry::operator< (const Entry& rhs) const
     }
 }
 
-
 bool Entry::operator< (const Entry& rhs)
 {
     if (arrival == rhs.arrival) {
@@ -85,7 +87,6 @@ bool Entry::operator< (const Entry& rhs)
         return arrival < rhs.arrival;
     }
 }
-
 
 void Entry::delayed(double p_delay, double p_newArrival, boost::int32_t p_type)
 {
@@ -99,7 +100,6 @@ void Entry::delayed(double p_delay, double p_newArrival, boost::int32_t p_type)
     origin = destination;
 }
 
-
 void Entry::service(double p_departure, boost::int32_t p_type)
 {
     // set the departure time
@@ -111,7 +111,6 @@ void Entry::service(double p_departure, boost::int32_t p_type)
     origin = destination;
 }
 
-
 void Entry::depart(boost::int32_t p_destination, boost::int32_t p_type)
 {
     destination = p_destination;
@@ -119,17 +118,15 @@ void Entry::depart(boost::int32_t p_destination, boost::int32_t p_type)
     type = p_type;
 }
 
-
 void Entry::acknowledge(boost::int32_t p_origin,
-                                 boost::int32_t p_destination,
-                                 boost::int32_t p_type)
+                        boost::int32_t p_destination,
+                        boost::int32_t p_type)
 {
     destination = p_destination;
     origin = p_origin;
 
     type = p_type;
 }
-
 
 void Entry::leave(boost::int32_t p_destination, boost::int32_t p_type)
 {
@@ -139,18 +136,15 @@ void Entry::leave(boost::int32_t p_destination, boost::int32_t p_type)
     type = p_type;
 }
 
-
 double Entry::getDelay() const
 {
     return delay;
 }
 
-
 boost::uintmax_t Entry::getId() const
 {
     return id;
 }
-
 
 double Entry::getArrival() const
 {
@@ -162,24 +156,20 @@ void Entry::setArrival(double p_arrival)
     arrival = p_arrival;
 }
 
-
 int Entry::getDestination() const
 {
     return destination;
 }
-
 
 int Entry::getOrigin() const
 {
     return origin;
 }
 
-
 int Entry::getType() const
 {
     return type;
 }
-
 
 void Entry::pushEventHistory(boost::int32_t p_node, double p_time)
 {
@@ -192,7 +182,6 @@ int Entry::getEventHistoryLength()
     return event_path.size();
 }
 
-
 int Entry::popEvent()
 {
     int dest = event_path.top();
@@ -202,22 +191,34 @@ int Entry::popEvent()
     return dest;
 }
 
-
 bool Entry::isEventQueueEmpty()
 {
     return event_path.empty();
 }
-
 
 double Entry::topArrival()
 {
     return event_arrivals.top();
 }
 
-
 double Entry::getExternalArrival()
 {
     return externalArrival;
+}
+
+double Entry::getReward()
+{
+    double reward = 0.0;
+
+    if ((topArrival() - getArrival()) < 0.0) {
+        reward = (topArrival() - getArrival());
+#ifndef NDEBUG
+    } else {
+        assert(gsl_fcmp(getArrival(), topArrival(), 1e-9) > -1);
+#endif /* NDEBUG_EVENTS */
+    }
+
+    return reward;
 }
 
 

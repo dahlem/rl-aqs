@@ -21,8 +21,6 @@
 # include <config.h>
 #endif
 
-#include <gsl/gsl_math.h>
-
 #include "Entry.hh"
 #include "LadderQueue.hh"
 namespace dcommon = des::common;
@@ -66,10 +64,10 @@ void LeaveHandler::update(LeaveEvent *subject)
 
     dnet::Vertex vertex = boost::vertex(origin, m_graph);
 
-    double inSystem =
-        (gsl_fcmp(entry->getArrival(), entry->getExternalArrival(), 1e-9) <= 0)
-        ? (0.0)
-        : (entry->getArrival() - entry->getExternalArrival());
+    double inSystem = 0.0;
+    if ((entry->getArrival() - entry->getExternalArrival()) > 0.0) {
+        inSystem = (entry->getArrival() - entry->getExternalArrival());
+    }
 
     m_EventInSystem[origin].push(inSystem);
     m_vertexAvgEventInSystemTimeMap[vertex] = m_EventInSystem[origin].mean();
