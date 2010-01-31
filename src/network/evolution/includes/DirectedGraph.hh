@@ -444,7 +444,7 @@ typedef boost::property <graph_generator_t, boost::uint16_t> GraphGeneratorPrope
  */
 typedef boost::adjacency_list<boost::setS,
                               boost::listS,
-                              boost::directedS,
+                              boost::bidirectionalS,
                               VertexProperties,
                               EdgeIndexProperty,
                               GraphGeneratorProperty> Graph;

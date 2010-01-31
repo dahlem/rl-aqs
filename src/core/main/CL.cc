@@ -164,6 +164,7 @@ CL::CL()
     po::options_description opt_rl("RL Configuration");
     opt_rl.add_options()
         (RL.c_str(), po::value <bool>()->default_value(false), "Enable Reinforcement Learning.")
+        (RL_CI.c_str(), po::value <bool>()->default_value(false), "Enable Collective Intelligence.")
         (RL_HYBRID.c_str(), po::value <bool>()->default_value(false), "Enable hybrid Reinforcement Learning.")
         (RL_HYBRID_WARMUP.c_str(), po::value <boost::uint16_t>()->default_value(1000), "hybrid Reinforcement Learning warmup phase.")
         (RL_RESPONSE_ALPHA.c_str(), po::value <std::string>(), "Reward Levels for response Time.")
@@ -388,6 +389,11 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
     }
     std::cout << "RL enabled: " << desArgs->rl << std::endl;
     if (desArgs->rl) {
+        if (vm.count(RL_CI.c_str())) {
+            desArgs->rl_ci = vm[RL_CI.c_str()].as <bool>();
+        }
+        std::cout << "Collective Intelligence: " << desArgs->rl_ci << "." << std::endl;
+
         if (vm.count(RL_Q_ALPHA.c_str())) {
             desArgs->rl_q_alpha = vm[RL_Q_ALPHA.c_str()].as <double>();
         }

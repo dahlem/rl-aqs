@@ -203,14 +203,17 @@ boost::uint32_t Ladder::bucket(double p_TS, boost::uint32_t p_rung)
     if (retVal < m_currentBucket[p_rung]) {
         retVal++;
     }
+    if (retVal == m_buckets[p_rung]) {
+        retVal--;
+    }
+
+#ifndef NDEBUG_QUEUE
+    std::cout << " -- bucket: " << retVal << std::endl;
+#endif /* NDEBUG */
 
 #ifndef NDEBUG
     assert(retVal >= m_currentBucket[p_rung]);
     assert(retVal < m_buckets[p_rung]);
-#endif /* NDEBUG */
-
-#ifndef NDEBUG_QUEUE
-    std::cout << " -- bucket: " << retVal << std::endl;
 #endif /* NDEBUG */
 
     return retVal;

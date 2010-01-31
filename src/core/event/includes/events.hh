@@ -37,13 +37,14 @@ const boost::int32_t ARRIVAL_EVENT              = 1;
 const boost::int32_t RESCHEDULED_EVENT          = 2;
 const boost::int32_t DEPARTURE_EVENT            = 3;
 const boost::int32_t ACK_EVENT                  = 4;
-const boost::int32_t LEAVE_EVENT                = 5;
+const boost::int32_t ACK_1HOP_EVENT             = 5;
+const boost::int32_t LEAVE_EVENT                = 6;
 
 /**
  * Declaration of admin events
  */
-const boost::int32_t LOG_GRAPH_EVENT            = 6;
-const boost::int32_t GENERATE_ARRIVAL_EVENT     = 7;
+const boost::int32_t LOG_GRAPH_EVENT            = 10;
+const boost::int32_t GENERATE_ARRIVAL_EVENT     = 11;
 
 /**
  * Declaration of the event source

@@ -176,6 +176,7 @@ bool EventProcessor::process()
 #endif /* NDEBUG_EVENTS */
                       break;
                   case ACK_EVENT:
+                  case ACK_1HOP_EVENT:
 #ifndef NDEBUG_EVENTS
                       std::cout << "** EventProcessor : ack event start" << std::endl;
 #endif /* NDEBUG_EVENTS */
