@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2007-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -166,7 +166,7 @@ dcommon::EntryList* dcommon::Top::delist()
     double width = 1.0;
 
     if (m_maxTS != m_minTS) {
-        width = (gsl_fcmp(m_maxTS, m_minTS, 1e-9) <= 0) ? (0.0) : (m_maxTS - m_minTS);
+        width = (gsl_fcmp(m_maxTS, m_minTS, 1e-9) <= 0.0) ? (0.0) : (m_maxTS - m_minTS);
         width /= static_cast<double> (m_fifo->size());
     }
 
