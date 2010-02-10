@@ -35,8 +35,6 @@ namespace bio = boost::iostreams;
 #include <cstddef>
 #include <cfloat>
 
-#include <gsl/gsl_math.h>
-
 #include "Top.hh"
 namespace dcommon = des::common;
 
@@ -163,10 +161,10 @@ void dcommon::Top::push(dcommon::EntryList* p_list)
 
 dcommon::EntryList* dcommon::Top::delist()
 {
-    double width = 1.0;
+    double width = 0.0;
 
-    if (m_maxTS != m_minTS) {
-        width = (gsl_fcmp(m_maxTS, m_minTS, 1e-9) <= 0.0) ? (0.0) : (m_maxTS - m_minTS);
+    if (m_maxTS > m_minTS) {
+        width = m_maxTS - m_minTS;
         width /= static_cast<double> (m_fifo->size());
     }
 
