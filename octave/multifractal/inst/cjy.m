@@ -14,6 +14,8 @@
 ## Created: 12.01.2010
 ## Version: 0.1
 
+## equations taken from: "Scale-free avalanches in multifractal random
+## walk", by M. Bartolozzi
 ## d0 = 1, a0 = 0.1, b = 1.3, lambda = 1.05, Nc = 1000, T = 5000, n0 = 0, nmax = log(30)/log(lambda)
 function [rt, time] = cjy(d0, a0, b, lambda, Nc, T, n0, nmax)
   ## eq. 5
@@ -37,6 +39,7 @@ function [rt, time] = cjy(d0, a0, b, lambda, Nc, T, n0, nmax)
   time = zeros(1, T);
   
   for (t = 1:T)
+    ## 2nd term of eq. 4
     temp1 = Ki(Nc + 1);
     if ((t - Nc - 1) > 0)
       temp1 = temp1 * eta(t-Nc-1);
@@ -45,11 +48,13 @@ function [rt, time] = cjy(d0, a0, b, lambda, Nc, T, n0, nmax)
       temp1 = 0;
     endif
 
+    ### 3rd term of eq. 4
     temp2 = 0;
     if (t > 1)
       temp2 = (Ki(2:(n+1)) - Ki(1:n)) .* eta((t-1):-1:(t-n));
     endif
 
+    ## eq. 4
     phit = Ki(1) * eta(t) - temp1 + sum(temp2);
 
     ## eq. 3

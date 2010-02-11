@@ -1,4 +1,4 @@
-# Copyright (C) 2007 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+# Copyright (C) 2007-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 #  
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without 
@@ -8,4 +8,4 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-SUBDIRS = common crn qrn lhs
+SUBDIRS = common crn qrn lhs mfrw main
