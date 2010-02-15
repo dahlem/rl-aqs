@@ -14,36 +14,24 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-/** @file StaticArrivalsChannel.hh
- * Specification of the StaticArrivalsChannel interface.
+/** @file Arrivals.cc
+ * Implementation of the Arrivals interface.
  */
-#ifndef __DES_CORE_MGMT_STATICARRIVALSCHANNEL_HH__
-#define __DES_CORE_MGMT_STATICARRIVALSCHANNEL_HH__
-
-#if HAVE_CONFIG_H
-# include <config.h>
-#endif
-
-
-#include "ArrivalsChannel.hh"
-
+#include "Arrivals.hh"
 
 namespace des {
 namespace core {
 
 
-class StaticArrivalsChannel : public ArrivalsChannel
+Arrivals::Arrivals()
 {
-public:
-    StaticArrivalsChannel() {};
-    virtual ~StaticArrivalsChannel() {};
+}
 
-};
 
+Arrivals::~Arrivals()
+{
+}
 
 
 }
 }
-
-
-#endif

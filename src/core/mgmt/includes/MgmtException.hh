@@ -46,6 +46,8 @@ public:
 
     enum Errors {
         CHANNEL_NOT_EXIST = 0,
+        NODE_NOT_EXIST,
+        TIME_NOT_EXIST,
         NUM_ERRORS
     };
 

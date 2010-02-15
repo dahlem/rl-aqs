@@ -37,10 +37,10 @@ namespace core
 {
 namespace id
 {
-static const boost::uint16_t ARRIVAL_CHANNEL = 0;
-static const boost::uint16_t QUEUE_CHANNEL   = 1;
-static const boost::uint16_t GRAPH_CHANNEL   = 2;
-static const boost::uint16_t CONFIG_CHANNEL  = 3;
+static const boost::uint16_t QUEUE_CHANNEL   = 0;
+static const boost::uint16_t GRAPH_CHANNEL   = 1;
+static const boost::uint16_t CONFIG_CHANNEL  = 2;
+static const boost::uint16_t ARRIVAL_CHANNEL = 3;
 }
 
 

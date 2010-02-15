@@ -12,16 +12,28 @@ noinst_LTLIBRARIES = libcoremgmt.la
 
 libcoremgmt_la_SOURCES =                                                  \
 	DesBus.cc                                                         \
+	Arrivals.cc                                                       \
+	CJYArrivals.cc                                                    \
 	MgmtException.cc
 
 libcoremgmt_la_CPPFLAGS =                                                 \
+	$(GSL_CFLAGS)                                                     \
 	$(BOOST_CPPFLAGS)                                                 \
+	-I$(top_srcdir)/src/design/pattern/includes                       \
+	-I$(top_srcdir)/src/sampling/crn/includes                         \
+	-I$(top_srcdir)/src/sampling/common/includes                      \
+	-I$(top_srcdir)/src/sampling/mfrw/includes                        \
 	-I$(top_srcdir)/src/network/evolution/includes                    \
 	-I$(top_srcdir)/src/common/queue/includes                         \
 	-I./includes
 
 libcoremgmt_la_LDFLAGS =                                                  \
-	$(BOOST_LDFLAGS)
+	$(GSL_LIBS)                                                       \
+	$(BOOST_LDFLAGS)                                                  \
+	$(top_srcdir)/src/sampling/common/libsamplingcommon.la            \
+	$(top_srcdir)/src/sampling/crn/libsamplingcrn.la                  \
+	$(top_srcdir)/src/sampling/lhs/libsamplinglhs.la                  \
+	$(top_srcdir)/src/sampling/mfrw/libsamplingmfrw.la
 
 include_HEADERS = includes
 MAINTAINERCLEANFILES = Makefile.in

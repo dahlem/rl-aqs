@@ -45,6 +45,7 @@ libcoreevent_la_SOURCES =                                                  \
 	ExpertNegativeHandler.cc                                           \
 	FullRLResponseHandler.cc                                           \
 	HybridFullRLResponseHandler.cc                                     \
+	SerialiseArrivalsHandler.cc                                        \
 	RLResponseHandler.cc
 
 libcoreevent_la_CPPFLAGS =                                                 \
@@ -57,6 +58,7 @@ libcoreevent_la_CPPFLAGS =                                                 \
 	-I$(top_srcdir)/src/statistics/analysis/includes                   \
 	-I$(top_srcdir)/src/sampling/crn/includes                          \
 	-I$(top_srcdir)/src/sampling/common/includes                       \
+	-I$(top_srcdir)/src/sampling/mfrw/includes                         \
 	-I$(top_srcdir)/src/common/queue/includes                          \
 	-I$(top_srcdir)/src/network/evolution/includes                     \
 	-I$(top_srcdir)/src/io/includes                                    \
@@ -77,7 +79,8 @@ libcoreevent_la_LIBADD =                                                   \
 	$(top_srcdir)/src/core/rl/librl.la                                 \
 	$(top_srcdir)/src/utils/vector/libutils_vector.la                  \
 	$(top_srcdir)/src/core/mgmt/libcoremgmt.la                         \
-	$(top_srcdir)/src/common/queue/libcommonqueue.la
+	$(top_srcdir)/src/common/queue/libcommonqueue.la                   \
+	$(top_srcdir)/src/sampling/mfrw/libsamplingmfrw.la
 
 libcoreevent_la_LDFLAGS =                                                  \
 	$(BOOST_LDFLAGS)

@@ -52,6 +52,9 @@ namespace fs = boost::filesystem;
 #include "AdminEvent.hh"
 #include "ArrivalEvent.hh"
 #include "ArrivalHandler.hh"
+#include "Arrivals.hh"
+#include "ArrivalsChannel.hh"
+#include "CJYArrivals.hh"
 #include "BoltzmannPolicy.hh"
 #include "CL.hh"
 #include "ConfigChannel.hh"
@@ -86,8 +89,8 @@ namespace fs = boost::filesystem;
 #include "Report.hh"
 #include "ResponseStatsHandler.hh"
 #include "RLResponseHandler.hh"
+#include "SerialiseArrivalsHandler.hh"
 #include "Simulation.hh"
-#include "StaticArrivalsChannel.hh"
 #include "UnprocessedEventsHandler.hh"
 #include "UtilisationHandler.hh"
 #include "WeightedPolicyLearner.hh"
@@ -427,18 +430,47 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
 
         num_vertices = boost::num_vertices(*graph);
 
-        // instantiate the channels (order of addition is important)
-        // instantiate the arrival channel
-        StaticArrivalsChannel arrivalChannel;
         QueueChannel queueChannel(queue);
         GraphChannel graphChannel(*graph);
         ConfigChannel configChannel(*desArgs);
 
-        dbus.addChannel(arrivalChannel);
         dbus.addChannel(queueChannel);
         dbus.addChannel(graphChannel);
         dbus.addChannel(configChannel);
 
+        // instantiate the channels (order of addition is important)
+        // instantiate the arrival channel
+        ArrivalsChannel *arrivalChannel;
+        Arrivals *arrivals;
+        boost::int32_t destination = 0;
+
+        dnet::VertexIndexMap vertex_index_props_map =
+            get(boost::vertex_index, *graph);
+
+        if (desArgs->mfrw) {
+            arrivals = new CJYArrivals(dbus);
+            arrivals->generate();
+            arrivalChannel = new ArrivalsChannel(arrivals);
+            dbus.addChannel(*arrivalChannel);
+
+
+#ifndef NDEBUG_EVENTS
+            std::cout << "Generate serialise events..." << std::endl;
+#endif /* NDEBUG */
+
+            // generate serialise arrival events here
+            BOOST_FOREACH(dnet::Vertex v, boost::vertices(*graph)) {
+                destination = vertex_index_props_map[v];
+
+#ifndef NDEBUG_EVENTS
+                std::cout << "... for vertex " << destination << std::endl;
+#endif /* NDEBUG */
+                EventGenerator::generateSerialiseArrivalAdmin(queue, destination, 0.0);
+            }
+        } else {
+            arrivalChannel = new ArrivalsChannel;
+            dbus.addChannel(*arrivalChannel);
+        }
 
         // init the crn for the arrival events
         Int32SA arrivalCRNs = arrivalCRN(num_vertices);
@@ -448,14 +480,6 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
 
         // init the crn for the departure uniform rv
         Int32SA departureCRNs = departureCRN(num_vertices);
-
-        dnet::VertexIndexMap vertex_index_props_map =
-            get(boost::vertex_index, *graph);
-        dnet::VertexArrivalRateMap vertex_arrival_props_map =
-            get(vertex_arrival_rate, *graph);
-
-        boost::int32_t destination = 0;
-        double arrival_rate = 0.0;
 
         // generate events over this graph
         if (desArgs->trace_event) {
@@ -477,10 +501,7 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
                 if (count == 0) {
                     // generate a single event
                     destination = vertex_index_props_map[*filter_iter_first];
-                    arrival_rate = vertex_arrival_props_map[*filter_iter_first];
 
-                    dsample::tGslRngSP arrival_rng = dsample::CRN::getInstance().get(
-                        arrivalCRNs[destination]);
                     EventGenerator::generateArrivalAdmin(queue, destination, 0.0);
                 } else {
                     std::cout << "Error: Expected a single vertex to be traced!" << std::endl;
@@ -491,7 +512,6 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
             }
         } else {
             std::pair <dnet::VertexIterator, dnet::VertexIterator> p;
-            dsample::tGslRngSP arrival_rng;
 
 #ifndef NDEBUG
             std::cout << "Generate events..." << std::endl;
@@ -499,13 +519,11 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
 
             BOOST_FOREACH(dnet::Vertex v, boost::vertices(*graph)) {
                 destination = vertex_index_props_map[v];
-                arrival_rate = vertex_arrival_props_map[v];
 
 #ifndef NDEBUG_EVENTS
                 std::cout << "... for vertex " << destination << std::endl;
 #endif /* NDEBUG */
 
-                arrival_rng = dsample::CRN::getInstance().get(arrivalCRNs[destination]);
                 EventGenerator::generateArrivalAdmin(queue, destination, 0.0);
             }
         }
@@ -531,6 +549,7 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
         LeaveEvent leaveEvent;
 
         GenerateArrivalsAdminHandler generateArrivalsAdminHandler(dbus, arrivalCRNs);
+        SerialiseArrivalsHandler serialiseArrivalsHandler(dbus);
         LogGraphHandler logGraphHandler(dbus, resultsBaseDir);
 
         ArrivalHandler arrivalHandler(dbus, serviceCRNs);
@@ -548,6 +567,7 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
 
         // attach the handlers to the events
         // the order of the handlers is important
+        adminEvent.attach(serialiseArrivalsHandler);
         adminEvent.attach(generateArrivalsAdminHandler);
         adminEvent.attach(logGraphHandler);
 
@@ -665,6 +685,14 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
         Report::accumResults(graph, &output);
         output.simulation_id = sim_num;
         output.replications = rep_num;
+
+        // cleanup the arrivals
+        if (arrivals != NULL) {
+            delete arrivals;
+        }
+        if (arrivalChannel != NULL) {
+            delete arrivalChannel;
+        }
 
 #ifdef HAVE_MPI
         // send the result back

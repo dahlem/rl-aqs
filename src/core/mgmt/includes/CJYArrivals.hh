@@ -14,11 +14,11 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-/** @file ArrivalsChannel.hh
- * Specification of the ArrivalsChannel interface.
+/** @file Arrivals.hh
+ * Specification of the Arrivals interface.
  */
-#ifndef __DES_CORE_MGMT_ARRIVALSCHANNEL_HH__
-#define __DES_CORE_MGMT_ARRIVALSCHANNEL_HH__
+#ifndef __DES_CORE_MGMT_CJYARRIVALS_HH__
+#define __DES_CORE_MGMT_CJYARRIVALS_HH__
 
 #if HAVE_CONFIG_H
 # include <config.h>
@@ -30,37 +30,33 @@
 
 #include <boost/cstdint.hpp>
 
-#include "Arrivals.hh"
-#include "Channel.hh"
+#include <gsl/gsl_matrix.h>
+
+#include "DirectedGraph.hh"
+namespace dnet = des::network;
+
+#include "clconfig.hh"
+#include "DesBus.hh"
 
 
 namespace des {
 namespace core {
 
 
-class ArrivalsChannel : public Channel
+class CJYArrivals : public Arrivals
 {
 public:
-    ArrivalsChannel()
-        { m_arrivals = NULL; }
+    CJYArrivals(DesBus&);
+    ~CJYArrivals();
 
-    ArrivalsChannel(Arrivals *p_arrivals)
-        : m_arrivals(p_arrivals)  {}
-
-    virtual ~ArrivalsChannel() {}
-
-    virtual boost::uint16_t getId()
-        { return id::ARRIVAL_CHANNEL; }
-
-
-    Arrivals* getArrivals()
-        {
-            return m_arrivals;
-        }
-
+    void generate();
+    void serialise(boost::uint16_t, boost::uint16_t) throw (MgmtException);
 
 private:
-    Arrivals *m_arrivals;
+    dnet::Graph &m_graph;
+    desArgs_t &m_desArgs;
+    gsl_matrix *m_arrivalRates;
+
 };
 
 

@@ -59,6 +59,17 @@ public:
         boost::int32_t p_destination,
         double p_time);
 
+    static void generateSerialiseArrivalAdmin(
+        dcommon::Queue &p_queue,
+        boost::int32_t p_destination,
+        double p_time);
+
+    static void generateAdminEventType(
+        dcommon::Queue &p_queue,
+        boost::int32_t p_destination,
+        double p_time,
+        boost::int32_t p_type);
+
     static void generateArrival(
         dcommon::Queue &p_queue,
         dsample::tGslRngSP arrival_rng,

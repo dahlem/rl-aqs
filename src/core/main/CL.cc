@@ -216,6 +216,33 @@ CL::CL()
         (VERTEX.c_str(), po::value <boost::int32_t>(), "The source vertex to trace the event for.")
         ;
 
+
+    po::options_description opt_mfrw("Multifractal Random Walk Configuration");
+    opt_mfrw.add_options()
+        (CL_MFRW.c_str(), po::value <bool>()->default_value(false),
+         "Use multifractal poisson arrivals.")
+        (CL_MFRW_D0.c_str(), po::value <double>()->default_value(1),
+         "amplitute of the fluctuations.")
+        (CL_MFRW_A0.c_str(), po::value <double>()->default_value(0.1),
+         "alpha 0.")
+        (CL_MFRW_B.c_str(), po::value <double>()->default_value(1.3),
+         "drift strength.")
+        (CL_MFRW_LAMBDA.c_str(), po::value <double>()->default_value(1.05),
+         "intermittency of the fluctuations.")
+        (CL_MFRW_NC.c_str(), po::value <boost::uint16_t>()->default_value(1000),
+         "memory steps.")
+        (CL_MFRW_T.c_str(), po::value <boost::uint16_t>()->default_value(5000),
+         "time scale.")
+        (CL_MFRW_N0.c_str(), po::value <double>()->default_value(0.0),
+         "initial value of the MFRW.")
+        (CL_MFRW_NMAX.c_str(), po::value <double>()->default_value(30.0),
+         "upper bound of the fluctuations.")
+        (CL_MFRW_UPPER.c_str(), po::value <double>()->default_value(1.0),
+         "upper bound in percent for stable queues (> 1 is unstable).")
+        (CL_MFRW_LOWER.c_str(), po::value <double>()->default_value(0.0),
+         "lower bound in percent for stable queues.")
+        ;
+
     opt_desc->add(opt_general);
     opt_desc->add(opt_app);
     opt_desc->add(opt_des);
@@ -227,6 +254,7 @@ CL::CL()
     opt_desc->add(opt_rl_policy_epsilon);
     opt_desc->add(opt_rl_policy_boltzmann);
     opt_desc->add(opt_rl_policy_wpl);
+    opt_desc->add(opt_mfrw);
     opt_desc->add(opt_expert);
     opt_desc->add(opt_debug);
 }
@@ -685,7 +713,64 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
     }
     std::cout << "Incentive to Deviate enabled: " << desArgs->incentive_deviate << std::endl;
 
-    std::cout << std::endl << "8) Output Files" << std::endl;
+    std::cout << std::endl << "8) Multifractal Random Walk Configuration" << std::endl;
+    if (vm.count(CL_MFRW.c_str())) {
+        desArgs->mfrw = vm[CL_MFRW.c_str()].as <bool>();
+    }
+    std::cout << "MFRW enabled: " << desArgs->mfrw << std::endl;
+    if (desArgs->mfrw) {
+        if (vm.count(CL_MFRW_D0.c_str())) {
+            desArgs->mfrw_d0 = vm[CL_MFRW_D0.c_str()].as <double>();
+        }
+        std::cout << "d0: " << desArgs->mfrw_d0 << "." << std::endl;
+
+        if (vm.count(CL_MFRW_A0.c_str())) {
+            desArgs->mfrw_a0 = vm[CL_MFRW_A0.c_str()].as <double>();
+        }
+        std::cout << "a0: " << desArgs->mfrw_a0 << "." << std::endl;
+
+        if (vm.count(CL_MFRW_B.c_str())) {
+            desArgs->mfrw_b = vm[CL_MFRW_B.c_str()].as <double>();
+        }
+        std::cout << "b: " << desArgs->mfrw_b << "." << std::endl;
+
+        if (vm.count(CL_MFRW_LAMBDA.c_str())) {
+            desArgs->mfrw_lambda = vm[CL_MFRW_LAMBDA.c_str()].as <double>();
+        }
+        std::cout << "lambda: " << desArgs->mfrw_lambda << "." << std::endl;
+
+        if (vm.count(CL_MFRW_NC.c_str())) {
+            desArgs->mfrw_Nc = vm[CL_MFRW_NC.c_str()].as <boost::uint16_t>();
+        }
+        std::cout << "Nc: " << desArgs->mfrw_Nc << "." << std::endl;
+
+        if (vm.count(CL_MFRW_T.c_str())) {
+            desArgs->mfrw_T = vm[CL_MFRW_T.c_str()].as <boost::uint16_t>();
+        }
+        std::cout << "T: " << desArgs->mfrw_T << "." << std::endl;
+
+        if (vm.count(CL_MFRW_N0.c_str())) {
+            desArgs->mfrw_n0 = vm[CL_MFRW_N0.c_str()].as <double>();
+        }
+        std::cout << "n0: " << desArgs->mfrw_n0 << "." << std::endl;
+
+        if (vm.count(CL_MFRW_NMAX.c_str())) {
+            desArgs->mfrw_nmax = vm[CL_MFRW_NMAX.c_str()].as <double>();
+        }
+        std::cout << "nmax: " << desArgs->mfrw_nmax << "." << std::endl;
+
+        if (vm.count(CL_MFRW_UPPER.c_str())) {
+            desArgs->mfrw_upper = vm[CL_MFRW_UPPER.c_str()].as <double>();
+        }
+        std::cout << "mfrw upper: " << desArgs->mfrw_upper << "." << std::endl;
+
+        if (vm.count(CL_MFRW_LOWER.c_str())) {
+            desArgs->mfrw_lower = vm[CL_MFRW_LOWER.c_str()].as <double>();
+        }
+        std::cout << "mfrw lower: " << desArgs->mfrw_lower << "." << std::endl;
+    }
+
+    std::cout << std::endl << "9) Output Files" << std::endl;
     desArgs->events_unprocessed = "events_unprocessed.dat";
     desArgs->events_processed = "events_processed.dat";
 
@@ -696,7 +781,7 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
         desArgs->trace_event = vm[TRACE.c_str()].as <bool>();
     }
     if (desArgs->trace_event) {
-        std::cout << std::endl << "9) Debug Configuration" << std::endl;
+        std::cout << std::endl << "10) Debug Configuration" << std::endl;
         if (vm.count(VERTEX.c_str())) {
             desArgs->vertex = vm[VERTEX.c_str()].as <boost::int32_t>();
             std::cout << std::endl << "Trace vertex " << desArgs->vertex << "." << std::endl;

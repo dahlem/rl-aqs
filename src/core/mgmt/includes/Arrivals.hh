@@ -14,11 +14,11 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-/** @file DynamicArrivalsChannel.hh
- * Specification of the DynamicArrivalsChannel interface.
+/** @file Arrivals.hh
+ * Specification of the Arrivals interface.
  */
-#ifndef __DES_CORE_MGMT_DYNAMICARRIVALSCHANNEL_HH__
-#define __DES_CORE_MGMT_DYNAMICARRIVALSCHANNEL_HH__
+#ifndef __DES_CORE_MGMT_ARRIVALS_HH__
+#define __DES_CORE_MGMT_ARRIVALS_HH__
 
 #if HAVE_CONFIG_H
 # include <config.h>
@@ -30,16 +30,22 @@
 
 #include <boost/cstdint.hpp>
 
+#include "MgmtException.hh"
+
+
 
 namespace des {
 namespace core {
 
 
-class DynamicArrivalsChannel
+class Arrivals
 {
 public:
-    DynamicArrivalsChannel() {};
-    virtual ~DynamicArrivalsChannel() {};
+    Arrivals();
+    virtual ~Arrivals() = 0;
+
+    virtual void generate() = 0;
+    virtual void serialise(boost::uint16_t, boost::uint16_t) throw (MgmtException) = 0;
 
 };
 

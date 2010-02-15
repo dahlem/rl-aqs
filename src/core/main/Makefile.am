@@ -33,6 +33,7 @@ des_main_CPPFLAGS =                                                      \
 	-I$(top_srcdir)/src/common/list/includes                         \
 	-I$(top_srcdir)/src/core/event/includes                          \
 	-I$(top_srcdir)/src/sampling/lhs/includes                        \
+	-I$(top_srcdir)/src/sampling/mfrw/includes                       \
 	-I$(top_srcdir)/src/utils/vector/includes                        \
 	-I$(top_srcdir)/src/nnet/includes                                \
 	-I$(top_srcdir)/src/core/mgmt/includes                           \
@@ -54,6 +55,7 @@ des_main_LDADD =                                                         \
 	$(top_srcdir)/src/date/libdesdate.la                             \
 	$(top_srcdir)/src/sampling/crn/libsamplingcrn.la                 \
 	$(top_srcdir)/src/sampling/lhs/libsamplinglhs.la                 \
+	$(top_srcdir)/src/sampling/mfrw/libsamplingmfrw.la               \
 	$(top_srcdir)/src/core/event/libcoreevent.la                     \
 	$(top_srcdir)/src/utils/vector/libutils_vector.la                \
 	$(top_srcdir)/src/core/mgmt/libcoremgmt.la                       \

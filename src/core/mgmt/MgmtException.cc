@@ -32,7 +32,9 @@ namespace core
  */
 const char* MgmtException::m_errorStrings[MgmtException::NUM_ERRORS] =
 {
-    "The Channel does not exist."
+    "The Channel does not exist.",
+    "The Node does not exist.",
+    "The Time step does not exist."
 };
 
 MgmtException::MgmtException(int p_code)

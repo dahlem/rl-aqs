@@ -127,7 +127,7 @@ public:
 
             for (boost::uint16_t i = 0; i < freeNodes; ++i) {
 #ifndef NDEBUG
-                std::cout << "Increment number of replicas for sim: " << (i+1) << std::endl;
+                std::cout << "Increment number of replicas for sim: " << (i%runs)+1 << std::endl;
 #endif /* NDEBUG */
 
                 simReplications[i%runs]++;
