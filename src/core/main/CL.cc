@@ -221,6 +221,8 @@ CL::CL()
     opt_mfrw.add_options()
         (CL_MFRW.c_str(), po::value <bool>()->default_value(false),
          "Use multifractal poisson arrivals.")
+        (CL_MFRW_SINGLE.c_str(), po::value <bool>()->default_value(true),
+         "Use only a single instance of multifractal poisson arrivals.")
         (CL_MFRW_D0.c_str(), po::value <double>()->default_value(1),
          "amplitute of the fluctuations.")
         (CL_MFRW_A0.c_str(), po::value <double>()->default_value(0.1),
@@ -718,7 +720,12 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
         desArgs->mfrw = vm[CL_MFRW.c_str()].as <bool>();
     }
     std::cout << "MFRW enabled: " << desArgs->mfrw << std::endl;
-    if (desArgs->mfrw) {
+    if (desArgs->mfrw_single) {
+        if (vm.count(CL_MFRW_SINGLE.c_str())) {
+            desArgs->mfrw_single = vm[CL_MFRW_SINGLE.c_str()].as <bool>();
+        }
+        std::cout << "single MFRW: " << desArgs->mfrw_single << std::endl;
+
         if (vm.count(CL_MFRW_D0.c_str())) {
             desArgs->mfrw_d0 = vm[CL_MFRW_D0.c_str()].as <double>();
         }

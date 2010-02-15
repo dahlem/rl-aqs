@@ -440,16 +440,66 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
 
         // instantiate the channels (order of addition is important)
         // instantiate the arrival channel
-        ArrivalsChannel *arrivalChannel;
-        Arrivals *arrivals;
+        ArrivalsChannel *arrivalChannel = NULL;
+        Arrivals *arrivals = NULL;
         boost::int32_t destination = 0;
 
         dnet::VertexIndexMap vertex_index_props_map =
             get(boost::vertex_index, *graph);
 
         if (desArgs->mfrw) {
-            arrivals = new CJYArrivals(dbus);
-            arrivals->generate();
+            if (desArgs->mfrw_single) {
+                std::stringstream mfrwSS;
+                mfrwSS << desArgs->results_dir;
+                std::string mfrwDir = mfrwSS.str();
+                mfrwSS << "/mfrw.dat";
+                std::string mfrwFile = mfrwSS.str();
+
+                if (fs::exists(mfrwFile)) {
+                    // read the MFRW from file
+                    std::cout << "Read generated MFRW: " << mfrwFile << std::endl;
+                    arrivals = new CJYArrivals(dbus, mfrwFile, true);
+                    arrivals->generate(false);
+                } else {
+#ifdef HAVE_MPI
+                    rc = MPI_Allreduce(&rank, minRank, 1, MPI_INT, MPI_MIN, group_comm);
+                    if (rc != MPI_SUCCESS) {
+                        std::cerr << "Error finding minimum rank in group." << std::endl;
+                        MPI_Abort(MPI_COMM_WORLD, 918);
+                    }
+
+                    if (rank == *minRank) {
+#endif /* HAVE_MPI */
+                        std::cout << "Generate MFRW: " << mfrwFile << std::endl;
+                        // create the repository if it does not exist already
+                        if (!fs::exists(mfrwDir)) {
+                            fs::create_directories(mfrwDir);
+                        }
+
+                        // generate the MFRW and serialise it
+                        arrivals = new CJYArrivals(dbus, mfrwFile, false);
+                        arrivals->generate(true);
+#ifdef HAVE_MPI
+                    }
+
+                    // wait for the MFRW to be serialised
+                    MPI_Barrier(group_comm);
+
+                    // everyone, but the master in the group read the MFRW
+                    if (rank != *minRank) {
+                        arrivals = new CJYArrivals(dbus, mfrwFile, true);
+                        arrivals->generate(false);
+                    }
+#endif /* HAVE_MPI */
+                }
+            } else {
+                std::cout << "Generated MFRW." << std::endl;
+                // generate the MFRW
+                std::string mfrwFile("");
+                arrivals = new CJYArrivals(dbus, mfrwFile, false);
+                arrivals->generate(false);
+            }
+
             arrivalChannel = new ArrivalsChannel(arrivals);
             dbus.addChannel(*arrivalChannel);
 

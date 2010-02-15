@@ -28,6 +28,8 @@
 # define __STDC_CONSTANT_MACROS
 #endif /* __STDC_CONSTANT_MACROS */
 
+#include <iostream>
+
 #include <boost/cstdint.hpp>
 
 #include <gsl/gsl_matrix.h>
@@ -46,13 +48,16 @@ namespace core {
 class CJYArrivals : public Arrivals
 {
 public:
-    CJYArrivals(DesBus&);
+    CJYArrivals(DesBus&, std::string&, bool);
     ~CJYArrivals();
 
-    void generate();
+    void generate(bool);
     void serialise(boost::uint16_t, boost::uint16_t) throw (MgmtException);
 
 private:
+    std::string &m_serialisedMatrixFilename;
+    bool m_readMFRW;
+    
     dnet::Graph &m_graph;
     desArgs_t &m_desArgs;
     gsl_matrix *m_arrivalRates;

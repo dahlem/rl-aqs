@@ -67,12 +67,15 @@ void SerialiseArrivalsHandler::update(AdminEvent *subject)
         m_arrivals->serialise(dest, m_currentTimeStep[dest]);
         m_currentTimeStep[dest]++;
 
+        // only schedule for time steps smaller than T
+        if (m_currentTimeStep[dest] < m_desArgs.mfrw_T) {
 #ifndef NDEBUG_EVENTS
-        std::cout << "generate serialise arrival admin event for vertex " << dest << std::endl;
+            std::cout << "generate serialise arrival admin event for vertex " << dest << std::endl;
 #endif /* NDEBUG */
         
-        double time = m_interval * m_currentTimeStep[dest];
-        EventGenerator::generateSerialiseArrivalAdmin(m_queue, dest, time);
+            double time = m_interval * m_currentTimeStep[dest];
+            EventGenerator::generateSerialiseArrivalAdmin(m_queue, dest, time);
+        }
     }
 }
 

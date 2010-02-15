@@ -44,7 +44,7 @@ public:
     Arrivals();
     virtual ~Arrivals() = 0;
 
-    virtual void generate() = 0;
+    virtual void generate(bool) = 0;
     virtual void serialise(boost::uint16_t, boost::uint16_t) throw (MgmtException) = 0;
 
 };

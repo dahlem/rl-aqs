@@ -138,6 +138,7 @@ const std::string CL_MFRW_NMAX = "mfrw_nmax";
 const std::string CL_MFRW_UPPER = "mfrw_upper";
 const std::string CL_MFRW_LOWER = "mfrw_lower";
 const std::string CL_MFRW = "mfrw";
+const std::string CL_MFRW_SINGLE = "mfrw_single";
 
 
 static const std::string ARGS_HEADER = "stop_time,graphs,max_arrival,boost_arrival,boost_edge,confidence,alpha,error,initial_reps,network_type,network_size,max_edges,edgeProb,edgeDiffusion,rl,cl_ci,rlq_alpha,rlq_lambda,rl_policy,rl_policy_epsilon,rl_policy_boltzmann_t,rl_hybrid,rl_hybrid_warmup,nn_momentum,rl_policy_wpl_eta";
@@ -234,6 +235,7 @@ struct desArgs_t {
     double max_rl_policy_wpl_eta;          /* max wpl learning rate */
 
     bool mfrw;
+    bool mfrw_single;
     double mfrw_d0;
     double mfrw_a0;
     double mfrw_b;
@@ -269,7 +271,7 @@ struct desArgs_t {
           nn_window(args.nn_window), nn_brent_iter(args.nn_brent_iter), nn_momentum(args.nn_momentum),
           nn_cg(args.nn_cg), nn_outsource(args.nn_outsource), nn_loss_serialise(args.nn_loss_serialise), min_nn_momentum(args.min_nn_momentum), max_nn_momentum(args.max_nn_momentum),
           rl_policy_wpl_eta(args.rl_policy_wpl_eta), min_rl_policy_wpl_eta(args.min_rl_policy_wpl_eta), max_rl_policy_wpl_eta(args.max_rl_policy_wpl_eta),
-          mfrw(args.mfrw), mfrw_d0(args.mfrw_d0), mfrw_a0(args.mfrw_a0), mfrw_b(args.mfrw_b), mfrw_lambda(args.mfrw_lambda),
+          mfrw(args.mfrw), mfrw_single(args.mfrw_single), mfrw_d0(args.mfrw_d0), mfrw_a0(args.mfrw_a0), mfrw_b(args.mfrw_b), mfrw_lambda(args.mfrw_lambda),
           mfrw_Nc(args.mfrw_Nc), mfrw_T(args.mfrw_T), mfrw_n0(args.mfrw_n0), mfrw_nmax(args.mfrw_nmax),
           mfrw_upper(args.mfrw_upper), mfrw_lower(args.mfrw_lower)
         {}
@@ -298,7 +300,7 @@ struct desArgs_t {
           nn_window(100), nn_brent_iter(500), nn_momentum(1.0),
           nn_cg(true), nn_outsource(false), nn_loss_serialise(false), min_nn_momentum(0.0), max_nn_momentum(0.0), rl_policy_wpl_eta(0.0),
           min_rl_policy_wpl_eta(0.0), max_rl_policy_wpl_eta(0.0),
-          mfrw(false), mfrw_d0(0.0), mfrw_a0(0.0), mfrw_b(0.0), mfrw_lambda(0.0),
+          mfrw(false), mfrw_single(true), mfrw_d0(0.0), mfrw_a0(0.0), mfrw_b(0.0), mfrw_lambda(0.0),
           mfrw_Nc(0), mfrw_T(0), mfrw_n0(0.0), mfrw_nmax(0.0), mfrw_upper(1.0), mfrw_lower(0.0)
         {}
 

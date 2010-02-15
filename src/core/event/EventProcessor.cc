@@ -90,6 +90,9 @@ bool EventProcessor::process()
 #endif /* NDEBUG_EVENTS */
 
             if (entry == NULL) {
+                std::cout << "**************************" << std::endl
+                          << "No event in queue anymore." << std::endl
+                          << "**************************" << std::endl;
                 break;
             }
 

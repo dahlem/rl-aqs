@@ -17,6 +17,9 @@
 /** @file Arrivals.cc
  * Implementation of the Arrivals interface.
  */
+#include <stdio.h>
+#include <iostream>
+
 #include <gsl/gsl_sf_log.h>
 #include <gsl/gsl_vector.h>
 
@@ -35,8 +38,10 @@ namespace des {
 namespace core {
 
 
-CJYArrivals::CJYArrivals(DesBus &p_bus) 
-    : m_graph((dynamic_cast<GraphChannel&> (p_bus.getChannel(id::GRAPH_CHANNEL))).getGraph()),
+CJYArrivals::CJYArrivals(DesBus &p_bus, std::string &p_serialisedMatrixFilename, bool p_readMFRW) 
+    : m_serialisedMatrixFilename(p_serialisedMatrixFilename),
+      m_readMFRW(p_readMFRW),
+      m_graph((dynamic_cast<GraphChannel&> (p_bus.getChannel(id::GRAPH_CHANNEL))).getGraph()),
       m_desArgs(((dynamic_cast<ConfigChannel&> (p_bus.getChannel(id::CONFIG_CHANNEL))).getConfig()))
 {
     m_arrivalRates = gsl_matrix_alloc(m_desArgs.net_size, m_desArgs.mfrw_T);
@@ -49,49 +54,76 @@ CJYArrivals::~CJYArrivals()
 }
 
 
-void CJYArrivals::generate()
+void CJYArrivals::generate(bool p_serialiseMatrix)
 {
-    dnet::VertexArrivalRateMap vertex_arrival_props_map =
-        get(vertex_arrival_rate, m_graph);
+    if (m_readMFRW) {
+        FILE *in_file;
 
-    for (boost::uint16_t node = 0; node < m_arrivalRates->size1; ++node) {
-        boost::uint32_t seedBin = dsample::Seeds::getInstance().getSeed();
-        boost::uint32_t seedNorm = dsample::Seeds::getInstance().getSeed();
-        boost::uint32_t rngBinIndex = dsample::CRN::getInstance().init(seedBin);
-        boost::uint32_t rngNormIndex = dsample::CRN::getInstance().init(seedNorm);
+        in_file = fopen(m_serialisedMatrixFilename.c_str(), "r");
+        int error = gsl_matrix_fscanf(in_file, m_arrivalRates);
+
+        if (error == GSL_EFAILED) {
+            std::cout << "Error: could not read MFRW matrix." << std::endl;
+        }
+        
+        fclose(in_file);
+    } else {
+        dnet::VertexArrivalRateMap vertex_arrival_props_map =
+            get(vertex_arrival_rate, m_graph);
+
+        for (boost::uint16_t node = 0; node < m_arrivalRates->size1; ++node) {
+            boost::uint32_t seedBin = dsample::Seeds::getInstance().getSeed();
+            boost::uint32_t seedNorm = dsample::Seeds::getInstance().getSeed();
+            boost::uint32_t rngBinIndex = dsample::CRN::getInstance().init(seedBin);
+            boost::uint32_t rngNormIndex = dsample::CRN::getInstance().init(seedNorm);
     
-        dsample::CRN::getInstance().log(seedBin, "binomial rng for MFRW");
-        dsample::CRN::getInstance().log(seedNorm, "normal rng for MFRW");
+            dsample::CRN::getInstance().log(seedBin, "binomial rng for MFRW");
+            dsample::CRN::getInstance().log(seedNorm, "normal rng for MFRW");
 
-        dsample::tGslRngSP rngBin = dsample::CRN::getInstance().get(rngBinIndex);
-        dsample::tGslRngSP rngNorm = dsample::CRN::getInstance().get(rngNormIndex);
+            dsample::tGslRngSP rngBin = dsample::CRN::getInstance().get(rngBinIndex);
+            dsample::tGslRngSP rngNorm = dsample::CRN::getInstance().get(rngNormIndex);
 
-        // get view of node
-        gsl_vector_view nodeView = gsl_matrix_row(m_arrivalRates, node);
-        double nmax = gsl_sf_log(m_desArgs.mfrw_nmax)/gsl_sf_log(m_desArgs.mfrw_lambda);
+            // get view of node
+            gsl_vector_view nodeView = gsl_matrix_row(m_arrivalRates, node);
+            double nmax = gsl_sf_log(m_desArgs.mfrw_nmax)/gsl_sf_log(m_desArgs.mfrw_lambda);
         
-        dsample::MFRW::path(&nodeView.vector, rngBin, rngNorm,
-                            m_desArgs.mfrw_d0, m_desArgs.mfrw_a0, m_desArgs.mfrw_b,
-                            m_desArgs.mfrw_lambda, m_desArgs.mfrw_Nc, m_desArgs.mfrw_T,
-                            m_desArgs.mfrw_n0, nmax);
+            dsample::MFRW::path(&nodeView.vector, rngBin, rngNorm,
+                                m_desArgs.mfrw_d0, m_desArgs.mfrw_a0, m_desArgs.mfrw_b,
+                                m_desArgs.mfrw_lambda, m_desArgs.mfrw_Nc, m_desArgs.mfrw_T,
+                                m_desArgs.mfrw_n0, nmax);
 
-        // scale the vector of vertex
-        dnet::Vertex vertex = boost::vertex(node, m_graph);
-        double arrivalRate = vertex_arrival_props_map[vertex];
+            // scale the vector of vertex to be within ...
+            dnet::Vertex vertex = boost::vertex(node, m_graph);
+            double arrivalRate = vertex_arrival_props_map[vertex];
         
-        // with min
-        double min = m_desArgs.mfrw_lower * arrivalRate;
+            // ... min
+            double min = m_desArgs.mfrw_lower * arrivalRate;
 
-        // and max
-        double max = m_desArgs.mfrw_upper * arrivalRate;
+            // and ... max
+            double max = m_desArgs.mfrw_upper * arrivalRate;
 
-        // result: min + v * (max - min)
-        double diff = max - min;
-        
-        gsl_vector_scale(&nodeView.vector, diff);
-        gsl_vector_add_constant(&nodeView.vector, min);
+            // first: (v + min) to be entirely positive with smallest element equal to zero
+            double minElement = -gsl_vector_min(&nodeView.vector);
+            gsl_vector_add_constant(&nodeView.vector, minElement);
+
+            // then: scale so that the largest element is equal to one
+            double scale = 1.0/gsl_vector_max(&nodeView.vector);
+            gsl_vector_scale(&nodeView.vector, scale);
+
+            // result: min + v * (max - min)
+            double diff = max - min;
+            gsl_vector_scale(&nodeView.vector, diff);
+            gsl_vector_add_constant(&nodeView.vector, min);
+        }
+
+        if (p_serialiseMatrix) {
+            FILE *out_file;
+
+            out_file = fopen(m_serialisedMatrixFilename.c_str(), "w");
+            gsl_matrix_fprintf(out_file, m_arrivalRates, "%f");
+            fclose(out_file);
+        }
     }
-
 }
 
 
