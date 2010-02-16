@@ -228,6 +228,11 @@ enum vertex_v_nn_loss_t { vertex_v_nn_loss = 1140 };
 enum edge_e_nn_loss_t { edge_e_nn_loss = 1141 };
 
 
+enum graph_system_delay_t { graph_system_delay = 1142 };
+enum graph_system_num_events_t { graph_system_num_events = 1143 };
+enum graph_system_processing_time_t { graph_system_processing_time = 1144 };
+
+
 
 // install the vertex service rate property
 namespace boost
@@ -263,6 +268,9 @@ BOOST_INSTALL_PROPERTY(edge, q_val);
 BOOST_INSTALL_PROPERTY(edge, eindex);
 BOOST_INSTALL_PROPERTY(edge, total_reward);
 BOOST_INSTALL_PROPERTY(edge, e_nn_loss);
+BOOST_INSTALL_PROPERTY(graph, system_delay);
+BOOST_INSTALL_PROPERTY(graph, system_num_events);
+BOOST_INSTALL_PROPERTY(graph, system_processing_time);
 }
 
 
@@ -430,9 +438,24 @@ typedef boost::property <edge_e_nn_loss_t, double, EdgeTotalRewardProperty> Edge
 typedef boost::property <edge_eindex_t, int, EdgeNNLossProperty> EdgeIndexProperty;
 
 /** @typedef GraphGeneratorProperty
- * Specifies the property for the edge weight
+ * Specifies the property for graph generator
  */
-typedef boost::property <graph_generator_t, boost::uint16_t> GraphGeneratorProperty;
+typedef boost::property <graph_generator_t, int> GraphGeneratorProperty;
+
+/** @typedef GraphSystemDelayProperty
+ * Specifies the property for the system delay
+ */
+typedef boost::property <graph_system_delay_t, double, GraphGeneratorProperty> GraphSystemDelayProperty;
+
+/** @typedef GraphSystemDelayProperty
+ * Specifies the property for the system number of events
+ */
+typedef boost::property <graph_system_num_events_t, double, GraphSystemDelayProperty> GraphSystemNumEventsProperty;
+
+/** @typedef GraphSystemProcessingTimeProperty
+ * Specifies the property for the total processing time of events in the system
+ */
+typedef boost::property <graph_system_processing_time_t, double, GraphSystemNumEventsProperty> GraphSystemProcessingTimeProperty;
 
 
 /** @typedef Graph
@@ -447,7 +470,7 @@ typedef boost::adjacency_list<boost::setS,
                               boost::bidirectionalS,
                               VertexProperties,
                               EdgeIndexProperty,
-                              GraphGeneratorProperty> Graph;
+                              GraphSystemProcessingTimeProperty> Graph;
 
 /** @typedef Vertex
  * Specifies the vertex descriptor of a graph
@@ -748,6 +771,9 @@ const std::string BEST_RESPONSE                     = "best_response";
 const std::string VERTEX_NN_LOSS                    = "vertex_nn_loss";
 const std::string EDGE_TOTAL_REWARD                 = "total_reward";
 const std::string EDGE_NN_LOSS                      = "edge_nn_loss";
+const std::string GRAPH_SYSTEM_DELAY                = "system_delay";
+const std::string GRAPH_SYSTEM_NUM_EVENTS           = "system_num_events";
+const std::string GRAPH_SYSTEM_PROCESSING           = "system_processing";
 
 
     }

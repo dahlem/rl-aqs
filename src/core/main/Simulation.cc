@@ -91,6 +91,7 @@ namespace fs = boost::filesystem;
 #include "RLResponseHandler.hh"
 #include "SerialiseArrivalsHandler.hh"
 #include "Simulation.hh"
+#include "SystemStatisticsHandler.hh"
 #include "UnprocessedEventsHandler.hh"
 #include "UtilisationHandler.hh"
 #include "WeightedPolicyLearner.hh"
@@ -428,6 +429,8 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
             }
         }
 
+        std::cout << "Graph Generator: " << boost::get_property(*graph, graph_generator) << std::endl;
+
         num_vertices = boost::num_vertices(*graph);
 
         QueueChannel queueChannel(queue);
@@ -628,6 +631,9 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
         ProcessedEventsHandler processedEventsHandler(processed_events);
         UnprocessedEventsHandler unprocessedEventsHandler(dbus, unprocessed_events);
         NullUnprocessedEventsHandler nullUnprocessedEventsHandler(dbus);
+        SystemStatisticsHandler systemStatisticsHandler(dbus);
+
+        postEvent.attach(systemStatisticsHandler);
 
         if (desArgs->log_events) {
             preAnyEvent.attach(processedEventsHandler);

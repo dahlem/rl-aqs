@@ -46,6 +46,7 @@ libcoreevent_la_SOURCES =                                                  \
 	FullRLResponseHandler.cc                                           \
 	HybridFullRLResponseHandler.cc                                     \
 	SerialiseArrivalsHandler.cc                                        \
+	SystemStatisticsHandler.cc                                         \
 	RLResponseHandler.cc
 
 libcoreevent_la_CPPFLAGS =                                                 \

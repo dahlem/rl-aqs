@@ -140,6 +140,9 @@ bool EventProcessor::process()
             } else {
                 // if stop time has been reached break out and handle the event below
                 if (entry->getArrival() > m_stopTime) {
+                    std::cout << "**************************" << std::endl
+                              << "Stoptime reached." << std::endl
+                              << "**************************" << std::endl;
                     break;
                 } else {
 #ifndef NDEBUG_EVENTS

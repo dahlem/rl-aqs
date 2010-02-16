@@ -193,9 +193,21 @@ boost::dynamic_properties GraphUtil::getProperties(Graph &p_graph)
     dp.property(VERTEX_NN_LOSS, get(vertex_v_nn_loss, p_graph));
     dp.property(EDGE_NN_LOSS, get(edge_e_nn_loss, p_graph));
 
-    boost::ref_property_map<Graph*, boost::uint16_t>
+    boost::ref_property_map<Graph*, int>
         graphGenerator(get_property(p_graph, graph_generator));
     dp.property(GRAPH_GENERATOR, graphGenerator);
+
+    boost::ref_property_map<Graph*, double>
+        systemDelay(get_property(p_graph, graph_system_delay));
+    dp.property(GRAPH_SYSTEM_DELAY, systemDelay);
+
+    boost::ref_property_map<Graph*, double>
+        systemNumEvents(get_property(p_graph, graph_system_num_events));
+    dp.property(GRAPH_SYSTEM_NUM_EVENTS, systemNumEvents);
+
+    boost::ref_property_map<Graph*, double>
+        systemProcessing(get_property(p_graph, graph_system_processing_time));
+    dp.property(GRAPH_SYSTEM_PROCESSING, systemProcessing);
 
     return dp;
 }

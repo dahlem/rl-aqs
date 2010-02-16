@@ -238,8 +238,6 @@ void WEvonet::advance(boost::uint32_t p_steps, tGraphSP g,
 
     double accum_service_rate = 0.0;
     size_t vertices = 0;
-    boost::uint16_t num_edges = 0;
-
 
     // at each step do:
     // 1. create vertex

@@ -1,4 +1,4 @@
-// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009, 2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,15 +23,12 @@
 # define __STDC_CONSTANT_MACROS
 #endif /* __STDC_CONSTANT_MACROS */
 
-#include <numeric>
-
 #include <boost/cstdint.hpp>
 #include <boost/graph/adjacency_list.hpp>
-#include <boost/graph/property_iter_range.hpp>
 
 #include "Report.hh"
 
-#include "WEvonet.hh"
+#include "DirectedGraph.hh"
 namespace dnet = des::network;
 
 
@@ -42,52 +39,24 @@ namespace core
 
 void Report::accumResults(dnet::tGraphSP p_graph, sim_output *output)
 {
-    output->system_average_delay
-        = meanDelay(p_graph);
-    output->system_expected_average_num_in_queue
-        = meanExpectedAverageNumberEvents(p_graph);
+    output->system_average_delay = meanDelay(p_graph);
+    output->system_expected_average_num_in_queue = meanExpectedAverageNumberEvents(p_graph);
     output->system_total_q = totalQ(p_graph);
 }
 
 double Report::meanExpectedAverageNumberEvents(dnet::tGraphSP p_graph)
 {
-    dnet::VExpectedAverageNumEventsIterator it, it_end;
-    boost::uint32_t size = boost::num_vertices(*p_graph);
-    double result = 0.0;
-
-    tie(it, it_end) = boost::get_property_iter_range(
-        *p_graph, vertex_expected_average_number_event);
-
-    result = std::accumulate(it, it_end, 0.0);
-
-    return result / static_cast<double> (size);
+    return boost::get_property(*p_graph, graph_system_num_events);
 }
 
 double Report::meanDelay(dnet::tGraphSP p_graph)
 {
-    dnet::VAverageDelayQueueIterator it, it_end;
-    boost::uint32_t size = boost::num_vertices(*p_graph);
-    double result = 0.0;
-
-    tie(it, it_end) = boost::get_property_iter_range(
-        *p_graph, vertex_average_delay_in_queue);
-
-    result = std::accumulate(it, it_end, 0.0);
-
-    return result / static_cast<double> (size);
+    return boost::get_property(*p_graph, graph_system_delay);
 }
 
 double Report::totalQ(dnet::tGraphSP p_graph)
 {
-    dnet::VAvgEventInSystemTimeIterator it, it_end;
-    double result = 0.0;
-
-    tie(it, it_end) = boost::get_property_iter_range(
-        *p_graph, vertex_avg_event_in_system_time);
-
-    result = std::accumulate(it, it_end, 0.0);
-
-    return result;
+    return boost::get_property(*p_graph, graph_system_processing_time);
 }
 
 
