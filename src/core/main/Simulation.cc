@@ -89,6 +89,7 @@ namespace fs = boost::filesystem;
 #include "Report.hh"
 #include "ResponseStatsHandler.hh"
 #include "RLResponseHandler.hh"
+#include "RollingSystemStatsAdminHandler.hh"
 #include "SerialiseArrivalsHandler.hh"
 #include "Simulation.hh"
 #include "SystemStatisticsHandler.hh"
@@ -429,8 +430,6 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
             }
         }
 
-        std::cout << "Graph Generator: " << boost::get_property(*graph, graph_generator) << std::endl;
-
         num_vertices = boost::num_vertices(*graph);
 
         QueueChannel queueChannel(queue);
@@ -512,14 +511,7 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
 #endif /* NDEBUG */
 
             // generate serialise arrival events here
-            BOOST_FOREACH(dnet::Vertex v, boost::vertices(*graph)) {
-                destination = vertex_index_props_map[v];
-
-#ifndef NDEBUG_EVENTS
-                std::cout << "... for vertex " << destination << std::endl;
-#endif /* NDEBUG */
-                EventGenerator::generateSerialiseArrivalAdmin(queue, destination, 0.0);
-            }
+            EventGenerator::generateAdminEventType(queue, 0.0, SERIALISE_ARRIVAL_EVENT);
         } else {
             arrivalChannel = new ArrivalsChannel;
             dbus.addChannel(*arrivalChannel);
@@ -534,55 +526,16 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
         // init the crn for the departure uniform rv
         Int32SA departureCRNs = departureCRN(num_vertices);
 
-        // generate events over this graph
-        if (desArgs->trace_event) {
-            int count = 0;
-
-            // filter the graph to find the vertex
-            std::pair <dnet::VertexIterator, dnet::VertexIterator> v_iter;
-            v_iter = boost::vertices(*graph);
-
-            typedef boost::filter_iterator<dnet::exists_vertex_index<dnet::VertexIndexMap>, dnet::VertexIterator>
-                FilterIter;
-
-            dnet::exists_vertex_index<dnet::VertexIndexMap>
-                predicate(vertex_index_props_map, desArgs->vertex);
-            FilterIter filter_iter_first(predicate, v_iter.first, v_iter.second);
-            FilterIter filter_iter_last(predicate, v_iter.second, v_iter.second);
-
-            for (; filter_iter_first != filter_iter_last; ++filter_iter_first) {
-                if (count == 0) {
-                    // generate a single event
-                    destination = vertex_index_props_map[*filter_iter_first];
-
-                    EventGenerator::generateArrivalAdmin(queue, destination, 0.0);
-                } else {
-                    std::cout << "Error: Expected a single vertex to be traced!" << std::endl;
-                    break;
-                }
-
-                count++;
-            }
-        } else {
-            std::pair <dnet::VertexIterator, dnet::VertexIterator> p;
+        std::pair <dnet::VertexIterator, dnet::VertexIterator> p;
 
 #ifndef NDEBUG
-            std::cout << "Generate events..." << std::endl;
+        std::cout << "Generate events..." << std::endl;
 #endif /* NDEBUG */
 
-            BOOST_FOREACH(dnet::Vertex v, boost::vertices(*graph)) {
-                destination = vertex_index_props_map[v];
-
-#ifndef NDEBUG_EVENTS
-                std::cout << "... for vertex " << destination << std::endl;
-#endif /* NDEBUG */
-
-                EventGenerator::generateArrivalAdmin(queue, destination, 0.0);
-            }
-        }
+        EventGenerator::generateAdminEventType(queue, 0.0, GENERATE_ARRIVAL_EVENT);
 
         if (desArgs->log_graphs) {
-            EventGenerator::generateLogGraphEvent(queue, 0.0);
+            EventGenerator::generateAdminEventType(queue, 0.0, LOG_GRAPH_EVENT);
         }
 
         // configure the results directory
@@ -623,6 +576,14 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
         adminEvent.attach(serialiseArrivalsHandler);
         adminEvent.attach(generateArrivalsAdminHandler);
         adminEvent.attach(logGraphHandler);
+
+        RollingSystemStatsAdminHandler *rollingSystemStatsAdmin = NULL;
+
+        if (desArgs->system_stats_steps > 0) {
+            rollingSystemStatsAdmin = new RollingSystemStatsAdminHandler(dbus);
+            adminEvent.attach(*rollingSystemStatsAdmin);
+            EventGenerator::generateAdminEventType(queue, 0.0, SYSTEM_STATISTICS_EVENT);
+        }
 
         // only register the logging handlers, if they are configured.
         dio::Results processed_events(desArgs->events_processed, resultsBaseDir);
@@ -748,6 +709,9 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
         }
         if (arrivalChannel != NULL) {
             delete arrivalChannel;
+        }
+        if (rollingSystemStatsAdmin != NULL) {
+            delete rollingSystemStatsAdmin;
         }
 
 #ifdef HAVE_MPI

@@ -124,7 +124,8 @@ bool EventProcessor::process()
             if (entry->getOrigin() == ADMIN_EVENT) {
                 if ((entry->getType() == LOG_GRAPH_EVENT)
                     || (entry->getType() == GENERATE_ARRIVAL_EVENT)
-                    || (entry->getType() == SERIALISE_ARRIVAL_EVENT)) {
+                    || (entry->getType() == SERIALISE_ARRIVAL_EVENT)
+                    || (entry->getType() == SYSTEM_STATISTICS_EVENT)) {
 #ifndef NDEBUG_EVENTS
                     std::cout << "** EventProcessor : admin event start" << std::endl;
 #endif /* NDEBUG_EVENTS */

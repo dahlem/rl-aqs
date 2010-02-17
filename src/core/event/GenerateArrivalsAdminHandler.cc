@@ -18,6 +18,7 @@
  * Implementation of a handler to generate external arrival events.
  */
 #include <boost/graph/adjacency_list.hpp>
+#include <boost/foreach.hpp>
 
 #include "Entry.hh"
 namespace dcommon = des::common;
@@ -64,24 +65,41 @@ GenerateArrivalsAdminHandler::~GenerateArrivalsAdminHandler()
 
 void GenerateArrivalsAdminHandler::update(AdminEvent *subject)
 {
+#ifndef NDEBUG_EVENTS
+    std::cout << "** GenerateArrivalsAdminHandler" << std::endl;
+#endif /* NDEBUG */
+
     dcommon::Entry *entry = subject->getEvent();
 
     // update the last event time
     if (entry->getType() == GENERATE_ARRIVAL_EVENT) {
-
-        int dest = entry->getDestination();
-
-        dnet::Vertex vertex = boost::vertex(dest, m_graph);
-        dnet::VertexArrivalRateMap vertex_arrival_props_map =
-            get(vertex_arrival_rate, m_graph);
-
-        // generate a single event
-        double arrival_rate = vertex_arrival_props_map[vertex];
+        // generate arrivals for each vertex
+        boost::int32_t destination = 0;
         double startTime = entry->getArrival();
 
-        // generate the events
-        dsample::tGslRngSP arrival_rng = dsample::CRN::getInstance().get(m_arrivalRngs[dest]);
-        EventGenerator::generateArrival(m_queue, arrival_rng, dest, startTime, arrival_rate);
+        dnet::VertexArrivalRateMap vertex_arrival_props_map =
+            get(vertex_arrival_rate, m_graph);
+        dnet::VertexIndexMap vertex_index_props_map =
+            get(boost::vertex_index, m_graph);
+
+#ifndef NDEBUG_EVENTS
+        std::cout << "generate arrivals for" << std::endl;
+#endif /* NDEBUG */
+
+        BOOST_FOREACH(dnet::Vertex v, boost::vertices(m_graph)) {
+            destination = vertex_index_props_map[v];
+
+#ifndef NDEBUG_EVENTS
+            std::cout << "... for vertex " << destination << std::endl;
+#endif /* NDEBUG */
+
+            // generate a single event
+            double arrival_rate = vertex_arrival_props_map[v];
+
+            // generate the events
+            dsample::tGslRngSP arrival_rng = dsample::CRN::getInstance().get(m_arrivalRngs[destination]);
+            EventGenerator::generateArrival(m_queue, arrival_rng, destination, startTime, arrival_rate);
+        }
     }
 }
 

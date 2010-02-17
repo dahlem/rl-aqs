@@ -17,6 +17,8 @@
 /** @file SerialiseArrivalsHandler.cc
  * Implementation of a serialise arrivals handler.
  */
+#include <boost/foreach.hpp>
+
 #include "Entry.hh"
 namespace dcommon = des::common;
 
@@ -24,6 +26,7 @@ namespace dcommon = des::common;
 #include "AdminEvent.hh"
 #include "ArrivalsChannel.hh"
 #include "ConfigChannel.hh"
+#include "GraphChannel.hh"
 #include "EventGenerator.hh"
 #include "QueueChannel.hh"
 #include "SerialiseArrivalsHandler.hh"
@@ -36,45 +39,55 @@ namespace core
 
 
 SerialiseArrivalsHandler::SerialiseArrivalsHandler(DesBus &p_bus)
-    : m_queue((dynamic_cast<QueueChannel&> (p_bus.getChannel(id::QUEUE_CHANNEL))).getQueue()),
+    : m_graph((dynamic_cast<GraphChannel&> (p_bus.getChannel(id::GRAPH_CHANNEL))).getGraph()),
+      m_queue((dynamic_cast<QueueChannel&> (p_bus.getChannel(id::QUEUE_CHANNEL))).getQueue()),
       m_desArgs(((dynamic_cast<ConfigChannel&> (p_bus.getChannel(id::CONFIG_CHANNEL))).getConfig())),
       m_arrivals((dynamic_cast<ArrivalsChannel&> (p_bus.getChannel(id::ARRIVAL_CHANNEL))).getArrivals())
 {
-    m_currentTimeStep = new boost::uint16_t[m_desArgs.net_size];
+    m_currentTimeStep = 0;
     m_interval = m_desArgs.stop_time / m_desArgs.mfrw_T;
-
-    for (boost::uint16_t i = 0; i < m_desArgs.net_size; ++i) {
-        m_currentTimeStep[i] = 0;
-    }
 }
 
 
 SerialiseArrivalsHandler::~SerialiseArrivalsHandler()
 {
-    delete [] m_currentTimeStep;
 }
 
 
 void SerialiseArrivalsHandler::update(AdminEvent *subject)
 {
     dcommon::Entry *entry = subject->getEvent();
-    if (entry->getType() == SERIALISE_ARRIVAL_EVENT) {
-        int dest = entry->getDestination();
-#ifndef NDEBUG_EVENTS
-        std::cout << "SerialiseArrivalHandler -- serialise arrival admin event for vertex " << dest << std::endl;
-#endif /* NDEBUG */
 
-        m_arrivals->serialise(dest, m_currentTimeStep[dest]);
-        m_currentTimeStep[dest]++;
+    if (entry->getType() == SERIALISE_ARRIVAL_EVENT) {
+#ifndef NDEBUG_EVENTS
+        std::cout << "SerialiseArrivalHandler -- serialise arrival admin events" << std::endl;
+#endif /* NDEBUG */
 
         // only schedule for time steps smaller than T
-        if (m_currentTimeStep[dest] < m_desArgs.mfrw_T) {
+        if (m_currentTimeStep < m_desArgs.mfrw_T) {
+            dnet::VertexIndexMap vertex_index_props_map =
+                get(boost::vertex_index, m_graph);
+
 #ifndef NDEBUG_EVENTS
-            std::cout << "generate serialise arrival admin event for vertex " << dest << std::endl;
+            std::cout << "generate serialise arrival admin events" << std::endl;
 #endif /* NDEBUG */
         
-            double time = m_interval * m_currentTimeStep[dest];
-            EventGenerator::generateSerialiseArrivalAdmin(m_queue, dest, time);
+            boost::int32_t destination = 0;
+            BOOST_FOREACH(dnet::Vertex v, boost::vertices(m_graph)) {
+                destination = vertex_index_props_map[v];
+
+#ifndef NDEBUG_EVENTS
+                std::cout << "... for vertex " << destination << std::endl;
+#endif /* NDEBUG */
+
+                // generate the events
+                m_arrivals->serialise(destination, m_currentTimeStep);
+            }
+
+            m_currentTimeStep++;
+
+            double time = m_interval * m_currentTimeStep;
+            EventGenerator::generateAdminEventType(m_queue, time, SERIALISE_ARRIVAL_EVENT);
         }
     }
 }

@@ -46,6 +46,7 @@ const boost::int32_t LEAVE_EVENT                = 6;
 const boost::int32_t LOG_GRAPH_EVENT            = 10;
 const boost::int32_t GENERATE_ARRIVAL_EVENT     = 11;
 const boost::int32_t SERIALISE_ARRIVAL_EVENT    = 12;
+const boost::int32_t SYSTEM_STATISTICS_EVENT    = 13;
 
 /**
  * Declaration of the event source

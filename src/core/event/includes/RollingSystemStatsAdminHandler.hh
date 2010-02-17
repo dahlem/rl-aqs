@@ -14,12 +14,12 @@
 // along with this program	  ; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-/** @file SerialiseArrivalsHandler.hh
- * This header file specifies the serialise arrivals handler subject.
+/** @file GenerateArrivalsHandler.hh
+ * This header file specifies the generate arrivals handler subject.
  */
 
-#ifndef __SERIALISEARRIVALSHANDLER_HH__
-#define __SERIALISEARRIVALSHANDLER_HH__
+#ifndef __CL_CORE_ROLLINGSYSTEMSTATSADMINHANDLER_HH__
+#define __CL_CORE_ROLLINGSYSTEMSTATSADMINHANDLER_HH__
 
 #if HAVE_CONFIG_H
 # include <config.h>
@@ -40,9 +40,11 @@ namespace design = des::design;
 #include "DirectedGraph.hh"
 namespace dnet = des::network;
 
+#include "OnlineStats.hh"
+namespace dstats = des::statistics;
+
 #include "clconfig.hh"
 #include "AdminEvent.hh"
-#include "Arrivals.hh"
 #include "DesBus.hh"
 
 
@@ -53,14 +55,14 @@ namespace core
 {
 
 
-/** @class SerialiseArrivalsHandler
- * The class @code{SerialiseArrivalsHandler} serialises arrival events in the DES.
+/** @class RollingSystemStatsAdminHandler
+ * The class @code{RollingSystemStatsAdminHandler} generates arrival events in the DES.
  */
-class SerialiseArrivalsHandler : public design::Observer<dcore::AdminEvent>
+class RollingSystemStatsAdminHandler : public design::Observer<dcore::AdminEvent>
 {
 public:
-    SerialiseArrivalsHandler(DesBus&);
-    ~SerialiseArrivalsHandler();
+    RollingSystemStatsAdminHandler(DesBus&);
+    ~RollingSystemStatsAdminHandler();
 
     void update(dcore::AdminEvent *subject);
 
@@ -68,10 +70,10 @@ private:
     dnet::Graph &m_graph;
     dcommon::Queue &m_queue;
     desArgs_t &m_desArgs;
-    Arrivals *m_arrivals;
-    boost::uint16_t m_currentTimeStep;
-    double m_interval;
-
+    dstats::OnlineStats *m_delay;
+    dstats::OnlineStats *m_numEvents;
+    dstats::OnlineStats *m_processingTime;
+    
 };
 
 
@@ -80,4 +82,4 @@ private:
 }
 
 
-#endif /* __SERIALISEARRIVALSHANDLER_HH__ */
+#endif /* __CL_CORE_ROLLINGSYSTEMSTATSADMINHANDLER_HH__ */

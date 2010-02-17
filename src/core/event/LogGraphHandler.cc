@@ -100,7 +100,7 @@ void LogGraphHandler::update(AdminEvent *subject)
 #ifndef NDEBUG_EVENTS
             std::cout << "schedule..." << std::endl;
 #endif /* NDEBUG_EVENTS */
-            EventGenerator::generateLogGraphEvent(m_queue, (static_cast<double> (m_counter) * m_interval));
+            EventGenerator::generateAdminEventType(m_queue, (static_cast<double> (m_counter) * m_interval), LOG_GRAPH_EVENT);
         }
     }
 }

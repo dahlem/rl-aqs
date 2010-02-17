@@ -93,6 +93,8 @@ CL::CL()
         (MAX_EDGES.c_str(), po::value<boost::uint32_t>()->default_value(UINT_MAX), "set the maximum number of edges to connect a new vertex")
         (ADD_SIM.c_str(), po::value<std::string>()->default_value(std::string("")), "add to existing experiments")
         (SIMULATION_DIR.c_str(), po::value<std::string>()->default_value(std::string("")), "simulation results directory")
+        (CL_SYSTEM_STATS_STEPS.c_str(), po::value<boost::uint16_t>()->default_value(0), "last n steps to calculate system statistics")
+        (CL_SYSTEM_STATS_INTERVAL.c_str(), po::value<boost::uint16_t>()->default_value(1), "interval in time steps between calculating system statistics")
         ;
 
     po::options_description opt_soc("Social Network Configuration");
@@ -210,13 +212,6 @@ CL::CL()
         (CL_INCENTIVE_DEVIATE.c_str(), po::value <bool>()->default_value(false), "Set the incentive to deviate metric.")
         ;
 
-    po::options_description opt_debug("Debug Configuration");
-    opt_debug.add_options()
-        (TRACE.c_str(), po::value <bool>()->default_value(false), "Set debugging.")
-        (VERTEX.c_str(), po::value <boost::int32_t>(), "The source vertex to trace the event for.")
-        ;
-
-
     po::options_description opt_mfrw("Multifractal Random Walk Configuration");
     opt_mfrw.add_options()
         (CL_MFRW.c_str(), po::value <bool>()->default_value(false),
@@ -258,7 +253,6 @@ CL::CL()
     opt_desc->add(opt_rl_policy_wpl);
     opt_desc->add(opt_mfrw);
     opt_desc->add(opt_expert);
-    opt_desc->add(opt_debug);
 }
 
 
@@ -395,6 +389,18 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
     }
     std::cout << "Maximum number of edges is set to "
               << desArgs->max_edges << "." << std::endl;
+
+    if (vm.count(CL_SYSTEM_STATS_STEPS.c_str())) {
+        desArgs->system_stats_steps = vm[CL_SYSTEM_STATS_STEPS.c_str()].as<boost::uint16_t>();
+    }
+    std::cout << "Last n steps to calculate system statistics is set to "
+              << desArgs->system_stats_steps << "." << std::endl;
+
+    if (vm.count(CL_SYSTEM_STATS_INTERVAL.c_str())) {
+        desArgs->system_stats_interval = vm[CL_SYSTEM_STATS_INTERVAL.c_str()].as<boost::uint16_t>();
+    }
+    std::cout << "Interval between calculating system statistics is set to "
+              << desArgs->system_stats_interval << "." << std::endl;
 
     if (desArgs->net_gen == 1) {
         std::cout << std::endl << "3) Social Network Configuration" << std::endl;
@@ -783,21 +789,6 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
 
     std::cout << "Unprocessed events\t" << desArgs->events_unprocessed << std::endl;
     std::cout << "Processed events\t" << desArgs->events_processed << std::endl;
-
-    if (vm.count(TRACE.c_str())) {
-        desArgs->trace_event = vm[TRACE.c_str()].as <bool>();
-    }
-    if (desArgs->trace_event) {
-        std::cout << std::endl << "10) Debug Configuration" << std::endl;
-        if (vm.count(VERTEX.c_str())) {
-            desArgs->vertex = vm[VERTEX.c_str()].as <boost::int32_t>();
-            std::cout << std::endl << "Trace vertex " << desArgs->vertex << "." << std::endl;
-        } else {
-            std::cout << "A vertex needs to be specified to trace the event." << std::endl;
-            return EXIT_FAILURE;
-        }
-    }
-
     std::cout << "******************************" << std::endl << std::endl;
 
     verify(desArgs);

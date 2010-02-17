@@ -49,8 +49,6 @@ const std::string GRAPH_SINGLE = "graph_single";
 const std::string SEEDS = "seeds";
 const std::string HELP = "help";
 const std::string RESULTS = "results";
-const std::string TRACE = "trace";
-const std::string VERTEX = "vertex";
 const std::string VERS = "version";
 const std::string LOG_GRAPHS = "log_graphs";
 const std::string LOG_GRAPH_RATE = "graph_generation";
@@ -140,6 +138,9 @@ const std::string CL_MFRW_LOWER = "mfrw_lower";
 const std::string CL_MFRW = "mfrw";
 const std::string CL_MFRW_SINGLE = "mfrw_single";
 
+const std::string CL_SYSTEM_STATS_STEPS = "system_stats_steps";
+const std::string CL_SYSTEM_STATS_INTERVAL = "system_stats_interval";
+
 
 static const std::string ARGS_HEADER = "stop_time,graphs,max_arrival,boost_arrival,boost_edge,confidence,alpha,error,initial_reps,network_type,network_size,max_edges,edgeProb,edgeDiffusion,rl,cl_ci,rlq_alpha,rlq_lambda,rl_policy,rl_policy_epsilon,rl_policy_boltzmann_t,rl_hybrid,rl_hybrid_warmup,nn_momentum,rl_policy_wpl_eta";
 
@@ -156,10 +157,8 @@ struct desArgs_t {
     std::string sim_dir;            /* simulation results directory */
     bool graph_single;              /* generate a single graph only */
 
-    bool trace_event;               /* trace an event */
     bool log_events;                /* log the events */
     bool log_graphs;                /* log the graphs */
-    boost::int32_t vertex;          /* the vertex to trace */
     boost::int32_t graph_rate;      /* the rate to generate graphs at */
     double max_arrival;             /* the max. arrival rate */
 
@@ -247,11 +246,14 @@ struct desArgs_t {
     double mfrw_upper;
     double mfrw_lower;
 
+    boost::uint16_t system_stats_steps; /* last steps of simulation to be taken into account for system statistics */
+    boost::uint16_t system_stats_interval; /* time interval in steps between system statistics calculations */
+
     desArgs_t(desArgs_t const &args)
         : graph_filename(args.graph_filename), seeds_filename(args.seeds_filename), results_dir(args.results_dir),
           events_unprocessed(args.events_unprocessed), events_processed(args.events_processed), add_sim(args.add_sim),
-          sim_dir(args.sim_dir), graph_single(args.graph_single), trace_event(args.trace_event), log_events(args.log_events), log_graphs(args.log_graphs),
-          vertex(args.vertex), graph_rate(args.graph_rate), max_arrival(args.max_arrival),
+          sim_dir(args.sim_dir), graph_single(args.graph_single), log_events(args.log_events), log_graphs(args.log_graphs),
+          graph_rate(args.graph_rate), max_arrival(args.max_arrival),
           stop_time(args.stop_time), confidence(args.confidence),
           lhs(args.lhs), alpha(args.alpha), error(args.error),
           replications(args.replications), init_replications(args.init_replications), simulations(args.simulations), sim_num(args.sim_num),
@@ -273,14 +275,14 @@ struct desArgs_t {
           rl_policy_wpl_eta(args.rl_policy_wpl_eta), min_rl_policy_wpl_eta(args.min_rl_policy_wpl_eta), max_rl_policy_wpl_eta(args.max_rl_policy_wpl_eta),
           mfrw(args.mfrw), mfrw_single(args.mfrw_single), mfrw_d0(args.mfrw_d0), mfrw_a0(args.mfrw_a0), mfrw_b(args.mfrw_b), mfrw_lambda(args.mfrw_lambda),
           mfrw_Nc(args.mfrw_Nc), mfrw_T(args.mfrw_T), mfrw_n0(args.mfrw_n0), mfrw_nmax(args.mfrw_nmax),
-          mfrw_upper(args.mfrw_upper), mfrw_lower(args.mfrw_lower)
+          mfrw_upper(args.mfrw_upper), mfrw_lower(args.mfrw_lower), system_stats_steps(args.system_stats_steps), system_stats_interval(args.system_stats_interval)
         {}
 
     desArgs_t()
         : graph_filename(""), seeds_filename(""), results_dir(""),
           events_unprocessed(""), events_processed(""), add_sim(""), sim_dir(""), graph_single(false),
-          trace_event(0), log_events(0), log_graphs(0),
-          vertex(0), graph_rate(0), max_arrival(0.0),
+          log_events(0), log_graphs(0),
+          graph_rate(0), max_arrival(0.0),
           stop_time(0.0), confidence(0),
           lhs(0), alpha(0.0), error(0.0),
           replications(0), init_replications(0), simulations(0), sim_num(0),
@@ -301,7 +303,8 @@ struct desArgs_t {
           nn_cg(true), nn_outsource(false), nn_loss_serialise(false), min_nn_momentum(0.0), max_nn_momentum(0.0), rl_policy_wpl_eta(0.0),
           min_rl_policy_wpl_eta(0.0), max_rl_policy_wpl_eta(0.0),
           mfrw(false), mfrw_single(true), mfrw_d0(0.0), mfrw_a0(0.0), mfrw_b(0.0), mfrw_lambda(0.0),
-          mfrw_Nc(0), mfrw_T(0), mfrw_n0(0.0), mfrw_nmax(0.0), mfrw_upper(1.0), mfrw_lower(0.0)
+          mfrw_Nc(0), mfrw_T(0), mfrw_n0(0.0), mfrw_nmax(0.0), mfrw_upper(1.0), mfrw_lower(0.0), system_stats_steps(0),
+          system_stats_interval(1)
         {}
 
     friend std::ostream& operator <<(std::ostream &p_os, const desArgs_t &desArgs)

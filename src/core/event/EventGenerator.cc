@@ -46,34 +46,8 @@ namespace core
 {
 
 
-void EventGenerator::generateLogGraphEvent(dcommon::Queue &p_queue, double p_scheduledTime)
-{
-    dcommon::Entry *entry = new dcommon::Entry(
-        0.0,
-        p_scheduledTime,
-        -99,
-        ADMIN_EVENT,
-        LOG_GRAPH_EVENT);
-
-#ifndef NDEBUG_EVENTS
-    std::cout << "Admin log graph event for time " << time << " scheduled." << std::endl;
-#endif /* NDEBUG_EVENTS */
-
-    try {
-        p_queue.push(entry);
-    } catch (dcommon::QueueException &qe) {
-        std::cout << "Error scheduling admin log graph event: " << entry->getArrival() << " " << qe.what() << std::endl;
-        if (entry != NULL) {
-            delete entry;
-        }
-        throw;
-    }
-}
-
-
 void EventGenerator::generateAdminEventType(
     dcommon::Queue &p_queue,
-    boost::int32_t p_destination,
     double p_time,
     boost::int32_t p_type)
 {
@@ -82,13 +56,12 @@ void EventGenerator::generateAdminEventType(
     dcommon::Entry *entry = new dcommon::Entry(
         0.0, // delay
         p_time, // arrival
-        p_destination, // destination
+        -99, // destination
         ADMIN_EVENT, // origin
         p_type); // type
 
 #ifndef NDEBUG_EVENTS
-    std::cout << "Admin event at time " << p_time
-              << " scheduled for vertex " << p_destination << std::endl;
+    std::cout << "Admin event at time " << p_time << std::endl;
 #endif /* NDEBUG_EVENTS */
 
     try {
@@ -100,24 +73,6 @@ void EventGenerator::generateAdminEventType(
         }
         throw;
     }
-}
-
-
-void EventGenerator::generateArrivalAdmin(
-    dcommon::Queue &p_queue,
-    boost::int32_t p_destination,
-    double p_time)
-{
-    EventGenerator::generateAdminEventType(p_queue, p_destination, p_time, GENERATE_ARRIVAL_EVENT);
-}
-
-
-void EventGenerator::generateSerialiseArrivalAdmin(
-    dcommon::Queue &p_queue,
-    boost::int32_t p_destination,
-    double p_time)
-{
-    EventGenerator::generateAdminEventType(p_queue, p_destination, p_time, SERIALISE_ARRIVAL_EVENT);
 }
 
 
