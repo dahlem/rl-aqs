@@ -8,7 +8,7 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-LT_PREREQ([1.5.26])
+#LT_PREREQ([1.5.26])
 AC_PREREQ(2.61)
 AC_INIT([Discrete Event Simulation for Service Interaction],
         [4.1],
@@ -28,9 +28,9 @@ AM_INIT_AUTOMAKE
 
 
 #LF_CONFIGURE_CC
-LF_CONFIGURE_CXX
-LF_HOST_TYPE
-LF_SET_WARNINGS
+#LF_CONFIGURE_CXX
+#LF_HOST_TYPE
+#LF_SET_WARNINGS
 
 AC_PROG_CXX
 define([AC_LIBTOOL_LANG_CXX_CONFIG], [:])dnl

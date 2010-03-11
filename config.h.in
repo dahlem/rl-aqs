@@ -3,12 +3,6 @@
 /* disable boost asserts, if enabled */
 #undef BOOST_DISABLE_ASSERTS
 
-/* buggy for-loops */
-#undef CXX_HAS_BUGGY_FOR_LOOPS
-
-/* no bool type */
-#undef CXX_HAS_NO_BOOL
-
 /* define if bool is a built-in type */
 #undef HAVE_BOOL
 
@@ -117,6 +111,10 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
+/* Define to the sub-directory in which libtool stores uninstalled libraries.
+   */
+#undef LT_OBJDIR
+
 /* define debugging, if disabled */
 #undef NDEBUG
 
@@ -161,9 +159,6 @@
 
 /* Version number of package */
 #undef VERSION
-
-/* os type */
-#undef YOUR_OS
 
 /* Define to empty if `const' does not conform to ANSI C. */
 #undef const
