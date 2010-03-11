@@ -102,7 +102,7 @@ void ArrivalHandler::update(ArrivalEvent *subject)
         dsample::tGslRngSP service_rng = dsample::CRN::getInstance().get(
             m_service_ids[entry->getDestination()]);
         service_time = gsl_ran_exponential(service_rng.get(),
-                                           1 / vertex_service_map[vertex]);
+                                           1.0 / vertex_service_map[vertex]);
     } catch (dsample::SamplingException &se) {
 #ifndef NDEBUG_EVENTS
         std::cout << "Exception: " << se.what() << std::endl;

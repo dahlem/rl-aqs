@@ -543,41 +543,19 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
         baseDir << desArgs->results_dir << "/" << sim_num << "/" << rep_num;
         std::string resultsBaseDir = baseDir.str();
 
-        // instantiate the events & handlers
-        AdminEvent adminEvent;
-        PreAnyEvent preAnyEvent;
-        PostAnyEvent postAnyEvent;
-        ArrivalEvent arrivalEvent;
-        DepartureEvent departureEvent;
-        PostEvent postEvent;
-        LastArrivalEvent lastArrivalEvent;
-        AckEvent ackEvent;
-        LeaveEvent leaveEvent;
-
+        // ADMIN EVENTS
+        // instantiate the admin handlers and register with admin event handler
         GenerateArrivalsAdminHandler generateArrivalsAdminHandler(dbus, arrivalCRNs);
         SerialiseArrivalsHandler serialiseArrivalsHandler(dbus);
         LogGraphHandler logGraphHandler(dbus, resultsBaseDir);
-
-        ArrivalHandler arrivalHandler(dbus, serviceCRNs);
-        NumEventsHandler numEventsHandler(dbus);
-        LastEventHandler lastEventHandler(dbus);
-        UtilisationHandler utilisationHandler(dbus);
-        ExpectedAverageEventInQueueHandler expectedAverageEventInQueueHandler(dbus);
-        AckHandler ackHandler(dbus);
-        LeaveHandler leaveHandler(dbus);
-
-        leaveEvent.attach(leaveHandler);
-
-        GenerateArrivalsHandler generateArrivalsHandler(dbus, arrivalCRNs);
-        lastArrivalEvent.attach(generateArrivalsHandler);
+        RollingSystemStatsAdminHandler *rollingSystemStatsAdmin = NULL;
 
         // attach the handlers to the events
         // the order of the handlers is important
+        AdminEvent adminEvent;
         adminEvent.attach(serialiseArrivalsHandler);
         adminEvent.attach(generateArrivalsAdminHandler);
         adminEvent.attach(logGraphHandler);
-
-        RollingSystemStatsAdminHandler *rollingSystemStatsAdmin = NULL;
 
         if (desArgs->system_stats_steps > 0) {
             rollingSystemStatsAdmin = new RollingSystemStatsAdminHandler(dbus);
@@ -585,6 +563,7 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
             EventGenerator::generateAdminEventType(queue, 0.0, SYSTEM_STATISTICS_EVENT);
         }
 
+        // PREANY & POST EVENT
         // only register the logging handlers, if they are configured.
         dio::Results processed_events(desArgs->events_processed, resultsBaseDir);
         dio::Results unprocessed_events(desArgs->events_unprocessed, resultsBaseDir);
@@ -593,6 +572,8 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
         UnprocessedEventsHandler unprocessedEventsHandler(dbus, unprocessed_events);
         NullUnprocessedEventsHandler nullUnprocessedEventsHandler(dbus);
         SystemStatisticsHandler systemStatisticsHandler(dbus);
+        PreAnyEvent preAnyEvent;
+        PostEvent postEvent;
 
         postEvent.attach(systemStatisticsHandler);
 
@@ -604,8 +585,38 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
             postEvent.attach(nullUnprocessedEventsHandler);
         }
 
+        // POSTANY EVENT
+        LastEventHandler lastEventHandler(dbus);
+        UtilisationHandler utilisationHandler(dbus);
+        ExpectedAverageEventInQueueHandler expectedAverageEventInQueueHandler(dbus);
+        PostAnyEvent postAnyEvent;
+        postAnyEvent.attach(utilisationHandler);
+        postAnyEvent.attach(expectedAverageEventInQueueHandler);
+        postAnyEvent.attach(lastEventHandler);
+
+
+        // ARRIVAL EVENT
+        ArrivalHandler arrivalHandler(dbus, serviceCRNs);
+        NumEventsHandler numEventsHandler(dbus);
+        ArrivalEvent arrivalEvent;
         arrivalEvent.attach(numEventsHandler);
         arrivalEvent.attach(arrivalHandler);
+
+        // LAST ARRIVAL EVENT
+        GenerateArrivalsHandler generateArrivalsHandler(dbus, arrivalCRNs);
+        LastArrivalEvent lastArrivalEvent;
+        lastArrivalEvent.attach(generateArrivalsHandler);
+
+        // LEAVE EVENTS
+        LeaveHandler leaveHandler(dbus);
+        LeaveEvent leaveEvent;
+        leaveEvent.attach(leaveHandler);
+
+
+        // ACK & DEPARTURE EVENT
+        DepartureEvent departureEvent;
+        AckHandler ackHandler(dbus);
+        AckEvent ackEvent;
 
         // configure the expert metrics
         tExpertNormalHandlerSP expertNormalHandler;
@@ -683,10 +694,6 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
         }
 
         ackEvent.attach(ackHandler);
-
-        postAnyEvent.attach(utilisationHandler);
-        postAnyEvent.attach(expectedAverageEventInQueueHandler);
-        postAnyEvent.attach(lastEventHandler);
 
         // instantiate the event processor and set the events
         EventProcessor processor(dbus, adminEvent, preAnyEvent, postAnyEvent, arrivalEvent,

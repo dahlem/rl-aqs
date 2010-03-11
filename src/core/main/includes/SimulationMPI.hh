@@ -348,7 +348,10 @@ public:
                 totalQs[output->simulation_id - 1].push(output->system_total_q);
 #ifndef NDEBUG
                 std::cout << "Updated statistics for simulation " << output->simulation_id
-                          << " and replication " << output->replications << std::endl << std::flush;
+                          << " and replication " << output->replications << std::endl
+                          << "replications received: " << avgDelays[output->simulation_id - 1].getNumValues()
+                          << ", " << (simReplications[output->simulation_id - 1] - avgDelays[output->simulation_id - 1].getNumValues())
+                          << " more to go." << std::endl << std::flush;
 #endif /* NDEBUG */
 
                 if (avgDelays[output->simulation_id - 1].getNumValues() >= simReplications[output->simulation_id - 1]) {

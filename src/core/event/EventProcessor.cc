@@ -103,7 +103,7 @@ bool EventProcessor::process()
             double newTime = entry->getArrival();
 
 #ifndef NDEBUG
-            assert(newTime >= m_oldTime);
+//            assert(newTime >= m_oldTime);
 #endif /* NDEBUG */
 
             // correct a possible floating point error
@@ -145,15 +145,15 @@ bool EventProcessor::process()
                               << "Stoptime reached." << std::endl
                               << "**************************" << std::endl;
                     break;
-                } else {
-#ifndef NDEBUG_EVENTS
-                    std::cout << "** EventProcessor : pre any event start" << std::endl;
-#endif /* NDEBUG_EVENTS */
-                    m_preAnyEvent.preAny(entry);
-#ifndef NDEBUG_EVENTS
-                    std::cout << "** EventProcessor : pre any event finished" << std::endl;
-#endif /* NDEBUG_EVENTS */
                 }
+
+#ifndef NDEBUG_EVENTS
+                std::cout << "** EventProcessor : pre any event start" << std::endl;
+#endif /* NDEBUG_EVENTS */
+                m_preAnyEvent.preAny(entry);
+#ifndef NDEBUG_EVENTS
+                std::cout << "** EventProcessor : pre any event finished" << std::endl;
+#endif /* NDEBUG_EVENTS */
 
                 switch (entry->getType()) {
                   case LAST_ARRIVAL_EVENT:
@@ -166,7 +166,6 @@ bool EventProcessor::process()
                       std::cout << "** EventProcessor : last arrival event finished" << std::endl;
 #endif /* NDEBUG_EVENTS */
                   case ARRIVAL_EVENT:
-                  case RESCHEDULED_EVENT:
 #ifndef NDEBUG_EVENTS
                       std::cout << "** EventProcessor : arrival event start" << std::endl;
 #endif /* NDEBUG_EVENTS */
