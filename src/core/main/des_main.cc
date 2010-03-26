@@ -217,7 +217,11 @@ int main(int argc, char *argv[])
     boost::uint16_t freeNodes = nodes - (simNodes + 1);
 
     if (rank > simNodes) {
-        colour = ((rank - simNodes) % desArgs->simulations) + 1;
+        colour = ((rank - simNodes) % desArgs->simulations);
+
+        if (colour == 0) {
+            colour = desArgs->simulations;
+        }
     }
 
 #ifndef NDEBUG
