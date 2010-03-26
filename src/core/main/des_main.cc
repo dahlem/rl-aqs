@@ -1,4 +1,4 @@
-// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009, 2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -132,7 +132,7 @@ int main(int argc, char *argv[])
     char *dateCStr = new char[128];
 
 #ifdef HAVE_MPI
-    int rank = 0, num_tasks = 0, colour = 0, rc = 0;
+    int rank = 0, nodes = 0, colour = 0, rc = 0;
     MPI_Datatype MPI_Simargs, MPI_Desout;
     MPI_Comm group_comm;
     dcore::sim_output outVal;
@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
 
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    MPI_Comm_size(MPI_COMM_WORLD, &num_tasks);
+    MPI_Comm_size(MPI_COMM_WORLD, &nodes);
 
     // register the structs
 # ifndef NDEBUG
@@ -204,12 +204,32 @@ int main(int argc, char *argv[])
         colour = ((rank - 1) / desArgs->init_replications) + 1;
     }
 
+    // if there are any free nodes, then re-assign the colours of those
+    // calculate the number of simulations
+    boost::uint16_t runs = 0;
+    if (p_desArgs->lhs_optimal) {
+        runs = (1 << desArgs->simulations) + 1;
+    } else {
+        runs = desArgs->simulations;
+    }
+
+    boost::uint16_t simNodes = runs * desArgs->init_replications;
+    boost::uint16_t freeNodes = nodes - (simNodes + 1);
+
+    if (rank > simNodes) {
+        colour = ((rank - simNodes) % desArgs->simulations) + 1;
+    }
+
+#ifndef NDEBUG
+    std::cout << "Rank" << rank << ", Colour: " << colour  << std::endl;
+#endif /* NDEBUG */
+
     MPI_Comm_split(MPI_COMM_WORLD, colour, rank, &group_comm);
 
     if (rank == 0) {
 
         // check whether we have enough nodes
-        if ((desArgs->simulations * desArgs->init_replications + 1) > num_tasks) {
+        if ((desArgs->simulations * desArgs->init_replications + 1) > nodes) {
             std::cerr << "Error: Not enough nodes available!" << std::endl;
             MPI_Abort(MPI_COMM_WORLD, 911);
         }
@@ -247,7 +267,7 @@ int main(int argc, char *argv[])
             dcore::SimulationMPI::simulate(desArgs, MPI_Simargs, MPI_Desout);
 
             // send kill pill
-            for(int i = 1; i < num_tasks; ++i) {
+            for(int i = 1; i < nodes; ++i) {
 # ifndef NDEBUG
                 std::cout << "Send kill pill to " << i << std::endl;
 # endif /* NDEBUG */
