@@ -11,7 +11,7 @@
 #LT_PREREQ([1.5.26])
 AC_PREREQ(2.61)
 AC_INIT([Discrete Event Simulation for Service Interaction],
-        [4.1],
+        [4.2],
         [Dominik Dahlem Dominik.Dahlem@cs.tcd.ie], 
         [des])
 
@@ -25,12 +25,6 @@ AC_CONFIG_MACRO_DIR([m4])
 AC_LANG([C++])
 
 AM_INIT_AUTOMAKE
-
-
-#LF_CONFIGURE_CC
-#LF_CONFIGURE_CXX
-#LF_HOST_TYPE
-#LF_SET_WARNINGS
 
 AC_PROG_CXX
 define([AC_LIBTOOL_LANG_CXX_CONFIG], [:])dnl

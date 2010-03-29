@@ -207,7 +207,7 @@ int main(int argc, char *argv[])
     // if there are any free nodes, then re-assign the colours of those
     // calculate the number of simulations
     boost::uint16_t runs = 0;
-    if (p_desArgs->lhs_optimal) {
+    if (desArgs->lhs_optimal) {
         runs = (1 << desArgs->simulations) + 1;
     } else {
         runs = desArgs->simulations;
@@ -216,11 +216,11 @@ int main(int argc, char *argv[])
     boost::uint16_t simNodes = runs * desArgs->init_replications;
     boost::uint16_t freeNodes = nodes - (simNodes + 1);
 
-    if (rank > simNodes) {
+    if (freeNodes > 0) {
         colour = ((rank - simNodes) % desArgs->simulations);
 
         if (colour == 0) {
-            colour = desArgs->simulations;
+            colour = runs;
         }
     }
 
