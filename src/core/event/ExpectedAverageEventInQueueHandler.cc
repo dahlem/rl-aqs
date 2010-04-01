@@ -72,16 +72,31 @@ void ExpectedAverageEventInQueueHandler::update(PostAnyEvent *subject)
 
         dnet::Vertex vertex = boost::vertex(entry->getDestination(), m_graph);
         double q_i = 0.0;
+        double num_in_queue = vertex_number_in_queue_map[vertex];
 
-        if ((entry->getArrival() - vertex_last_event_time_map[vertex]) > 0.0) {
-            q_i = entry->getArrival() - vertex_last_event_time_map[vertex];
+        // since we update the # of events in the queue in the arrival/departure handler
+        // we have to take the state of the queue immediately before the event arrived at
+        // the server into account
+        if ((entry->getType() == LAST_ARRIVAL_EVENT) ||
+            (entry->getType() == ARRIVAL_EVENT)) {
+
+            // if the queue had been occupied by at least one event we know that the
+            // server had been busy
+            if (vertex_number_in_queue_map[vertex] > 0) {
+                if ((entry->getArrival() - vertex_last_event_time_map[vertex]) >= 0.0) {
+                    q_i = (entry->getArrival() - vertex_last_event_time_map[vertex]);
+                    num_in_queue--;
+                }
+            }
+        } else {
+            // for all departures we know that the queue was previously busy
+            if ((entry->getArrival() - vertex_last_event_time_map[vertex]) >= 0.0) {
+                q_i = (entry->getArrival() - vertex_last_event_time_map[vertex]);
+                num_in_queue++;
+            }
         }
 
-#ifndef NDEBUG
-        assert(gsl_fcmp(entry->getArrival(), vertex_last_event_time_map[vertex], 1e-9) >= 0);
-#endif /* NDEBUG */
-
-        q_i *= vertex_number_in_queue_map[vertex];
+        q_i *= num_in_queue;
 
 #ifndef NDEBUG_EVENTS
         std::cout << "** Update expected avg. event in queue for vertex: " << entry->getDestination() << std::endl;
@@ -95,11 +110,11 @@ void ExpectedAverageEventInQueueHandler::update(PostAnyEvent *subject)
         vertex_Qdt_map[vertex] += q_i;
         vertex_expected_average_number_event_map[vertex] =
             vertex_Qdt_map[vertex] / entry->getArrival();
-    }
 
 #ifndef NDEBUG_EVENTS
-    std::cout << "Avg. Event in queue updated." << std::endl;
+        std::cout << "Avg. Event in queue: " << vertex_expected_average_number_event_map[vertex] << std::endl;
 #endif /* NDEBUG_EVENTS */
+    }
 }
 
 

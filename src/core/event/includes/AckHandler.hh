@@ -57,7 +57,6 @@ private:
     dcommon::Queue &m_queue;
     bool m_collectiveIntelligence;
 
-    dnet::VertexNumEventsProcessedMap vertex_num_events_processed_map;
     dnet::VertexIndexMap vertex_index_map;
 };
 

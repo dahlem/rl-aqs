@@ -228,9 +228,39 @@ enum vertex_v_nn_loss_t { vertex_v_nn_loss = 1140 };
 enum edge_e_nn_loss_t { edge_e_nn_loss = 1141 };
 
 
-enum graph_system_delay_t { graph_system_delay = 1142 };
-enum graph_system_num_events_t { graph_system_num_events = 1143 };
-enum graph_system_processing_time_t { graph_system_processing_time = 1144 };
+/** @enum edge_emotion_t
+ * This enum extends the edge properties by an emotion attribute
+ */
+enum edge_emotion_t { edge_emotion = 1142 };
+
+
+/** @enum edge_rmin_t
+ * This enum extends the edge properties by a min. reward attribute
+ */
+enum edge_rmin_t { edge_rmin = 1143 };
+
+
+/** @enum edge_rmax_t
+ * This enum extends the edge properties by a max reward attribute
+ */
+enum edge_rmax_t { edge_rmax = 1144 };
+
+
+/** @enum edge_e_pos_t
+ * This enum extends the edge properties by a e(+) attribute
+ */
+enum edge_e_pos_t { edge_e_pos = 1145 };
+
+
+/** @enum edge_e_neg_t
+ * This enum extends the edge properties by a e(-) attribute
+ */
+enum edge_e_neg_t { edge_e_neg = 1146 };
+
+
+enum graph_system_delay_t { graph_system_delay = 1147 };
+enum graph_system_num_events_t { graph_system_num_events = 1148 };
+enum graph_system_processing_time_t { graph_system_processing_time = 1149 };
 
 
 
@@ -268,6 +298,11 @@ BOOST_INSTALL_PROPERTY(edge, q_val);
 BOOST_INSTALL_PROPERTY(edge, eindex);
 BOOST_INSTALL_PROPERTY(edge, total_reward);
 BOOST_INSTALL_PROPERTY(edge, e_nn_loss);
+BOOST_INSTALL_PROPERTY(edge, emotion);
+BOOST_INSTALL_PROPERTY(edge, rmin);
+BOOST_INSTALL_PROPERTY(edge, rmax);
+BOOST_INSTALL_PROPERTY(edge, e_pos);
+BOOST_INSTALL_PROPERTY(edge, e_neg);
 BOOST_INSTALL_PROPERTY(graph, system_delay);
 BOOST_INSTALL_PROPERTY(graph, system_num_events);
 BOOST_INSTALL_PROPERTY(graph, system_processing_time);
@@ -432,10 +467,35 @@ typedef boost::property <edge_total_reward_t, double, EdgeQValueProperty> EdgeTo
  */
 typedef boost::property <edge_e_nn_loss_t, double, EdgeTotalRewardProperty> EdgeNNLossProperty;
 
+/** @typedef EdgeEmotionProperty
+ * Specifies the property for the emotion of the edge
+ */
+typedef boost::property <edge_emotion_t, double, EdgeNNLossProperty> EdgeEmotionProperty;
+
+/** @typedef EdgeRMinProperty
+ * Specifies the property for the min. reward
+ */
+typedef boost::property <edge_rmin_t, double, EdgeEmotionProperty> EdgeRminProperty;
+
+/** @typedef EdgeRmaxProperty
+ * Specifies the property for the max. reward
+ */
+typedef boost::property <edge_rmax_t, double, EdgeRminProperty> EdgeRmaxProperty;
+
+/** @typedef EdgeEPosProperty
+ * Specifies the property for the e(+)
+ */
+typedef boost::property <edge_e_pos_t, double, EdgeRmaxProperty> EdgeEPosProperty;
+
+/** @typedef EdgeENegProperty
+ * Specifies the property for the e(-)
+ */
+typedef boost::property <edge_e_neg_t, double, EdgeEPosProperty> EdgeENegProperty;
+
 /** @typedef EdgeIndexProperty
  * Specifies the property for the edge index
  */
-typedef boost::property <edge_eindex_t, int, EdgeNNLossProperty> EdgeIndexProperty;
+typedef boost::property <edge_eindex_t, int, EdgeENegProperty> EdgeIndexProperty;
 
 /** @typedef GraphGeneratorProperty
  * Specifies the property for graph generator
@@ -642,6 +702,31 @@ typedef boost::property_map <Graph, edge_e_nn_loss_t>::type EdgeNNLossMap;
  */
 typedef boost::property_map <Graph, boost::edge_weight_t>::type EdgeWeightMap;
 
+/** @typedef EdgeEmotionMap
+ * Specifies the edge emotion property
+ */
+typedef boost::property_map <Graph, edge_emotion_t>::type EdgeEmotionMap;
+
+/** @typedef EdgeRMinMap
+ * Specifies the edge rmin property
+ */
+typedef boost::property_map <Graph, edge_rmin_t>::type EdgeRMinMap;
+
+/** @typedef EdgeRMaxMap
+ * Specifies the edge rmax property
+ */
+typedef boost::property_map <Graph, edge_rmax_t>::type EdgeRMaxMap;
+
+/** @typedef EdgeEPosMap
+ * Specifies the edge e(+) property
+ */
+typedef boost::property_map <Graph, edge_e_pos_t>::type EdgeEPosMap;
+
+/** @typedef EdgeENegMap
+ * Specifies the edge e(-) property
+ */
+typedef boost::property_map <Graph, edge_e_neg_t>::type EdgeENegMap;
+
 /** @typedef VServiceIterator
  * Specifies the iterator for the vertex service rates
  */
@@ -771,6 +856,11 @@ const std::string BEST_RESPONSE                     = "best_response";
 const std::string VERTEX_NN_LOSS                    = "vertex_nn_loss";
 const std::string EDGE_TOTAL_REWARD                 = "total_reward";
 const std::string EDGE_NN_LOSS                      = "edge_nn_loss";
+const std::string EDGE_EMOTION                      = "edge_emotion";
+const std::string EDGE_RMIN                         = "edge_rmin";
+const std::string EDGE_RMAX                         = "edge_rmax";
+const std::string EDGE_E_POS                        = "edge_e_pos";
+const std::string EDGE_E_NEG                        = "edge_e_neg";
 const std::string GRAPH_SYSTEM_DELAY                = "system_delay";
 const std::string GRAPH_SYSTEM_NUM_EVENTS           = "system_num_events";
 const std::string GRAPH_SYSTEM_PROCESSING           = "system_processing";

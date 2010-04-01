@@ -16,6 +16,7 @@ librl_la_SOURCES =                                                      \
 	BoltzmannPolicy.cc                                              \
 	WeightedPolicyLearner.cc                                        \
 	FairActionLearner.cc                                            \
+	GradientPolicyLearner.cc                                        \
 	RandomSelection.cc                                              \
 	RLStateHelper.cc                                                \
 	OnPolicySelection.cc

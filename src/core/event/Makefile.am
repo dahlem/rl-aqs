@@ -48,6 +48,7 @@ libcoreevent_la_SOURCES =                                                  \
 	SerialiseArrivalsHandler.cc                                        \
 	SystemStatisticsHandler.cc                                         \
 	RollingSystemStatsAdminHandler.cc                                  \
+	CognitiveValueHandler.cc                                           \
 	RLResponseHandler.cc
 
 libcoreevent_la_CPPFLAGS =                                                 \

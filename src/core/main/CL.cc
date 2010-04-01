@@ -173,7 +173,7 @@ CL::CL()
         (RL_RESPONSE_REWARD.c_str(), po::value <std::string>(), "Reward Scalars above respective levels.")
         (RL_Q_ALPHA.c_str(), po::value <double>()->default_value(0.1), "Learning Rate.")
         (RL_Q_LAMBDA.c_str(), po::value <double>()->default_value(0.1), "Action-value Rate.")
-        (RL_POLICY.c_str(), po::value <boost::uint16_t>()->default_value(1), "Policy (1=Epsilon-Greedy, 2=Boltzmann, 3=WPL, 4=FAL).")
+        (RL_POLICY.c_str(), po::value <boost::uint16_t>()->default_value(1), "Policy (1=Epsilon-Greedy, 2=Boltzmann, 3=WPL, 4=FAL, 5=CPL).")
         (CL_RL_STATE_IDS.c_str(), po::value <std::string>()->default_value(""), "State representation.")
         (CL_NN_HIDDENLAYER_NEURONS.c_str(), po::value <boost::uint16_t>()->default_value(5), "Hidden number of Neurons.")
         (CL_NN_LOSS_POLICY.c_str(), po::value <boost::uint16_t>()->default_value(1), "Loss Policy (1=default, 2=sliding window).")
@@ -200,6 +200,15 @@ CL::CL()
     po::options_description opt_rl_policy_wpl("RL WPL/FAL Policy Configuration");
     opt_rl_policy_wpl.add_options()
         (RL_POLICY_WPL_ETA.c_str(), po::value <double>()->default_value(0.001), "Learning rate for WPL.")
+        ;
+
+    po::options_description opt_rl_policy_cpl("RL CPL Policy Configuration");
+    opt_rl_policy_cpl.add_options()
+        (RL_POLICY_WPL_ETA.c_str(), po::value <double>()->default_value(0.001), "Learning rate for WPL.")
+        (CL_COGNITIVE_A_POS.c_str(), po::value <double>()->default_value(0.0), "Amplitude for positive signals.")
+        (CL_COGNITIVE_A_NEG.c_str(), po::value <double>()->default_value(0.0), "Amplitude for negative signals.")
+        (CL_COGNITIVE_R_POS.c_str(), po::value <double>()->default_value(0.0), "Decay rate for positive signals.")
+        (CL_COGNITIVE_R_NEG.c_str(), po::value <double>()->default_value(0.0), "Decay rate for negative signals.")
         ;
 
     po::options_description opt_expert("Expert Metrics Configuration");
@@ -251,6 +260,7 @@ CL::CL()
     opt_desc->add(opt_rl_policy_epsilon);
     opt_desc->add(opt_rl_policy_boltzmann);
     opt_desc->add(opt_rl_policy_wpl);
+    opt_desc->add(opt_rl_policy_cpl);
     opt_desc->add(opt_mfrw);
     opt_desc->add(opt_expert);
 }
@@ -463,6 +473,36 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
                 desArgs->rl_policy_wpl_eta = vm[RL_POLICY_WPL_ETA.c_str()].as <double>();
             }
             std::cout << "RL WPL: " << desArgs->rl_policy_wpl_eta << "." << std::endl;
+        } else if (desArgs->rl_policy == 5) {
+            if (vm.count(RL_POLICY_EPSILON.c_str())) {
+                desArgs->rl_policy_epsilon = vm[RL_POLICY_EPSILON.c_str()].as <double>();
+            }
+            std::cout << "RL Epsilon: " << desArgs->rl_policy_epsilon << "." << std::endl;
+
+            if (vm.count(RL_POLICY_WPL_ETA.c_str())) {
+                desArgs->rl_policy_wpl_eta = vm[RL_POLICY_WPL_ETA.c_str()].as <double>();
+            }
+            std::cout << "RL CPL update rate: " << desArgs->rl_policy_wpl_eta << "." << std::endl;
+
+            if (vm.count(CL_COGNITIVE_A_POS.c_str())) {
+                desArgs->cognitive_A_pos = vm[CL_COGNITIVE_A_POS.c_str()].as <double>();
+            }
+            std::cout << "Cognitive A(+): " << desArgs->cognitive_A_pos << "." << std::endl;
+
+            if (vm.count(CL_COGNITIVE_A_NEG.c_str())) {
+                desArgs->cognitive_A_neg = vm[CL_COGNITIVE_A_NEG.c_str()].as <double>();
+            }
+            std::cout << "Cognitive A(-): " << desArgs->cognitive_A_neg << "." << std::endl;
+
+            if (vm.count(CL_COGNITIVE_R_POS.c_str())) {
+                desArgs->cognitive_r_pos = vm[CL_COGNITIVE_R_POS.c_str()].as <double>();
+            }
+            std::cout << "Cognitive r(+): " << desArgs->cognitive_r_pos << "." << std::endl;
+
+            if (vm.count(CL_COGNITIVE_R_NEG.c_str())) {
+                desArgs->cognitive_r_neg = vm[CL_COGNITIVE_R_NEG.c_str()].as <double>();
+            }
+            std::cout << "Cognitive r(-): " << desArgs->cognitive_r_neg << "." << std::endl;
         }
 
         if (vm.count(CL_NN_LOSS_POLICY.c_str())) {

@@ -51,7 +51,6 @@ AckHandler::AckHandler(DesBus &p_bus)
     dcore::desArgs_t config = (dynamic_cast<ConfigChannel&> (p_bus.getChannel(id::CONFIG_CHANNEL))).getConfig();
 
     m_collectiveIntelligence = config.rl_ci;
-    vertex_num_events_processed_map = get(vertex_num_events_processed, m_graph);
     vertex_index_map = get(boost::vertex_index, m_graph);
 }
 
@@ -113,8 +112,6 @@ void AckHandler::update(AckEvent *subject)
 #ifndef NDEBUG_EVENTS
     std::cout << "** Update the events processed." << std::endl;
 #endif /* NDEBUG_EVENTS */
-
-    vertex_num_events_processed_map[vertex]++;
 
 #ifndef NDEBUG_EVENTS
     std::cout << "** Acknowledge handler done." << std::endl;

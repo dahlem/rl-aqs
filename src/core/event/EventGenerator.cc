@@ -83,10 +83,8 @@ void EventGenerator::generateArrival(
     double start_time,
     double arrival_rate)
 {
-    double cur_arrival = -dsample::Rng::poiss(
-        arrival_rate, gsl_rng_uniform(arrival_rng.get()));
-
-    cur_arrival += start_time;
+    double cur_arrival = start_time
+        - dsample::Rng::poiss(arrival_rate, gsl_rng_uniform(arrival_rng.get()));
 
     // enqueue the last arrival event
     dcommon::Entry *entry = new dcommon::Entry(
@@ -99,7 +97,7 @@ void EventGenerator::generateArrival(
     try {
         p_queue.push(entry);
 #ifndef NDEBUG_EVENTS
-        std::cout << "External last arrival event scheduled for vertex " << destination << std::endl;
+        std::cout << "External last arrival event scheduled for vertex " << destination << " at time: " << cur_arrival << std::endl;
 #endif /* NDEBUG_EVENTS */
     } catch (dcommon::QueueException &qe) {
         std::cout << "Error scheduling external last arrival event: " << entry->getArrival() << " " << qe.what() << std::endl;

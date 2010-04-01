@@ -1,4 +1,4 @@
-// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009, 2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -88,12 +88,17 @@ typedef struct SimArgsMPI {
     double rl_policy_boltzmann_t;   /* rl policy boltzmann temperature */
     double nn_momentum;             /* NN Backpropagation momentum */
     double rl_policy_wpl_eta;             /* NN Backpropagation momentum */
+    double cognitive_A_pos;             /* cognitive A(+) */
+    double cognitive_A_neg;             /* cognitive A(-) */
+    double cognitive_r_pos;             /* cognitive r(+) */
+    double cognitive_r_neg;             /* cognitive r(-) */
 
     SimArgsMPI()
         : sim_num(0), rep_num(0), net_size(0), max_edges(0), edge_prob(0.0),
           boost_arrival(0.0), boost_edge(0.0), rl_q_alpha(0.0), rl_q_lambda(0.0),
           rl_policy_epsilon(0.0), rl_policy_boltzmann_t(0.0), nn_momentum(0.0),
-          rl_policy_wpl_eta(0.0)
+          rl_policy_wpl_eta(0.0), cognitive_A_pos(0.0), cognitive_A_neg(0.0),
+          cognitive_r_pos(0.0), cognitive_r_neg(0.0)
         {}
 
 } tSimArgsMPI;

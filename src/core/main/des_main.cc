@@ -74,7 +74,7 @@ void register_simargs(MPI_Datatype &MPI_Simargs, dcore::tSimArgsMPI &value)
 
     /* One value of each type */
     blocklens[0] = 4;
-    blocklens[1] = 9;
+    blocklens[1] = 13;
 
     /* The base types */
     old_types[0] = MPI_UNSIGNED;

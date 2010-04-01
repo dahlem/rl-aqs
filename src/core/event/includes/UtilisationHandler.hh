@@ -54,9 +54,9 @@ private:
 
     // derived fields
     dnet::VertexBdtMap vertex_Bdt_map;
-    dnet::VertexBusyMap vertex_busy_map;
     dnet::VertexUtilisationMap vertex_utilisation_map;
     dnet::VertexLastEventTimeMap vertex_last_event_time_map;
+    dnet::VertexNumberInQueueMap vertex_number_in_queue_map;
 
 };
 

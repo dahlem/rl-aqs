@@ -57,6 +57,7 @@ namespace fs = boost::filesystem;
 #include "CJYArrivals.hh"
 #include "BoltzmannPolicy.hh"
 #include "CL.hh"
+#include "CognitiveValueHandler.hh"
 #include "ConfigChannel.hh"
 #include "DefaultResponseHandler.hh"
 #include "DepartureEvent.hh"
@@ -75,6 +76,7 @@ namespace fs = boost::filesystem;
 #include "GenerateArrivalsHandler.hh"
 #include "GenerateArrivalsAdminHandler.hh"
 #include "GraphChannel.hh"
+#include "GradientPolicyLearner.hh"
 #include "HybridFullRLResponseHandler.hh"
 #include "LastArrivalEvent.hh"
 #include "LastEventHandler.hh"
@@ -150,6 +152,7 @@ typedef boost::shared_ptr<ExpertAbsoluteHandler> tExpertAbsoluteHandlerSP;
 typedef boost::shared_ptr<ExpertPositiveHandler> tExpertPositiveHandlerSP;
 typedef boost::shared_ptr<ExpertNegativeHandler> tExpertNegativeHandlerSP;
 typedef boost::shared_ptr<ResponseStatsHandler> tResponseStatsHandlerSP;
+typedef boost::shared_ptr<CognitiveValueHandler> tCognitiveValueHandlerSP;
 
 
 Int32SA arrivalCRN(boost::uint16_t p_num_vertices)
@@ -290,7 +293,8 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
     boost::uint16_t net_size = 0, max_edges = 0;
     double edge_prob = 0.0,
         rl_q_alpha = 0.0, rl_q_lambda = 0.0, rl_policy_epsilon = 0.0, rl_policy_boltz_t = 0.0,
-        nn_momentum = 0.0, boost_arrival = 0.0, boost_edge = 0.0, rl_policy_wpl_eta = 0.0;
+        nn_momentum = 0.0, boost_arrival = 0.0, boost_edge = 0.0, rl_policy_wpl_eta = 0.0,
+        cognitive_A_pos = 0.0, cognitive_A_neg = 0.0, cognitive_r_pos = 0.0, cognitive_r_neg = 0.0;
 
     // receive the input arguments via mpi
 #ifdef HAVE_MPI
@@ -337,6 +341,10 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
         boost_arrival = simArgs.boost_arrival;
         boost_edge = simArgs.boost_edge;
         rl_policy_wpl_eta = simArgs.rl_policy_wpl_eta;
+        cognitive_A_pos = simArgs.cognitive_A_pos;
+        cognitive_A_neg = simArgs.cognitive_A_neg;
+        cognitive_r_pos = simArgs.cognitive_r_pos;
+        cognitive_r_neg = simArgs.cognitive_r_neg;
 #else
         sim_num = desArgs->sim_num;
         rep_num = desArgs->rep_num;
@@ -351,6 +359,10 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
         boost_arrival = desArgs->boost_arrival;
         boost_edge = desArgs->boost_edge;
         rl_policy_wpl_eta = desArgs->rl_policy_wpl_eta;
+        cognitive_A_pos = desArgs->cognitive_A_pos;
+        cognitive_A_neg = desArgs->cognitive_A_neg;
+        cognitive_r_pos = desArgs->cognitive_r_pos;
+        cognitive_r_neg = desArgs->cognitive_r_neg;
 
 #endif /* HAVE_MPI */
 
@@ -361,6 +373,10 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
                   << "RL Policy epsilon: " << rl_policy_epsilon << std::endl
                   << "RL Policy Boltz T: " << rl_policy_boltz_t << std::endl
                   << "RL Policy WPL eta: " << rl_policy_wpl_eta << std::endl
+                  << "Cognitive A(+): " << cognitive_A_pos << std::endl
+                  << "Cognitive A(-): " << cognitive_A_neg << std::endl
+                  << "Cognitive r(+): " << cognitive_r_pos << std::endl
+                  << "Cognitive r(-): " << cognitive_r_neg << std::endl
                   << "NN Momentum: " << nn_momentum << std::endl;
         std::cout.flush();
 # endif /* NDEBUG */
@@ -444,7 +460,6 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
         // instantiate the arrival channel
         ArrivalsChannel *arrivalChannel = NULL;
         Arrivals *arrivals = NULL;
-        boost::int32_t destination = 0;
 
         dnet::VertexIndexMap vertex_index_props_map =
             get(boost::vertex_index, *graph);
@@ -618,6 +633,13 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
         AckHandler ackHandler(dbus);
         AckEvent ackEvent;
 
+        // configure the cognitive value handler
+        tCognitiveValueHandlerSP cognitiveValHandler;
+        if (desArgs->rl_policy == 5) {
+            cognitiveValHandler = tCognitiveValueHandlerSP(new CognitiveValueHandler(dbus));
+            ackEvent.attach(*cognitiveValHandler);
+        }
+
         // configure the expert metrics
         tExpertNormalHandlerSP expertNormalHandler;
         tExpertAbsoluteHandlerSP expertAbsoluteHandler;
@@ -627,6 +649,8 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
 
         if (desArgs->expert_normal || desArgs->expert_absolute
             || desArgs->expert_positive || desArgs->expert_negative) {
+            responseStatsHandler = tResponseStatsHandlerSP(new ResponseStatsHandler(dbus));
+            ackEvent.attach(*responseStatsHandler);
             expertNormalHandler = tExpertNormalHandlerSP(new ExpertNormalHandler(dbus));
             ackEvent.attach(*expertNormalHandler);
             expertAbsoluteHandler = tExpertAbsoluteHandlerSP(new ExpertAbsoluteHandler(dbus));
@@ -635,8 +659,6 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
             ackEvent.attach(*expertPositiveHandler);
             expertNegativeHandler = tExpertNegativeHandlerSP(new ExpertNegativeHandler(dbus));
             ackEvent.attach(*expertNegativeHandler);
-            responseStatsHandler = tResponseStatsHandlerSP(new ResponseStatsHandler(dbus));
-            ackEvent.attach(*responseStatsHandler);
         }
 
         // configure reinforcement learning
@@ -657,6 +679,8 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
                 pol = tPolicySP(new drl::WeightedPolicyLearner(dbus));
             } else if (desArgs->rl_policy == 4) {
                 pol = tPolicySP(new drl::FairActionLearner(dbus));
+            } else if (desArgs->rl_policy == 5) {
+                pol = tPolicySP(new drl::GradientPolicyLearner(dbus));
             }
 
             // configure the on-policy selection

@@ -141,8 +141,13 @@ const std::string CL_MFRW_SINGLE = "mfrw_single";
 const std::string CL_SYSTEM_STATS_STEPS = "system_stats_steps";
 const std::string CL_SYSTEM_STATS_INTERVAL = "system_stats_interval";
 
+const std::string CL_COGNITIVE_A_POS = "cognitive_A_pos";
+const std::string CL_COGNITIVE_A_NEG = "cognitive_A_neg";
+const std::string CL_COGNITIVE_R_POS = "cognitive_r_pos";
+const std::string CL_COGNITIVE_R_NEG = "cognitive_r_neg";
 
-static const std::string ARGS_HEADER = "stop_time,graphs,max_arrival,boost_arrival,boost_edge,confidence,alpha,error,initial_reps,network_type,network_size,max_edges,edgeProb,edgeDiffusion,rl,cl_ci,rlq_alpha,rlq_lambda,rl_policy,rl_policy_epsilon,rl_policy_boltzmann_t,rl_hybrid,rl_hybrid_warmup,nn_momentum,rl_policy_wpl_eta";
+
+static const std::string ARGS_HEADER = "stop_time,graphs,max_arrival,boost_arrival,boost_edge,confidence,alpha,error,initial_reps,network_type,network_size,max_edges,edgeProb,edgeDiffusion,rl,cl_ci,rlq_alpha,rlq_lambda,rl_policy,rl_policy_epsilon,rl_policy_boltzmann_t,rl_hybrid,rl_hybrid_warmup,nn_momentum,rl_policy_wpl_eta,cognitive_A_pos,cognitive_A_neg,cognitive_r_pos,cognitive_r_neg";
 
 /** @struct
  * structure specifying the command line variables.
@@ -249,6 +254,11 @@ struct desArgs_t {
     boost::uint16_t system_stats_steps; /* last steps of simulation to be taken into account for system statistics */
     boost::uint16_t system_stats_interval; /* time interval in steps between system statistics calculations */
 
+    double cognitive_A_pos;
+    double cognitive_A_neg;
+    double cognitive_r_pos;
+    double cognitive_r_neg;
+
     desArgs_t(desArgs_t const &args)
         : graph_filename(args.graph_filename), seeds_filename(args.seeds_filename), results_dir(args.results_dir),
           events_unprocessed(args.events_unprocessed), events_processed(args.events_processed), add_sim(args.add_sim),
@@ -275,7 +285,8 @@ struct desArgs_t {
           rl_policy_wpl_eta(args.rl_policy_wpl_eta), min_rl_policy_wpl_eta(args.min_rl_policy_wpl_eta), max_rl_policy_wpl_eta(args.max_rl_policy_wpl_eta),
           mfrw(args.mfrw), mfrw_single(args.mfrw_single), mfrw_d0(args.mfrw_d0), mfrw_a0(args.mfrw_a0), mfrw_b(args.mfrw_b), mfrw_lambda(args.mfrw_lambda),
           mfrw_Nc(args.mfrw_Nc), mfrw_T(args.mfrw_T), mfrw_n0(args.mfrw_n0), mfrw_nmax(args.mfrw_nmax),
-          mfrw_upper(args.mfrw_upper), mfrw_lower(args.mfrw_lower), system_stats_steps(args.system_stats_steps), system_stats_interval(args.system_stats_interval)
+          mfrw_upper(args.mfrw_upper), mfrw_lower(args.mfrw_lower), system_stats_steps(args.system_stats_steps), system_stats_interval(args.system_stats_interval),
+          cognitive_A_pos(args.cognitive_A_pos), cognitive_A_neg(args.cognitive_A_neg), cognitive_r_pos(args.cognitive_r_pos), cognitive_r_neg(args.cognitive_r_neg)
         {}
 
     desArgs_t()
@@ -304,7 +315,8 @@ struct desArgs_t {
           min_rl_policy_wpl_eta(0.0), max_rl_policy_wpl_eta(0.0),
           mfrw(false), mfrw_single(true), mfrw_d0(0.0), mfrw_a0(0.0), mfrw_b(0.0), mfrw_lambda(0.0),
           mfrw_Nc(0), mfrw_T(0), mfrw_n0(0.0), mfrw_nmax(0.0), mfrw_upper(1.0), mfrw_lower(0.0), system_stats_steps(0),
-          system_stats_interval(1)
+          system_stats_interval(1),
+          cognitive_A_pos(0.0), cognitive_A_neg(0.0), cognitive_r_pos(0.0), cognitive_r_neg(0.0)
         {}
 
     friend std::ostream& operator <<(std::ostream &p_os, const desArgs_t &desArgs)
@@ -333,7 +345,11 @@ struct desArgs_t {
                  << desArgs.rl_hybrid << ","
                  << desArgs.rl_hybrid_warmup << ","
                  << desArgs.nn_momentum << ","
-                 << desArgs.rl_policy_wpl_eta;
+                 << desArgs.rl_policy_wpl_eta << ","
+                 << desArgs.cognitive_A_pos << ","
+                 << desArgs.cognitive_A_neg << ","
+                 << desArgs.cognitive_r_pos << ","
+                 << desArgs.cognitive_r_neg;
 
             return p_os;
         }

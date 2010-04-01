@@ -170,7 +170,7 @@ void ArrivalHandler::update(ArrivalEvent *subject)
               << ", delay: " << delay << std::endl;
 #endif /* NDEBUG_EVENTS */
 
-// calculate the average delay in the queue
+    // calculate the average delay in the queue
     vertex_average_delay_in_queue_map[vertex] =
         dstats::Stats::mean(vertex_num_events_map[vertex],
                             vertex_average_delay_in_queue_map[vertex],

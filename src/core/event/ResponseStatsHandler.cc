@@ -70,9 +70,12 @@ void ResponseStatsHandler::update(AckEvent *subject)
 #endif /* NDEBUG_EVENTS */
 
     dnet::Vertex vertex = boost::vertex(entry->getDestination(), m_graph);
+    vertex_num_events_processed_map[vertex]++;
+
     double size = vertex_num_events_processed_map[vertex];
     double xbar = vertex_mean_reward_map[vertex];
     double x = 0.0;
+
     if ((entry->topArrival() - entry->getArrival()) > 0.0) {
         x = (entry->topArrival() - entry->getArrival());
     }

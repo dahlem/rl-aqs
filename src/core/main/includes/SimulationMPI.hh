@@ -172,6 +172,7 @@ public:
             std::cout << "RL Q Lambda Index: " << LhsUtils::getRLLambdaIndex(p_desArgs) << std::endl;
             std::cout << "RL epsilon Index: " << LhsUtils::getRLEpsilonIndex(p_desArgs) << std::endl;
             std::cout << "NN momentum Index: " << LhsUtils::getNNMomentumIndex(p_desArgs) << std::endl;
+            std::cout << "RL WPL eta Index: " << LhsUtils::getRlWplEtaIndex(p_desArgs) << std::endl;
 #endif /* NDEBUG */
 
             if (dimensions > 0) {
@@ -316,7 +317,11 @@ public:
                                      << p_desArgs->rl_hybrid << ","
                                      << p_desArgs->rl_hybrid_warmup << ","
                                      << desArgsMPI.nn_momentum << ","
-                                     << desArgsMPI.rl_policy_wpl_eta;
+                                     << desArgsMPI.rl_policy_wpl_eta << ","
+                                     << desArgsMPI.cognitive_A_pos << ","
+                                     << desArgsMPI.cognitive_A_neg << ","
+                                     << desArgsMPI.cognitive_r_pos << ","
+                                     << desArgsMPI.cognitive_r_neg;
             }
 
             // 4. continue with as many experiments as needed
