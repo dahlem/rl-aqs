@@ -1,4 +1,4 @@
-## Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+## Copyright (C) 2008, 2009, 2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 ##
 ## This file is free software; as a special exception the author gives
 ## unlimited permission to copy and/or distribute it, with or without
@@ -180,7 +180,9 @@ function T = deslhsoMaximin(m, r, lb, ub)
   T = T ./ 2^m;
 
   ## scale the matrix to be within [min, max]
-  T = repmat(lb, rows(T), 1) .+ T .* repmat(ub - lb, rows(T), 1);
+  lbe = postpad(lb, columns(T), 0);
+  ube = postpad(ub, columns(T), 0);
+  T = repmat(lbe, rows(T), 1) .+ T .* repmat(ube - lbe, rows(T), 1);
 endfunction
 
 

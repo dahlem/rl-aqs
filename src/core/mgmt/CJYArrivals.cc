@@ -38,7 +38,7 @@ namespace des {
 namespace core {
 
 
-CJYArrivals::CJYArrivals(DesBus &p_bus, std::string &p_serialisedMatrixFilename, bool p_readMFRW) 
+CJYArrivals::CJYArrivals(DesBus &p_bus, std::string &p_serialisedMatrixFilename, bool p_readMFRW)
     : m_serialisedMatrixFilename(p_serialisedMatrixFilename),
       m_readMFRW(p_readMFRW),
       m_graph((dynamic_cast<GraphChannel&> (p_bus.getChannel(id::GRAPH_CHANNEL))).getGraph()),
@@ -65,7 +65,7 @@ void CJYArrivals::generate(bool p_serialiseMatrix)
         if (error == GSL_EFAILED) {
             std::cout << "Error: could not read MFRW matrix." << std::endl;
         }
-        
+
         fclose(in_file);
     } else {
         dnet::VertexArrivalRateMap vertex_arrival_props_map =
@@ -76,7 +76,7 @@ void CJYArrivals::generate(bool p_serialiseMatrix)
             boost::uint32_t seedNorm = dsample::Seeds::getInstance().getSeed();
             boost::uint32_t rngBinIndex = dsample::CRN::getInstance().init(seedBin);
             boost::uint32_t rngNormIndex = dsample::CRN::getInstance().init(seedNorm);
-    
+
             dsample::CRN::getInstance().log(seedBin, "binomial rng for MFRW");
             dsample::CRN::getInstance().log(seedNorm, "normal rng for MFRW");
 
@@ -86,7 +86,7 @@ void CJYArrivals::generate(bool p_serialiseMatrix)
             // get view of node
             gsl_vector_view nodeView = gsl_matrix_row(m_arrivalRates, node);
             double nmax = gsl_sf_log(m_desArgs.mfrw_nmax)/gsl_sf_log(m_desArgs.mfrw_lambda);
-        
+
             dsample::MFRW::path(&nodeView.vector, rngBin, rngNorm,
                                 m_desArgs.mfrw_d0, m_desArgs.mfrw_a0, m_desArgs.mfrw_b,
                                 m_desArgs.mfrw_lambda, m_desArgs.mfrw_Nc, m_desArgs.mfrw_T,
@@ -94,8 +94,9 @@ void CJYArrivals::generate(bool p_serialiseMatrix)
 
             // scale the vector of vertex to be within ...
             dnet::Vertex vertex = boost::vertex(node, m_graph);
+
             double arrivalRate = vertex_arrival_props_map[vertex];
-        
+
             // ... min
             double min = m_desArgs.mfrw_lower * arrivalRate;
 

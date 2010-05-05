@@ -103,7 +103,7 @@ bool EventProcessor::process()
             double newTime = entry->getArrival();
 
 #ifndef NDEBUG
-//            assert(newTime >= m_oldTime);
+            assert(newTime >= m_oldTime);
 #endif /* NDEBUG */
 
             // correct a possible floating point error

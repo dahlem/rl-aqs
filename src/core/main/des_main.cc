@@ -216,7 +216,7 @@ int main(int argc, char *argv[])
     boost::uint16_t simNodes = runs * desArgs->init_replications;
     boost::uint16_t freeNodes = nodes - (simNodes + 1);
 
-    if (freeNodes > 0) {
+    if ((freeNodes > 0) && (rank >= simNodes)) {
         colour = ((rank - simNodes) % desArgs->simulations);
 
         if (colour == 0) {

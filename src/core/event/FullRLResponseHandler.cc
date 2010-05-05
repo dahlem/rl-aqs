@@ -89,7 +89,17 @@ FullRLResponseHandler::FullRLResponseHandler(
 
     // init the neural network for each edge
     boost::uint16_t num_nets = (m_outsource) ? (boost::num_vertices(m_graph)) : (boost::num_edges(m_graph));
+
+#ifndef NDEBUG_EVENTS
+    std::cout << "** FullRLResponse" << std::endl;
+    std::cout << "Create " << num_nets << " function approximators."  << std::endl;
+#endif /* NDEBUG_EVENTS */
+
     for (boost::uint16_t i = 0; i < num_nets; ++i) {
+#ifndef NDEBUG_EVENTS
+        std::cout << "Create function approximator for edge: " << i << std::endl;
+#endif /* NDEBUG_EVENTS */
+
         // create the neural network for edge i
         FFNetSP net = dnnet::NNetFactory::createNNet<dnnet::HTangent, dnnet::Identity>
             (m_state_representation.size(), hidden_neurons, 1, uniform_rng_index);
@@ -116,6 +126,12 @@ FullRLResponseHandler::FullRLResponseHandler(
         m_trainings.push_back(training);
     }
 
+#ifndef NDEBUG_EVENTS
+    std::cout << "Created " << m_nets.size() << " function approximators."  << std::endl;
+    std::cout << "Created " << m_objectives.size() << " loss functions."  << std::endl;
+    std::cout << "Created " << m_trainings.size() << " training algos."  << std::endl;
+#endif /* NDEBUG_EVENTS */
+
     // allocate memory here for the input vector and the target
     m_inputs = DoubleSA(new double[m_state_representation.size()]);
     m_target = DoubleSA(new double[1]);
@@ -124,6 +140,10 @@ FullRLResponseHandler::FullRLResponseHandler(
 
 FullRLResponseHandler::~FullRLResponseHandler()
 {
+#ifndef NDEBUG_EVENTS
+    std::cout << "** ~FullRLResponse" << std::endl;
+#endif /* NDEBUG_EVENTS */
+
     m_trainings.clear();
     m_objectives.clear();
     m_nets.clear();
@@ -230,7 +250,7 @@ void FullRLResponseHandler::update(AckEvent *subject)
 
         index = (m_outsource) ? (entry->getOrigin()) : (edge_index_map[oldE]);
 
-#ifndef NDEBUG_EVENTS
+#ifndef NDEBUG
         std::cout << "Train NN for edge: " << index << std::endl;
 #endif /* NDEBUG_EVENTS */
 

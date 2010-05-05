@@ -22,6 +22,7 @@
 #include <iostream>
 
 #ifndef NDEBUG
+# include <cassert>
 # include <gsl/gsl_math.h>
 #endif /* NDEBUG */
 
@@ -90,6 +91,10 @@ bool Entry::operator< (const Entry& rhs)
 
 void Entry::delayed(double p_delay, double p_newArrival, boost::int32_t p_type)
 {
+#ifndef NDEBUG
+    assert(p_delay >= 0.0);
+#endif /* NDEBUG */
+
     // update the delay
     delay += p_delay;
 
@@ -184,6 +189,11 @@ int Entry::getEventHistoryLength()
 
 int Entry::popEvent()
 {
+#ifndef NDEBUG
+    assert(event_path.size() > 0);
+    assert(event_arrivals.size() > 0);
+#endif /* NDEBUG */
+
     int dest = event_path.top();
     event_path.pop();
     event_arrivals.pop();

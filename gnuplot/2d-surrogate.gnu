@@ -44,7 +44,7 @@ fi
 gnuplot << EOF
 
 set terminal pdf colour solid rounded
-set output "$DATAFILE.eps"
+set output "$DATAFILE.pdf"
 
 set datafile separator ","
 

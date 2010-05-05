@@ -1,4 +1,4 @@
-// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009, 2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -121,6 +121,10 @@ public:
             std::cout << "RL epsilon Index: " << LhsUtils::getRLEpsilonIndex(p_desArgs) << std::endl;
             std::cout << "NN momentum Index: " << LhsUtils::getNNMomentumIndex(p_desArgs) << std::endl;
             std::cout << "RL policy wpl Index: " << LhsUtils::getRlWplEtaIndex(p_desArgs) << std::endl;
+            std::cout << "CPL A(+) Index: " << LhsUtils::getCplAPosIndex(p_desArgs) << std::endl;
+            std::cout << "CPL A(-) Index: " << LhsUtils::getCplANegIndex(p_desArgs) << std::endl;
+            std::cout << "CPL r(+) Index: " << LhsUtils::getCplRPosIndex(p_desArgs) << std::endl;
+            std::cout << "CPL r(+) Index: " << LhsUtils::getCplRNegIndex(p_desArgs) << std::endl;
 #endif /* NDEBUG */
 
             if (dimensions > 0) {
@@ -166,6 +170,22 @@ public:
                 if (LhsUtils::getRlWplEtaIndex(p_desArgs) >= 0) {
                     gsl_vector_set(min, LhsUtils::getRlWplEtaIndex(p_desArgs), p_desArgs->min_rl_policy_wpl_eta);
                     gsl_vector_set(max, LhsUtils::getRlWplEtaIndex(p_desArgs), p_desArgs->max_rl_policy_wpl_eta);
+                }
+                if (LhsUtils::getCplAPosIndex(p_desArgs) >= 0) {
+                    gsl_vector_set(min, LhsUtils::getCplAPosIndex(p_desArgs), p_desArgs->min_cognitive_A_pos);
+                    gsl_vector_set(max, LhsUtils::getCplAPosIndex(p_desArgs), p_desArgs->max_cognitive_A_pos);
+                }
+                if (LhsUtils::getCplANegIndex(p_desArgs) >= 0) {
+                    gsl_vector_set(min, LhsUtils::getCplANegIndex(p_desArgs), p_desArgs->min_cognitive_A_neg);
+                    gsl_vector_set(max, LhsUtils::getCplANegIndex(p_desArgs), p_desArgs->max_cognitive_A_neg);
+                }
+                if (LhsUtils::getCplRPosIndex(p_desArgs) >= 0) {
+                    gsl_vector_set(min, LhsUtils::getCplRPosIndex(p_desArgs), p_desArgs->min_cognitive_r_pos);
+                    gsl_vector_set(max, LhsUtils::getCplRPosIndex(p_desArgs), p_desArgs->max_cognitive_r_pos);
+                }
+                if (LhsUtils::getCplRNegIndex(p_desArgs) >= 0) {
+                    gsl_vector_set(min, LhsUtils::getCplRNegIndex(p_desArgs), p_desArgs->min_cognitive_r_neg);
+                    gsl_vector_set(max, LhsUtils::getCplRNegIndex(p_desArgs), p_desArgs->max_cognitive_r_neg);
                 }
 
                 if (p_desArgs->lhs_optimal) {
@@ -240,6 +260,22 @@ public:
                 if (LhsUtils::getRlWplEtaIndex(p_desArgs) >= 0) {
                     p_desArgs->rl_policy_wpl_eta = gsl_matrix_get(
                         sample, i, LhsUtils::getRlWplEtaIndex(p_desArgs));
+                }
+                if (LhsUtils::getCplAPosIndex(p_desArgs) >= 0) {
+                    p_desArgs->cognitive_A_pos = gsl_matrix_get(
+                        sample, i, LhsUtils::getCplAPosIndex(p_desArgs));
+                }
+                if (LhsUtils::getCplANegIndex(p_desArgs) >= 0) {
+                    p_desArgs->cognitive_A_neg = gsl_matrix_get(
+                        sample, i, LhsUtils::getCplANegIndex(p_desArgs));
+                }
+                if (LhsUtils::getCplRPosIndex(p_desArgs) >= 0) {
+                    p_desArgs->cognitive_r_pos = gsl_matrix_get(
+                        sample, i, LhsUtils::getCplRPosIndex(p_desArgs));
+                }
+                if (LhsUtils::getCplRNegIndex(p_desArgs) >= 0) {
+                    p_desArgs->cognitive_r_neg = gsl_matrix_get(
+                        sample, i, LhsUtils::getCplRNegIndex(p_desArgs));
                 }
 
                 output = m_dsim.simulate(p_desArgs);

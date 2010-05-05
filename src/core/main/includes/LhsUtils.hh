@@ -1,4 +1,4 @@
-// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009, 2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -58,6 +58,10 @@ public:
     static int getRLEpsilonIndex(tDesArgsSP p_desArgs);
     static int getNNMomentumIndex(tDesArgsSP p_desArgs);
     static int getRlWplEtaIndex(tDesArgsSP p_desArgs);
+    static int getCplAPosIndex(tDesArgsSP p_desArgs);
+    static int getCplANegIndex(tDesArgsSP p_desArgs);
+    static int getCplRPosIndex(tDesArgsSP p_desArgs);
+    static int getCplRNegIndex(tDesArgsSP p_desArgs);
     static void serialiseDesign(tDesArgsSP p_desArgs, const gsl_matrix *p_design, std::string &p_filename, std::string &p_dir);
 
 private:

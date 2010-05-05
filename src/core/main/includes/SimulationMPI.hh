@@ -173,6 +173,10 @@ public:
             std::cout << "RL epsilon Index: " << LhsUtils::getRLEpsilonIndex(p_desArgs) << std::endl;
             std::cout << "NN momentum Index: " << LhsUtils::getNNMomentumIndex(p_desArgs) << std::endl;
             std::cout << "RL WPL eta Index: " << LhsUtils::getRlWplEtaIndex(p_desArgs) << std::endl;
+            std::cout << "CPL A(+) Index: " << LhsUtils::getCplAPosIndex(p_desArgs) << std::endl;
+            std::cout << "CPL A(-) Index: " << LhsUtils::getCplANegIndex(p_desArgs) << std::endl;
+            std::cout << "CPL r(+) Index: " << LhsUtils::getCplRPosIndex(p_desArgs) << std::endl;
+            std::cout << "CPL r(+) Index: " << LhsUtils::getCplRNegIndex(p_desArgs) << std::endl;
 #endif /* NDEBUG */
 
             if (dimensions > 0) {
@@ -218,6 +222,22 @@ public:
                 if (LhsUtils::getRlWplEtaIndex(p_desArgs) >= 0) {
                     gsl_vector_set(min, LhsUtils::getRlWplEtaIndex(p_desArgs), p_desArgs->min_rl_policy_wpl_eta);
                     gsl_vector_set(max, LhsUtils::getRlWplEtaIndex(p_desArgs), p_desArgs->max_rl_policy_wpl_eta);
+                }
+                if (LhsUtils::getCplAPosIndex(p_desArgs) >= 0) {
+                    gsl_vector_set(min, LhsUtils::getCplAPosIndex(p_desArgs), p_desArgs->min_cognitive_A_pos);
+                    gsl_vector_set(max, LhsUtils::getCplAPosIndex(p_desArgs), p_desArgs->max_cognitive_A_pos);
+                }
+                if (LhsUtils::getCplANegIndex(p_desArgs) >= 0) {
+                    gsl_vector_set(min, LhsUtils::getCplANegIndex(p_desArgs), p_desArgs->min_cognitive_A_neg);
+                    gsl_vector_set(max, LhsUtils::getCplANegIndex(p_desArgs), p_desArgs->max_cognitive_A_neg);
+                }
+                if (LhsUtils::getCplRPosIndex(p_desArgs) >= 0) {
+                    gsl_vector_set(min, LhsUtils::getCplRPosIndex(p_desArgs), p_desArgs->min_cognitive_r_pos);
+                    gsl_vector_set(max, LhsUtils::getCplRPosIndex(p_desArgs), p_desArgs->max_cognitive_r_pos);
+                }
+                if (LhsUtils::getCplAPosIndex(p_desArgs) >= 0) {
+                    gsl_vector_set(min, LhsUtils::getCplRNegIndex(p_desArgs), p_desArgs->min_cognitive_r_neg);
+                    gsl_vector_set(max, LhsUtils::getCplRnegIndex(p_desArgs), p_desArgs->max_cognitive_r_neg);
                 }
 
                 if (p_desArgs->lhs_optimal) {
@@ -309,6 +329,7 @@ public:
                                      << desArgsMPI.edge_prob << ","
                                      << p_desArgs->edge_fixed << ","
                                      << p_desArgs->rl << ","
+                                     << p_desArgs->rl_ci << ","
                                      << desArgsMPI.rl_q_alpha << ","
                                      << desArgsMPI.rl_q_lambda << ","
                                      << p_desArgs->rl_policy << ","
@@ -620,6 +641,30 @@ private:
                         sample, desArgsMPI.sim_num - 1, LhsUtils::getRlWplEtaIndex(p_desArgs));
                 } else {
                     desArgsMPI.rl_policy_wpl_eta = p_desArgs->rl_policy_wpl_eta;
+                }
+                if (LhsUtils::getCplAPosIndex(p_desArgs) >= 0) {
+                    desArgsMPI.cognitive_A_pos = gsl_matrix_get(
+                        sample, desArgsMPI.sim_num - 1, LhsUtils::getCplAPosIndex(p_desArgs));
+                } else {
+                    desArgsMPI.cognitive_A_pos = p_desArgs->cognitive_A_pos;
+                }
+                if (LhsUtils::getCplANegIndex(p_desArgs) >= 0) {
+                    desArgsMPI.cognitive_A_neg = gsl_matrix_get(
+                        sample, desArgsMPI.sim_num - 1, LhsUtils::getCplANegIndex(p_desArgs));
+                } else {
+                    desArgsMPI.cognitive_A_neg = p_desArgs->cognitive_A_neg;
+                }
+                if (LhsUtils::getCplRPosIndex(p_desArgs) >= 0) {
+                    desArgsMPI.cognitive_r_pos = gsl_matrix_get(
+                        sample, desArgsMPI.sim_num - 1, LhsUtils::getCplRPosIndex(p_desArgs));
+                } else {
+                    desArgsMPI.cognitive_r_pos = p_desArgs->cognitive_r_pos;
+                }
+                if (LhsUtils::getCplRNegIndex(p_desArgs) >= 0) {
+                    desArgsMPI.cognitive_r_neg = gsl_matrix_get(
+                        sample, desArgsMPI.sim_num - 1, LhsUtils::getCplRNegIndex(p_desArgs));
+                } else {
+                    desArgsMPI.cognitive_r_neg = p_desArgs->cognitive_r_neg;
                 }
         }
 };

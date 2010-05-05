@@ -161,6 +161,14 @@ CL::CL()
             std::numeric_limits<double>::max()), "set the min. eta for wpl.")
         (MAX_RL_POLICY_WPL_ETA.c_str(), po::value <double>()->default_value(
             std::numeric_limits<double>::max()), "set the max. eta for wpl.")
+        (CL_MIN_COGNITIVE_A_POS.c_str(), po::value <double>()->default_value(std::numeric_limits<double>::max()), "min. Amplitude for positive signals.")
+        (CL_MIN_COGNITIVE_A_NEG.c_str(), po::value <double>()->default_value(std::numeric_limits<double>::max()), "min. Amplitude for negative signals.")
+        (CL_MIN_COGNITIVE_R_POS.c_str(), po::value <double>()->default_value(std::numeric_limits<double>::max()), "min. Decay rate for positive signals.")
+        (CL_MIN_COGNITIVE_R_NEG.c_str(), po::value <double>()->default_value(std::numeric_limits<double>::max()), "min. Decay rate for negative signals.")
+        (CL_MAX_COGNITIVE_A_POS.c_str(), po::value <double>()->default_value(std::numeric_limits<double>::max()), "max. Amplitude for positive signals.")
+        (CL_MAX_COGNITIVE_A_NEG.c_str(), po::value <double>()->default_value(std::numeric_limits<double>::max()), "max. Amplitude for negative signals.")
+        (CL_MAX_COGNITIVE_R_POS.c_str(), po::value <double>()->default_value(std::numeric_limits<double>::max()), "max. Decay rate for positive signals.")
+        (CL_MAX_COGNITIVE_R_NEG.c_str(), po::value <double>()->default_value(std::numeric_limits<double>::max()), "max. Decay rate for negative signals.")
         ;
 
     po::options_description opt_rl("RL Configuration");
@@ -728,6 +736,46 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
             desArgs->max_rl_policy_wpl_eta = vm[MAX_RL_POLICY_WPL_ETA.c_str()].as <double>();
         }
         std::cout << "Maximum eta set to " << desArgs->max_rl_policy_wpl_eta << "." << std::endl;
+
+        if (vm.count(CL_MIN_COGNITIVE_A_POS.c_str())) {
+            desArgs->min_cognitive_A_pos = vm[CL_MIN_COGNITIVE_A_POS.c_str()].as <double>();
+        }
+        std::cout << "Minimum cpl A+ set to " << desArgs->min_cognitive_A_pos << "." << std::endl;
+
+        if (vm.count(CL_MAX_COGNITIVE_A_POS.c_str())) {
+            desArgs->max_cognitive_A_pos = vm[CL_MAX_COGNITIVE_A_POS.c_str()].as <double>();
+        }
+        std::cout << "Maximum cpl A+ set to " << desArgs->max_cognitive_A_pos << "." << std::endl;
+
+        if (vm.count(CL_MIN_COGNITIVE_A_NEG.c_str())) {
+            desArgs->min_cognitive_A_neg = vm[CL_MIN_COGNITIVE_A_NEG.c_str()].as <double>();
+        }
+        std::cout << "Minimum cpl A- set to " << desArgs->min_cognitive_A_neg << "." << std::endl;
+
+        if (vm.count(CL_MAX_COGNITIVE_A_NEG.c_str())) {
+            desArgs->max_cognitive_A_neg = vm[CL_MAX_COGNITIVE_A_NEG.c_str()].as <double>();
+        }
+        std::cout << "Maximum cpl A- set to " << desArgs->max_cognitive_A_neg << "." << std::endl;
+
+        if (vm.count(CL_MIN_COGNITIVE_R_POS.c_str())) {
+            desArgs->min_cognitive_r_pos = vm[CL_MIN_COGNITIVE_R_POS.c_str()].as <double>();
+        }
+        std::cout << "Minimum cpl r+ set to " << desArgs->min_cognitive_r_pos << "." << std::endl;
+
+        if (vm.count(CL_MAX_COGNITIVE_R_POS.c_str())) {
+            desArgs->max_cognitive_r_pos = vm[CL_MAX_COGNITIVE_R_POS.c_str()].as <double>();
+        }
+        std::cout << "Maximum cpl r+ set to " << desArgs->max_cognitive_r_pos << "." << std::endl;
+
+        if (vm.count(CL_MIN_COGNITIVE_R_NEG.c_str())) {
+            desArgs->min_cognitive_r_neg = vm[CL_MIN_COGNITIVE_R_NEG.c_str()].as <double>();
+        }
+        std::cout << "Minimum cpl r- set to " << desArgs->min_cognitive_r_neg << "." << std::endl;
+
+        if (vm.count(CL_MAX_COGNITIVE_R_NEG.c_str())) {
+            desArgs->max_cognitive_r_neg = vm[CL_MAX_COGNITIVE_R_NEG.c_str()].as <double>();
+        }
+        std::cout << "Maximum cpl r- set to " << desArgs->max_cognitive_r_neg << "." << std::endl;
     }
 
     std::cout << std::endl << "7) Expert Metrics Configuration" << std::endl;

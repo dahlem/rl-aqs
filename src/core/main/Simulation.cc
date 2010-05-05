@@ -389,6 +389,7 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
             // read the graph
             try {
                 dnet::GraphUtil::read(*graph, desArgs->graph_filename, dnet::GraphUtil::GRAPHML);
+                desArgs->net_size = boost::num_vertices(*graph);
             } catch (dnet::GraphException &ge) {
                 std::cerr << "Error: Cannot open graph file " << desArgs->graph_filename
                           << "!" << std::endl;
@@ -448,6 +449,7 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
 
         num_vertices = boost::num_vertices(*graph);
 
+        // instantiate the channels (order of addition is important)
         QueueChannel queueChannel(queue);
         GraphChannel graphChannel(*graph);
         ConfigChannel configChannel(*desArgs);
@@ -456,13 +458,9 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
         dbus.addChannel(graphChannel);
         dbus.addChannel(configChannel);
 
-        // instantiate the channels (order of addition is important)
         // instantiate the arrival channel
         ArrivalsChannel *arrivalChannel = NULL;
         Arrivals *arrivals = NULL;
-
-        dnet::VertexIndexMap vertex_index_props_map =
-            get(boost::vertex_index, *graph);
 
         if (desArgs->mfrw) {
             if (desArgs->mfrw_single) {
@@ -540,8 +538,6 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
 
         // init the crn for the departure uniform rv
         Int32SA departureCRNs = departureCRN(num_vertices);
-
-        std::pair <dnet::VertexIterator, dnet::VertexIterator> p;
 
 #ifndef NDEBUG
         std::cout << "Generate events..." << std::endl;

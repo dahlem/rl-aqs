@@ -1,4 +1,4 @@
-## Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+## Copyright (C) 2008, 2009, 2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 ##
 ## This file is free software; as a special exception the author gives
 ## unlimited permission to copy and/or distribute it, with or without
@@ -124,6 +124,24 @@ function [l, beta] = krig_likelihoodStochastic(theta, C, X, y, F, sigmaSquared, 
   l = - 0.5 * (n * log(2 * pi) + log(det(R)) + temp' * R_inv * temp); ##Staum ##eq. (14)
 endfunction
 
+function [l, beta] = krig_likelihoodStochasticS(theta, C, X, y, F, sigmaSquared, nugget = 0, p=2)
+  S = sigmaSquared * scf_gaussianm(X, theta, nugget, p) + C;
+  U = chol(S);
+
+  ## invert it via Cholesky factorization
+  L = U';
+  Linv = inv(L);
+  Sinv = Linv'*Linv;
+
+  ## the optimal beta given theta and tau2
+  beta = inv(F'*Sinv*F)*(F'*(Sinv*y)); 
+  Z = L\(y-F*beta);
+
+  ## negative log likelihood
+  n = rows(y);
+  f = (log(det(L)) + 0.5*Z'*Z + 0.5*n*log(2*pi));
+endfunction
+
 
 ## from better simulation metamodelling, the why, what, and how of
 ## stochastic kriging by Ankeman eq. (20)
@@ -189,15 +207,14 @@ function y = krig(x, X, R, beta, theta, y, F, FUN = @(x) 1, p=2)
 endfunction
 
 ## from Ankeman
-function y = krigS(x, X, R, C, sigmaSqu, theta, y, F, FUN = @(x) 1, p=2)
+function f = krigS(x, X, R, C, sigmaSqu, theta, y, F, FUN = @(x) 1, p=2)
   R = sigmaSqu * R + C;
   R_inv = cholinv(R);
   beta = ((F' * (R_inv * F))\F') * (R_inv * y);
   r = scf_gaussianu(X, x, theta, p) * sigmaSqu;
 
-  y = FUN(x) * beta + r' * R_inv * (y - F * beta);
+  f = FUN(x) * beta + r' * R_inv * (y - F * beta);
 endfunction
-
 
 ##function y = krigS(x, X, R, C, sigmaSqu, theta, y, F, FUN = @(x) 1, p=2)
 ##  R_inv = cholinv(sigmaSqu * R + C);

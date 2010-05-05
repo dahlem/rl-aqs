@@ -43,8 +43,8 @@ fi
 
 gnuplot << EOF
 
-set terminal postscript eps enhanced colour solid rounded size 2.8,2.8 10
-set output "$DATAFILE.eps"
+set terminal pdf enhanced colour solid rounded
+set output "$DATAFILE.pdf"
 
 set datafile separator ","
 
@@ -52,28 +52,25 @@ set yrange [$MINY:$MAXY]
 set xrange [$MINX:$MAXX]
 set autoscale z
 
-# output of the surface
-set pm3d at s explicit
-set grid
-set key off
-unset hidden3d
-set palette rgbformulae 22,13,-31
+unset key
 
-#set hidden3d offset 1 trianglepattern 3 undefined 1 altdiagonal bentover
-#set style data lines
-#set contour base
-#set cntrparam levels 10
-#set pm3d
-# set grid nopolar
-# set grid xtics ytics ztics
-#unset key
+# output of the surface
+#set pm3d at s explicit
+#set grid
+##set key off
+#unset hidden3d
+#set palette rgbformulae 22,13,-31
+
+# set pm3d depthorder explicit
 
 # change the angle the plot is shown
 set view , , 1, 1.5
-#set palette rgb 10,13,31
+set palette rgb 10,13,31
 set title "$TITLE"
 set xlabel "$XLABEL"
 set ylabel "$YLABEL"
 
-splot "$DATAFILE.dat" u 1:2:3:4 w pm3d
+
+splot "$DATAFILE.dat" u 1:2:3:4 w pm3d, \
+      "1-avgEventSys-X.dat" u 1:2:3 w p lt rgb "black"
 EOF
