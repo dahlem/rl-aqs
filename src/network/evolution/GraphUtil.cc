@@ -191,6 +191,7 @@ boost::dynamic_properties GraphUtil::getProperties(Graph &p_graph)
     dp.property(ACTUAL_REWARD, get(vertex_actual_reward, p_graph));
     dp.property(BEST_RESPONSE, get(vertex_best_response, p_graph));
     dp.property(VERTEX_NN_LOSS, get(vertex_v_nn_loss, p_graph));
+    dp.property(VERTEX_COEFF_VAR, get(vertex_coeff_var, p_graph));
     dp.property(EDGE_NN_LOSS, get(edge_e_nn_loss, p_graph));
     dp.property(EDGE_EMOTION, get(edge_emotion, p_graph));
     dp.property(EDGE_RMIN, get(edge_rmin, p_graph));

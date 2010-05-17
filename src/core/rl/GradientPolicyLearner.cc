@@ -57,11 +57,25 @@ namespace rl
 
 
 GradientPolicyLearner::GradientPolicyLearner(dcore::DesBus &p_bus)
-    : m_graph((dynamic_cast<dcore::GraphChannel&> (p_bus.getChannel(dcore::id::GRAPH_CHANNEL))).getGraph())
+    : m_graph((dynamic_cast<dcore::GraphChannel&> (p_bus.getChannel(dcore::id::GRAPH_CHANNEL))).getGraph()),
+      m_lastTime(new double[boost::num_edges(m_graph)])
 {
     dcore::desArgs_t config = (dynamic_cast<dcore::ConfigChannel&> (p_bus.getChannel(dcore::id::CONFIG_CHANNEL))).getConfig();
     m_epsilon = config.rl_policy_epsilon;
     m_eta = config.rl_policy_wpl_eta;
+    m_ANeg = config.cognitive_A_neg;
+    m_APos = config.cognitive_A_pos;
+    m_rNeg = config.cognitive_r_neg;
+    m_rPos = config.cognitive_r_pos;
+
+    edge_weight_map = get(boost::edge_weight, m_graph);
+    edge_emotion_map = get(edge_emotion, m_graph);
+    edge_rmin_map = get(edge_rmin, m_graph);
+    edge_rmax_map = get(edge_rmax, m_graph);
+    edge_e_pos_map = get(edge_e_pos, m_graph);
+    edge_e_neg_map = get(edge_e_neg, m_graph);
+    edge_index_map = get(edge_eindex, m_graph);
+    edge_q_val_map = get(edge_q_val, m_graph);
 
     boost::uint32_t seed = dsample::Seeds::getInstance().getSeed();
     boost::uint32_t pol_uniform_rng_index
@@ -75,8 +89,9 @@ GradientPolicyLearner::GradientPolicyLearner(dcore::DesBus &p_bus)
     dsample::CRN::getInstance().log(seed, "simplex uniform");
     m_simplex_rng = dsample::CRN::getInstance().get(simplex_rng_index);
 
-    edge_weight_map = get(boost::edge_weight, m_graph);
-    edge_emotion_map = get(edge_emotion, m_graph);
+    for (boost::uint16_t i = 0; i < boost::num_edges(m_graph); ++i) {
+        m_lastTime[i] = 0.0;
+    }
 }
 
 
@@ -100,21 +115,62 @@ boost::uint16_t GradientPolicyLearner::operator() (
         double sum = 0.0;
 
         // 1. calc the mean of the q-values
+        double q_mean = 0.0;
         for (boost::uint16_t i = 0; i < p_values.size(); ++i) {
             dnet::Edge edge = boost::edge(
                 boost::vertex(p_source, m_graph),
                 boost::vertex(p_values[i].first, m_graph),
                 m_graph).first;
             orig[i] = edge_weight_map[edge];
-            diff[i] = edge_emotion_map[edge];
+            q_mean += p_values[i].second * orig[i];
         }
 
-        // 2. for each action
+        // 2. decay the previous signals
         for (boost::uint16_t i = 0; i < p_values.size(); ++i) {
-            diff[i] = diff[i] * m_eta * orig[i];
+            dnet::Edge edge = boost::edge(
+                boost::vertex(p_source, m_graph),
+                boost::vertex(p_values[i].first, m_graph),
+                m_graph).first;
+            double time_diff = p_attr.currentTime - m_lastTime[edge_index_map[edge]];
+            edge_e_pos_map[edge] = edge_e_pos_map[edge] * exp(m_rPos * time_diff);
+            edge_e_neg_map[edge] = edge_e_neg_map[edge] * exp(m_rNeg * time_diff);
+            m_lastTime[edge_index_map[edge]] = p_attr.currentTime;
+        }
 
-            // 2.1. calculate new policy
-            gradient[i] = orig[i] + diff[i];
+        // 3. for each action
+        for (boost::uint16_t i = 0; i < p_values.size(); ++i) {
+            dnet::Edge e = boost::edge(
+                boost::vertex(p_source, m_graph),
+                boost::vertex(p_values[i].first, m_graph),
+                m_graph).first;
+
+            // 3.1. calc the difference between current Q and average Q
+            double signal = p_values[i].second - q_mean;
+
+            // 3.2 update the +/- -ve signals
+            if (signal > 0) {
+                edge_e_pos_map[e] = edge_e_pos_map[e] + m_APos * signal;
+            } else {
+                edge_e_neg_map[e] = edge_e_neg_map[e] + m_ANeg * signal;
+            }
+
+            // 3.3 update the rmin, rmax values
+            if (edge_rmin_map[e] > signal) {
+                edge_rmin_map[e] = signal;
+            }
+            if (edge_rmax_map[e] < signal) {
+                edge_rmax_map[e] = signal;
+            }
+
+            // 3.4 bound the signals
+            double posSignal = (edge_e_pos_map[e] > edge_rmax_map[e]) ? edge_rmax_map[e] : edge_e_pos_map[e];
+            double negSignal = (edge_e_neg_map[e] < edge_rmin_map[e]) ? edge_rmin_map[e] : edge_e_neg_map[e];
+            edge_emotion_map[e] = posSignal + negSignal;
+
+            diff[i] = edge_emotion_map[e];
+
+            // 2.3. calculate the gradient
+            gradient[i] = orig[i] + m_eta * diff[i];
         }
 
 #if !defined(NDEBUG_WPL) || !defined(NDEBUG_EVENTS)

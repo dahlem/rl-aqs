@@ -139,7 +139,7 @@ function [l, beta] = krig_likelihoodStochasticS(theta, C, X, y, F, sigmaSquared,
 
   ## negative log likelihood
   n = rows(y);
-  f = (log(det(L)) + 0.5*Z'*Z + 0.5*n*log(2*pi));
+  l = (log(det(L)) + 0.5*Z'*Z + 0.5*n*log(2*pi));
 endfunction
 
 

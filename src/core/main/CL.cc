@@ -227,6 +227,8 @@ CL::CL()
         (CL_EXPERT_NEGATIVE.c_str(), po::value <bool>()->default_value(false), "Set the negative expert metric.")
         (CL_REGRET_ABSOLUTE.c_str(), po::value <bool>()->default_value(false), "Set the absolute regret metric.")
         (CL_INCENTIVE_DEVIATE.c_str(), po::value <bool>()->default_value(false), "Set the incentive to deviate metric.")
+        (CL_COEFF_VAR.c_str(), po::value <bool>()->default_value(false), "Set the coefficient of variation metric.")
+        (CL_COEFF_VAR_WINDOW.c_str(), po::value <boost::uint16_t>()->default_value(100), "Set the window for the coefficient of variation metric.")
         ;
 
     po::options_description opt_mfrw("Multifractal Random Walk Configuration");
@@ -808,6 +810,16 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
         desArgs->incentive_deviate = vm[CL_INCENTIVE_DEVIATE.c_str()].as <bool>();
     }
     std::cout << "Incentive to Deviate enabled: " << desArgs->incentive_deviate << std::endl;
+
+    if (vm.count(CL_COEFF_VAR.c_str())) {
+        desArgs->coefficient_variation = vm[CL_COEFF_VAR.c_str()].as <bool>();
+    }
+    std::cout << "Coefficient of variation enabled: " << desArgs->coefficient_variation << std::endl;
+
+    if (vm.count(CL_COEFF_VAR_WINDOW.c_str())) {
+        desArgs->coefficient_variation_window = vm[CL_COEFF_VAR_WINDOW.c_str()].as <boost::uint16_t>();
+    }
+    std::cout << "Coefficient of variation window: " << desArgs->coefficient_variation_window << std::endl;
 
     std::cout << std::endl << "8) Multifractal Random Walk Configuration" << std::endl;
     if (vm.count(CL_MFRW.c_str())) {

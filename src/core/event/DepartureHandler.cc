@@ -96,7 +96,8 @@ void DepartureHandler::update(DepartureEvent *subject)
 
     if (degree > 0) {
         dcommon::Entry *new_entry = new dcommon::Entry(*entry);
-        boost::int32_t destination = m_selection(entry->getDestination());
+        drl::PAttr attr(0.0, 0.0, entry->getArrival(), drl::PolicyContext::selection());
+        boost::int32_t destination = m_selection(entry->getDestination(), attr);
 
 #ifndef NDEBUG
         assert(destination >= 0);

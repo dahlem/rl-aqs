@@ -117,7 +117,8 @@ bool LadderQueue::push(Entry *p_entry) throw (QueueException)
         std::cout << "LQ -- Inserted at top." << std::endl;
 #endif /* NDEBUG_EVENTS */
     } else {
-        if (p_entry->getArrival() <= m_bottom->getMaxTS()) {
+        if ((p_entry->getArrival() <= m_bottom->getMaxTS())
+            && (p_entry->getArrival() >= m_bottom->getMinTS())) {
             m_bottom->push(p_entry);
 
 #ifndef NDEBUG_QUEUE

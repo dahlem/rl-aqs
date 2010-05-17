@@ -53,7 +53,7 @@ public:
     template <typename Activation, typename ActivationOutput>
     static boost::shared_ptr <FeedforwardNetwork <Activation, ActivationOutput> >
     createNNet(boost::uint16_t p_num_inputs, boost::uint16_t p_num_hidden,
-               boost::uint16_t p_num_outputs, boost::uint32_t p_uniform_idx) 
+               boost::uint16_t p_num_outputs, boost::uint32_t p_uniform_idx)
         {
             return boost::shared_ptr <FeedforwardNetwork <Activation, ActivationOutput> >
                 (new FeedforwardNetwork <Activation, ActivationOutput>(p_num_inputs, p_num_hidden, p_num_outputs, p_uniform_idx));
@@ -61,7 +61,7 @@ public:
 
     template <typename Activation, typename ActivationOutput>
     static boost::shared_ptr <MSE <boost::shared_ptr <FeedforwardNetwork <Activation, ActivationOutput> >, Activation, ActivationOutput> >
-    createDefaultMSEObjective(boost::shared_ptr <FeedforwardNetwork <Activation, ActivationOutput> > p_net) 
+    createDefaultMSEObjective(boost::shared_ptr <FeedforwardNetwork <Activation, ActivationOutput> > p_net)
         {
             LossPolicySP policy = LossPolicySP(new DefaultLossPolicy());
             return boost::shared_ptr <MSE <boost::shared_ptr <FeedforwardNetwork <Activation, ActivationOutput> >, Activation, ActivationOutput> >
@@ -70,7 +70,7 @@ public:
 
     template <typename Activation, typename ActivationOutput>
     static boost::shared_ptr <MSE <boost::shared_ptr <FeedforwardNetwork <Activation, ActivationOutput> >, Activation, ActivationOutput> >
-    createSlidingWindowMSEObjective(boost::shared_ptr <FeedforwardNetwork <Activation, ActivationOutput> > p_net, int p_window) 
+    createSlidingWindowMSEObjective(boost::shared_ptr <FeedforwardNetwork <Activation, ActivationOutput> > p_net, int p_window)
         {
             LossPolicySP policy = LossPolicySP(new SlidingWindowLossPolicy(p_window));
             return boost::shared_ptr <MSE <boost::shared_ptr <FeedforwardNetwork <Activation, ActivationOutput> >, Activation, ActivationOutput> >
@@ -98,8 +98,8 @@ public:
             return TrainingSP(new Backpropagation <boost::shared_ptr <FeedforwardNetwork <Activation, ActivationOutput> >, boost::shared_ptr <MSE <boost::shared_ptr <FeedforwardNetwork <Activation, ActivationOutput> >, Activation, ActivationOutput> > >
                               (p_nnet, p_objective, p_trainingRate, p_momentum, p_errtol));
         }
-    
-    
+
+
 
 private:
     NNetFactory()

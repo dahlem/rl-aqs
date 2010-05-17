@@ -30,6 +30,8 @@
 #endif /* __STDC_CONSTANT_MACROS */
 
 
+#include <boost/scoped_array.hpp>
+
 #include <gsl/gsl_randist.h>
 
 #include "CRN.hh"
@@ -49,6 +51,8 @@ namespace des
 namespace rl
 {
 
+typedef boost::scoped_array <double> tDoubleSA;
+
 class GradientPolicyLearner : public Policy
 {
 public:
@@ -62,13 +66,27 @@ public:
 
 private:
     dnet::Graph &m_graph;
+    tDoubleSA m_lastTime;
+
+    // derived fields
     double m_epsilon;
     double m_eta;
-    dsample::tGslRngSP m_uniform_rng;
-    dsample::tGslRngSP m_simplex_rng;
+    double m_ANeg;
+    double m_APos;
+    double m_rNeg;
+    double m_rPos;
 
     dnet::EdgeWeightMap edge_weight_map;
     dnet::EdgeEmotionMap edge_emotion_map;
+    dnet::EdgeRMinMap edge_rmin_map;
+    dnet::EdgeRMaxMap edge_rmax_map;
+    dnet::EdgeEPosMap edge_e_pos_map;
+    dnet::EdgeENegMap edge_e_neg_map;
+    dnet::EdgeIndexMap edge_index_map;
+    dnet::EdgeQValueMap edge_q_val_map;
+
+    dsample::tGslRngSP m_uniform_rng;
+    dsample::tGslRngSP m_simplex_rng;
 };
 
 

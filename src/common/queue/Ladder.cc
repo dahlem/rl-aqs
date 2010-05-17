@@ -189,7 +189,7 @@ boost::uint32_t Ladder::bucket(double p_TS, boost::uint32_t p_rung)
     double diff = 0.0;
 
     // if the difference is too small we set it to zero
-    if ((p_TS - m_RStart[p_rung]) <=0) {
+    if ((p_TS - m_RStart[p_rung]) <= 0.0) {
         diff = 0.0;
     } else {
         diff = (p_TS - m_RStart[p_rung]);
@@ -203,8 +203,11 @@ boost::uint32_t Ladder::bucket(double p_TS, boost::uint32_t p_rung)
     if (retVal < m_currentBucket[p_rung]) {
         retVal++;
     }
-    if (retVal == m_buckets[p_rung]) {
-        retVal--;
+    if (retVal >= m_buckets[p_rung]) {
+        retVal = m_buckets[p_rung] - 1;
+    }
+    if (retVal > m_currentBucket[p_rung]) {
+        retVal = m_currentBucket[p_rung];
     }
 
 #ifndef NDEBUG_QUEUE
@@ -212,10 +215,12 @@ boost::uint32_t Ladder::bucket(double p_TS, boost::uint32_t p_rung)
 #endif /* NDEBUG */
 
 #ifndef NDEBUG
-    assert(retVal >= m_currentBucket[p_rung]);
-    if (retVal >= m_buckets[p_rung]) {
-        std::cout << "retVal: " << retVal << ", buckets: " << m_buckets[p_rung] << std::endl;
+    if ((retVal >= m_buckets[p_rung]) || (retVal < m_currentBucket[p_rung])) {
+        std::cout << "retVal: " << retVal << ", buckets: " << m_buckets[p_rung] << ", current bucket: "
+                  << m_currentBucket[p_rung] << ", events: " << m_events[p_rung] << " on rung: "
+                  << p_rung << std::endl;
     }
+    assert(retVal >= m_currentBucket[p_rung]);
     assert(retVal < m_buckets[p_rung]);
 #endif /* NDEBUG */
 

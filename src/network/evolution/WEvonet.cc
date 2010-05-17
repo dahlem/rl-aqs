@@ -122,6 +122,8 @@ tGraphSP WEvonet::createBBVGraph(boost::uint32_t p_size, boost::uint32_t max_edg
         = get(vertex_best_response, *g);
     VertexNNLossMap vertex_nn_loss_map
         = get(vertex_v_nn_loss, *g);
+    VertexCoeffVarMap vertex_coeff_var_map
+        = get(vertex_coeff_var, *g);
     EdgeNNLossMap edge_nn_loss_map
         = get(edge_e_nn_loss, *g);
     EdgeEmotionMap edge_emotion_map
@@ -166,6 +168,7 @@ tGraphSP WEvonet::createBBVGraph(boost::uint32_t p_size, boost::uint32_t max_edg
     vertex_actual_reward_map[v1] = 0.0;
     vertex_best_response_map[v1] = 0.0;
     vertex_nn_loss_map[v1] = 0.0;
+    vertex_coeff_var_map[v1] = 0.0;
 
     advance(p_size - 1, g, num_edges_rng, uniform_rng, vertex_arrival_rng,
             fixed_edge_weight, max_arrival_rate, boost_arrival, boost_edge, max_edges);
@@ -178,7 +181,7 @@ tGraphSP WEvonet::createBBVGraph(boost::uint32_t p_size, boost::uint32_t max_edg
         edge_nn_loss_map[e] = 0.0;
         edge_emotion_map[e] = 0.0;
         edge_rmin_map[e] = 0.0;
-        edge_rmax_map[e] = std::numeric_limits<double>::max();
+        edge_rmax_map[e] = 0.0;
         edge_e_pos_map[e] = 0.0;
         edge_e_neg_map[e] = 0.0;
     }
@@ -249,6 +252,8 @@ void WEvonet::advance(boost::uint32_t p_steps, tGraphSP g,
         = get(vertex_best_response, *g);
     VertexNNLossMap vertex_nn_loss_map
         = get(vertex_v_nn_loss, *g);
+    VertexCoeffVarMap vertex_coeff_var_map
+        = get(vertex_coeff_var, *g);
     EdgeNNLossMap edge_nn_loss_map
         = get(edge_e_nn_loss, *g);
     EdgeEmotionMap edge_emotion_map
@@ -324,6 +329,7 @@ void WEvonet::advance(boost::uint32_t p_steps, tGraphSP g,
         vertex_actual_reward_map[v] = 0.0;
         vertex_best_response_map[v] = 0.0;
         vertex_nn_loss_map[v] = 0.0;
+        vertex_coeff_var_map[v] = 0.0;
 
         // select vertices to connect to
         boost::uint32_t edges = 0;
@@ -356,7 +362,7 @@ void WEvonet::advance(boost::uint32_t p_steps, tGraphSP g,
                         edge_nn_loss_map[e.first] = 0.0;
                         edge_emotion_map[e.first] = 0.0;
                         edge_rmin_map[e.first] = 0.0;
-                        edge_rmax_map[e.first] = std::numeric_limits<double>::max();
+                        edge_rmax_map[e.first] = 0.0;
                         edge_e_pos_map[e.first] = 0.0;
                         edge_e_neg_map[e.first] = 0.0;
 
@@ -530,6 +536,8 @@ tGraphSP WEvonet::createERGraph(boost::uint32_t p_size, double fixed_edge_weight
         = get(vertex_best_response, *g);
     VertexNNLossMap vertex_nn_loss_map
         = get(vertex_v_nn_loss, *g);
+    VertexCoeffVarMap vertex_coeff_var_map
+        = get(vertex_coeff_var, *g);
     EdgeNNLossMap edge_nn_loss_map
         = get(edge_e_nn_loss, *g);
     EdgeEmotionMap edge_emotion_map
@@ -578,6 +586,7 @@ tGraphSP WEvonet::createERGraph(boost::uint32_t p_size, double fixed_edge_weight
         vertex_actual_reward_map[*p_v.first] = 0.0;
         vertex_best_response_map[*p_v.first] = 0.0;
         vertex_nn_loss_map[*p_v.first] = 0.0;
+        vertex_coeff_var_map[*p_v.first] = 0.0;
     }
 
     // assign edge indeces
@@ -589,7 +598,7 @@ tGraphSP WEvonet::createERGraph(boost::uint32_t p_size, double fixed_edge_weight
         edge_nn_loss_map[e] = 0.0;
         edge_emotion_map[e] = 0.0;
         edge_rmin_map[e] = 0.0;
-        edge_rmax_map[e] = std::numeric_limits<double>::max();
+        edge_rmax_map[e] = 0.0;
         edge_e_pos_map[e] = 0.0;
         edge_e_neg_map[e] = 0.0;
     }
@@ -651,6 +660,7 @@ tGraphSP WEvonet::createERGraph(boost::uint32_t p_size, double fixed_edge_weight
         vertex_actual_reward_map[*p_v.first] = 0.0;
         vertex_best_response_map[*p_v.first] = 0.0;
         vertex_nn_loss_map[*p_v.first] = 0.0;
+        vertex_coeff_var_map[*p_v.first] = 0.0;
     }
 
     // re-assign edge indeces
@@ -662,7 +672,7 @@ tGraphSP WEvonet::createERGraph(boost::uint32_t p_size, double fixed_edge_weight
         edge_nn_loss_map[e] = 0.0;
         edge_emotion_map[e] = 0.0;
         edge_rmin_map[e] = 0.0;
-        edge_rmax_map[e] = std::numeric_limits<double>::max();
+        edge_rmax_map[e] = 0.0;
         edge_e_pos_map[e] = 0.0;
         edge_e_neg_map[e] = 0.0;
     }

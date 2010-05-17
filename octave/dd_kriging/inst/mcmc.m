@@ -1,4 +1,4 @@
-## Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+## Copyright (C) 2008, 2009, 2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 ##
 ## This file is free software; as a special exception the author gives
 ## unlimited permission to copy and/or distribute it, with or without
@@ -573,7 +573,7 @@ function [chain, acceptanceRate] = mcmc_mhgibbsStochastic3(x0_theta, X, y, C, x0
     batchaccept(i) = 0;
   endfor
 
-  [q_old, x.beta] = krig_likelihoodStochastic(logitinv(x.theta, aTheta, bTheta),C,X, y, F, logitinv(x.sigma, aSigma, bSigma),nugget,p);
+  [q_old, x.beta] = krig_likelihoodStochasticS(logitinv(x.theta, aTheta, bTheta),C,X, y, F, logitinv(x.sigma, aSigma, bSigma),nugget,p);
   phi1_cand = logitinv(x.theta, aTheta, bTheta);
   phi2_cand = logitinv(x.sigma, aSigma, bSigma);
   pi_old = sum(log(phi1_cand - aTheta) + log(bTheta - phi1_cand)) + sum(log(phi2_cand - aSigma) + log(bSigma - phi2_cand));
@@ -590,7 +590,7 @@ function [chain, acceptanceRate] = mcmc_mhgibbsStochastic3(x0_theta, X, y, C, x0
         x.theta(thetas) = normrnd(x.theta(thetas), exp(tuning(thetas)));
 
         ## step 2: calcuate the probability of move
-        [q_new, x.beta] = krig_likelihoodStochastic(logitinv(x.theta, aTheta, bTheta),C,X, y, F, logitinv(x.sigma, aSigma, bSigma),nugget,p);
+        [q_new, x.beta] = krig_likelihoodStochasticS(logitinv(x.theta, aTheta, bTheta),C,X, y, F, logitinv(x.sigma, aSigma, bSigma),nugget,p);
 	phi1_cand = logitinv(x.theta, aTheta, bTheta);
 	phi2_cand = logitinv(x.sigma, aSigma, bSigma);
 	pi_new = sum(log(phi1_cand - aTheta) + log(bTheta - phi1_cand)) + sum(log(phi2_cand - aSigma) + log(bSigma - phi2_cand));
@@ -620,7 +620,7 @@ function [chain, acceptanceRate] = mcmc_mhgibbsStochastic3(x0_theta, X, y, C, x0
       x.sigma = normrnd(x.sigma, exp(tuning(dims)));
 
       ## step 2: calcuate the probability of move
-      [q_new, x.beta] = krig_likelihoodStochastic(logitinv(x.theta, aTheta, bTheta), C,X, y, F, logitinv(x.sigma, aSigma, bSigma),nugget,p);
+      [q_new, x.beta] = krig_likelihoodStochasticS(logitinv(x.theta, aTheta, bTheta), C,X, y, F, logitinv(x.sigma, aSigma, bSigma),nugget,p);
       phi1_cand = logitinv(x.theta, aTheta, bTheta);
       phi2_cand = logitinv(x.sigma, aSigma, bSigma);
       pi_new = sum(log(phi1_cand - aTheta) + log(bTheta - phi1_cand)) + sum(log(phi2_cand - aSigma) + log(bSigma - phi2_cand));

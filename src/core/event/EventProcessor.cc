@@ -102,10 +102,6 @@ bool EventProcessor::process()
 
             double newTime = entry->getArrival();
 
-#ifndef NDEBUG
-            assert(newTime >= m_oldTime);
-#endif /* NDEBUG */
-
             // correct a possible floating point error
             if (newTime < m_oldTime) {
 #ifndef NDEBUG
@@ -114,6 +110,7 @@ bool EventProcessor::process()
                           << ", old Time: " << m_oldTime
                           << " to " << m_oldTime + std::numeric_limits<double>::epsilon()
                           << std::endl;
+                assert(newTime >= m_oldTime);
 #endif /* NDEBUG */
                 newTime = m_oldTime + std::numeric_limits<double>::epsilon();
                 entry->setArrival(newTime);

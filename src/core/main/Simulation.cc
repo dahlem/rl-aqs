@@ -54,9 +54,10 @@ namespace fs = boost::filesystem;
 #include "ArrivalHandler.hh"
 #include "Arrivals.hh"
 #include "ArrivalsChannel.hh"
-#include "CJYArrivals.hh"
 #include "BoltzmannPolicy.hh"
 #include "CL.hh"
+#include "CJYArrivals.hh"
+#include "CoefficientVariationHandler.hh"
 #include "CognitiveValueHandler.hh"
 #include "ConfigChannel.hh"
 #include "DefaultResponseHandler.hh"
@@ -153,6 +154,7 @@ typedef boost::shared_ptr<ExpertPositiveHandler> tExpertPositiveHandlerSP;
 typedef boost::shared_ptr<ExpertNegativeHandler> tExpertNegativeHandlerSP;
 typedef boost::shared_ptr<ResponseStatsHandler> tResponseStatsHandlerSP;
 typedef boost::shared_ptr<CognitiveValueHandler> tCognitiveValueHandlerSP;
+typedef boost::shared_ptr<CoefficientVariationHandler> tCoefficientVariationHandlerSP;
 
 
 Int32SA arrivalCRN(boost::uint16_t p_num_vertices)
@@ -630,11 +632,11 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
         AckEvent ackEvent;
 
         // configure the cognitive value handler
-        tCognitiveValueHandlerSP cognitiveValHandler;
-        if (desArgs->rl_policy == 5) {
-            cognitiveValHandler = tCognitiveValueHandlerSP(new CognitiveValueHandler(dbus));
-            ackEvent.attach(*cognitiveValHandler);
-        }
+        // tCognitiveValueHandlerSP cognitiveValHandler;
+        // if (desArgs->rl_policy == 5) {
+        //     cognitiveValHandler = tCognitiveValueHandlerSP(new CognitiveValueHandler(dbus));
+        //     ackEvent.attach(*cognitiveValHandler);
+        // }
 
         // configure the expert metrics
         tExpertNormalHandlerSP expertNormalHandler;
@@ -714,6 +716,12 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
         }
 
         ackEvent.attach(ackHandler);
+
+        tCoefficientVariationHandlerSP coeffVarHandler;
+        if (desArgs->coefficient_variation) {
+            coeffVarHandler = tCoefficientVariationHandlerSP(new CoefficientVariationHandler(dbus));
+            ackEvent.attach(*coeffVarHandler);
+        }
 
         // instantiate the event processor and set the events
         EventProcessor processor(dbus, adminEvent, preAnyEvent, postAnyEvent, arrivalEvent,

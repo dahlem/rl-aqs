@@ -57,7 +57,7 @@ public:
     virtual ~RandomSelection()
         {}
 
-    boost::int32_t operator() (boost::int32_t p_source);
+    boost::int32_t operator() (boost::int32_t p_source, PAttr p_attr);
 
 private:
     dnet::Graph &m_graph;

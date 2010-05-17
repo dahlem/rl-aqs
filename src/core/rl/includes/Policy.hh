@@ -1,4 +1,4 @@
-// Copyright (C) 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2009, 2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -75,11 +75,14 @@ struct PolicyContext
 
 struct PAttr
 {
-    explicit PAttr(double p_tau, PolicyContext p_context)
-        : tau(p_tau), context(p_context)
+    explicit PAttr(double p_tau, double p_reward, double p_currentTime,
+                   PolicyContext p_context)
+        : tau(p_tau), reward(p_reward), currentTime(p_currentTime), context(p_context)
         {}
 
     double tau; // boltzmann policy temperature
+    double reward;
+    double currentTime;
     PolicyContext context; // 1=selection, 2=learning
 };
 

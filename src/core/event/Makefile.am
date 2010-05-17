@@ -49,6 +49,7 @@ libcoreevent_la_SOURCES =                                                  \
 	SystemStatisticsHandler.cc                                         \
 	RollingSystemStatsAdminHandler.cc                                  \
 	CognitiveValueHandler.cc                                           \
+	CoefficientVariationHandler.cc                                     \
 	RLResponseHandler.cc
 
 libcoreevent_la_CPPFLAGS =                                                 \

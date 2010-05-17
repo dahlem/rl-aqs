@@ -229,7 +229,8 @@ void FullRLResponseHandler::update(AckEvent *subject)
         }
 
         // retrieve new action
-        drl::PAttr attr(0.0, drl::PolicyContext::learning());
+        drl::PAttr attr(0.0, entry->getReward(), entry->getArrival(),
+                        drl::PolicyContext::learning());
         newAction = m_policy(entry->getDestination(), values, attr);
 
 #ifndef NDEBUG_EVENTS
@@ -250,7 +251,7 @@ void FullRLResponseHandler::update(AckEvent *subject)
 
         index = (m_outsource) ? (entry->getOrigin()) : (edge_index_map[oldE]);
 
-#ifndef NDEBUG
+#ifndef NDEBUG_EVENTS
         std::cout << "Train NN for edge: " << index << std::endl;
 #endif /* NDEBUG_EVENTS */
 
@@ -289,14 +290,6 @@ void FullRLResponseHandler::update(AckEvent *subject)
 #endif /* NDEBUG_EVENTS */
 
         edge_q_val_map[e] = qStatsSA[index].mean();
-
-        if (m_nn_loss_serialise) {
-            if (m_outsource) {
-                edge_nn_loss_map[e] = m_objectives[edge_index_map[e]]->error();
-            } else {
-                vertex_nn_loss_map[boost::vertex(newAction, m_graph)] = m_objectives[newAction]->error();
-            }
-        }
     }
 
     // set new action

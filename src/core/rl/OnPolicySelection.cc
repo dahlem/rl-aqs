@@ -49,7 +49,7 @@ OnPolicySelection::OnPolicySelection(
 }
 
 
-boost::int32_t OnPolicySelection::operator() (boost::int32_t p_source)
+boost::int32_t OnPolicySelection::operator() (boost::int32_t p_source, PAttr p_attr)
 {
 #ifndef NDEBUG_EVENTS
     std::cout << "** OnPolicy Selection" << std::endl;
@@ -97,7 +97,7 @@ boost::int32_t OnPolicySelection::operator() (boost::int32_t p_source)
 #endif /* NDEBUG_EVENTS */
         }
 
-        PAttr attr(0.0, PolicyContext::selection());
+        PAttr attr(0.0, 0.0, p_attr.currentTime, PolicyContext::selection());
         destination = m_policy(p_source, values, attr);
     }
 

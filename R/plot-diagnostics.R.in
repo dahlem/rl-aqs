@@ -1,4 +1,4 @@
-## Copyright (C) 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+## Copyright (C) 2009, 2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 ##
 ## This file is free software; as a special exception the author gives
 ## unlimited permission to copy and/or distribute it, with or without
@@ -39,11 +39,11 @@ des.diagnostic.sum <- function(g, simNum, replications) {
     ## calc mean and standard error
     return(list(g=g,
                 meanResponse=mean(dflocal$eventInSystemTimes),
-                seResponse=(sd(dflocal$eventInSystemTimes) / replications),
+                seResponse=(sd(dflocal$eventInSystemTimes) / sqrt(replications)),
                 meanDelay=mean(dflocal$averageDelayInQueue),
-                seDelay=(sd(dflocal$averageDelayInQueue) / replications),
+                seDelay=(sd(dflocal$averageDelayInQueue) / sqrt(replications)),
                 meanUtilisation=mean(dflocal$utilisation),
-                seUtilisation=(sd(dflocal$utilisation) / replications)
+                seUtilisation=(sd(dflocal$utilisation) / sqrt(replications))
                 ))
 }
 
@@ -74,14 +74,14 @@ des.diagnostic.plots <- function(cl, simNum, replications, graphs, stopTime, ps=
   sortedResult <- diagnostics[order(unlist(diagnostics[,1])), ]
   df$time = seq(1, graphs) * interval;
   df$meanResponse = sortedResult[,2]
-  df$uclResponse = df$meanResponse + 1.96 * sortedResult[,3]
-  df$lclResponse = df$meanResponse - 1.96 * sortedResult[,3]
+  df$uclResponse = df$meanResponse + qt(0.975,df=replications-1) * sortedResult[,3]
+  df$lclResponse = df$meanResponse - qt(0.975,df=replications-1) * sortedResult[,3]
   df$meanDelay = sortedResult[,4]
-  df$uclDelay = df$meanDelay + 1.96 * sortedResult[,5]
-  df$lclDelay = df$meanDelay - 1.96 * sortedResult[,5]
+  df$uclDelay = df$meanDelay + qt(0.975,df=replications-1) * sortedResult[,5]
+  df$lclDelay = df$meanDelay - qt(0.975,df=replications-1) * sortedResult[,5]
   df$meanUtilisation = sortedResult[,6]
-  df$uclUtil = df$meanUtilisation + 1.96 * sortedResult[,7]
-  df$lclUtil = df$meanUtilisation - 1.96 * sortedResult[,7]
+  df$uclUtil = df$meanUtilisation + qt(0.975,df=replications-1) * sortedResult[,7]
+  df$lclUtil = df$meanUtilisation - qt(0.975,df=replications-1) * sortedResult[,7]
 
   if (ps) {
     des.pdf(paste(simNum, "/graph-response-diagnostic-evo-plot.pdf", sep=""))

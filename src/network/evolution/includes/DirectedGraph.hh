@@ -263,6 +263,12 @@ enum graph_system_num_events_t { graph_system_num_events = 1148 };
 enum graph_system_processing_time_t { graph_system_processing_time = 1149 };
 
 
+/** @enum vertex_coeff_var_t
+ * This enum extends the vertex properties by a coefficient of variation argument
+ */
+enum vertex_coeff_var_t { vertex_coeff_var = 1150 };
+
+
 
 // install the vertex service rate property
 namespace boost
@@ -293,6 +299,7 @@ BOOST_INSTALL_PROPERTY(vertex, incentive_deviate);
 BOOST_INSTALL_PROPERTY(vertex, actual_reward);
 BOOST_INSTALL_PROPERTY(vertex, best_response);
 BOOST_INSTALL_PROPERTY(vertex, v_nn_loss);
+BOOST_INSTALL_PROPERTY(vertex, coeff_var);
 BOOST_INSTALL_PROPERTY(graph, generator);
 BOOST_INSTALL_PROPERTY(edge, q_val);
 BOOST_INSTALL_PROPERTY(edge, eindex);
@@ -442,10 +449,15 @@ typedef boost::property <vertex_best_response_t, double, VertexActualRewardPrope
  */
 typedef boost::property <vertex_v_nn_loss_t, double, VertexBestResponseProperty> VertexNNLossProperty;
 
+/** @typedef VertexCoeffVarProperties
+ * This type definition assembles all the properties for the vertices of the graph
+ */
+typedef boost::property <vertex_coeff_var_t, double, VertexNNLossProperty> VertexCoeffVarProperties;
+
 /** @typedef VertexProperties
  * This type definition assembles all the properties for the vertices of the graph
  */
-typedef boost::property <boost::vertex_index_t, int, VertexNNLossProperty> VertexProperties;
+typedef boost::property <boost::vertex_index_t, int, VertexCoeffVarProperties> VertexProperties;
 
 /** @typedef EdgeWeightProperty
  * Specifies the property for the edge weight
@@ -677,6 +689,11 @@ typedef boost::property_map <Graph, vertex_best_response_t>::type VertexBestResp
  */
 typedef boost::property_map <Graph, vertex_v_nn_loss_t>::type VertexNNLossMap;
 
+/** @typedef VertexCoeffVarMap
+ * Specifies the map that stores the vertex attribute coeff_var
+ */
+typedef boost::property_map <Graph, vertex_coeff_var_t>::type VertexCoeffVarMap;
+
 /** @typedef EdgeQValueMap
  * Specifies the map that stores the edge q-value attribute
  */
@@ -854,6 +871,7 @@ const std::string INCENTIVE_DEVIATE                 = "incentive_deviate";
 const std::string ACTUAL_REWARD                     = "actual_reward";
 const std::string BEST_RESPONSE                     = "best_response";
 const std::string VERTEX_NN_LOSS                    = "vertex_nn_loss";
+const std::string VERTEX_COEFF_VAR                  = "vertex_coeff_var";
 const std::string EDGE_TOTAL_REWARD                 = "total_reward";
 const std::string EDGE_NN_LOSS                      = "edge_nn_loss";
 const std::string EDGE_EMOTION                      = "edge_emotion";

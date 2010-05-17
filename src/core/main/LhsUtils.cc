@@ -127,6 +127,38 @@ void LhsUtils::serialiseDesign(tDesArgsSP p_desArgs, const gsl_matrix *p_design,
             line << RL_POLICY_WPL_ETA;
         }
     }
+    if (p_desArgs->min_cognitive_A_pos < std::numeric_limits<double>::max()) {
+        dims++;
+        if (dims > 1) {
+            line << "," << CL_COGNITIVE_A_POS;
+        } else {
+            line << CL_COGNITIVE_A_POS;
+        }
+    }
+    if (p_desArgs->min_cognitive_A_neg < std::numeric_limits<double>::max()) {
+        dims++;
+        if (dims > 1) {
+            line << "," << CL_COGNITIVE_A_NEG;
+        } else {
+            line << CL_COGNITIVE_A_NEG;
+        }
+    }
+    if (p_desArgs->min_cognitive_r_pos < std::numeric_limits<double>::max()) {
+        dims++;
+        if (dims > 1) {
+            line << "," << CL_COGNITIVE_R_POS;
+        } else {
+            line << CL_COGNITIVE_R_POS;
+        }
+    }
+    if (p_desArgs->min_cognitive_r_neg < std::numeric_limits<double>::max()) {
+        dims++;
+        if (dims > 1) {
+            line << "," << CL_COGNITIVE_R_NEG;
+        } else {
+            line << CL_COGNITIVE_R_NEG;
+        }
+    }
 
     // print header
     design.print(line);

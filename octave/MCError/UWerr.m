@@ -181,6 +181,7 @@ function [value,dvalue,ddvalue,tauint,dtauint,wopt,Qval] = UWerr(Data,Stau,Nrep,
     flag=1; Gint=0;
   endif
   t=1;
+
   while (t <= tmax)
     GammaFbb(t+1) = 0;
 

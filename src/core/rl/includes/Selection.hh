@@ -1,4 +1,4 @@
-// Copyright (C) 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2009, 2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -47,7 +47,7 @@ public:
     virtual ~Selection()
         {}
 
-    virtual boost::int32_t operator() (boost::int32_t p_source) = 0;
+    virtual boost::int32_t operator() (boost::int32_t p_source, PAttr p_attr) = 0;
 
 protected:
     Policy &m_policy;

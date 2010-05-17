@@ -48,15 +48,16 @@ namespace rl
 
 RandomSelection::RandomSelection(
     dcore::DesBus &p_bus, Policy &p_policy, Int32SA p_depart_uniform_ids)
-    : m_graph((dynamic_cast<dcore::GraphChannel&> (p_bus.getChannel(dcore::id::GRAPH_CHANNEL))).getGraph()),
-      Selection(p_policy), m_depart_uniform_ids(p_depart_uniform_ids)
+    : Selection(p_policy),
+      m_graph((dynamic_cast<dcore::GraphChannel&> (p_bus.getChannel(dcore::id::GRAPH_CHANNEL))).getGraph()),
+      m_depart_uniform_ids(p_depart_uniform_ids)
 {
     edge_weight_map = get(boost::edge_weight, m_graph);
     vertex_index_map = get(boost::vertex_index, m_graph);
 }
 
 
-boost::int32_t RandomSelection::operator() (boost::int32_t p_source)
+boost::int32_t RandomSelection::operator() (boost::int32_t p_source, PAttr p_attr)
 {
 #ifndef NDEBUG_EVENTS
     std::cout << "** Random Selection" << std::endl;

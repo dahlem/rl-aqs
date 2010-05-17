@@ -27,6 +27,9 @@
 
 #include <cmath>
 
+#include <boost/foreach.hpp>
+#include <boost/graph/adjacency_list.hpp>
+
 #include "Entry.hh"
 namespace dcommon = des::common;
 
@@ -84,37 +87,57 @@ void CognitiveValueHandler::update(AckEvent *subject)
 #endif /* NDEBUG_EVENTS */
 
     dnet::Vertex vertex = boost::vertex(entry->getDestination(), m_graph);
-    // observe reward (the longer it takes the smaller the reward)
-    double reward = entry->getReward();
+    dnet::Graph::degree_size_type degree = boost::out_degree(vertex, m_graph);
 
-    // update the rmin, rmax values
-    dnet::Edge e = boost::edge(
-        boost::vertex(entry->getDestination(), m_graph),
-        boost::vertex(entry->getOrigin(), m_graph), m_graph).first;
+    if (degree > 1) {
+        // observe reward (the longer it takes the smaller the reward)
+        double reward = entry->getReward();
 
-    if (edge_rmin_map[e] > reward) {
-        edge_rmin_map[e] = reward;
-    }
-    if (edge_rmax_map[e] < reward) {
-        edge_rmax_map[e] = reward;
-    }
+        dnet::Edge e = boost::edge(
+            vertex, boost::vertex(entry->getOrigin(), m_graph), m_graph).first;
 
-    // decay the previous signals
-    double diff = entry->getArrival() - m_lastTime[edge_index_map[e]];
-    edge_e_pos_map[e] = edge_e_pos_map[e] * exp(m_rPos * diff);
-    edge_e_neg_map[e] = edge_e_neg_map[e] * exp(m_rNeg * diff);
-    m_lastTime[edge_index_map[e]] = entry->getArrival();
-
-    // add new signal
-    double signal = reward - edge_q_val_map[e];
-    edge_e_pos_map[e] = edge_e_pos_map[e] + m_APos * signal;
-    edge_e_neg_map[e] = edge_e_neg_map[e] + m_ANeg * signal;
-
-    double upper = (edge_e_pos_map[e] > edge_rmax_map[e]) ? edge_rmax_map[e] : edge_e_pos_map[e];
-    double lower = 0.0;
+        // decay the previous signals for all edges emanating from destination
+        BOOST_FOREACH(dnet::Edge edge, (boost::out_edges(vertex, m_graph))) {
+            double diff = entry->getArrival() - m_lastTime[edge_index_map[edge]];
+            edge_e_pos_map[edge] = edge_e_pos_map[edge] * exp(m_rPos * diff);
+            edge_e_neg_map[edge] = edge_e_neg_map[edge] * exp(m_rNeg * diff);
+            m_lastTime[edge_index_map[edge]] = entry->getArrival();
+        }
 
 #ifndef NDEBUG_EVENTS
+        std::cout << "reward: " << reward << ", Q: " << edge_q_val_map[e] << std::endl;
 #endif /* NDEBUG_EVENTS */
+
+        // add new signal
+        double signal = reward - edge_q_val_map[e];
+        if (reward > edge_q_val_map[e]) {
+            edge_e_pos_map[e] = edge_e_pos_map[e] + m_APos * signal;
+        } else {
+            edge_e_neg_map[e] = edge_e_neg_map[e] + m_ANeg * signal;
+        }
+
+        // update the rmin, rmax values
+        if (edge_rmin_map[e] > signal) {
+            edge_rmin_map[e] = signal;
+        }
+        if (edge_rmax_map[e] < signal) {
+            edge_rmax_map[e] = signal;
+        }
+
+        // bound the signal to the maximum/minimum experienced reward
+        BOOST_FOREACH(dnet::Edge edge, (boost::out_edges(vertex, m_graph))) {
+            double posSignal = (edge_e_pos_map[edge] > edge_rmax_map[edge]) ? edge_rmax_map[edge] : edge_e_pos_map[edge];
+            double negSignal = (edge_e_neg_map[edge] < edge_rmin_map[edge]) ? edge_rmin_map[edge] : edge_e_neg_map[edge];
+            edge_emotion_map[edge] = posSignal + negSignal;
+
+#ifndef NDEBUG_EVENTS
+            std::cout << "edge: " << edge_index_map[edge] << std::endl;
+            std::cout << "pos signal: " << edge_e_pos_map[edge] << ", max pos. signal: " << edge_rmax_map[edge] << std::endl;
+            std::cout << "neg signal: " << edge_e_neg_map[edge] << ", min neg. signal: " << edge_rmin_map[edge] << std::endl;
+            std::cout << "Cognitive value: " << edge_emotion_map[edge] << " = " << posSignal << " + " << negSignal << std::endl;
+#endif /* NDEBUG_EVENTS */
+        }
+    }
 }
 
 
