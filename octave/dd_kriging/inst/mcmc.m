@@ -30,6 +30,156 @@ function fi =  logitinv(z, a, b)
   fi = b-(b-a)./(1+exp(z));
 endfunction
 
+function [chain, acceptanceRate] = mcmc_mhgibbsStochastic3(x0_theta, X, y, C, x0_sigma, batchlength, batches, p_tuning, p_acceptance = 0.23, aTheta = 3/500, bTheta = 1, aSigma = 3/500, bSigma = 1, nugget = 0, FUN = @(x) 1, verbose = 0, p=2)
+
+  if (rows(y) != rows(X))
+    error("The vector y has to have the same dimension as matrix columns.");
+  endif
+
+  if (columns(x0_theta) != columns(X))
+    error("The vector x0_theta has to have the same dimension as matrix columns.");
+  endif
+
+  samples = batches * batchlength;
+  dims = columns(X) + 1;
+  F = FUN(X);
+
+  ## initialise the x values
+  x.theta = logit(x0_theta, aTheta, bTheta);
+  n = rows(X);
+  x.sigma = logit(x0_sigma, aSigma, bSigma);
+  
+  ## tuning for the thetas
+  tuning = zeros(1, dims);
+  ## batch acceptance rate
+  batchaccept = zeros(1, dims);
+  acceptanceRate = zeros(batches, dims);
+
+  ## temporary accepted values
+  pi_accept = q_accept = beta_accept = theta_accept = sigma_accept = [];
+
+  ## initialise the chain
+  chain.accepted = 0;
+  chain.beta = zeros(columns(F), samples);
+  chain.theta = zeros(samples, length(x.theta));
+  chain.sigma = zeros(1, samples);
+  chain.l = zeros(1, samples);
+
+  ## init the batch variables for adaptive tuning
+  tuning = log(p_tuning);
+  for i = 1:dims
+    batchaccept(i) = 0;
+  endfor
+
+  [q_old, x.beta] = krig_likelihoodStochasticS(logitinv(x.theta, aTheta, bTheta),C,X, y, F, logitinv(x.sigma, aSigma, bSigma),nugget,p);
+  phi1_cand = logitinv(x.theta, aTheta, bTheta);
+  phi2_cand = logitinv(x.sigma, aSigma, bSigma);
+  pi_old = sum(log(phi1_cand - aTheta) + log(bTheta - phi1_cand)) + sum(log(phi2_cand - aSigma) + log(bSigma - phi2_cand));
+  q_accept = q_old;
+  beta_accept = x.beta;
+  theta_accept = x.theta;
+  sigma_accept = x.sigma;
+
+  for b = 0:(batches-1)
+    for i = 1:batchlength
+      ## gibbs steps
+      for thetas = 1:length(x.theta)
+        thetaj = x.theta(thetas);
+        x.theta(thetas) = normrnd(x.theta(thetas), exp(tuning(thetas)));
+
+        ## step 2: calcuate the probability of move
+        [q_new, x.beta] = krig_likelihoodStochasticS(logitinv(x.theta, aTheta, bTheta),C,X, y, F, logitinv(x.sigma, aSigma, bSigma),nugget,p);
+	phi1_cand = logitinv(x.theta, aTheta, bTheta);
+	phi2_cand = logitinv(x.sigma, aSigma, bSigma);
+	pi_new = sum(log(phi1_cand - aTheta) + log(bTheta - phi1_cand)) + sum(log(phi2_cand - aSigma) + log(bSigma - phi2_cand));
+
+##      ratio = (q_new / q_old) * (pi_old / pi_new);
+        ratio = (q_new + pi_new) - (q_old + pi_old);
+        ##    ratio = (pi_new * q_old) / (pi_old * q_new);
+
+        ## step 3: accept, if u < alpha(x, x')
+##      if rand() <= min(ratio, 1)
+        ## step 3: accept, if u < alpha(x, x')
+        u = rand();
+        if u <= exp(ratio)
+          batchaccept(thetas)++;
+          q_accept = q_new;
+          beta_accept = x.beta;
+          theta_accept = x.theta;
+          sigma_accept = x.sigma;
+          q_old = q_new;
+          pi_old = pi_new;
+        else
+          x.theta(thetas) = thetaj;
+        endif
+      endfor
+
+      sigmaj = x.sigma;
+      x.sigma = normrnd(x.sigma, exp(tuning(dims)));
+
+      ## step 2: calcuate the probability of move
+      [q_new, x.beta] = krig_likelihoodStochasticS(logitinv(x.theta, aTheta, bTheta), C,X, y, F, logitinv(x.sigma, aSigma, bSigma),nugget,p);
+      phi1_cand = logitinv(x.theta, aTheta, bTheta);
+      phi2_cand = logitinv(x.sigma, aSigma, bSigma);
+      pi_new = sum(log(phi1_cand - aTheta) + log(bTheta - phi1_cand)) + sum(log(phi2_cand - aSigma) + log(bSigma - phi2_cand));
+
+      ##      ratio = (q_new / q_old) * (pi_old / pi_new);
+      ratio = (q_new + pi_new) - (q_old + pi_old);
+      ##    ratio = (pi_new * q_old) / (pi_old * q_new);
+
+      ## step 3: accept, if u < alpha(x, x')
+      ##      if rand() <= min(ratio, 1)
+      ## step 3: accept, if u < alpha(x, x')
+      u = rand();
+      if u <= exp(ratio)
+        batchaccept(dims)++;
+        q_accept = q_new;
+        beta_accept = x.beta;
+        sigma_accept = x.sigma;
+        q_old = q_new;
+        pi_old = pi_new;
+      else
+        x.sigma = sigmaj;
+      endif
+
+      ## put results into markov chain
+      chain.accepted++;
+      chain.beta(:, chain.accepted) = beta_accept;
+      chain.theta(chain.accepted, :) = logitinv(theta_accept, aTheta, bTheta);
+      chain.sigma(chain.accepted) = logitinv(sigma_accept, aSigma, bSigma);
+      chain.l(chain.accepted) = q_accept;
+    endfor
+
+    ## adaptive tuning
+    acceptanceRate(b+1,:) = batchaccept/batchlength;
+    for j = 1:dims
+      if (batchaccept(j)/batchlength > p_acceptance)
+        tuning(j) += min(0.01, 1.0/sqrt(b+1));
+      else
+        tuning(j) -= min(0.01, 1.0/sqrt(b+1));
+      endif
+      batchaccept(j) = 0;
+    endfor
+
+    if (verbose)
+      fprintf(stdout, "Batch: %d of %d\n", b, batches);
+      fprintf(stdout, "Metropolis batch acceptance rate:\n");
+
+      for j = 1:dims
+        fprintf(stdout, "   %1.3f   ", acceptanceRate(b+1, j));
+      endfor
+      fprintf(stdout, "\n");
+      for j = 1:dims
+        fprintf(stdout, "+/-%1.3f   ", tuning(j));
+      endfor
+      fprintf(stdout, "\n\n");
+      fflush(stdout);
+    endif
+  endfor
+endfunction
+
+
+
 ## This function implements the metropolis hastings algorithm for
 ## estimating the model parameters of the bayesian likelihood equation,
 ## where s1 is the constant standard deviation, x0_beta is an initial
@@ -531,154 +681,6 @@ function [chain, acceptanceRate] = mcmc_mhgibbsStochastic(x0_theta, X, y, C, x0_
   endfor
 endfunction
 
-
-function [chain, acceptanceRate] = mcmc_mhgibbsStochastic3(x0_theta, X, y, C, x0_sigma, batchlength, batches, p_tuning, p_acceptance = 0.23, aTheta = 3/500, bTheta = 1, aSigma = 3/500, bSigma = 1, nugget = 0, FUN = @(x) 1, verbose = 0, p=2)
-
-  if (rows(y) != rows(X))
-    error("The vector y has to have the same dimension as matrix columns.");
-  endif
-
-  if (columns(x0_theta) != columns(X))
-    error("The vector x0_theta has to have the same dimension as matrix columns.");
-  endif
-
-  samples = batches * batchlength;
-  dims = columns(X) + 1;
-  F = FUN(X);
-
-  ## initialise the x values
-  x.theta = logit(x0_theta, aTheta, bTheta);
-  n = rows(X);
-  x.sigma = logit(x0_sigma, aSigma, bSigma);
-  
-  ## tuning for the thetas
-  tuning = zeros(1, dims);
-  ## batch acceptance rate
-  batchaccept = zeros(1, dims);
-  acceptanceRate = zeros(batches, dims);
-
-  ## temporary accepted values
-  pi_accept = q_accept = beta_accept = theta_accept = sigma_accept = [];
-
-  ## initialise the chain
-  chain.accepted = 0;
-  chain.beta = zeros(columns(F), samples);
-  chain.theta = zeros(samples, length(x.theta));
-  chain.sigma = zeros(1, samples);
-  chain.l = zeros(1, samples);
-
-  ## init the batch variables for adaptive tuning
-  tuning = log(p_tuning);
-  for i = 1:dims
-    batchaccept(i) = 0;
-  endfor
-
-  [q_old, x.beta] = krig_likelihoodStochasticS(logitinv(x.theta, aTheta, bTheta),C,X, y, F, logitinv(x.sigma, aSigma, bSigma),nugget,p);
-  phi1_cand = logitinv(x.theta, aTheta, bTheta);
-  phi2_cand = logitinv(x.sigma, aSigma, bSigma);
-  pi_old = sum(log(phi1_cand - aTheta) + log(bTheta - phi1_cand)) + sum(log(phi2_cand - aSigma) + log(bSigma - phi2_cand));
-  q_accept = q_old;
-  beta_accept = x.beta;
-  theta_accept = x.theta;
-  sigma_accept = x.sigma;
-
-  for b = 0:(batches-1)
-    for i = 1:batchlength
-      ## gibbs steps
-      for thetas = 1:length(x.theta)
-        thetaj = x.theta(thetas);
-        x.theta(thetas) = normrnd(x.theta(thetas), exp(tuning(thetas)));
-
-        ## step 2: calcuate the probability of move
-        [q_new, x.beta] = krig_likelihoodStochasticS(logitinv(x.theta, aTheta, bTheta),C,X, y, F, logitinv(x.sigma, aSigma, bSigma),nugget,p);
-	phi1_cand = logitinv(x.theta, aTheta, bTheta);
-	phi2_cand = logitinv(x.sigma, aSigma, bSigma);
-	pi_new = sum(log(phi1_cand - aTheta) + log(bTheta - phi1_cand)) + sum(log(phi2_cand - aSigma) + log(bSigma - phi2_cand));
-
-##      ratio = (q_new / q_old) * (pi_old / pi_new);
-        ratio = (q_new + pi_new) - (q_old + pi_old);
-        ##    ratio = (pi_new * q_old) / (pi_old * q_new);
-
-        ## step 3: accept, if u < alpha(x, x')
-##      if rand() <= min(ratio, 1)
-        ## step 3: accept, if u < alpha(x, x')
-        u = rand();
-        if u <= exp(ratio)
-          batchaccept(thetas)++;
-          q_accept = q_new;
-          beta_accept = x.beta;
-          theta_accept = x.theta;
-          sigma_accept = x.sigma;
-          q_old = q_new;
-          pi_old = pi_new;
-        else
-          x.theta(thetas) = thetaj;
-        endif
-      endfor
-
-      sigmaj = x.sigma;
-      x.sigma = normrnd(x.sigma, exp(tuning(dims)));
-
-      ## step 2: calcuate the probability of move
-      [q_new, x.beta] = krig_likelihoodStochasticS(logitinv(x.theta, aTheta, bTheta), C,X, y, F, logitinv(x.sigma, aSigma, bSigma),nugget,p);
-      phi1_cand = logitinv(x.theta, aTheta, bTheta);
-      phi2_cand = logitinv(x.sigma, aSigma, bSigma);
-      pi_new = sum(log(phi1_cand - aTheta) + log(bTheta - phi1_cand)) + sum(log(phi2_cand - aSigma) + log(bSigma - phi2_cand));
-
-      ##      ratio = (q_new / q_old) * (pi_old / pi_new);
-      ratio = (q_new + pi_new) - (q_old + pi_old);
-      ##    ratio = (pi_new * q_old) / (pi_old * q_new);
-
-      ## step 3: accept, if u < alpha(x, x')
-      ##      if rand() <= min(ratio, 1)
-      ## step 3: accept, if u < alpha(x, x')
-      u = rand();
-      if u <= exp(ratio)
-        batchaccept(dims)++;
-        q_accept = q_new;
-        beta_accept = x.beta;
-        sigma_accept = x.sigma;
-        q_old = q_new;
-        pi_old = pi_new;
-      else
-        x.sigma = sigmaj;
-      endif
-
-      ## put results into markov chain
-      chain.accepted++;
-      chain.beta(:, chain.accepted) = beta_accept;
-      chain.theta(chain.accepted, :) = logitinv(theta_accept, aTheta, bTheta);
-      chain.sigma(chain.accepted) = logitinv(sigma_accept, aSigma, bSigma);
-      chain.l(chain.accepted) = q_accept;
-    endfor
-
-    ## adaptive tuning
-    acceptanceRate(b+1,:) = batchaccept/batchlength;
-    for j = 1:dims
-      if (batchaccept(j)/batchlength > p_acceptance)
-        tuning(j) += min(0.01, 1.0/sqrt(b+1));
-      else
-        tuning(j) -= min(0.01, 1.0/sqrt(b+1));
-      endif
-      batchaccept(j) = 0;
-    endfor
-
-    if (verbose)
-      fprintf(stdout, "Batch: %d of %d\n", b, batches);
-      fprintf(stdout, "Metropolis batch acceptance rate:\n");
-
-      for j = 1:dims
-        fprintf(stdout, "   %1.3f   ", acceptanceRate(b+1, j));
-      endfor
-      fprintf(stdout, "\n");
-      for j = 1:dims
-        fprintf(stdout, "+/-%1.3f   ", tuning(j));
-      endfor
-      fprintf(stdout, "\n\n");
-      fflush(stdout);
-    endif
-  endfor
-endfunction
 
 ## add log transforms to the mcmc target
 ## add the log transform elements to the mcmc target

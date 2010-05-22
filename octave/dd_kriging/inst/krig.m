@@ -124,24 +124,6 @@ function [l, beta] = krig_likelihoodStochastic(theta, C, X, y, F, sigmaSquared, 
   l = - 0.5 * (n * log(2 * pi) + log(det(R)) + temp' * R_inv * temp); ##Staum ##eq. (14)
 endfunction
 
-function [l, beta] = krig_likelihoodStochasticS(theta, C, X, y, F, sigmaSquared, nugget = 0, p=2)
-  S = sigmaSquared * scf_gaussianm(X, theta, nugget, p) + C;
-  U = chol(S);
-
-  ## invert it via Cholesky factorization
-  L = U';
-  Linv = inv(L);
-  Sinv = Linv'*Linv;
-
-  ## the optimal beta given theta and tau2
-  beta = inv(F'*Sinv*F)*(F'*(Sinv*y)); 
-  Z = L\(y-F*beta);
-
-  ## negative log likelihood
-  n = rows(y);
-  l = (log(det(L)) + 0.5*Z'*Z + 0.5*n*log(2*pi));
-endfunction
-
 
 ## from better simulation metamodelling, the why, what, and how of
 ## stochastic kriging by Ankeman eq. (20)
@@ -206,15 +188,6 @@ function y = krig(x, X, R, beta, theta, y, F, FUN = @(x) 1, p=2)
   y = FUN(x) * beta + r' * (R\(y - F * beta));
 endfunction
 
-## from Ankeman
-function f = krigS(x, X, R, C, sigmaSqu, theta, y, F, FUN = @(x) 1, p=2)
-  R = sigmaSqu * R + C;
-  R_inv = cholinv(R);
-  beta = ((F' * (R_inv * F))\F') * (R_inv * y);
-  r = scf_gaussianu(X, x, theta, p) * sigmaSqu;
-
-  f = FUN(x) * beta + r' * R_inv * (y - F * beta);
-endfunction
 
 ##function y = krigS(x, X, R, C, sigmaSqu, theta, y, F, FUN = @(x) 1, p=2)
 ##  R_inv = cholinv(sigmaSqu * R + C);
@@ -225,6 +198,35 @@ endfunction
 
 
 ## from Ankeman
+function [l, beta] = krig_likelihoodStochasticS(theta, C, X, y, F, sigmaSquared, nugget = 0, p=2)
+  S = sigmaSquared * scf_gaussianm(X, theta, nugget, p) + C;
+  U = chol(S);
+
+  ## invert it via Cholesky factorization
+  L = U';
+  Linv = inv(L);
+  Sinv = Linv'*Linv;
+
+  ## the optimal beta given theta and tau2
+  beta = inv(F'*Sinv*F)*(F'*(Sinv*y)); 
+  Z = L\(y-F*beta);
+
+  ## negative log likelihood
+  n = rows(y);
+  l = (log(det(L)) + 0.5*Z'*Z + 0.5*n*log(2*pi));
+endfunction
+
+
+function f = krigS(x, X, R, C, sigmaSqu, theta, y, F, FUN = @(x) 1, p=2)
+  R = sigmaSqu * R + C;
+  R_inv = cholinv(R);
+  beta = ((F' * (R_inv * F))\F') * (R_inv * y);
+  r = scf_gaussianu(X, x, theta, p) * sigmaSqu;
+
+  f = FUN(x) * beta + r' * R_inv * (y - F * beta);
+endfunction
+
+
 function y = krigS1(x, X, R, C, sigmaSqu, theta, y, F, FUN = @(x) 1, p=2)
   x = x';
   R = sigmaSqu * R + C;

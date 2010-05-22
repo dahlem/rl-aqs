@@ -124,6 +124,8 @@ tGraphSP WEvonet::createBBVGraph(boost::uint32_t p_size, boost::uint32_t max_edg
         = get(vertex_v_nn_loss, *g);
     VertexCoeffVarMap vertex_coeff_var_map
         = get(vertex_coeff_var, *g);
+    VertexNNLossCVMap vertex_nn_loss_cv_map
+        = get(vertex_v_nn_loss_cv, *g);
     EdgeNNLossMap edge_nn_loss_map
         = get(edge_e_nn_loss, *g);
     EdgeEmotionMap edge_emotion_map
@@ -136,6 +138,8 @@ tGraphSP WEvonet::createBBVGraph(boost::uint32_t p_size, boost::uint32_t max_edg
         = get(edge_e_pos, *g);
     EdgeENegMap edge_e_neg_map
         = get(edge_e_neg, *g);
+    EdgeNNLossCVMap edge_nn_loss_cv_map
+        = get(edge_e_nn_loss_cv, *g);
 
     // set the graph properties
     boost::set_property(*g, graph_generator, 1);
@@ -169,6 +173,7 @@ tGraphSP WEvonet::createBBVGraph(boost::uint32_t p_size, boost::uint32_t max_edg
     vertex_best_response_map[v1] = 0.0;
     vertex_nn_loss_map[v1] = 0.0;
     vertex_coeff_var_map[v1] = 0.0;
+    vertex_nn_loss_cv_map[v1] = 0.0;
 
     advance(p_size - 1, g, num_edges_rng, uniform_rng, vertex_arrival_rng,
             fixed_edge_weight, max_arrival_rate, boost_arrival, boost_edge, max_edges);
@@ -184,6 +189,7 @@ tGraphSP WEvonet::createBBVGraph(boost::uint32_t p_size, boost::uint32_t max_edg
         edge_rmax_map[e] = 0.0;
         edge_e_pos_map[e] = 0.0;
         edge_e_neg_map[e] = 0.0;
+        edge_nn_loss_cv_map[e] = 0.0;
     }
 
     return g;
@@ -254,6 +260,8 @@ void WEvonet::advance(boost::uint32_t p_steps, tGraphSP g,
         = get(vertex_v_nn_loss, *g);
     VertexCoeffVarMap vertex_coeff_var_map
         = get(vertex_coeff_var, *g);
+    VertexNNLossCVMap vertex_nn_loss_cv_map
+        = get(vertex_v_nn_loss_cv, *g);
     EdgeNNLossMap edge_nn_loss_map
         = get(edge_e_nn_loss, *g);
     EdgeEmotionMap edge_emotion_map
@@ -266,6 +274,8 @@ void WEvonet::advance(boost::uint32_t p_steps, tGraphSP g,
         = get(edge_e_pos, *g);
     EdgeENegMap edge_e_neg_map
         = get(edge_e_neg, *g);
+    EdgeNNLossCVMap edge_nn_loss_cv_map
+        = get(edge_e_nn_loss_cv, *g);
 
     double accum_service_rate = 0.0;
     size_t vertices = 0;
@@ -330,6 +340,7 @@ void WEvonet::advance(boost::uint32_t p_steps, tGraphSP g,
         vertex_best_response_map[v] = 0.0;
         vertex_nn_loss_map[v] = 0.0;
         vertex_coeff_var_map[v] = 0.0;
+        vertex_nn_loss_cv_map[v] = 0.0;
 
         // select vertices to connect to
         boost::uint32_t edges = 0;
@@ -365,6 +376,7 @@ void WEvonet::advance(boost::uint32_t p_steps, tGraphSP g,
                         edge_rmax_map[e.first] = 0.0;
                         edge_e_pos_map[e.first] = 0.0;
                         edge_e_neg_map[e.first] = 0.0;
+                        edge_nn_loss_cv_map[e.first] = 0.0;
 
                         break;
                     }
@@ -538,6 +550,8 @@ tGraphSP WEvonet::createERGraph(boost::uint32_t p_size, double fixed_edge_weight
         = get(vertex_v_nn_loss, *g);
     VertexCoeffVarMap vertex_coeff_var_map
         = get(vertex_coeff_var, *g);
+    VertexNNLossCVMap vertex_nn_loss_cv_map
+        = get(vertex_v_nn_loss_cv, *g);
     EdgeNNLossMap edge_nn_loss_map
         = get(edge_e_nn_loss, *g);
     EdgeEmotionMap edge_emotion_map
@@ -550,6 +564,8 @@ tGraphSP WEvonet::createERGraph(boost::uint32_t p_size, double fixed_edge_weight
         = get(edge_e_pos, *g);
     EdgeENegMap edge_e_neg_map
         = get(edge_e_neg, *g);
+    EdgeNNLossCVMap edge_nn_loss_cv_map
+        = get(edge_e_nn_loss_cv, *g);
 
     // assign ids, arrival and service rates
 #ifndef NDEBUG_NETWORK
@@ -587,6 +603,7 @@ tGraphSP WEvonet::createERGraph(boost::uint32_t p_size, double fixed_edge_weight
         vertex_best_response_map[*p_v.first] = 0.0;
         vertex_nn_loss_map[*p_v.first] = 0.0;
         vertex_coeff_var_map[*p_v.first] = 0.0;
+        vertex_nn_loss_cv_map[*p_v.first] = 0.0;
     }
 
     // assign edge indeces
@@ -601,6 +618,7 @@ tGraphSP WEvonet::createERGraph(boost::uint32_t p_size, double fixed_edge_weight
         edge_rmax_map[e] = 0.0;
         edge_e_pos_map[e] = 0.0;
         edge_e_neg_map[e] = 0.0;
+        edge_nn_loss_cv_map[e] = 0.0;
     }
 
     // remove cycles
@@ -661,6 +679,7 @@ tGraphSP WEvonet::createERGraph(boost::uint32_t p_size, double fixed_edge_weight
         vertex_best_response_map[*p_v.first] = 0.0;
         vertex_nn_loss_map[*p_v.first] = 0.0;
         vertex_coeff_var_map[*p_v.first] = 0.0;
+        vertex_nn_loss_cv_map[*p_v.first] = 0.0;
     }
 
     // re-assign edge indeces
@@ -675,6 +694,7 @@ tGraphSP WEvonet::createERGraph(boost::uint32_t p_size, double fixed_edge_weight
         edge_rmax_map[e] = 0.0;
         edge_e_pos_map[e] = 0.0;
         edge_e_neg_map[e] = 0.0;
+        edge_nn_loss_cv_map[e] = 0.0;
     }
 
     // balance the service rates

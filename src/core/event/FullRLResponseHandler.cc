@@ -26,6 +26,7 @@
 #endif /* NDEBUG_EVENTS */
 
 #include <algorithm>
+#include <cmath>
 
 #include <boost/foreach.hpp>
 
@@ -82,10 +83,12 @@ FullRLResponseHandler::FullRLResponseHandler(
     vertex_regret_total_map = get(vertex_regret_absolute, m_graph);
     vertex_incentive_deviate_map = get(vertex_incentive_deviate, m_graph);
     vertex_nn_loss_map = get(vertex_v_nn_loss, m_graph);
+    vertex_nn_loss_cv_map = get(vertex_v_nn_loss_cv, m_graph);
     edge_q_val_map = get(edge_q_val, m_graph);
     edge_index_map = get(edge_eindex, m_graph);
     edge_total_reward_map = get(edge_total_reward, m_graph);
     edge_nn_loss_map = get(edge_e_nn_loss, m_graph);
+    edge_nn_loss_cv_map = get(edge_e_nn_loss_cv, m_graph);
 
     // init the neural network for each edge
     boost::uint16_t num_nets = (m_outsource) ? (boost::num_vertices(m_graph)) : (boost::num_edges(m_graph));
@@ -270,9 +273,11 @@ void FullRLResponseHandler::update(AckEvent *subject)
 
         if (m_nn_loss_serialise) {
             if (m_outsource) {
-                edge_nn_loss_map[oldE] = m_objectives[edge_index_map[oldE]]->error();
-            } else {
                 vertex_nn_loss_map[boost::vertex(entry->getOrigin(), m_graph)] = m_objectives[entry->getOrigin()]->error();
+                vertex_nn_loss_cv_map[boost::vertex(entry->getOrigin(), m_graph)] = sqrt(m_objectives[entry->getOrigin()]->error()) / edge_q_val_map[oldE];
+            } else {
+                edge_nn_loss_map[oldE] = m_objectives[edge_index_map[oldE]]->error();
+                edge_nn_loss_cv_map[oldE] = sqrt(m_objectives[edge_index_map[oldE]]->error()) / edge_q_val_map[oldE];
             }
         }
     } else if (degree == 1) {

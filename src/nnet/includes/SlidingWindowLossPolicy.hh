@@ -23,8 +23,8 @@
 # define __STDC_CONSTANT_MACROS
 #endif /* __STDC_CONSTANT_MACROS */
 
-#include <numeric>
 #include <iostream>
+#include <numeric>
 
 #include <boost/cstdint.hpp>
 #include <boost/circular_buffer.hpp>

@@ -56,7 +56,7 @@ CoefficientVariationHandler::CoefficientVariationHandler(DesBus& p_bus)
     for (boost::uint16_t i = 0; i < boost::num_vertices(m_graph); ++i) {
         m_circBuffer[i].set_capacity(config.coefficient_variation_window);
     }
-    
+
     edge_index_map = get(edge_eindex, m_graph);
     edge_q_val_map = get(edge_q_val, m_graph);
     vertex_coeff_var_map = get(vertex_coeff_var, m_graph);
@@ -93,14 +93,14 @@ void CoefficientVariationHandler::update(AckEvent *subject)
             / static_cast<double> (m_circBuffer[entry->getDestination()].size());
         double error = 0.0;
         double temp = 0.0;
-            
+
         for (boost::uint16_t i = 0; i < m_circBuffer[entry->getDestination()].size(); ++i) {
             temp = m_circBuffer[entry->getDestination()][i] - mu;
             error += temp * temp;
         }
 
-        cv = sqrt(error / m_circBuffer[entry->getDestination()].size()) / mu;
-        
+        cv = sqrt(error / static_cast<double> (m_circBuffer[entry->getDestination()].size())) / mu;
+
         vertex_coeff_var_map[vertex] = cv;
     }
 }

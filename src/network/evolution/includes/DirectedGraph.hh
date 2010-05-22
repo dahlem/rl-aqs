@@ -270,6 +270,18 @@ enum vertex_coeff_var_t { vertex_coeff_var = 1150 };
 
 
 
+/** @enum edge_e_nn_loss_cv_t
+ * This enum extends the edge properties by a NN loss coefficient of variation attribute
+ */
+enum edge_e_nn_loss_cv_t { edge_e_nn_loss_cv = 1151 };
+
+
+/** @enum vertex_coeff_var_t
+ * This enum extends the vertex properties by a NN loss coefficient of variation argument
+ */
+enum vertex_v_nn_loss_cv_t { vertex_v_nn_loss_cv = 1152 };
+
+
 // install the vertex service rate property
 namespace boost
 {
@@ -300,6 +312,7 @@ BOOST_INSTALL_PROPERTY(vertex, actual_reward);
 BOOST_INSTALL_PROPERTY(vertex, best_response);
 BOOST_INSTALL_PROPERTY(vertex, v_nn_loss);
 BOOST_INSTALL_PROPERTY(vertex, coeff_var);
+BOOST_INSTALL_PROPERTY(vertex, v_nn_loss_cv);
 BOOST_INSTALL_PROPERTY(graph, generator);
 BOOST_INSTALL_PROPERTY(edge, q_val);
 BOOST_INSTALL_PROPERTY(edge, eindex);
@@ -310,6 +323,7 @@ BOOST_INSTALL_PROPERTY(edge, rmin);
 BOOST_INSTALL_PROPERTY(edge, rmax);
 BOOST_INSTALL_PROPERTY(edge, e_pos);
 BOOST_INSTALL_PROPERTY(edge, e_neg);
+BOOST_INSTALL_PROPERTY(edge, e_nn_loss_cv);
 BOOST_INSTALL_PROPERTY(graph, system_delay);
 BOOST_INSTALL_PROPERTY(graph, system_num_events);
 BOOST_INSTALL_PROPERTY(graph, system_processing_time);
@@ -454,10 +468,15 @@ typedef boost::property <vertex_v_nn_loss_t, double, VertexBestResponseProperty>
  */
 typedef boost::property <vertex_coeff_var_t, double, VertexNNLossProperty> VertexCoeffVarProperties;
 
+/** @typedef VertexNNLossCVProperties
+ * Specifies the property for the coefficient of variation of the loss value of the NN
+ */
+typedef boost::property <vertex_v_nn_loss_cv_t, double, VertexCoeffVarProperties> VertexNNLossCVProperties;
+
 /** @typedef VertexProperties
  * This type definition assembles all the properties for the vertices of the graph
  */
-typedef boost::property <boost::vertex_index_t, int, VertexCoeffVarProperties> VertexProperties;
+typedef boost::property <boost::vertex_index_t, int, VertexNNLossCVProperties> VertexProperties;
 
 /** @typedef EdgeWeightProperty
  * Specifies the property for the edge weight
@@ -504,10 +523,15 @@ typedef boost::property <edge_e_pos_t, double, EdgeRmaxProperty> EdgeEPosPropert
  */
 typedef boost::property <edge_e_neg_t, double, EdgeEPosProperty> EdgeENegProperty;
 
+/** @typedef EdgeNNLossCVProperties
+ * Specifies the property for the coefficient of variation of the loss value of the NN
+ */
+typedef boost::property <edge_e_nn_loss_cv_t, double, EdgeENegProperty> EdgeNNLossCVProperties;
+
 /** @typedef EdgeIndexProperty
  * Specifies the property for the edge index
  */
-typedef boost::property <edge_eindex_t, int, EdgeENegProperty> EdgeIndexProperty;
+typedef boost::property <edge_eindex_t, int, EdgeNNLossCVProperties> EdgeIndexProperty;
 
 /** @typedef GraphGeneratorProperty
  * Specifies the property for graph generator
@@ -694,6 +718,11 @@ typedef boost::property_map <Graph, vertex_v_nn_loss_t>::type VertexNNLossMap;
  */
 typedef boost::property_map <Graph, vertex_coeff_var_t>::type VertexCoeffVarMap;
 
+/** @typedef VertexCoeffVarMap
+ * Specifies the map that stores the vertex attribute coeff_var
+ */
+typedef boost::property_map <Graph, vertex_v_nn_loss_cv_t>::type VertexNNLossCVMap;
+
 /** @typedef EdgeQValueMap
  * Specifies the map that stores the edge q-value attribute
  */
@@ -743,6 +772,11 @@ typedef boost::property_map <Graph, edge_e_pos_t>::type EdgeEPosMap;
  * Specifies the edge e(-) property
  */
 typedef boost::property_map <Graph, edge_e_neg_t>::type EdgeENegMap;
+
+/** @typedef EdgeNNLossCVMap
+ * Specifies the edge coefficient of variation of the NN loss property
+ */
+typedef boost::property_map <Graph, edge_e_nn_loss_cv_t>::type EdgeNNLossCVMap;
 
 /** @typedef VServiceIterator
  * Specifies the iterator for the vertex service rates
@@ -872,6 +906,7 @@ const std::string ACTUAL_REWARD                     = "actual_reward";
 const std::string BEST_RESPONSE                     = "best_response";
 const std::string VERTEX_NN_LOSS                    = "vertex_nn_loss";
 const std::string VERTEX_COEFF_VAR                  = "vertex_coeff_var";
+const std::string VERTEX_V_NN_LOSS_CV               = "vertex_v_nn_loss_cv";
 const std::string EDGE_TOTAL_REWARD                 = "total_reward";
 const std::string EDGE_NN_LOSS                      = "edge_nn_loss";
 const std::string EDGE_EMOTION                      = "edge_emotion";
@@ -879,6 +914,7 @@ const std::string EDGE_RMIN                         = "edge_rmin";
 const std::string EDGE_RMAX                         = "edge_rmax";
 const std::string EDGE_E_POS                        = "edge_e_pos";
 const std::string EDGE_E_NEG                        = "edge_e_neg";
+const std::string EDGE_E_NN_LOSS_CV                 = "e_nn_loss_cv";
 const std::string GRAPH_SYSTEM_DELAY                = "system_delay";
 const std::string GRAPH_SYSTEM_NUM_EVENTS           = "system_num_events";
 const std::string GRAPH_SYSTEM_PROCESSING           = "system_processing";

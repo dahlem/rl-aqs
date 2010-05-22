@@ -117,12 +117,14 @@ void RollingSystemStatsAdminHandler::update(AdminEvent *subject)
         }
 
         double startTime = entry->getArrival() + static_cast<double> (m_desArgs.system_stats_interval);
-        
+
 #ifndef NDEBUG_EVENTS
         std::cout << "Generate new admin event to calculate system statistics at time " << startTime << std::endl;
 #endif /* NDEBUG_EVENTS */
 
-        EventGenerator::generateAdminEventType(m_queue, startTime, SYSTEM_STATISTICS_EVENT);
+        if (startTime <= m_desArgs.stop_time) {
+            EventGenerator::generateAdminEventType(m_queue, startTime, SYSTEM_STATISTICS_EVENT);
+        }
     }
 }
 

@@ -118,9 +118,11 @@ private:
     dnet::VertexRegretAbsoluteMap vertex_regret_total_map;
     dnet::VertexIncentiveDeviateMap vertex_incentive_deviate_map;
     dnet::VertexNNLossMap vertex_nn_loss_map;
+    dnet::VertexNNLossCVMap vertex_nn_loss_cv_map;
     dnet::EdgeQValueMap edge_q_val_map;
     dnet::EdgeTotalRewardMap edge_total_reward_map;
     dnet::EdgeNNLossMap edge_nn_loss_map;
+    dnet::EdgeNNLossCVMap edge_nn_loss_cv_map;
 
     // neural networks
     std::vector<FFNetSP> m_nets;
