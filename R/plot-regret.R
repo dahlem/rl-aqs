@@ -493,11 +493,11 @@ for (sim in simulations$sim_num) {
 
   df <- get.var.snapshots(dir, numGraphs, numReps, "regret_absolute", ci=0.975, mode="total")
   df$time <- time
-  write.csv(df, paste(sim, "-regret.csv", sep=""))
+  write.csv(df, paste(sim, "-regret.csv", sep=""), quote=F)
 
   df <- get.var.snapshots(dir, numGraphs, numReps, "incentive_deviate", ci=0.975, mode="total")
   df$time <- time
-  write.csv(df, paste(sim, "-incentive-deviate.csv", sep=""))
+  write.csv(df, paste(sim, "-incentive-deviate.csv", sep=""), quote=F)
 }
 
 

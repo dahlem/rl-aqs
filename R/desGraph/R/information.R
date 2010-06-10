@@ -1,4 +1,4 @@
-## Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+## Copyright (C) 2008, 2009, 2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
 ##
 ## This file is free software; as a special exception the author gives
 ## unlimited permission to copy and/or distribute it, with or without
@@ -278,7 +278,7 @@ des.plot.dist.from.rand <- function(dir, numGraphs, mode, stopTime, ps=TRUE) {
   df <- data.frame(time=rep(0, numGraphs+1), dist=rep(0, numGraphs+1))
   df$time = seq(0, numGraphs) * interval
   df$dist = dists
-  write.csv(df, "graph-info-distance-from-rand-evo-plot.dat")
+  write.csv(df, "graph-info-distance-from-rand-evo-plot.dat", quote=F)
 
   graph <- read.graph(graphs[1], format="graphml")
   maxDist <- des.graph.max.info(graph)

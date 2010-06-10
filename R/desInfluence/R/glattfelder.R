@@ -167,6 +167,8 @@ des.backbone.control.eta.prime <- function(data, vartheta) {
   eta100 <- des.backbone.control.eta.100(data)
 
   etaPrime <- etahat/eta100
+  df <- data.frame(etahat, eta100, etaPrime)
+  return(df)
 }
 
 

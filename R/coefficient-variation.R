@@ -49,17 +49,85 @@ cv.depth <- function(cvs, depthSpec) {
   return(m)
 }
 
+library(igraph)
 
-graphs <- create.graphs(".", 1, 1, 4000)
-cvs <- cna.readCVs(graphs)
+message("Start with the analysis of regret!")
 
-depthSpec <- list(c(4), c(6), c(7))
-cvsM <- cv.depth(cvs, depthSpec)
+simulations <- read.csv("simulations.dat", header=TRUE)
+print(simulations)
 
-write.table(cvsM, "coefficient_variation_mean.dat", sep=",", row.names=F, col.names=paste("Depth_", 1:length(depthSpec), sep=""))
 
-tcvsM <- t(cvsM)
+## (1) for all simulations
+for (sim in simulations$sim_num) {
+  graphs <- simulations[simulations$sim_num == sim,]$graphs
+  stopTime <- simulations[simulations$sim_num == sim,]$stop_time
+  reps <- simulations[simulations$sim_num == sim,]$actual_reps
 
-rho <- cor(tcvsM, method = "spearman")
-tau <- cor(tcvsM, method = "kendall")
-r <- cor(tcvsM, method = "pearson")
+  numGraphs <- (graphs - 1);
+  interval <- stopTime / numGraphs;
+  time = seq(0, numGraphs) * interval
+
+  depthSpec <- list(c(4), c(6), c(7))
+
+  graphs <- create.graphs(".", sim, 1, numGraphs)
+  cvsM <- cna.readCVs(graphs)
+  cvs <- cv.depth(cvsM, depthSpec)
+
+  df1 <- data.frame(time=rep(0, numGraphs+1), cvs=rep(0, numGraphs+1))
+  df1$cvs <- cvs[1,]
+  df2 <- data.frame(time=rep(0, numGraphs+1), cvs=rep(0, numGraphs+1))
+  df2$cvs <- cvs[2,]
+  df3 <- data.frame(time=rep(0, numGraphs+1), cvs=rep(0, numGraphs+1))
+  df3$cvs <- cvs[3,]
+  df4 <- data.frame(time=rep(0, numGraphs+1), cvs=rep(0, numGraphs+1))
+  df4$cvs <- mean(c(cvs[2,], cvs[3,]))
+
+  for (rep in 2:reps) {
+    graphs <- create.graphs(".", sim, rep, numGraphs)
+    cvsM <- cna.readCVs(graphs)
+    cvs <- cv.depth(cvsM, depthSpec)
+
+    df1 <- cbind(df1, cvs[1,])
+    df2 <- cbind(df2, cvs[2,])
+    df3 <- cbind(df3, cvs[3,])
+    df4 <- cbind(df4, mean(c(cvs[2,], cvs[3,])))
+    print(paste("Finished ", rep, "replication"))
+  }
+  
+  muCvs1 <- rowMeans(df1)
+  seCvs1 <- qt(0.975, df=reps-1) * apply(df1, 1, sd) / sqrt(reps)
+  muCvs2 <- rowMeans(df2)
+  seCvs2 <- qt(0.975, df=reps-1) * apply(df2, 1, sd) / sqrt(reps)
+  muCvs3 <- rowMeans(df3)
+  seCvs3 <- qt(0.975, df=reps-1) * apply(df3, 1, sd) / sqrt(reps)
+  muCvs4 <- rowMeans(df4)
+  seCvs4 <- qt(0.975, df=reps-1) * apply(df4, 1, sd) / sqrt(reps)
+
+  results1 <- data.frame(time=seq(0, numGraphs) * interval, cvs=muCvs1, seCvs1, cvs1=cvs[1,])
+  results2 <- data.frame(time=seq(0, numGraphs) * interval, cvs=muCvs2, seCvs2, cvs1=cvs[2,])
+  results3 <- data.frame(time=seq(0, numGraphs) * interval, cvs=muCvs3, seCvs3, cvs1=cvs[3,])
+  results4 <- data.frame(time=seq(0, numGraphs) * interval, cvs=muCvs4, seCvs4, cvs1=mean(c(cvs[2,], cvs[3,])))
+
+  results1$time <- time
+  results2$time <- time
+  results3$time <- time
+  results4$time <- time
+  write.table(results1, paste(sim, "-coefficient_variation_mean_4.dat", sep=""), sep=",", row.names=F, quote=F)
+  write.table(results2, paste(sim, "-coefficient_variation_mean_6.dat", sep=""), sep=",", row.names=F, quote=F)
+  write.table(results3, paste(sim, "-coefficient_variation_mean_7.dat", sep=""), sep=",", row.names=F, quote=F)
+  write.table(results4, paste(sim, "-coefficient_variation_mean_6_7.dat", sep=""), sep=",", row.names=F, quote=F)
+
+  tcvsM <- t(cvs)
+  rho <- cor(tcvsM, method = "spearman")
+  write.table(rho, paste(sim, "-coefficient_variation_rho.dat", sep=""), sep=",", row.names=F, quote=F)
+
+  tau <- cor(tcvsM, method = "kendall")
+  write.table(tau, paste(sim, "-coefficient_variation_tau.dat", sep=""), sep=",", row.names=F, quote=F)
+
+  r <- cor(tcvsM, method = "pearson")
+  write.table(r, paste(sim, "-coefficient_variation_r.dat", sep=""), sep=",", row.names=F, quote=F)
+}
+
+
+message("Finished.")
+
