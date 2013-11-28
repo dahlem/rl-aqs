@@ -1,0 +1,47 @@
+README
+
+Implementation of a high-performance adaptive queueing simulation
+environment, which can be configured to run on clusters of computers
+using MPI. The underlying simulator is based on advanced data
+structures to provide efficient event handling, such as a priority
+queue implementation geared towards discrete event simulation
+[1]. Decentralised control is implemented using SARSA reinforcement
+learning with a neural network function approximator to provide
+compact representation of the state space. Details and results of the
+research into adaptive queueing systems can be found [2-5].
+
+
+[1] Ladder queue: An <i>O</i>(1) priority queue structure for
+    large-scale discrete event simulation
+    by: Wai T. Tang, Rick, Ian L. Thng
+    ACM Transactions on Modeling and Computer Simulation (TOMACS),
+    Vol. 15, No. 3. (July 2005), pp. 175-204,
+    doi:10.1145/1103323.1103324
+
+ 	
+[2] Cognitive Policy Learner: Biasing Winning or Losing Strategies
+    by Dominik Dahlem, Jim Dowling, William Harrison
+    In Tenth International Conference on Autonomous Agents and
+    Multiagent Systems (2--6 May 2011), pp. 601-608
+
+[3] Collaborative Function Approximation in Social Multiagent Systems
+    by Dominik Dahlem, William Harrison
+    Web Intelligence and Intelligent Agent Technology, IEEE/WIC/ACM
+    International Conference on In Web Intelligence and Intelligent
+    Agent Technology, IEEE/WIC/ACM International Conference on
+    (September 2010), pp. 48-55, doi:10.1109/WI-IAT.2010.276
+
+[4] Globally Optimal Multi-agent Reinforcement Learning Parameters in
+    Distributed Task Assignment
+    by Dominik Dahlem, William Harrison
+    Web Intelligence and Intelligent Agent Technology, IEEE/WIC/ACM
+    International Conference on In Web Intelligence and Intelligent
+    Agent Technology, IEEE/WIC/ACM International Conference on, Vol. 2
+    (2009), pp. 28-35, doi:10.1109/wi-iat.2009.122
+
+[5] Waiting Time Sensitivities of Social and Random Graph Models
+    by Dominik Dahlem, William Harrison
+    Social Network Analysis and Mining, International Conference on
+    Advances in In Social Network Analysis and Mining, International
+    Conference on Advances in, Vol. 0 (July 2009), pp. 176-181,
+    doi:10.1109/asonam.2009.25

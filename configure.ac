@@ -225,12 +225,11 @@ DX_RTF_FEATURE([OFF])
 DX_XML_FEATURE([OFF])
 DX_PDF_FEATURE([OFF])
 DX_PS_FEATURE([OFF])
-DX_INIT_DOXYGEN([DES], [Doxyfile], [doc/doxygen])
+DX_INIT_DOXYGEN([RL-AQS], [Doxyfile], [doc/doxygen])
 
 
 
 AC_CONFIG_FILES([
-   README
    Makefile
    doc/Makefile
    m4/Makefile
