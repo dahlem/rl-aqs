@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2007-2009 Dominik Dahlem <Dominik.Dahlem@gmail.com>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -62,7 +62,7 @@ typedef boost::shared_array <double> tDoubleSA;
  * The elements int this structure are distributed uniformly in the limit
  * among the rungs of the ladder.</p>
  *
- * @author <a href="mailto:Dominik.Dahlem@cs.tcd.ie">Dominik Dahlem</a>
+ * @author <a href="mailto:Dominik.Dahlem@gmail.com">Dominik Dahlem</a>
  */
 class Ladder: public dcommon::Queue
 {

@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008 Dominik Dahlem <Dominik.Dahlem@gmail.com>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ namespace des
 /**
  * This exception specifies errors that may occur within graphs.
  *
- * @author <a href="mailto:Dominik.Dahlem@cs.tcd.ie">Dominik Dahlem</a>
+ * @author <a href="mailto:Dominik.Dahlem@gmail.com">Dominik Dahlem</a>
  */
 class GraphException: public std::exception
 {

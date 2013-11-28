@@ -1,4 +1,4 @@
-// Copyright (C) 2007,2008,2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2007,2008,2009 Dominik Dahlem <Dominik.Dahlem@gmail.com>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -88,7 +88,7 @@ typedef boost::shared_ptr <str_buf> tStrBufSP;
  * but provides better performance, because list elements don't have to be
  * free'd and created several times.
  *
- * @author <a href="mailto:Dominik.Dahlem@cs.tcd.ie">Dominik Dahlem</a>
+ * @author <a href="mailto:Dominik.Dahlem@gmail.com">Dominik Dahlem</a>
  */
 class LadderQueue: public dcommon::Queue
 {

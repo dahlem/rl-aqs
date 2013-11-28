@@ -1,4 +1,4 @@
-// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009, 2010, 2013 Dominik Dahlem <Dominik.Dahlem@gmail.com>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -57,6 +57,7 @@ const std::string MAX_ARRIVAL = "max_arrival";
 const std::string BOOST_ARRIVAL = "boost_arrival";
 const std::string BOOST_EDGE = "boost_edge";
 const std::string NUM_GRAPHS = "num_graphs";
+const std::string SO_TOPOLOGY_FEATURES = "feature_vectors";
 
 
 
@@ -69,6 +70,7 @@ int main(int argc, char *argv[])
     double edge_fixed = -1.0;
     double edge_prob = 0.05;
     double max_arrival, boost_arrival, boost_edge;
+    bool so_topology_features;
 
     dsample::tGslRngSP r1, r2, r3;
     std::string filename;
@@ -88,7 +90,7 @@ int main(int argc, char *argv[])
         (MAX_ARRIVAL.c_str(), po::value <double>()->default_value(1), "Maximum arrival rate.")
         (BOOST_ARRIVAL.c_str(), po::value <double>()->default_value(1.0), "Boost the arrival rate.")
         (BOOST_EDGE.c_str(), po::value <double>()->default_value(1.0), "Boost the edge weight.")
-        (MAX_EDGES.c_str(), po::value<boost::uint32_t>()->default_value(dnet::WEvonet::MAX_OUTDEGREE), "set the maximum number of edges to connect a new vertex")
+        (MAX_EDGES.c_str(), po::value<boost::uint32_t>()->default_value(UINT_MAX), "set the maximum number of edges to connect a new vertex")
         (NUM_GRAPHS.c_str(), po::value<boost::uint32_t>()->default_value(1), "set the number of graphs to be generated")
         ;
 
@@ -102,9 +104,16 @@ int main(int argc, char *argv[])
         (EDGE_PROB.c_str(), po::value <double>()->default_value(0.05), "probability of having an edge (u,v).")
         ;
 
+    po::options_description opt_so_topo("Self-organising Topology");
+    opt_so_topo.add_options()
+        (SO_TOPOLOGY_FEATURES.c_str(), po::value <bool>()->default_value(false), "enable feature vectors.")
+        ;
+
+
     opt_desc.add(desc);
     opt_desc.add(desc_soc);
     opt_desc.add(desc_rand);
+    opt_desc.add(opt_so_topo);
 
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, opt_desc), vm);
@@ -206,6 +215,11 @@ int main(int argc, char *argv[])
     std::cout << "Generate network type "
               << net_gen << "." << std::endl;
 
+    if (vm.count(SO_TOPOLOGY_FEATURES.c_str())) {
+        so_topology_features = vm[SO_TOPOLOGY_FEATURES.c_str()].as <bool>();
+    }
+    std::cout << "Feature vectors enabled: " << so_topology_features << std::endl;
+
     boost::int32_t arrival_rng_index;
     boost::int32_t uniform_rng_index;
     boost::int32_t num_edges_rng_index;
@@ -262,6 +276,15 @@ int main(int argc, char *argv[])
             g = dnet::WEvonet::createERGraph(net_size, edge_fixed, max_arrival,
                                              boost_arrival, boost_edge, r1, seed, edge_prob,
                                              max_edges);
+        }
+
+        if (so_topology_features) {
+            boost::uint32_t seed = dsample::Seeds::getInstance().getSeed();
+            boost::uint32_t rng_rand_feature_index = dsample::CRN::getInstance().init(seed);
+            dsample::CRN::getInstance().log(seed, "randomise feature choice.");
+            dsample::tGslRngSP rng = dsample::CRN::getInstance().get(rng_rand_feature_index);
+
+            dnet::WEvonet::establishFeatures(g, rng);
         }
 
         if (format == dnet::GraphUtil::GRAPHVIZ) {

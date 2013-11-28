@@ -1,4 +1,4 @@
-// Copyright (C) 2008-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008-2010 Dominik Dahlem <Dominik.Dahlem@gmail.com>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -63,7 +63,7 @@ static const std::string HEADER = "uid,id,arrivalTime,delay,origin,destination,t
  * An event is specified by the arrival time, the destination, the origin, and
  * a type of the event.
  *
- * @author <a href="mailto:Dominik.Dahlem@cs.tcd.ie">Dominik Dahlem</a>
+ * @author <a href="mailto:Dominik.Dahlem@gmail.com">Dominik Dahlem</a>
  */
 class Entry : public boost::intrusive::list_base_hook<>
 {

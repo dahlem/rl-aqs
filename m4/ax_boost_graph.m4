@@ -1,5 +1,5 @@
 # ===========================================================================
-#           http://autoconf-archive.cryp.to/ax_boost_graph.html
+#    http://www.gnu.org/software/autoconf-archive/ax_boost_graph.html
 # ===========================================================================
 #
 # SYNOPSIS
@@ -20,25 +20,25 @@
 #
 #     HAVE_BOOST_GRAPH
 #
-# LAST MODIFICATION
+# LICENSE
 #
-#   2008-04-12
-#
-# COPYLEFT
-#
-#   Copyright (c) 2008 Thomas Porschberg <thomas@randspringer.de>
-#   Copyright (c) 2008 Michael Tindal
+#   Copyright (c) 2009 Thomas Porschberg <thomas@randspringer.de>
+#   Copyright (c) 2009 Michael Tindal
+#   Copyright (c) 2009 Roman Rybalko <libtorrent@romanr.info>
 #
 #   Copying and distribution of this file, with or without modification, are
 #   permitted in any medium without royalty provided the copyright notice
-#   and this notice are preserved.
+#   and this notice are preserved. This file is offered as-is, without any
+#   warranty.
+
+#serial 26
 
 AC_DEFUN([AX_BOOST_GRAPH],
 [
 	AC_ARG_WITH([boost-graph],
 	AS_HELP_STRING([--with-boost-graph@<:@=special-lib@:>@],
                    [use the Graph library from boost - it is possible to specify a certain library for the linker
-                        e.g. --with-boost-graph=boost_graph-gcc-mt-d-1_33_1 ]),
+                        e.g. --with-boost-graph=boost_graph-gcc-mt ]),
         [
         if test "$withval" = "no"; then
 			want_boost="no"
@@ -47,7 +47,7 @@ AC_DEFUN([AX_BOOST_GRAPH],
             ax_boost_user_graph_lib=""
         else
 		    want_boost="yes"
-        	ax_boost_user_graph_lib="$withval"
+		ax_boost_user_graph_lib="$withval"
 		fi
         ],
         [want_boost="yes"]
@@ -63,43 +63,48 @@ AC_DEFUN([AX_BOOST_GRAPH],
 		LDFLAGS="$LDFLAGS $BOOST_LDFLAGS"
 		export LDFLAGS
 
+		LIBS_SAVED=$LIBS
+		LIBS="$LIBS $BOOST_SYSTEM_LIB"
+		export LIBS
+
         AC_CACHE_CHECK(whether the Boost::Graph library is available,
 					   ax_cv_boost_graph,
         [AC_LANG_PUSH([C++])
-		 AC_COMPILE_IFELSE(AC_LANG_PROGRAM([[@%:@include <boost/graph/adjacency_list.hpp>]],
-                                   [[typedef boost::adjacency_list<boost::listS, boost::vecS> Graph;
-                                     Graph G(2);
-                                     return 0;
-                                   ]]),
-         ax_cv_boost_graph=yes, ax_cv_boost_graph=no)
+         AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[@%:@include <boost/graph/adjacency_list.hpp>]],
+                                   [[using namespace boost;
+                                   adjacency_list<> l;
+                                   return 0;]])],
+					       ax_cv_boost_graph=yes, ax_cv_boost_graph=no)
          AC_LANG_POP([C++])
 		])
 		if test "x$ax_cv_boost_graph" = "xyes"; then
 			AC_DEFINE(HAVE_BOOST_GRAPH,,[define if the Boost::Graph library is available])
             BOOSTLIBDIR=`echo $BOOST_LDFLAGS | sed -e 's/@<:@^\/@:>@*//'`
             if test "x$ax_boost_user_graph_lib" = "x"; then
-                for libextension in `ls $BOOSTLIBDIR/libboost_graph*.{so,a}* 2>/dev/null | sed 's,.*/,,' | sed -e 's;^lib\(boost_graph.*\)\.so.*$;\1;' -e 's;^lib\(boost_graph.*\)\.a*$;\1;'` ; do
+                for libextension in `ls -r $BOOSTLIBDIR/libboost_graph* 2>/dev/null | sed 's,.*/lib,,' | sed 's,\..*,,'` ; do
                      ax_lib=${libextension}
 				    AC_CHECK_LIB($ax_lib, exit,
                                  [BOOST_GRAPH_LIB="-l$ax_lib"; AC_SUBST(BOOST_GRAPH_LIB) link_graph="yes"; break],
                                  [link_graph="no"])
-  				done
+				done
                 if test "x$link_graph" != "xyes"; then
-                for libextension in `ls $BOOSTLIBDIR/boost_graph*.{dll,a}* 2>/dev/null | sed 's,.*/,,' | sed -e 's;^\(boost_graph.*\)\.dll.*$;\1;' -e 's;^\(boost_graph.*\)\.a*$;\1;'` ; do
+                for libextension in `ls -r $BOOSTLIBDIR/boost_graph* 2>/dev/null | sed 's,.*/,,' | sed -e 's,\..*,,'` ; do
                      ax_lib=${libextension}
 				    AC_CHECK_LIB($ax_lib, exit,
                                  [BOOST_GRAPH_LIB="-l$ax_lib"; AC_SUBST(BOOST_GRAPH_LIB) link_graph="yes"; break],
                                  [link_graph="no"])
-  				done
-                fi
-
+				done
+		    fi
             else
                for ax_lib in $ax_boost_user_graph_lib boost_graph-$ax_boost_user_graph_lib; do
-				      AC_CHECK_LIB($ax_lib, main,
+				      AC_CHECK_LIB($ax_lib, exit,
                                    [BOOST_GRAPH_LIB="-l$ax_lib"; AC_SUBST(BOOST_GRAPH_LIB) link_graph="yes"; break],
                                    [link_graph="no"])
                   done
 
+            fi
+            if test "x$ax_lib" = "x"; then
+                AC_MSG_ERROR(Could not find a version of the library!)
             fi
 			if test "x$link_graph" != "xyes"; then
 				AC_MSG_ERROR(Could not link against $ax_lib !)
@@ -107,6 +112,7 @@ AC_DEFUN([AX_BOOST_GRAPH],
 		fi
 
 		CPPFLAGS="$CPPFLAGS_SAVED"
-    	LDFLAGS="$LDFLAGS_SAVED"
+		LDFLAGS="$LDFLAGS_SAVED"
+		LIBS="$LIBS_SAVED"
 	fi
 ])

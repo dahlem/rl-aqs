@@ -1,4 +1,4 @@
-// Copyright (C) 2007,2008,2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2007,2008,2009 Dominik Dahlem <Dominik.Dahlem@gmail.com>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -55,7 +55,7 @@ namespace des
  * characteristics. This class maintains a few variables (timestamp, number of
  * events).
  *
- * @author <a href="mailto:Dominik.Dahlem@cs.tcd.ie">Dominik Dahlem</a>
+ * @author <a href="mailto:Dominik.Dahlem@gmail.com">Dominik Dahlem</a>
  */
 class Top: public dcommon::Queue
 {

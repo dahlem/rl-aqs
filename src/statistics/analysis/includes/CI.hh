@@ -1,4 +1,4 @@
-// Copyright (C) 2007, 2008 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2007, 2008 Dominik Dahlem <Dominik.Dahlem@gmail.com>
 //
 // This file is free software; as a special exception the author gives
 // unlimited permission to copy and/or distribute it, with or without
@@ -26,7 +26,7 @@ namespace des
  * This class calculates confidence intervals given a set of <code>double</code>
  * values.
  *
- * @author <a href="mailto:Dominik.Dahlem@cs.tcd.ie">Dominik Dahlem</a>
+ * @author <a href="mailto:Dominik.Dahlem@gmail.com">Dominik Dahlem</a>
  */
 class CI
 {

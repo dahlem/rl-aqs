@@ -1,4 +1,4 @@
-// Copyright (C) 2008-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008-2010 Dominik Dahlem <Dominik.Dahlem@gmail.com>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -447,6 +447,16 @@ void Simulation::simulate(MPI_Datatype &mpi_desargs, MPI_Datatype &mpi_desout,
                 graph = Simulation::createGraph(desArgs, net_size,  max_edges,
                                                 edge_prob, boost_arrival, boost_edge);
             }
+        }
+
+        // if feature selection is enabled to facilitate self-organising topologies
+        if (desArgs->so_topology_features) {
+            boost::uint32_t seed = dsample::Seeds::getInstance().getSeed();
+            boost::uint32_t rng_rand_feature_index = dsample::CRN::getInstance().init(seed);
+            dsample::CRN::getInstance().log(seed, "randomise feature choice.");
+            dsample::tGslRngSP rng = dsample::CRN::getInstance().get(rng_rand_feature_index);
+
+            dnet::WEvonet::establishFeatures(graph, rng);
         }
 
         num_vertices = boost::num_vertices(*graph);

@@ -1,4 +1,4 @@
-# Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+# Copyright (C) 2008-2010, 2013 Dominik Dahlem <Dominik.Dahlem@gmail.com>
 #  
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without 
@@ -15,10 +15,12 @@ network_add_vertices_SOURCES =                                        \
 
 network_add_vertices_CPPFLAGS =                                       \
 	-I./includes                                                  \
+	-I$(top_srcdir)/src/network/evolution/includes                \
 	$(BOOST_CPPFLAGS)
 
 
 network_add_vertices_LDFLAGS =                                        \
+	$(BOOST_GRAPH_LIB)                                            \
 	$(BOOST_LDFLAGS)
 
 

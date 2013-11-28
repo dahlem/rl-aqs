@@ -1,4 +1,4 @@
-// Copyright (C) 2008, 2009, 2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009, 2010 Dominik Dahlem <Dominik.Dahlem@gmail.com>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -67,7 +67,7 @@ void GraphUtil::print_dot(Graph &p_graph, const std::string& filename)
     if (out.is_open()) {
         boost::dynamic_properties dp = getProperties(p_graph);
         std::string node_id = "id";
-        boost::write_graphviz(out, p_graph, dp, node_id);
+        boost::write_graphviz_dp(out, p_graph, dp, node_id);
         out.close();
     }
 }
@@ -193,6 +193,8 @@ boost::dynamic_properties GraphUtil::getProperties(Graph &p_graph)
     dp.property(VERTEX_NN_LOSS, get(vertex_v_nn_loss, p_graph));
     dp.property(VERTEX_COEFF_VAR, get(vertex_coeff_var, p_graph));
     dp.property(VERTEX_V_NN_LOSS_CV, get(vertex_v_nn_loss_cv, p_graph));
+    dp.property(VERTEX_V_FEATURES, get(vertex_v_features, p_graph));
+    dp.property(VERTEX_V_CHOICE, get(vertex_v_choice, p_graph));
     dp.property(EDGE_NN_LOSS, get(edge_e_nn_loss, p_graph));
     dp.property(EDGE_EMOTION, get(edge_emotion, p_graph));
     dp.property(EDGE_RMIN, get(edge_rmin, p_graph));

@@ -1,4 +1,4 @@
-// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009, 2010 Dominik Dahlem <Dominik.Dahlem@gmail.com>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -78,6 +78,14 @@ public:
     static tGraphSP createERGraph(boost::uint32_t p_size, double p_edge_weight,
                                   double p_max_arrival_rate, double p_boost_arrival, double p_boost_edge,
                                   tGslRngSP p_vertex_arrival_rng, boost::uint32_t seed, double p, boost::uint32_t max_edges);
+
+    /** @fn void establishFeatures(tGraphSP)
+     * Create the feature vector for the vertices based on their structural embedding
+     * in the graph.
+     *
+     * @param tGraphSP the graph
+     */
+    static void establishFeatures(tGraphSP, tGslRngSP);
 
 private:
 

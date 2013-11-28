@@ -1,4 +1,4 @@
-// Copyright (C) 2008-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008-2010 Dominik Dahlem <Dominik.Dahlem@gmail.com>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -237,7 +237,7 @@ public:
                 }
                 if (LhsUtils::getCplAPosIndex(p_desArgs) >= 0) {
                     gsl_vector_set(min, LhsUtils::getCplRNegIndex(p_desArgs), p_desArgs->min_cognitive_r_neg);
-                    gsl_vector_set(max, LhsUtils::getCplRnegIndex(p_desArgs), p_desArgs->max_cognitive_r_neg);
+                    gsl_vector_set(max, LhsUtils::getCplRNegIndex(p_desArgs), p_desArgs->max_cognitive_r_neg);
                 }
 
                 if (p_desArgs->lhs_optimal) {

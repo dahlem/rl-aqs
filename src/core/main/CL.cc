@@ -1,4 +1,4 @@
-// Copyright (C) 2008, 2009, 2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009, 2010 Dominik Dahlem <Dominik.Dahlem@gmail.com>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -259,6 +259,12 @@ CL::CL()
          "lower bound in percent for stable queues.")
         ;
 
+
+    po::options_description opt_so_topo("Self-organising Topology");
+    opt_so_topo.add_options()
+        (CL_SO_TOPOLOGY_FEATURES.c_str(), po::value <bool>()->default_value(false), "enable feature vectors.")
+        ;
+
     opt_desc->add(opt_general);
     opt_desc->add(opt_app);
     opt_desc->add(opt_des);
@@ -273,6 +279,7 @@ CL::CL()
     opt_desc->add(opt_rl_policy_cpl);
     opt_desc->add(opt_mfrw);
     opt_desc->add(opt_expert);
+    opt_desc->add(opt_so_topo);
 }
 
 
@@ -883,7 +890,13 @@ int CL::parse(int argc, char *argv[], tDesArgsSP desArgs)
         std::cout << "mfrw lower: " << desArgs->mfrw_lower << "." << std::endl;
     }
 
-    std::cout << std::endl << "9) Output Files" << std::endl;
+    std::cout << std::endl << "9) Self-organising Service Network" << std::endl;
+    if (vm.count(CL_SO_TOPOLOGY_FEATURES.c_str())) {
+        desArgs->so_topology_features = vm[CL_SO_TOPOLOGY_FEATURES.c_str()].as <bool>();
+    }
+    std::cout << "Feature vectors enabled: " << desArgs->so_topology_features << std::endl;
+
+    std::cout << std::endl << "10) Output Files" << std::endl;
     desArgs->events_unprocessed = "events_unprocessed.dat";
     desArgs->events_processed = "events_processed.dat";
 

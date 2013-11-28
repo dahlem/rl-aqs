@@ -1,4 +1,4 @@
-// Copyright (C) 2008, 2009, 2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009, 2010 Dominik Dahlem <Dominik.Dahlem@gmail.com>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -159,6 +159,8 @@ const std::string CL_MAX_COGNITIVE_R_NEG = "max_cognitive_r_neg";
 const std::string CL_COEFF_VAR = "coefficient_variation";
 const std::string CL_COEFF_VAR_WINDOW = "coefficient_variation_window";
 
+const std::string CL_SO_TOPOLOGY_FEATURES = "feature_vectors";
+
 
 static const std::string ARGS_HEADER = "stop_time,graphs,max_arrival,boost_arrival,boost_edge,confidence,alpha,error,initial_reps,network_type,network_size,max_edges,edgeProb,edgeDiffusion,rl,cl_ci,rlq_alpha,rlq_lambda,rl_policy,rl_policy_epsilon,rl_policy_boltzmann_t,rl_hybrid,rl_hybrid_warmup,nn_momentum,rl_policy_wpl_eta,cognitive_A_pos,cognitive_A_neg,cognitive_r_pos,cognitive_r_neg";
 
@@ -284,6 +286,8 @@ struct desArgs_t {
     double max_cognitive_r_pos;
     double max_cognitive_r_neg;
 
+    bool so_topology_features;                /* establish feature vectors for services */
+
     desArgs_t(desArgs_t const &args)
         : graph_filename(args.graph_filename), seeds_filename(args.seeds_filename), results_dir(args.results_dir),
           events_unprocessed(args.events_unprocessed), events_processed(args.events_processed), add_sim(args.add_sim),
@@ -314,7 +318,8 @@ struct desArgs_t {
           mfrw_upper(args.mfrw_upper), mfrw_lower(args.mfrw_lower), system_stats_steps(args.system_stats_steps), system_stats_interval(args.system_stats_interval),
           cognitive_A_pos(args.cognitive_A_pos), cognitive_A_neg(args.cognitive_A_neg), cognitive_r_pos(args.cognitive_r_pos), cognitive_r_neg(args.cognitive_r_neg),
           min_cognitive_A_pos(args.min_cognitive_A_pos), min_cognitive_A_neg(args.min_cognitive_A_neg), min_cognitive_r_pos(args.min_cognitive_r_pos), min_cognitive_r_neg(args.min_cognitive_r_neg),
-          max_cognitive_A_pos(args.max_cognitive_A_pos), max_cognitive_A_neg(args.max_cognitive_A_neg), max_cognitive_r_pos(args.max_cognitive_r_pos), max_cognitive_r_neg(args.max_cognitive_r_neg)
+          max_cognitive_A_pos(args.max_cognitive_A_pos), max_cognitive_A_neg(args.max_cognitive_A_neg), max_cognitive_r_pos(args.max_cognitive_r_pos), max_cognitive_r_neg(args.max_cognitive_r_neg),
+          so_topology_features(args.so_topology_features)
         {}
 
     desArgs_t()
@@ -348,7 +353,8 @@ struct desArgs_t {
           system_stats_interval(1),
           cognitive_A_pos(0.0), cognitive_A_neg(0.0), cognitive_r_pos(0.0), cognitive_r_neg(0.0),
           min_cognitive_A_pos(0.0), min_cognitive_A_neg(0.0), min_cognitive_r_pos(0.0), min_cognitive_r_neg(0.0),
-          max_cognitive_A_pos(0.0), max_cognitive_A_neg(0.0), max_cognitive_r_pos(0.0), max_cognitive_r_neg(0.0)
+          max_cognitive_A_pos(0.0), max_cognitive_A_neg(0.0), max_cognitive_r_pos(0.0), max_cognitive_r_neg(0.0),
+          so_topology_features(false)
         {}
 
     friend std::ostream& operator <<(std::ostream &p_os, const desArgs_t &desArgs)

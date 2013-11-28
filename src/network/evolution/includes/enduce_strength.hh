@@ -1,4 +1,4 @@
-// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009 Dominik Dahlem <Dominik.Dahlem@gmail.com>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ namespace des { namespace network {
  * @code{StengthDiffMap}. The last argument carries the calculated differences in the
  * strength allocation.
  *
- * @author <a href="mailto:Dominik.Dahlem@cs.tcd.ie">Dominik Dahlem</a>
+ * @author <a href="mailto:Dominik.Dahlem@gmail.com">Dominik Dahlem</a>
  */
 template <class VertexArrivalMap, class EdgeWeightMap,
           class VertexIndexMap, class StrengthDiffMap>
@@ -113,7 +113,7 @@ public:
  * include the @code{VertexServiceMap}, @code{StengthDiffMap}. The last argument
  * carries the calculated differences in the strength allocation.
  *
- * @author <a href="mailto:Dominik.Dahlem@cs.tcd.ie">Dominik Dahlem</a>
+ * @author <a href="mailto:Dominik.Dahlem@gmail.com">Dominik Dahlem</a>
  */
 template <class VertexServiceMap, class StrengthDiffMap>
 class apply_enduced_strength_visitor : public boost::default_bfs_visitor

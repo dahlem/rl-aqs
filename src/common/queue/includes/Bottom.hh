@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2007-2010 Dominik Dahlem <Dominik.Dahlem@gmail.com>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -55,7 +55,7 @@ namespace des
  * For implementation details on the specific methods see the implementation
  * class.
  *
- * @author <a href="mailto:Dominik.Dahlem@cs.tcd.ie>Dominik Dahlem</a>
+ * @author <a href="mailto:Dominik.Dahlem@gmail.com>Dominik Dahlem</a>
  */
 class Bottom: public Queue
 {

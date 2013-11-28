@@ -1,4 +1,4 @@
-// Copyright (C) 2008, 2009, 2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009, 2010 Dominik Dahlem <Dominik.Dahlem@gmail.com>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -27,10 +27,12 @@
 # include <iostream>
 #endif /* NDEBUG_NETWORK */
 
+//#include <algorithms>
 #include <fstream>
 #include <limits>
 #include <list>
 #include <numeric>
+#include <set>
 #include <string>
 #include <utility>
 #include <vector>
@@ -42,7 +44,8 @@
 #include <boost/graph/property_iter_range.hpp>
 #include <boost/graph/topological_sort.hpp>
 #include <boost/pending/indirect_cmp.hpp>
-#include <boost/pending/integer_range.hpp>
+#include <boost/range/irange.hpp>
+//#include <boost/pending/integer_range.hpp>
 #include <boost/random/linear_congruential.hpp>
 
 #include <gsl/gsl_rng.h>
@@ -728,6 +731,125 @@ tGraphSP WEvonet::createERGraph(boost::uint32_t p_size, double fixed_edge_weight
 
     return g;
 }
+
+void WEvonet::establishFeatures(tGraphSP p_g, tGslRngSP p_rand_feature)
+{
+    boost::uint16_t num_features = 0;
+
+    // 1. for each vertex
+    BOOST_FOREACH(Vertex v, (boost::vertices(*p_g))) {
+#ifndef NDEBUG
+        VertexIndexMap indexMap = get(boost::vertex_index, *p_g);
+        std::cout << "Vertex: " << indexMap[v] << std::endl;
+        std::cout.flush();
+#endif /* NDEBUG */
+
+        // 1.1 get all out-vertices
+        boost::uint16_t outdegree = boost::out_degree(v, *p_g);
+
+#ifndef NDEBUG
+        std::cout << "  out-dgree: " << outdegree << std::endl;
+        std::cout.flush();
+#endif /* NDEBUG */
+        if (outdegree > 0) {
+            std::vector<int> intersection;
+            std::set<int> t1, t2;
+            VertexFeaturesMap featuresMap = get(vertex_v_features, *p_g);
+            VertexChoiceMap choiceMap = get(vertex_v_choice, *p_g);
+
+            // 1.2 is the intersection of the feature vectors non-empty
+            boost::graph_traits<Graph>::out_edge_iterator out_i, out_end;
+            tie(out_i, out_end) = boost::out_edges(v, *p_g);
+
+            std::copy(featuresMap[boost::target(*out_i, *p_g)].begin(),
+                      featuresMap[boost::target(*out_i, *p_g)].end(),
+                      std::inserter(t1, t1.begin()));
+
+#ifndef NDEBUG
+            std::cout << "  set: ";
+            std::copy(t1.begin(),
+                      t1.end(),
+                      std::ostream_iterator<int>(std::cout, " "));
+            std::cout << std::endl;
+            std::cout.flush();
+#endif /* NDEBUG */
+
+            // advance the iterator
+            ++out_i;
+
+            for (; out_i != out_end; ++out_i) {
+                // empty the intersection set and copy the features of the current
+                // iterator into a temp set
+                intersection.clear();
+                std::copy(featuresMap[boost::target(*out_i, *p_g)].begin(),
+                          featuresMap[boost::target(*out_i, *p_g)].end(),
+                          std::inserter(t2, t2.begin()));
+
+
+#ifndef NDEBUG
+                std::cout << "  set: ";
+                std::copy(t2.begin(),
+                          t2.end(),
+                          std::ostream_iterator<int>(std::cout, " "));
+                std::cout << std::endl;
+                std::cout.flush();
+#endif /* NDEBUG */
+
+                // calculate the intersection
+                std::set_intersection(t1.begin(), t1.end(),
+                                      t2.begin(), t2.end(),
+                                      std::inserter(intersection, intersection.begin()));
+
+                // empty the t1 set and copy the intersection elements into it
+                t1.clear();
+                std::copy(intersection.begin(),
+                          intersection.end(),
+                          std::inserter(t1, t1.begin()));
+            }
+
+#ifndef NDEBUG
+            std::cout << "  -> intersection: ";
+            std::copy(intersection.begin(),
+                      intersection.end(),
+                      std::ostream_iterator<int>(std::cout, " "));
+            std::cout << std::endl;
+            std::cout.flush();
+#endif /* NDEBUG */
+
+            if (!intersection.empty()) {
+                // 1.2.1 yes : pick a random feature of this intersection and add it to the choice attribute of the head vertex
+                boost::uint32_t choice = gsl_rng_uniform_int(p_rand_feature.get(), intersection.size());
+                choiceMap[v] = intersection[choice];
+
+#ifndef NDEBUG
+                std::cout << "  choice: " << intersection[choice] << std::endl;
+                std::cout.flush();
+#endif /* NDEBUG */
+            } else {
+                // 1.2.2 no : define a new feature, add it to the choice attribute of the head vertex and the features attributes of the tail vertices
+                num_features++;
+                choiceMap[v] = num_features;
+
+#ifndef NDEBUG
+                std::cout << "  new feature: " << num_features << std::endl;
+                std::cout.flush();
+#endif /* NDEBUG */
+
+                BOOST_FOREACH(Edge e, (boost::out_edges(v, *p_g))) {
+                    featuresMap[boost::target(e, *p_g)].insert(num_features);
+                }
+            }
+        } else {
+            // nothing to do, if the out-degree is zero
+        }
+
+#ifndef NDEBUG
+        std::cout << std::endl << std::endl;
+        std::cout.flush();
+#endif /* NDEBUG */
+    }
+}
+
 
 }
 }

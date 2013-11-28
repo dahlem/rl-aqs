@@ -1,4 +1,4 @@
-// Copyright (C) 2007, 2008, 2009 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2007, 2008, 2009 Dominik Dahlem <Dominik.Dahlem@gmail.com>
 //
 // This file is free software; as a special exception the author gives
 // unlimited permission to copy and/or distribute it, with or without
@@ -64,7 +64,7 @@ typedef boost::shared_ptr <str_buf> tStrBufSP;
 /**
  * This class specifies the contract of a queue.
  *
- * @author <a href="mailto:Dominik.Dahlem@cs.tcd.ie>Dominik Dahlem</a>
+ * @author <a href="mailto:Dominik.Dahlem@gmail.com>Dominik Dahlem</a>
  */
 class Queue
 {

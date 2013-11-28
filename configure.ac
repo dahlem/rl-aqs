@@ -1,4 +1,4 @@
-# Copyright (C) 2007-2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+# Copyright (C) 2007-2010, 2013 Dominik Dahlem <Dominik.Dahlem@gmail.com>
 #  
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without 
@@ -8,12 +8,11 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-#LT_PREREQ([1.5.26])
 AC_PREREQ(2.61)
 AC_INIT([Discrete Event Simulation for Service Interaction],
-        [4.2],
-        [Dominik Dahlem Dominik.Dahlem@cs.tcd.ie], 
-        [des])
+        [4.3],
+        [Dominik Dahlem Dominik.Dahlem@gmail.com], 
+        [rl-aqs])
 
 AC_CONFIG_AUX_DIR(config)
 AC_CONFIG_SRCDIR([config.h.in])
@@ -55,7 +54,7 @@ AC_CHECK_FUNCS([floor memset sqrt pow])
 AX_PATH_GSL([1.9])
 
 # Boost library check
-AX_BOOST_BASE([1.39])
+AX_BOOST_BASE([1.48])
 AX_BOOST_GRAPH
 AX_BOOST_DATE_TIME
 AX_BOOST_PROGRAM_OPTIONS
@@ -233,28 +232,8 @@ DX_INIT_DOXYGEN([DES], [Doxyfile], [doc/doxygen])
 AC_CONFIG_FILES([
    README
    Makefile
-   pbs/allreduce_test.sh
-   pbs/crn_test.pbs
-   pbs/seeds_read.pbs
-   pbs/struct_test.pbs
-   pbs/read_graphml.pbs
-   pbs/write_seeds.pbs
    doc/Makefile
    m4/Makefile
-   R/Makefile
-   R/plot-diagnostics.R
-   R/analysis/Makefile
-   R/analysis/assortativity-analysis.R
-   R/desGraph/Makefile
-   R/desGraph/DESCRIPTION
-   R/desInfluence/Makefile
-   R/desInfluence/DESCRIPTION
-   R/desStats/Makefile
-   R/desStats/DESCRIPTION
-   R/desSim/Makefile
-   R/desSim/DESCRIPTION
-   R/graphProps/Makefile
-   R/graphProps/DESCRIPTION
    src/Makefile
    src/common/Makefile
    src/common/list/Makefile
@@ -316,6 +295,6 @@ AC_MSG_RESULT([
 
 $PACKAGE $VERSION: Automatic configuration OK.
 
-Type 'make' to compile des.
+Type 'make' to compile $PACKAGE.
 
 ])

@@ -1,4 +1,4 @@
-// Copyright (C) 2007 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2007 Dominik Dahlem <Dominik.Dahlem@gmail.com>
 //
 // This file is free software; as a special exception the author gives
 // unlimited permission to copy and/or distribute it, with or without
@@ -34,7 +34,7 @@ namespace des
  * This class compares two <code>double</code> values and returns 0, if they are
  * equal, otherwise the difference.
  *
- * @author <a href="mailto:Dominik.Dahlem@cs.tcd.ie">Dominik Dahlem</a>
+ * @author <a href="mailto:Dominik.Dahlem@gmail.com">Dominik Dahlem</a>
  */
 class Compare
 {

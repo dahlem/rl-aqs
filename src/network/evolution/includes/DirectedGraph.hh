@@ -1,4 +1,4 @@
-// Copyright (C) 2008, 2009, 2010 Dominik Dahlem <Dominik.Dahlem@cs.tcd.ie>
+// Copyright (C) 2008, 2009, 2010 Dominik Dahlem <Dominik.Dahlem@gmail.com>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -38,6 +38,8 @@
 #include <boost/graph/property_iter_range.hpp>
 
 #include <gsl/gsl_rng.h>
+
+#include "IntSet.hh"
 
 
 /** @enum vertex_service_rate_t
@@ -282,6 +284,18 @@ enum edge_e_nn_loss_cv_t { edge_e_nn_loss_cv = 1151 };
 enum vertex_v_nn_loss_cv_t { vertex_v_nn_loss_cv = 1152 };
 
 
+/** @enum vertex_features_t
+ * This enum extends the vertex properties by a feature argument
+ */
+enum vertex_v_features_t { vertex_v_features = 1153 };
+
+
+/** @enum vertex_choice_t
+ * This enum extends the vertex properties by a choice argument
+ */
+enum vertex_v_choice_t { vertex_v_choice = 1154 };
+
+
 // install the vertex service rate property
 namespace boost
 {
@@ -313,6 +327,8 @@ BOOST_INSTALL_PROPERTY(vertex, best_response);
 BOOST_INSTALL_PROPERTY(vertex, v_nn_loss);
 BOOST_INSTALL_PROPERTY(vertex, coeff_var);
 BOOST_INSTALL_PROPERTY(vertex, v_nn_loss_cv);
+BOOST_INSTALL_PROPERTY(vertex, v_features);
+BOOST_INSTALL_PROPERTY(vertex, v_choice);
 BOOST_INSTALL_PROPERTY(graph, generator);
 BOOST_INSTALL_PROPERTY(edge, q_val);
 BOOST_INSTALL_PROPERTY(edge, eindex);
@@ -473,10 +489,20 @@ typedef boost::property <vertex_coeff_var_t, double, VertexNNLossProperty> Verte
  */
 typedef boost::property <vertex_v_nn_loss_cv_t, double, VertexCoeffVarProperties> VertexNNLossCVProperties;
 
+/** @typedef VertexFeaturesProperties
+ * Specifies the property for the features vector
+ */
+typedef boost::property <vertex_v_features_t, IntSet, VertexNNLossCVProperties> VertexFeaturesProperties;
+
+/** @typedef VertexChoiceProperties
+ * Specifies the property for the choice of a feature
+ */
+typedef boost::property <vertex_v_choice_t, int, VertexFeaturesProperties> VertexChoiceProperties;
+
 /** @typedef VertexProperties
  * This type definition assembles all the properties for the vertices of the graph
  */
-typedef boost::property <boost::vertex_index_t, int, VertexNNLossCVProperties> VertexProperties;
+typedef boost::property <boost::vertex_index_t, int, VertexChoiceProperties> VertexProperties;
 
 /** @typedef EdgeWeightProperty
  * Specifies the property for the edge weight
@@ -723,6 +749,16 @@ typedef boost::property_map <Graph, vertex_coeff_var_t>::type VertexCoeffVarMap;
  */
 typedef boost::property_map <Graph, vertex_v_nn_loss_cv_t>::type VertexNNLossCVMap;
 
+/** @typedef VertexFeaturesMap
+ * Specifies the map that stores the vertex features
+ */
+typedef boost::property_map <Graph, vertex_v_features_t>::type VertexFeaturesMap;
+
+/** @typedef VertexChoiceMap
+ * Specifies the map that stores the vertex choice
+ */
+typedef boost::property_map <Graph, vertex_v_choice_t>::type VertexChoiceMap;
+
 /** @typedef EdgeQValueMap
  * Specifies the map that stores the edge q-value attribute
  */
@@ -907,6 +943,8 @@ const std::string BEST_RESPONSE                     = "best_response";
 const std::string VERTEX_NN_LOSS                    = "vertex_nn_loss";
 const std::string VERTEX_COEFF_VAR                  = "vertex_coeff_var";
 const std::string VERTEX_V_NN_LOSS_CV               = "vertex_v_nn_loss_cv";
+const std::string VERTEX_V_FEATURES                 = "vertex_features";
+const std::string VERTEX_V_CHOICE                   = "vertex_choice";
 const std::string EDGE_TOTAL_REWARD                 = "total_reward";
 const std::string EDGE_NN_LOSS                      = "edge_nn_loss";
 const std::string EDGE_EMOTION                      = "edge_emotion";

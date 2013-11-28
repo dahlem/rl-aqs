@@ -1,1 +1,0 @@
-./configure --with-boost=/home/support/apps/libs/boost/gcc/4.4.0/openmpi/1.3.3/64/1.40 --with-gsl-prefix=/home/support/apps/libs/gsl/gcc/4.4.0/64/1.9  --with-expat-lib=/usr/lib64/libexpat.so --with-expat=/usr/lib64/ --enable-mpi --enable-openmpi --enable-debug
